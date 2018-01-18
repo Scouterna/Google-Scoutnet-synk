@@ -8,7 +8,7 @@ var domain = 'xxxxxscout.se'; //The domain/website url of the group/kår
 var group_id = '765'; //Can be found in Scoutnet if you have proper permissions
 
 //Get a detailed csv/xls/json list of all members
-var api_key = 'f86745723446545r4576r54ger567r54ad38352f'; //Can be found in Scoutnet if you have proper permissions
+var api_key_account = 'f86745723446545r4576r54ger567r54ad38352f'; //Can be found in Scoutnet if you have proper permissions
 
 var scoutnet_url = 'www.scoutnet.se'; //The url of Scoutnet
 
@@ -311,7 +311,7 @@ function getScoutleaders(allmembers) {
 function fetchScoutnetMembersAccount() {
   
   
-  var url = 'https://' + scoutnet_url + '/api/group/memberlist?id=' + group_id + '&key=' + api_key + '&pretty=1';
+  var url = 'https://' + scoutnet_url + '/api/group/memberlist?id=' + group_id + '&key=' + api_key_account + '&pretty=1';
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
   //Logger.log(response); 
   
