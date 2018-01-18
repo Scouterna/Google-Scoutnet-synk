@@ -66,25 +66,25 @@ function Accounts() {
           account_exists = "yes"; //Match
           updateAccount(leaders[k], useraccounts[i]); //Update Account if needed
           
-          Logger.log("This account exists " + useraccounts[i].name.fullName + " " + useraccounts[i].primaryEmail + " " + useraccounts[i].externalIds[m].value);
+          //Logger.log("This account exists " + useraccounts[i].name.fullName + " " + useraccounts[i].primaryEmail + " " + useraccounts[i].externalIds[m].value);
         }      
         //var text = x.first_name + " " + x.last_name;
         //Logger.log(leaders[i].first_name);        
       }
       if ("yes"==account_exists) { //Dont need to loop throw everyone
-       Logger.log("Break");
+       //Logger.log("Break");
        break;        
       }
     }
     
     if (account_exists=="no") { //No account with this membersid, so add it
-      Logger.log("Dont exists" + leaders[k].first_name + " " + leaders[k].last_name);
+      //Logger.log("Dont exists" + leaders[k].first_name + " " + leaders[k].last_name);
       createAccount(leaders[k]); //Create google account for this user      
     }
   }
   
   /****Suspend user*/
-  Logger.log("Checking if needing to suspend a useraccount");
+  //Logger.log("Checking if needing to suspend a useraccount");
   
   for (i = 0; i < useraccounts.length; i++) { //Check all Google accounts
     
@@ -96,12 +96,12 @@ function Accounts() {
       if (contains(member_numbers, useraccounts[i].externalIds[m].value)) { //If member_id match. Account exists
           
         member_exists = "yes"; //Match                   
-        Logger.log("This account has a match " + useraccounts[i].name.fullName + " " + useraccounts[i].primaryEmail + " " + useraccounts[i].externalIds[m].value);
+        //Logger.log("This account has a match " + useraccounts[i].name.fullName + " " + useraccounts[i].primaryEmail + " " + useraccounts[i].externalIds[m].value);
       }        
     }
     if ("no"==member_exists) { //Dont need to loop throw everyone
       
-      Logger.log("User " + useraccounts[i].name.fullName + " does not exists as active leader in Scoutnet");
+      //Logger.log("User " + useraccounts[i].name.fullName + " does not exists as active leader in Scoutnet");
       suspendAccount(useraccounts[i].primaryEmail);
     }
   }  
@@ -128,14 +128,18 @@ function contains(a, obj) {
 function createAccount(leader) {
   
   var first_name = leader.first_name;
-  var first_name_email = first_name.toLowerCase().replace(/\s+/g, ''); //Remove whitespaces
+  var first_name_email = first_name.toLowerCase().trim(); //Remove start and end whitespaces
+  first_name_email = first_name_email.replace(/([ ])+/g, '.'); //Replace all middle whitespaces with one . (dot)
+  first_name_email = first_name_email.replace(/[.][\-]/g, '-').replace(/[\-][.]/g, '-');
   first_name_email = removeDiacritics (first_name_email);
-  first_name_email = first_name_email.replace(/[^0-9a-z]/gi, ''); //Remove if not english character or number
-  
+  first_name_email = first_name_email.replace(/[^0-9a-z.\-]/gi, ''); //Remove if not english character or number
+
   var last_name = leader.last_name;
-  var last_name_email = last_name.toLowerCase().replace(/\s+/g, ''); //Remove whitespaces
+  var last_name_email = last_name.toLowerCase().trim(); //Remove start and end whitespaces
+  last_name_email = last_name_email.replace(/([ ])+/g, '.'); //Replace all middle whitespaces with one . (dot)
+  last_name_email = last_name_email.replace(/[.][\-]/g, '-').replace(/[\-][.]/g, '-');
   last_name_email = removeDiacritics (last_name_email);
-  last_name_email = last_name_email.replace(/[^0-9a-z]/gi, ''); //Remove if not english character or number
+  last_name_email = last_name_email.replace(/[^0-9a-z.\-]/gi, ''); //Remove if not english character or number
   
   var email = first_name_email + "." + last_name_email + "@" + domain; 
  
@@ -152,8 +156,7 @@ function createAccount(leader) {
     //Logger.log("Denna adress finns redan");
   }
   
-  Logger.log("Den emailadress som skapas är " + email);
- 
+   
   var user = {
     primaryEmail: email,
     name: {
@@ -172,7 +175,7 @@ function createAccount(leader) {
   };
   user = AdminDirectory.Users.insert(user);
   
-  Logger.log('User %s created with ID %s.', user.primaryEmail, user.id);  
+  Logger.log('Användare %s skapad.', user.primaryEmail);  
 }
 
 
@@ -194,7 +197,7 @@ function checkIfEmailExists(email) {
     if (users) {
       return "yes";      
     } else {
-      Logger.log('No user found with emailadress. ' + email);
+      Logger.log('Ingen användare hittades med ' + email);
       return "no";
     }
     pageToken = page.nextPageToken;
@@ -229,7 +232,7 @@ function updateAccount(leader, useraccount) {
     "orgUnitPath": "/Scoutnet"    
     };
     user = AdminDirectory.Users.update(user, email);
-    Logger.log('User %s %s updated with name to %s %s.', go_first_name, go_last_name, first_name, last_name);  
+    Logger.log('Användare %s %s uppdaterad med namn till %s %s.', go_first_name, go_last_name, first_name, last_name);  
   }
 }
 
@@ -244,7 +247,7 @@ function suspendAccount(email) {
   };
   
   user = AdminDirectory.Users.update(user, email);
-  Logger.log('User %s suspended', email);  
+  Logger.log('Användare %s är avstängd', email);  
 }
 
 
@@ -272,7 +275,7 @@ function getGoogleAccounts() {
                 
       }
     } else {
-      Logger.log('No users found.');
+      Logger.log('Ingen användare hittades.');
       var empty = [];
       return empty;
     }
@@ -445,7 +448,7 @@ function listAllUsers() {
         //Logger.log('%s (%s) %s', user.name.fullName, user.primaryEmail, externalIds[0].value);
       }
     } else {
-      Logger.log('No users found.');
+      Logger.log('Inga användare hittades.');
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
