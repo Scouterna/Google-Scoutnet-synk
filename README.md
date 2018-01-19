@@ -33,7 +33,7 @@ Om det finns personer som har samma namn (för- och efternamn) angivet i Scoutne
 I kalkylarket kan du ställa in namn på de olika google-grupperna, dess e-postadress, vilken e-postlista i Scoutnet de ska synkroniseras mot samt hur den ska synkronisera i fältet Synkinställning. Du kan där för respektive e-postlistan ange följande
 - "@" Lägg till personens Google-konto om den har något, annars hoppa över personen
 - "-" Lägg endast till personens e-postadress som listad i Scoutnet
-- " " Lägg till både personens e-postadress som listad i Scoutnet samt Google-konto om den har något.
+- "&" Lägg till både personens e-postadress som listad i Scoutnet samt Google-konto om den har något.
 
 Om du vill att en person ska vara med i en Google-grupp utan att beröras av att tas bort vid en synkronisering lägger du till e-postadressen som ägare eller medarbetare av gruppen.
 ### Inställningar
