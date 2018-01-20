@@ -12,7 +12,7 @@ var api_key = '45aafaa5e25553354523497544531a2b4a13'; //Can be found in Scoutnet
 
 var spreadsheetUrl = 'https://docs.google.com/spreadsheets/d/1ru524ccWIEMDOEJFDNDRUNSKDN459Ywk0/edit#gid=0';
 
-var scoutnet_url = 'www.scoutnet.se'; //The url of Scoutnet/Min speiding
+var scoutnet_url = 'www.scoutnet.se'; //The url of Scoutnet
 
 
 function Groups() {
