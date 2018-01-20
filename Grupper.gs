@@ -75,6 +75,10 @@ function Groups() {
           cell=selection.getCell(i+1,5);
           cell.setValue(group_id);
           
+          cell=selection.getCell(i+1,6);
+          var cell_url = '=HYPERLINK("https://admin.google.com/AdminHome?groupId='+ email + '&chromeless=1#OGX:Group";"Länk")';
+          cell.setValue(cell_url);
+          
         }
         else { //If the groups emailadress already exists
           
@@ -108,7 +112,7 @@ function Groups() {
         
         var group = AdminDirectory.Groups.get(group_id);
         
-        if (email!=group.email) {
+        if (email!=group.email) { //The email has changed
           
           var tmp_row = i+1;          
           Logger.log("The email has changed on row " + tmp_row);          
@@ -141,7 +145,11 @@ function Groups() {
             cell.setBackground("white");
             
             cell=selection.getCell(i+1,5);
-            cell.setValue(group_id);          
+            cell.setValue(group_id);
+            
+            cell=selection.getCell(i+1,6);
+            var cell_url = '=HYPERLINK("https://admin.google.com/AdminHome?groupId='+ email + '&chromeless=1#OGX:Group";"Länk")';
+            cell.setValue(cell_url);
             
           }
           else { //If the groups emailadress already exists
@@ -261,26 +269,53 @@ function updateGroup(group_id, scoutnet_id, cell_scoutnet_id, synk_option) {
     
     var email = allmembers[k].email;
     var member_no = allmembers[k].member_no;
+    var email_mum = allmembers[k].email_mum;
+    var email_dad = allmembers[k].email_dad;
+    var email_alt = allmembers[k].alt_email;
     
     var tmp_email = getGoogleAccount(email, member_no);
     
-    if (synk_option=="@") { //Only add if person has Google-account and add their google-email
-      
+    synk_option = synk_option.toLowerCase().trim();
+    
+    if (synk_option.indexOf("@")!=-1) { //Only add if person has Google-account and add their google-email
+            
       if (tmp_email!="") { //This member has an google-account
         allmembers_email.push(tmp_email); 
       }      
     }
-    else if (synk_option=="-") { //Only add Scoutnet-email
+    else { //Only add Scoutnet-email
       
-      if (email!="") { //Only add people with an emailadress      
-        allmembers_email.push(email);      
-      }      
-    }
-    else { //Add both Scoutnet email and the Google-account email
-           
-      if (email!="") { //Only add people with an emailadress      
-        allmembers_email.push(email);      
+      if (synk_option.indexOf("m")!=-1) { //Only add members personal adress
+        if (email!="") { //Only add people with an emailadress      
+          allmembers_email.push(email);      
+        }      
       }
+      else if (synk_option.indexOf("f")!=-1) { //Only add parents adress
+        if (email_mum!="") { //Only add mums with an emailadress      
+          allmembers_email.push(email_mum);      
+        }
+        if (email_dad!="") { //Only add dads with an emailadress      
+          allmembers_email.push(email_dad);      
+        }       
+      }
+      else { //Add all emailadresses found in Scoutnet
+        if (email!="") { //Only add people with an emailadress      
+          allmembers_email.push(email);          
+        }
+        if (email_mum!="") { //Only add mums with an emailadress      
+          allmembers_email.push(email_mum);          
+        }
+        if (email_dad!="") { //Only add dads with an emailadress      
+          allmembers_email.push(email_dad);          
+        }
+        if (email_alt!="") { //Only add dads with an emailadress      
+          allmembers_email.push(email_alt);         
+        }       
+      }      
+    }    
+    
+    if (synk_option.indexOf("-")==-1) { //Add both Scoutnet email and the Google-account email
+      
       if (tmp_email!="") { //This member has an google-account
         allmembers_email.push(tmp_email); 
       }      
@@ -293,7 +328,7 @@ function updateGroup(group_id, scoutnet_id, cell_scoutnet_id, synk_option) {
     if (group_members[i].role=='MEMBER') //Only remove people with the role member
       if (!contains(allmembers_email, group_members[i].email)) {
         
-        Logger.log(group_members[i].email + " Should be removed from the Google mailinglist");
+        Logger.log(group_members[i].email + " Should be removed from the " + group_id  + "Google mailinglist");
         AdminDirectory.Members.remove(group_id, group_members[i].email);
       }
     group_members_email.push(group_members[i].email);
@@ -336,7 +371,8 @@ function addGroupMember(group_id, email) {
 function fetchScoutnetMembersGroup(scoutnet_id, cell_scoutnet_id) {
   
   Logger.log("Scoutnet mailinglist-id=" + scoutnet_id);
-  var url = 'https://' + scoutnet_url + '/api/group/customlists?id=' + group_id + '&key='+ api_key + '&pretty=1&list_id=' + scoutnet_id;
+  var email_fields = '&contact_fields=email_mum,email_dad,email_alt';
+  var url = 'https://' + scoutnet_url + '/api/group/customlists?id=' + group_id + '&key='+ api_key + '&list_id=' + scoutnet_id + email_fields;
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
   //Logger.log(response); 
   
@@ -392,13 +428,41 @@ function fetchScoutnetMembersGroup(scoutnet_id, cell_scoutnet_id) {
       email = medlem.email.value;
       email = JSON.stringify(email);
       email = email.substring(1, email.length - 1);
-    }    
+      email = email.toLowerCase().trim();
+    }
+    
+    var email_mum = "";
+    if (medlem.email_mum){
+      email_mum = medlem.email_mum.value;
+      email_mum = JSON.stringify(email_mum);
+      email_mum = email_mum.substring(1, email_mum.length - 1);
+      email_mum = email_mum.toLowerCase().trim();
+    } 
+    
+    var email_dad = "";
+    if (medlem.email_dad){
+      email_dad = medlem.email_dad.value;
+      email_dad = JSON.stringify(email_dad);
+      email_dad = email_dad.substring(1, email_dad.length - 1);
+      email_dad = email_dad.toLowerCase().trim();
+    } 
+    
+    var alt_email = "";
+    if (medlem.alt_email){
+      alt_email = medlem.alt_email.value;
+      alt_email = JSON.stringify(alt_email);
+      alt_email = alt_email.substring(1, alt_email.length - 1);
+      alt_email = alt_email.toLowerCase().trim();
+    }
      
     var member = {
       member_no: member_no,
       first_name: first_name,
       last_name: last_name,
-      email: email           
+      email: email,
+      email_mum: email_mum,
+      email_dad: email_dad,
+      alt_email: alt_email
     };
     
     allmembers.push(member);    
@@ -455,11 +519,11 @@ function createHeaders() {
 
   // Set the values we want for headers
   var values = [
-    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "grupp id hos Google RÖR EJ"]
+    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "grupp id hos Google RÖR EJ", "Länk"]
   ];
 
   // Set the range of cells
-  var range = data.getRange("A1:E1");
+  var range = data.getRange("A1:F1");
 
   // Call the setValues method on range and pass in our values
   range.setValues(values); 
