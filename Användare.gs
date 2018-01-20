@@ -384,28 +384,8 @@ function fetchScoutnetMembersAccount() {
       email = medlem.email.value;
       email = JSON.stringify(email);
       email = email.substring(1, email.length - 1);
-    }
-    
-    var contact_email_mum = "";
-    if (medlem.contact_email_mum){
-      contact_email_mum = medlem.contact_email_mum.value;
-      contact_email_mum = JSON.stringify(contact_email_mum);
-      contact_email_mum = contact_email_mum.substring(1, contact_email_mum.length - 1);
-    } 
-    
-    var contact_email_dad = "";
-    if (medlem.contact_email_dad){
-      contact_email_dad = medlem.contact_email_dad.value;
-      contact_email_dad = JSON.stringify(contact_email_dad);
-      contact_email_dad = contact_email_dad.substring(1, contact_email_dad.length - 1);
-    } 
-    
-    var contact_alt_email = "";
-    if (medlem.contact_alt_email){
-      contact_alt_email = medlem.contact_alt_email.value;
-      contact_alt_email = JSON.stringify(contact_alt_email);
-      contact_alt_email = contact_alt_email.substring(1, contact_alt_email.length - 1);
-    }    
+      email = email.toLowerCase().trim();
+    }     
      
     var member = {
       member_no: member_no,
@@ -415,10 +395,7 @@ function fetchScoutnetMembersAccount() {
       unit: unit,
       unit_role: unit_role,
       group_role: group_role,
-      email: email,
-      contact_email_mum: contact_email_mum,
-      contact_email_dad: contact_email_dad,
-      contact_alt_email: contact_alt_email      
+      email: email           
     };
     
     allmembers.push(member);    
