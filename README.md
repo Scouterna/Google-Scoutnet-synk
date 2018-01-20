@@ -35,6 +35,13 @@ I kalkylarket kan du ställa in namn på de olika google-grupperna, dess e-posta
 - "-" Lägg endast till personens e-postadress som listad i Scoutnet
 - "&" Lägg till både personens e-postadress som listad i Scoutnet samt Google-konto om den har något.
 
+Det går också att ställa in i detta fält vilka e-postadressfält från scoutnet som ska läggas till
+- "m" Lägg endast till en medlems primära e-postadress
+- "f" Lägg endast till de e-postadresser som är angivet i fälten Anhörig 1,2. Alltså vanligtvis föräldrarna.
+- Om man inte anger något används fälten primär e-postadress, anhörig 1, anhörig 2 och alternativ e-postadress.
+
+Det går att enkelt kontrollera vilka som är med i en google-grupp genom att trycka på länken vid varje e-postadress i kalkylarket.
+
 Om du vill att en person ska vara med i en Google-grupp utan att beröras av att tas bort vid en synkronisering lägger du till e-postadressen som ägare eller medarbetare av gruppen.
 ### Inställningar
 - Ändra kårens domän namn på variabeln "domain"
