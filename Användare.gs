@@ -3,15 +3,7 @@
  * @website https://github.com/scouternasetjanster
  */
 
-var domain = 'xxxxxscout.se'; //The domain/website url of the group/kår
-
-var group_id = '765'; //Can be found in Scoutnet if you have proper permissions
-
-//Get a detailed csv/xls/json list of all members
-var api_key_account = 'f86745723446545r4576r54ger567r54ad38352f'; //Can be found in Scoutnet if you have proper permissions
-
 var scoutnet_url = 'www.scoutnet.se'; //The url of Scoutnet
-
 
 /*
  * Call this if you would like to syncronize both accounts and groups after each other
@@ -141,13 +133,13 @@ function createAccount(leader) {
   last_name_email = removeDiacritics (last_name_email);
   last_name_email = last_name_email.replace(/[^0-9a-z.\-]/gi, ''); //Remove if not english character or number
 
-  var email = first_name_email + "." + last_name_email + "@" + domain;
+  var email = first_name_email + "." + last_name_email + "@" + settings.domain;
 
   if ("yes" == checkIfEmailExists(email)) {
 
      for (t = 1; t < 5; t++) { //Should not be more people with the same name
 
-        email = first_name_email + "." + last_name_email + t + "@" + domain;
+        email = first_name_email + "." + last_name_email + t + "@" + settings.domain;
 
         if ("no" == checkIfEmailExists(email)) { //Create this emailadress
           break;
@@ -187,7 +179,7 @@ function checkIfEmailExists(email) {
   var pageToken, page;
   do {
     page = AdminDirectory.Users.list({
-      domain: domain,
+      domain: settings.domain,
       query: email=email,
       orderBy: 'givenName',
       maxResults: 150,
@@ -261,7 +253,7 @@ function getGoogleAccounts() {
   var pageToken, page;
   do {
     page = AdminDirectory.Users.list({
-      domain: domain,
+      domain: settings.domain,
       query: "orgUnitPath='/Scoutnet'",
       orderBy: 'givenName',
       maxResults: 150,
@@ -314,7 +306,7 @@ function getScoutleaders(allmembers) {
 function fetchScoutnetMembersAccount() {
 
 
-  var url = 'https://' + scoutnet_url + '/api/group/memberlist?id=' + group_id + '&key=' + api_key_account + '&pretty=1';
+  var url = 'https://' + scoutnet_url + '/api/group/memberlist?id=' + settings.group_id + '&key=' + settings.user_api_key + '&pretty=1';
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
   //Logger.log(response);
 

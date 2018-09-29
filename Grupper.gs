@@ -3,21 +3,12 @@
  * @website https://github.com/scouternasetjanster
  */
 
-var domain = 'xxxxscout.se';
-
-var group_id = '765'; //Can be found in Scoutnet if you have proper permissions
-
-//Get a csv/xls/json list of members, based on mailing lists you have set up
-var api_key = '45aafaa5e25553354523497544531a2b4a13'; //Can be found in Scoutnet if you have proper permissions
-
-var spreadsheetUrl = 'https://docs.google.com/spreadsheets/d/1ru524ccWIEMDOEJFDNDRUNSKDN459Ywk0/edit#gid=0';
-
 var scoutnet_url = 'www.scoutnet.se'; //The url of Scoutnet
 
 
 function Groups() {
 
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl).getSheets()[0];
+  var sheet = SpreadsheetApp.openByUrl(settings.spreadsheet_url).getSheets()[0];
   var selection = sheet.getDataRange();
   var data = selection.getValues();
 
@@ -195,7 +186,7 @@ function getGroupMembers(group_id) {
   var pageToken, page;
   do {
     page = AdminDirectory.Members.list(group_id,{
-      domainName: domain,
+      domainName: settings.domain,
       maxResults: 150,
       pageToken: pageToken,
     });
@@ -233,7 +224,7 @@ function getGoogleAccount(scoutnet_email, member_no) {
   var pageToken, page;
   do {
     page = AdminDirectory.Users.list({
-      domain: domain,
+      domain: settings.domain,
       query: qry,
       orderBy: 'givenName',
       maxResults: 150,
@@ -372,7 +363,7 @@ function fetchScoutnetMembersGroup(scoutnet_id, cell_scoutnet_id) {
 
   Logger.log("Scoutnet mailinglist-id=" + scoutnet_id);
   var email_fields = '&contact_fields=email_mum,email_dad,email_alt';
-  var url = 'https://' + scoutnet_url + '/api/group/customlists?id=' + group_id + '&key='+ api_key + '&list_id=' + scoutnet_id + email_fields;
+  var url = 'https://' + scoutnet_url + '/api/group/customlists?id=' + settings.group_id + '&key='+ settings.group_api_key + '&list_id=' + scoutnet_id + email_fields;
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
   //Logger.log(response);
 
@@ -511,7 +502,7 @@ function changeGroupPermissions(email) {
  * Create headers in the spreadsheet and hide the column with the group-id
  */
 function createHeaders() {
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl);
+  var sheet = SpreadsheetApp.openByUrl(settings.spreadsheet_url);
   var data = sheet.getSheets()[0];
 
   // Freezes the first row
@@ -545,7 +536,7 @@ function checkEmailFormat(email) {
   var arr = email.split("@");
   var tmp_domain = arr[1];
 
-  if (tmp_domain == domain) {
+  if (tmp_domain == settings.domain) {
        return "yes";
   }
   return "no";
@@ -560,7 +551,7 @@ function checkIfGroupExists(email) {
   var pageToken, page;
   do {
     page = AdminDirectory.Groups.list({
-      domain: domain,
+      domain: settings.domain,
       maxResults: 150,
       pageToken: pageToken
     });
@@ -595,7 +586,7 @@ function listAllGroups() {
   var pageToken, page;
   do {
     page = AdminDirectory.Groups.list({
-      domain: domain,
+      domain: settings.domain,
       maxResults: 150,
       pageToken: pageToken
     });
@@ -617,7 +608,7 @@ function listAllGroups() {
  */
 function readSpreadSheet() {
 
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl);
+  var sheet = SpreadsheetApp.openByUrl(settings.spreadsheet_url);
   var data = sheet.getDataRange().getValues();
 
   for (var i = 1; i < data.length; i++) {

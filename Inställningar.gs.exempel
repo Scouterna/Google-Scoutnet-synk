@@ -1,0 +1,26 @@
+var settings = {
+    // ******************************************
+    // Generella inställningar
+    // ******************************************
+    // Scoutkårens domän
+    domain: 'xxxxxscout.se',
+    // Grupp id. Hittas i scoutnet om du har rättigheter för att se apikopplingarna.
+    group_id: '765',
+
+    // ******************************************
+    // Inställningar för att synkronisera anvädare nedan
+    // ******************************************
+    // API nyckel för endpoint:
+    // "Get a detailed csv/xls/json list of all member"
+    user_api_key : 'f86745723446545r4576r54ger567r54ad38352f',
+
+    // ******************************************
+    // Inställningar för att synkronisera gruppper mot listor nedan
+    // ******************************************
+    // API nyckel för endpoint:
+    // "Get a csv/xls/json list of members, based on mailing lists you have set up"
+    group_api_key : '45aafaa5e25553354523497544531a2b4a13',
+
+    // Länk till kalkylark med inställningar för maillistor/grupper
+    spreadsheet_url : 'https://docs.google.com/spreadsheets/d/1ru524ccWIEMDOEJFDNDRUNSKDN459Ywk0/edit#gid=0'
+}
