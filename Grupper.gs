@@ -1,6 +1,6 @@
 /**
  * @author Emil Öhman <emil.ohman@scouterna.se>
- * @website https://github.com/scouternasetjanster 
+ * @website https://github.com/scouternasetjanster
  */
 
 var domain = 'xxxxscout.se';
@@ -16,172 +16,172 @@ var scoutnet_url = 'www.scoutnet.se'; //The url of Scoutnet
 
 
 function Groups() {
-  
+
   var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl).getSheets()[0];
   var selection = sheet.getDataRange();
   var data = selection.getValues();
-  
+
   var delete_rows = [];
-  
+
   for (var i = 1; i < data.length; i++) {
-    
+
     Logger.log('Namn: ' + data[i][0] + ' E-post: ' + data[i][1] + ' Scoutnet: ' + data[i][2] + ' grupp id: ' + data[i][4]);
     var name = data[i][0];
     var email = data[i][1];
     var scoutnet_id = data[i][2];
     var synk_option = data[i][3];
     var group_id = data[i][4];
-    
+
     var update_group = "yes";
-    
-    if (group_id=="") { //We should create a group
-      
-      if (name=="" && email=="") { //Remove the row
+
+    if (group_id == "") { //We should create a group
+
+      if (name == "" && email == "") { //Remove the row
         Logger.log("try remove row " + i+1);
-        
+
         delete_rows.push(i+1);
         update_group = "no";
       }
-      else if (name=="" && email!="") { //We don't do anything
+      else if (name == "" && email != "") { //We don't do anything
       }
-      else if (name!="" && email=="") { //We don't do anything
+      else if (name != "" && email == "") { //We don't do anything
       }
-      
-      else if (name!="" && email!="") {        
-        
-        if ("no"==checkIfGroupExists(email) && "yes"==checkEmailFormat(email)) {
-          
+
+      else if (name != "" && email != "") {
+
+        if ("no" == checkIfGroupExists(email) && "yes" == checkEmailFormat(email)) {
+
           email = email.toLowerCase().replace(/\s+/g, ''); //Remove whitespaces
           email = removeDiacritics (email);
-          
+
           var group = {
             "email": email,
             "name": name,
             "description": "Scoutnet"
           };
-          
-          AdminDirectory.Groups.insert(group);        
+
+          AdminDirectory.Groups.insert(group);
           changeGroupPermissions(email);
-          
+
           var group = AdminDirectory.Groups.get(email);
           var group_id = group.id;
-          
+
           Logger.log("Created group: " + email);
-          
-          var cell=selection.getCell(i+1,2);
+
+          var cell = selection.getCell(i+1,2);
           cell.setValue(email);
           cell.setBackground("white");
-          
-          cell=selection.getCell(i+1,5);
+
+          cell = selection.getCell(i+1,5);
           cell.setValue(group_id);
-          
-          cell=selection.getCell(i+1,6);
+
+          cell = selection.getCell(i+1,6);
           var cell_url = '=HYPERLINK("https://admin.google.com/AdminHome?groupId='+ email + '&chromeless=1#OGX:Group";"Länk")';
           cell.setValue(cell_url);
-          
+
         }
         else { //If the groups emailadress already exists
-          
-          var cell=selection.getCell(i+1,2);
-          cell.setBackground("red");          
-          
-        }        
-      }           
+
+          var cell = selection.getCell(i+1,2);
+          cell.setBackground("red");
+
+        }
+      }
     }
-    else if (group_id!="") {
-      
-      if (name=="" && email=="") { //Remove the group
-        
+    else if (group_id != "") {
+
+      if (name == "" && email == "") { //Remove the group
+
         Logger.log("try remove " + group_id + " row " + i+1);
         AdminDirectory.Groups.remove(group_id);
         Logger.log(group_id + " was removed");
-        
+
         delete_rows.push(i+1);
         update_group = "no";
-        
+
       }
-      else if (email=="") { //If empty, put the emailadress back
-        
+      else if (email == "") { //If empty, put the emailadress back
+
         var tmp_usr = AdminDirectory.Groups.get(group_id);
         var tmp_email = tmp_usr.email;
-        var cell=selection.getCell(i+1,2);
-        cell.setValue(tmp_email);       
-        
+        var cell = selection.getCell(i+1,2);
+        cell.setValue(tmp_email);
+
       }
-      else if (email!="") { //Checking if need to update
-        
+      else if (email != "") { //Checking if need to update
+
         var group = AdminDirectory.Groups.get(group_id);
-        
-        if (email!=group.email) { //The email has changed
-          
-          var tmp_row = i+1;          
-          Logger.log("The email has changed on row " + tmp_row);          
-          
-          if ("no"==checkIfGroupExists(email) && "yes"==checkEmailFormat(email)) {
-            
+
+        if (email != group.email) { //The email has changed
+
+          var tmp_row = i+1;
+          Logger.log("The email has changed on row " + tmp_row);
+
+          if ("no" == checkIfGroupExists(email) && "yes" == checkEmailFormat(email)) {
+
             email = email.toLowerCase().replace(/\s+/g, ''); //Remove whitespaces
-            email = removeDiacritics (email);            
-            
+            email = removeDiacritics (email);
+
             Logger.log("try remove " + group_id + " row " + tmp_row);
             AdminDirectory.Groups.remove(group_id); //We do this because high risk for service unavailable if using patch/update
             Logger.log(group_id + " was removed");
-            
+
             var tmp_group = {
               "email": email,
               "name": name,
               "description": "Scoutnet"
             };
-            
-            AdminDirectory.Groups.insert(tmp_group);        
+
+            AdminDirectory.Groups.insert(tmp_group);
             changeGroupPermissions(email);
-            
+
             Logger.log("Updated email for group: " + email);
-            
+
             group = AdminDirectory.Groups.get(email);
             group_id = group.id;
-            
-            var cell=selection.getCell(i+1,2);
+
+            var cell = selection.getCell(i+1,2);
             cell.setValue(email);
             cell.setBackground("white");
-            
-            cell=selection.getCell(i+1,5);
+
+            cell = selection.getCell(i+1,5);
             cell.setValue(group_id);
-            
-            cell=selection.getCell(i+1,6);
+
+            cell = selection.getCell(i+1,6);
             var cell_url = '=HYPERLINK("https://admin.google.com/AdminHome?groupId='+ email + '&chromeless=1#OGX:Group";"Länk")';
             cell.setValue(cell_url);
-            
+
           }
           else { //If the groups emailadress already exists
-            
-            var cell=selection.getCell(tmp_row,2);
+
+            var cell = selection.getCell(tmp_row,2);
             cell.setBackground("red");
-            
+
           }
-        }        
-        else if (name!=group.name) { //If the name, but not the email changed
+        }
+        else if (name != group.name) { //If the name, but not the email changed
           var tmp_row = i+1;
-          
+
           Logger.log("The name has changed on row " + tmp_row);
           var tmp_group = {
             name: name
           };
-          AdminDirectory.Groups.patch(tmp_group, group_id);          
-        }        
+          AdminDirectory.Groups.patch(tmp_group, group_id);
+        }
       }
-    }    
+    }
     if (update_group == "yes") {
       var cell_scoutnet_id = selection.getCell(i+1,3);
       updateGroup(group_id, scoutnet_id, cell_scoutnet_id, synk_option); //Update members of the group
     }
   }
-  
+
   for (var k = delete_rows.length-1; k >= 0 ; k--) { //Remove rows, start from the highest number
-    
+
     var tmp_row = delete_rows[k];
     Logger.log("Remove row " + tmp_row);
     sheet.deleteRow(tmp_row);
-  }  
+  }
 }
 
 
@@ -189,9 +189,9 @@ function Groups() {
  * Return groupmembers of a specified group
  */
 function getGroupMembers(group_id) {
-  
+
   var group = [];
-  
+
   var pageToken, page;
   do {
     page = AdminDirectory.Members.list(group_id,{
@@ -205,18 +205,18 @@ function getGroupMembers(group_id) {
       for (var i = 0; i < members.length; i++)
       {
         var member = members[i];
-        
+
         var member = {
           email: member.email,
           role: member.role,
           status: member.status
         };
-        group.push(member);        
+        group.push(member);
       }
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
-      
+
   return group;
 }
 
@@ -226,9 +226,9 @@ function getGroupMembers(group_id) {
  * then, get it back. If not return empty string ""
  */
 function getGoogleAccount(scoutnet_email, member_no) {
-  
+
   var users;
-  
+
   var qry = "externalId='"+ member_no +"'";
   var pageToken, page;
   do {
@@ -241,16 +241,16 @@ function getGoogleAccount(scoutnet_email, member_no) {
     });
     users = page.users;
     if (users) {
-      
+
       //Logger.log('%s (%s)', users[0].name.fullName, users[0].primaryEmail);
       return users[0].primaryEmail;
-        
+
     } else {
       //Logger.log('No users found.');
       return "";
     }
     pageToken = page.nextPageToken;
-  } while (pageToken);  
+  } while (pageToken);
 }
 
 
@@ -258,91 +258,91 @@ function getGoogleAccount(scoutnet_email, member_no) {
  * Update members of the groups
  */
 function updateGroup(group_id, scoutnet_id, cell_scoutnet_id, synk_option) {
-  
+
   var allmembers = fetchScoutnetMembersGroup(scoutnet_id, cell_scoutnet_id);
   var allmembers_email = [];
-  
+
   var group_members = getGroupMembers(group_id); //All groupmembers with their role
   var group_members_email = [];
-  
-  for (k = 0; k < allmembers.length; k++) {   
-    
+
+  for (k = 0; k < allmembers.length; k++) {
+
     var email = allmembers[k].email;
     var member_no = allmembers[k].member_no;
     var email_mum = allmembers[k].email_mum;
     var email_dad = allmembers[k].email_dad;
     var email_alt = allmembers[k].alt_email;
-    
+
     var tmp_email = getGoogleAccount(email, member_no);
-    
+
     synk_option = synk_option.toLowerCase().trim();
-    
-    if (synk_option.indexOf("@")!=-1) { //Only add if person has Google-account and add their google-email
-            
-      if (tmp_email!="") { //This member has an google-account
-        allmembers_email.push(tmp_email); 
-      }      
+
+    if (synk_option.indexOf("@") != -1) { //Only add if person has Google-account and add their google-email
+
+      if (tmp_email != "") { //This member has an google-account
+        allmembers_email.push(tmp_email);
+      }
     }
     else { //Only add Scoutnet-email
-      
-      if (synk_option.indexOf("m")!=-1) { //Only add members personal adress
-        if (email!="") { //Only add people with an emailadress      
-          allmembers_email.push(email);      
-        }      
-      }
-      else if (synk_option.indexOf("f")!=-1) { //Only add parents adress
-        if (email_mum!="") { //Only add mums with an emailadress      
-          allmembers_email.push(email_mum);      
+
+      if (synk_option.indexOf("m") != -1) { //Only add members personal adress
+        if (email != "") { //Only add people with an emailadress
+          allmembers_email.push(email);
         }
-        if (email_dad!="") { //Only add dads with an emailadress      
-          allmembers_email.push(email_dad);      
-        }       
+      }
+      else if (synk_option.indexOf("f") != -1) { //Only add parents adress
+        if (email_mum != "") { //Only add mums with an emailadress
+          allmembers_email.push(email_mum);
+        }
+        if (email_dad != "") { //Only add dads with an emailadress
+          allmembers_email.push(email_dad);
+        }
       }
       else { //Add all emailadresses found in Scoutnet
-        if (email!="") { //Only add people with an emailadress      
-          allmembers_email.push(email);          
+        if (email != "") { //Only add people with an emailadress
+          allmembers_email.push(email);
         }
-        if (email_mum!="") { //Only add mums with an emailadress      
-          allmembers_email.push(email_mum);          
+        if (email_mum != "") { //Only add mums with an emailadress
+          allmembers_email.push(email_mum);
         }
-        if (email_dad!="") { //Only add dads with an emailadress      
-          allmembers_email.push(email_dad);          
+        if (email_dad != "") { //Only add dads with an emailadress
+          allmembers_email.push(email_dad);
         }
-        if (email_alt!="") { //Only add dads with an emailadress      
-          allmembers_email.push(email_alt);         
-        }       
-      }      
-    }    
-    
-    if (synk_option.indexOf("-")==-1) { //Add both Scoutnet email and the Google-account email
-      
-      if (tmp_email!="") { //This member has an google-account
-        allmembers_email.push(tmp_email); 
-      }      
-    }    
-    Logger.log("Namn " + allmembers[k].first_name + " " + allmembers[k].last_name);   
-  }  
-  
-  for (i = 0; i < group_members.length; i++) {    
-   
-    if (group_members[i].role=='MEMBER') //Only remove people with the role member
+        if (email_alt != "") { //Only add dads with an emailadress
+          allmembers_email.push(email_alt);
+        }
+      }
+    }
+
+    if (synk_option.indexOf("-") == -1) { //Add both Scoutnet email and the Google-account email
+
+      if (tmp_email != "") { //This member has an google-account
+        allmembers_email.push(tmp_email);
+      }
+    }
+    Logger.log("Namn " + allmembers[k].first_name + " " + allmembers[k].last_name);
+  }
+
+  for (i = 0; i < group_members.length; i++) {
+
+    if (group_members[i].role == 'MEMBER') //Only remove people with the role member
       if (!contains(allmembers_email, group_members[i].email)) {
-        
+
         Logger.log(group_members[i].email + " Should be removed from the " + group_id  + "Google mailinglist");
         AdminDirectory.Members.remove(group_id, group_members[i].email);
       }
     group_members_email.push(group_members[i].email);
-  }  
-  
+  }
+
   for (i = 0; i < allmembers_email.length; i++) { //We do this second to save some time, also because Google sometimes
     //changes the emailadress of a user.
-       
+
     if (!contains(group_members_email, allmembers_email[i])) { //Add member to mailinglist
-       
+
       Logger.log(allmembers_email[i] + " Should be added to the Google mailinglist");
       addGroupMember(group_id, allmembers_email[i])
-    }    
-  }  
+    }
+  }
 }
 
 
@@ -350,7 +350,7 @@ function updateGroup(group_id, scoutnet_id, cell_scoutnet_id, synk_option) {
  * Adds a member to a specified group
  */
 function addGroupMember(group_id, email) {
-  
+
   var member = {
     email: email,
     role: 'MEMBER'
@@ -359,7 +359,7 @@ function addGroupMember(group_id, email) {
     AdminDirectory.Members.insert(member, group_id);
   }
   catch (e) {
-    Logger.log("Could not add email:" + email); 
+    Logger.log("Could not add email:" + email);
   }
 }
 
@@ -369,60 +369,60 @@ function addGroupMember(group_id, email) {
  * Return firstname,lastname, membernumber and email
  */
 function fetchScoutnetMembersGroup(scoutnet_id, cell_scoutnet_id) {
-  
+
   Logger.log("Scoutnet mailinglist-id=" + scoutnet_id);
   var email_fields = '&contact_fields=email_mum,email_dad,email_alt';
   var url = 'https://' + scoutnet_url + '/api/group/customlists?id=' + group_id + '&key='+ api_key + '&list_id=' + scoutnet_id + email_fields;
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
-  //Logger.log(response); 
-  
-  var json = response.getContentText();  
-  
+  //Logger.log(response);
+
+  var json = response.getContentText();
+
   var data;
   var allmembers = [];
-  
+
   try {
     data= JSON.parse(json);  //Make it into a Javascript object
   }
   catch (e) {
-    Logger.log("EROOOR");
+    Logger.log("ERROR, parsing json in fetchSconetMembersGroup for id: " + scoutnet_id);
     cell_scoutnet_id.setBackground("red");
     return allmembers;
-  }   
+  }
   cell_scoutnet_id.setBackground("white");
-  
-  if (scoutnet_id=="") {
+
+  if (scoutnet_id == "") {
     cell_scoutnet_id.setBackground("yellow");
   }
-  
-  var medlemmar = data.data;  
+
+  var medlemmar = data.data;
   //Logger.log(medlemmar);
-  
+
   var i = 0;
   for (x in medlemmar) {
     var medlem = medlemmar[x];
-    
+
     var member_no = "";
     if (medlem.member_no){
       member_no = medlem.member_no.value
       member_no = JSON.stringify(member_no);
       member_no = member_no.substring(1, member_no.length - 1);
     }
-    
+
     var first_name = "";
     if (medlem.first_name){
       first_name = medlem.first_name.value;
       first_name = JSON.stringify(first_name);
       first_name = first_name.substring(1, first_name.length - 1);
     }
-    
+
     var last_name = "";
     if (medlem.last_name){
       last_name = medlem.last_name.value;
       last_name = JSON.stringify(last_name);
       last_name = last_name.substring(1, last_name.length - 1);
-    }   
-    
+    }
+
     var email = "";
     if (medlem.email){
       email = medlem.email.value;
@@ -430,23 +430,23 @@ function fetchScoutnetMembersGroup(scoutnet_id, cell_scoutnet_id) {
       email = email.substring(1, email.length - 1);
       email = email.toLowerCase().trim();
     }
-    
+
     var email_mum = "";
     if (medlem.email_mum){
       email_mum = medlem.email_mum.value;
       email_mum = JSON.stringify(email_mum);
       email_mum = email_mum.substring(1, email_mum.length - 1);
       email_mum = email_mum.toLowerCase().trim();
-    } 
-    
+    }
+
     var email_dad = "";
     if (medlem.email_dad){
       email_dad = medlem.email_dad.value;
       email_dad = JSON.stringify(email_dad);
       email_dad = email_dad.substring(1, email_dad.length - 1);
       email_dad = email_dad.toLowerCase().trim();
-    } 
-    
+    }
+
     var alt_email = "";
     if (medlem.alt_email){
       alt_email = medlem.alt_email.value;
@@ -454,7 +454,7 @@ function fetchScoutnetMembersGroup(scoutnet_id, cell_scoutnet_id) {
       alt_email = alt_email.substring(1, alt_email.length - 1);
       alt_email = alt_email.toLowerCase().trim();
     }
-     
+
     var member = {
       member_no: member_no,
       first_name: first_name,
@@ -464,10 +464,10 @@ function fetchScoutnetMembersGroup(scoutnet_id, cell_scoutnet_id) {
       email_dad: email_dad,
       alt_email: alt_email
     };
-    
-    allmembers.push(member);    
-  } 
-  return allmembers;  
+
+    allmembers.push(member);
+  }
+  return allmembers;
 }
 
 
@@ -477,7 +477,7 @@ function fetchScoutnetMembersGroup(scoutnet_id, cell_scoutnet_id) {
  */
 function contains(a, obj) {
   for (var i = 0; i < a.length; i++) {
-    if (a[i] === obj) {
+    if (a[i]  === obj) {
       return true;
     }
   }
@@ -488,9 +488,9 @@ function contains(a, obj) {
  * Change the permissions of the group after it is created
  */
 function changeGroupPermissions(email) {
-  
+
   var group = AdminGroupsSettings.newGroups();
-  
+
   group.whoCanJoin = 'INVITED_CAN_JOIN';
   group.whoCanViewMembership = 'ALL_MANAGERS_CAN_VIEW';
   group.whoCanInvite = 'ALL_MANAGERS_CAN_INVITE';
@@ -502,7 +502,7 @@ function changeGroupPermissions(email) {
   group.replyTo = 'REPLY_TO_SENDER';
   group.membersCanPostAsTheGroup = false;
   group.whoCanLeaveGroup = 'NONE_CAN_LEAVE';
-  
+
   AdminGroupsSettings.Groups.patch(group, email);
 }
 
@@ -526,29 +526,29 @@ function createHeaders() {
   var range = data.getRange("A1:F1");
 
   // Call the setValues method on range and pass in our values
-  range.setValues(values); 
+  range.setValues(values);
 
   var column = data.getRange("E1:E100")
   column.setBackground("orange");
   column.setFontColor("blue");
-  
+
   //Hide the column with the group-id
-  data.hideColumns(5);    
+  data.hideColumns(5);
 }
 
- 
+
 /*
  * Check the the format of the emailadress is ok
  */
 function checkEmailFormat(email) {
-  
+
   var arr = email.split("@");
   var tmp_domain = arr[1];
-  
-  if (tmp_domain==domain) {
+
+  if (tmp_domain == domain) {
        return "yes";
   }
-  return "no";  
+  return "no";
 }
 
 
@@ -556,7 +556,7 @@ function checkEmailFormat(email) {
  * Returns "yes" if group exists, otherwise "no"
  */
 function checkIfGroupExists(email) {
-  
+
   var pageToken, page;
   do {
     page = AdminDirectory.Groups.list({
@@ -566,23 +566,23 @@ function checkIfGroupExists(email) {
     });
     var groups = page.groups;
     if (groups) {
-      
+
       for (var i = 0; i < groups.length; i++) {
-        
+
         var group = groups[i];
-        if (group.email==email) { //Match found
-          
+        if (group.email == email) { //Match found
+
           Logger.log('This group already exists. ' + email);
           return "yes";
-        }        
-      }      
+        }
+      }
     }
     else {
-      Logger.log('No group found with emailadress. ' + email);      
+      Logger.log('No group found with emailadress. ' + email);
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
-  
+
   Logger.log('No group found with emailadress. ' + email);
   return "no";
 }
@@ -616,13 +616,13 @@ function listAllGroups() {
  * Test function to read the spreadsheet
  */
 function readSpreadSheet() {
-  
+
   var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl);
   var data = sheet.getDataRange().getValues();
-  
+
   for (var i = 1; i < data.length; i++) {
-    
-    Logger.log('Namn: ' + data[i][0] + ' E-post: ' + data[i][1] + ' medlem: ' + data[i][2] + ' grupp id: ' + data[i][4]);           
+
+    Logger.log('Namn: ' + data[i][0] + ' E-post: ' + data[i][1] + ' medlem: ' + data[i][2] + ' grupp id: ' + data[i][4]);
   }
   return data;
 }

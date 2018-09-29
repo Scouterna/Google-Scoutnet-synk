@@ -1,6 +1,6 @@
 /**
  * @author Emil Öhman <emil.ohman@scouterna.se>
- * @website https://github.com/scouternasetjanster 
+ * @website https://github.com/scouternasetjanster
  */
 
 var domain = 'xxxxxscout.se'; //The domain/website url of the group/kår
@@ -17,7 +17,7 @@ var scoutnet_url = 'www.scoutnet.se'; //The url of Scoutnet
  * Call this if you would like to syncronize both accounts and groups after each other
  */
 function AccountsAndGroups() {
-  
+
   Accounts();
   Groups();
 }
@@ -26,85 +26,85 @@ function AccountsAndGroups() {
  * Main function handling user account syncronisation
  */
 function Accounts() {
-  
+
   var allmembers = fetchScoutnetMembersAccount();
   var leaders = getScoutleaders(allmembers);
   var useraccounts = getGoogleAccounts();
-  
+
   var member_numbers = []; //List of member_no of leaders in Scoutnet
-  
+
   //Logger.log("Dessa Google-konton finns");
-  for (i = 0; i < useraccounts.length; i++) {    
-   //Logger.log(useraccounts[i].name.fullName + " " + useraccounts[i].primaryEmail + " " + useraccounts[i].externalIds[0].value);     
-  }  
-  
+  for (i = 0; i < useraccounts.length; i++) {
+   //Logger.log(useraccounts[i].name.fullName + " " + useraccounts[i].primaryEmail + " " + useraccounts[i].externalIds[0].value);
+  }
+
   //Logger.log("Dessa medlemsnummer finns i Scoutnet");
-  for (k = 0; k < leaders.length; k++) {    
+  for (k = 0; k < leaders.length; k++) {
     member_numbers.push(leaders[k].member_no);
-    //Logger.log("Medlemsnummer " + leaders[k].member_no);    
-  }     
-  
+    //Logger.log("Medlemsnummer " + leaders[k].member_no);
+  }
+
   //Logger.log(allmembers);
   var num_leaders = leaders.length;
   //num_leaders = 5; //If wants to test by only sync a few leaders
   Logger.log("number of Scoutnet accounts " + num_leaders);
   Logger.log("number of Google accounts " + useraccounts.length); //Det är samma Google id hela tiden av någon orsak!!!!
   for (k = 0; k < num_leaders; k++) { //Check all leaders in Scoutnet
-    
+
     var account_exists = "no";
-    
+
     for (i = 0; i < useraccounts.length; i++) { //Check all Google accounts
-    
+
       var num_externalIds = useraccounts[i].externalIds.length;
       //Logger.log("Num externalIDS" + num_externalIds);
-      
+
       for (m = 0; m < num_externalIds; m++) {
-        
+
        // Logger.log("Checking if Scoutnet_id =" + leaders[k].member_no + " and Google id =" + useraccounts[i].externalIds[m].value);
-        if (leaders[k].member_no==useraccounts[i].externalIds[m].value) { //If member_id match. Account exists
-          
+        if (leaders[k].member_no == useraccounts[i].externalIds[m].value) { //If member_id match. Account exists
+
           account_exists = "yes"; //Match
           updateAccount(leaders[k], useraccounts[i]); //Update Account if needed
-          
+
           //Logger.log("This account exists " + useraccounts[i].name.fullName + " " + useraccounts[i].primaryEmail + " " + useraccounts[i].externalIds[m].value);
-        }      
+        }
         //var text = x.first_name + " " + x.last_name;
-        //Logger.log(leaders[i].first_name);        
+        //Logger.log(leaders[i].first_name);
       }
-      if ("yes"==account_exists) { //Dont need to loop throw everyone
+      if ("yes" == account_exists) { //Dont need to loop throw everyone
        //Logger.log("Break");
-       break;        
+       break;
       }
     }
-    
-    if (account_exists=="no") { //No account with this membersid, so add it
+
+    if (account_exists == "no") { //No account with this membersid, so add it
       //Logger.log("Dont exists" + leaders[k].first_name + " " + leaders[k].last_name);
-      createAccount(leaders[k]); //Create google account for this user      
+      createAccount(leaders[k]); //Create google account for this user
     }
   }
-  
+
   /****Suspend user*/
   //Logger.log("Checking if needing to suspend a useraccount");
-  
+
   for (i = 0; i < useraccounts.length; i++) { //Check all Google accounts
-    
+
     var member_exists = "no";
-    var num_externalIds = useraccounts[i].externalIds.length;      
-      
-    for (m = 0; m < num_externalIds; m++) {        
-      
+    var num_externalIds = useraccounts[i].externalIds.length;
+
+    for (m = 0; m < num_externalIds; m++) {
+
       if (contains(member_numbers, useraccounts[i].externalIds[m].value)) { //If member_id match. Account exists
-          
-        member_exists = "yes"; //Match                   
+
+        member_exists = "yes"; //Match
         //Logger.log("This account has a match " + useraccounts[i].name.fullName + " " + useraccounts[i].primaryEmail + " " + useraccounts[i].externalIds[m].value);
-      }        
+      }
     }
-    if ("no"==member_exists) { //Dont need to loop throw everyone
-      
+    if ("no" == member_exists) { //Dont need to loop throw everyone
+
       //Logger.log("User " + useraccounts[i].name.fullName + " does not exists as active leader in Scoutnet");
       suspendAccount(useraccounts[i].primaryEmail);
     }
-  }  
+  }
 }
 
 
@@ -126,7 +126,7 @@ function contains(a, obj) {
  * Create Google account
  */
 function createAccount(leader) {
-  
+
   var first_name = leader.first_name;
   var first_name_email = first_name.toLowerCase().trim(); //Remove start and end whitespaces
   first_name_email = first_name_email.replace(/([ ])+/g, '.'); //Replace all middle whitespaces with one . (dot)
@@ -140,23 +140,23 @@ function createAccount(leader) {
   last_name_email = last_name_email.replace(/[.][\-]/g, '-').replace(/[\-][.]/g, '-');
   last_name_email = removeDiacritics (last_name_email);
   last_name_email = last_name_email.replace(/[^0-9a-z.\-]/gi, ''); //Remove if not english character or number
-  
-  var email = first_name_email + "." + last_name_email + "@" + domain; 
- 
-  if ("yes"==checkIfEmailExists(email)) {
-    
+
+  var email = first_name_email + "." + last_name_email + "@" + domain;
+
+  if ("yes" == checkIfEmailExists(email)) {
+
      for (t = 1; t < 5; t++) { //Should not be more people with the same name
-       
+
         email = first_name_email + "." + last_name_email + t + "@" + domain;
-       
-        if ("no"==checkIfEmailExists(email)) { //Create this emailadress
-          break;          
-        }       
+
+        if ("no" == checkIfEmailExists(email)) { //Create this emailadress
+          break;
+        }
      }
     //Logger.log("Denna adress finns redan");
   }
-  
-   
+
+
   var user = {
     primaryEmail: email,
     name: {
@@ -166,24 +166,24 @@ function createAccount(leader) {
     "externalIds": [
     {
      "value": leader.member_no,
-     "type": "organization"      
+     "type": "organization"
     }
     ],
     "orgUnitPath": "/Scoutnet",
-    
+
     password: Math.random().toString(36) // Generate a random password string.
   };
   user = AdminDirectory.Users.insert(user);
-  
-  Logger.log('Användare %s skapad.', user.primaryEmail);  
+
+  Logger.log('Användare %s skapad.', user.primaryEmail);
 }
 
 
 /*
  * Check if account with this email exists
  */
-function checkIfEmailExists(email) {  
-  
+function checkIfEmailExists(email) {
+
   var pageToken, page;
   do {
     page = AdminDirectory.Users.list({
@@ -195,14 +195,14 @@ function checkIfEmailExists(email) {
     });
     users = page.users;
     if (users) {
-      return "yes";      
+      return "yes";
     } else {
       Logger.log('Ingen användare hittades med ' + email);
       return "no";
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
-  
+
 }
 
 
@@ -211,28 +211,28 @@ function checkIfEmailExists(email) {
  * Update name, orgpath and cancel cancel suspension if needed
  */
 function updateAccount(leader, useraccount) {
-  
+
   var go_first_name = useraccount.name.givenName;
   var go_last_name = useraccount.name.familyName;
   var go_suspended = useraccount.suspended;
-  
-  var first_name = leader.first_name;  
+
+  var first_name = leader.first_name;
   var last_name = leader.last_name;
-  
+
   var email = useraccount.primaryEmail;
-  
-  if (go_first_name!=first_name || go_last_name!=last_name || go_suspended) {
-  
+
+  if (go_first_name != first_name || go_last_name != last_name || go_suspended) {
+
     var user = {
     name: {
       givenName: first_name,
       familyName: last_name
     },
     suspended: false,
-    "orgUnitPath": "/Scoutnet"    
+    "orgUnitPath": "/Scoutnet"
     };
     user = AdminDirectory.Users.update(user, email);
-    Logger.log('Användare %s %s uppdaterad med namn till %s %s.', go_first_name, go_last_name, first_name, last_name);  
+    Logger.log('Användare %s %s uppdaterad med namn till %s %s.', go_first_name, go_last_name, first_name, last_name);
   }
 }
 
@@ -241,13 +241,13 @@ function updateAccount(leader, useraccount) {
  * Suspend account if not active as leader
  */
 function suspendAccount(email) {
-  
+
   var user = {
     suspended: true
   };
-  
+
   user = AdminDirectory.Users.update(user, email);
-  Logger.log('Användare %s är avstängd', email);  
+  Logger.log('Användare %s är avstängd', email);
 }
 
 
@@ -255,9 +255,9 @@ function suspendAccount(email) {
  * Get a list of all Google accounts for the suborganisation Scoutnet
  */
 function getGoogleAccounts() {
-  
+
   var users;
-  
+
   var pageToken, page;
   do {
     page = AdminDirectory.Users.list({
@@ -272,7 +272,7 @@ function getGoogleAccounts() {
       for (var i = 0; i < users.length; i++) {
         var user = users[i];
         Logger.log('%s (%s)', user.name.fullName, user.primaryEmail);
-                
+
       }
     } else {
       Logger.log('Ingen användare hittades.');
@@ -281,8 +281,8 @@ function getGoogleAccounts() {
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
-  
-  return users;  
+
+  return users;
 }
 
 
@@ -291,19 +291,19 @@ function getGoogleAccounts() {
  * by checking if they have a unit_role or group_role
  */
 function getScoutleaders(allmembers) {
-  
+
   var leaders = [];
-  
+
   for (i = 0; i < allmembers.length; i++) {
-    
+
     var group_role = allmembers[i].group_role;
     var unit_role = allmembers[i].unit_role;
-    
-    if (group_role.length!=0 || unit_role.length!=0) {
+
+    if (group_role.length != 0 || unit_role.length != 0) {
      leaders.push(allmembers[i]);
-    }    
+    }
   }
-  return leaders;  
+  return leaders;
 }
 
 
@@ -312,81 +312,81 @@ function getScoutleaders(allmembers) {
  * Return firstname,lastname, membernumber and a lot more
  */
 function fetchScoutnetMembersAccount() {
-  
-  
+
+
   var url = 'https://' + scoutnet_url + '/api/group/memberlist?id=' + group_id + '&key=' + api_key_account + '&pretty=1';
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
-  //Logger.log(response); 
-  
+  //Logger.log(response);
+
   var json = response.getContentText();
   var data = JSON.parse(json);  //Make it into a Javascript object
-  
-  
+
+
   var medlemmar = data.data;
   var allmembers = [];
-  
+
   //Logger.log(medlemmar);
   var i = 0;
   for (x in medlemmar) {
     var medlem = medlemmar[x];
-    
+
     var member_no = "";
     if (medlem.member_no){
       member_no = medlem.member_no.value
       member_no = JSON.stringify(member_no);
       member_no = member_no.substring(1, member_no.length - 1);
     }
-    
+
     var first_name = "";
     if (medlem.first_name){
       first_name = medlem.first_name.value;
       first_name = JSON.stringify(first_name);
       first_name = first_name.substring(1, first_name.length - 1);
     }
-    
+
     var last_name = "";
     if (medlem.last_name){
       last_name = medlem.last_name.value;
       last_name = JSON.stringify(last_name);
       last_name = last_name.substring(1, last_name.length - 1);
     }
-    
+
     var date_of_birth = "";
     if (medlem.date_of_birth){
       date_of_birth = medlem.date_of_birth.value;
       date_of_birth = JSON.stringify(date_of_birth);
       date_of_birth = date_of_birth.substring(1, date_of_birth.length - 1);
     }
-    
+
     var unit = "";
     if (medlem.unit){
       unit = medlem.unit.value;
       unit = JSON.stringify(unit);
       unit = unit.substring(1, unit.length - 1);
     }
-    
+
     var unit_role = "";
     if (medlem.unit_role){
       unit_role = medlem.unit_role.value;
       unit_role = JSON.stringify(unit_role);
       unit_role = unit_role.substring(1, unit_role.length - 1);
     }
-    
+
     var group_role = "";
     if (medlem.group_role){
       group_role = medlem.group_role.value;
       group_role = JSON.stringify(group_role);
       group_role = group_role.substring(1, group_role.length - 1);
     }
-    
+
     var email = "";
     if (medlem.email){
       email = medlem.email.value;
       email = JSON.stringify(email);
       email = email.substring(1, email.length - 1);
       email = email.toLowerCase().trim();
-    }     
-     
+    }
+
     var member = {
       member_no: member_no,
       first_name: first_name,
@@ -395,12 +395,12 @@ function fetchScoutnetMembersAccount() {
       unit: unit,
       unit_role: unit_role,
       group_role: group_role,
-      email: email           
+      email: email
     };
-    
-    allmembers.push(member);    
-  } 
-  return allmembers;  
+
+    allmembers.push(member);
+  }
+  return allmembers;
 }
 
 
