@@ -17,18 +17,18 @@ Vid problem, fel, frågor eller tips på förbättringar eller fler funktioner s
 6. Tryck på "Nytt Script" och namnge sedan projektet till något lämpligt, t.ex Scoutnet.
 7. Till vänster på skärmen listas de olika filer som finns i projektet och vid nu vid starten finns endast en som heter Code.gs. Byt namn på den till "Användare" och ta bort den koden som står i filen.
 8. Klistra in koden från filen Användare.gs och spara (Ctrl+S).
-9. Skapa en ny fil som heter "Grupper" och gör samma sak för filen Grupper.gs
+9. Gör samma sak för de andra filerna som slutar på .gs
 10. Under "Resources"/"Advanced Google Services" behöver du aktivera "Admin Directory API", "Google Sheets API" och "Group Settings API". På denna sida finns också en länk till "Google API Console" (https://console.cloud.google.com/apis/library?project) där du också behöver aktivera tjänsterna. Aktivera där "Admin SDK", "Google Sheets API", "Group Settings API".
 11. Gör inställningar enligt nedan för respektive fil.
-12. Kör programmet en gång genom att trycka på filen Användare.gs och välja funktionen "AccountsAndGroups" upp bland menyn och tryck sedan på playknappen.
+12. Kör programmet en gång genom att trycka på filen Användare.gs och välja funktionen "AnvändareOchGrupper" upp bland menyn och tryck sedan på playknappen.
 13. Du kan nu tidinställa hur ofta som programmen ska köra/synkronisera genom att trycka på "klocksymbolen" i menyn och ställa in synkroniseringar. Tänk på att inte köra synkroniseringen för ofta då det finns maxbegränsningar per dag och som mestadels beror på antal grupper och e-postadresser i dessa. Det bör räcka med att synkronisera användare en gång per dygn och samma för grupper, förslagsvis mitt i natten. Synkroniseringen bör gå under minuten och om det är personer som på något sätt har ställt in att deras e-postadress ska användas som ett slags alias för deras @gmail.com så kommer deras adress tas bort från e-postlistan och sedan läggas till igen någon delsekund senare. Du kan här trycka på "notifications" och ställa in att att du får felmeddelanden om något skulle gå fel.
-Om du vill att synkroniseringen av användarkonton och grupper ska ske "samtidigt" (direkt efter varandra) så kan du ställa in den att exekvera funktionen "AccountsAndGroup".
+Om du vill att synkroniseringen av användarkonton och grupper ska ske "samtidigt" (direkt efter varandra) så kan du ställa in den att exekvera funktionen "AnvändareOchGrupper".
 ### Övriga program
-1. Skapa en ny fil i samma projekt som tidigare och klistra in koden och kör. Eventuellt kan du behöva lägga till någon inställning i konfigurationsfilen (kommer inom kort).
+1. Skapa en ny fil i samma projekt som tidigare och klistra in koden och kör. Eventuellt kan du behöva lägga till någon inställning i konfigurationsfilen Konfiguration.gs.
 2. Läs aktuellt avsnitt i manualen nedan.
 ## Manual
 ### Google användarkonton - synkronisering med Scoutnet
-Synkroniserar personer som har en funktionsroll i kåren på avdelningsnivå eller på kårnivå och skapar användarkonton på kårens G Suite åt dem. Om personen vid nästkommande synkronisering ej har en funktionsroll inaktiveras konto. Om personen senare får en funktionsroll aktiveras kontot igen. Det är bara konton som finns i organisationsstrukturen "Scoutnet" i G Suite som berörs vid en synkronisering. Användarkonton skapas på formen fornamn.efternamn@domännamn.se.
+Synkroniserar personer som som är med på e-postlistor från Scoutnet genom att man anger id-nummret för e-postlistan i Konfiguration.gs. Det går bra att ange flera e-postlistor med kommatecken samt skriva kommentarer med parenteser. Om inget id-nummer för en e-postlista anges så tolkat programmet det som alla personer i kåren som har en avdelningsroll eller roll på kårnivå och skapar användarkonton på kårens G Suite åt dem i den underorganisationen i G Suite som man specificerar. Om personen vid nästkommande synkronisering ej matchar något inaktiveras konto. Om personen senare matchas aktiveras kontot igen. Det är bara konton som finns i organisationsstrukturen "Scoutnet" i G Suite som berörs vid en synkronisering. Användarkonton skapas på formen fornamn.efternamn@domännamn.se
 Om det finns personer som har samma namn (för- och efternamn) angivet i Scoutnet kommer de som skapas som nr2 osv skapas på formen fornamn.efternamnX@domännamn.se där X motsvarar en siffra från 1-5.
 - E-postadresser genereras på följande sätt.
 1. För och efternamn görs om till gemener och tar bort alla mellanslag och andra tomrum som är skrivet i de fälten i Scoutnet.
@@ -41,7 +41,8 @@ Om det finns personer som har samma namn (för- och efternamn) angivet i Scoutne
 
 
 ### Google grupper - synkronisering med Scoutnet
-I kalkylarket kan du ställa in namn på de olika google-grupperna, dess e-postadress, vilken e-postlista i Scoutnet de ska synkroniseras mot samt hur den ska synkronisera i fältet Synkinställning. Du kan där för respektive e-postlistan ange följande
+I kalkylarket kan du ställa in namn på de olika google-grupperna, dess e-postadress, vilken e-postlista i Scoutnet de ska synkroniseras mot samt hur den ska synkronisera i fältet Synkinställning. Du kan i cellera för listid kommaseparera flera listor om du vill använda flera listor från Scoutnet för att bygga upp en större egen. Det går också bra att skriva kommentarer med parenteser.
+Du kan där för respektive e-postlistan ange följande
 - "@" Lägg till personens Google-konto om den har något, annars hoppa över personen
 - "-" Lägg endast till personens e-postadress som listad i Scoutnet
 - "&" Lägg till både personens e-postadress som listad i Scoutnet samt Google-konto om den har något.
@@ -49,18 +50,20 @@ I kalkylarket kan du ställa in namn på de olika google-grupperna, dess e-posta
 Det går också att ställa in i detta fält vilka e-postadressfält från scoutnet som ska läggas till
 - "m" Lägg endast till en medlems primära e-postadress
 - "f" Lägg endast till de e-postadresser som är angivet i fälten Anhörig 1,2. Alltså vanligtvis föräldrarna.
+- "e" Lägg endast till de fält som Scoutnet använder för att skicka till med den inbygda e-postlistsfunktionen.
 - Om man inte anger något används fälten primär e-postadress, anhörig 1, anhörig 2 och alternativ e-postadress.
 
 Det går att enkelt kontrollera vilka som är med i en google-grupp genom att trycka på länken vid varje e-postadress i kalkylarket.
 
 Om du vill att en person ska vara med i en Google-grupp utan att beröras av att tas bort vid en synkronisering lägger du till e-postadressen som ägare eller medarbetare av gruppen.
-#### Inställningar
+#### Inställningar (i Konfiguration.gs)
 - Ändra kårens domän namn på variabeln "domain"
 - Ändra kårens grupp-id som finns angivet i Scoutnet på sidan för Webbkoppling
-- Ändra api-nyckeln som under Webbkoppling i Scoutnet står under "Get a csv/xls/json list of members, based on mailing lists you have set up"
-- Skapa ett Google Kalkylark och klistra in webbadressen vid variabeln "spreadsheetUrl"
+- Ändra api-nyckeln med namn api_key_mailinglists som hittas i Scoutnet under Webbkoppling under "Get a csv/xls/json list of members, based on mailing lists you have set up"
+- Skapa ett Google Kalkylark och klistra in webbadressen vid variabeln "spreadsheetUrl_Grupper"
 - Spara.
-- Välj funktionen createHeaders och kör den.
+- Välj funktionen GrupperRubrikData i Grupper.gs och kör den.
+- Fyll i övriga fält i filen Konfiguration.gs vid behov och möjligt.
 - Klart.
 
 ## Hjälp
