@@ -56,8 +56,17 @@ Det går också att ställa in i detta fält vilka e-postadressfält från scout
 Det går att enkelt kontrollera vilka som är med i en google-grupp genom att trycka på länken vid varje e-postadress i kalkylarket.
 
 Om du vill att en person ska vara med i en Google-grupp utan att beröras av att tas bort vid en synkronisering lägger du till e-postadressen som ägare eller medarbetare av gruppen.
+
+#### Begränsa åtkomst
+
+Kolumnen "Begränsa åtkomst" i kalkylbladet styr vem som får lov att skicka till listan. Detta kan t.ex. användas så att bara ledare inom kåren får lov att skicka till listor med alla scouter, medan en lista som går till ledarna kan användas av utomstående.
+
+- Tom ruta betyder betyder att vem som helst får skicka till listan. Detta är bra för inkommande meddelanden, t.ex. styrelsen, ledarteam, lägerkommittéer osv.
+- "ALL_IN_DOMAIN_CAN_POST" begränsar till avsändare från kårens domän i G Suite. Detta är bra för listor som går till alla scouter på en avdelning eller hela kåren.
+- För mer info, se avsnittet "whoCanPostMessage" i Googles dokumentation här: https://developers.google.com/admin-sdk/groups-settings/v1/reference/groups#resource
+
 #### Inställningar (i Konfiguration.gs)
-- Ändra kårens domän namn på variabeln "domain"
+- Ändra kårens domännamn på variabeln "domain"
 - Ändra kårens grupp-id som finns angivet i Scoutnet på sidan för Webbkoppling
 - Ändra api-nyckeln med namn api_key_mailinglists som hittas i Scoutnet under Webbkoppling under "Get a csv/xls/json list of members, based on mailing lists you have set up"
 - Skapa ett Google Kalkylark och klistra in webbadressen vid variabeln "spreadsheetUrl_Grupper"

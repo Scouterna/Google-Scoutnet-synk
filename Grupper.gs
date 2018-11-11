@@ -19,6 +19,7 @@ function GrupperRubrikData() {
   gruppRubrikData["synk_option"] = 3;
   gruppRubrikData["groupId"] = 4;
   gruppRubrikData["cell_url"] = 5;
+  gruppRubrikData["post_permission"] = 6;
                   
   return gruppRubrikData;
 }
@@ -41,10 +42,14 @@ function Grupper() {
     var scoutnet_list_id = data[i][grd["scoutnet_list_id"]];
     var synk_option = data[i][grd["synk_option"]];
     var groupId = data[i][grd["groupId"]];
+    var postPermission = data[i][grd["post_permission"]];
+    if (!postPermission) {
+      postPermission = "ANYONE_CAN_POST";
+    }
     
     var rad_nummer = i+1;
     
-    Logger.log('Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id + ' grupp id: ' + groupId);
+    Logger.log('Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id + ' Grupp-ID: ' + groupId + ' Inläggsbehörighet: ' + postPermission);
     
     var update_group = "yes";
     
@@ -68,7 +73,7 @@ function Grupper() {
           email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
           email = removeDiacritics(email);
           
-          var group = createGroup(email, name);   
+          var group = createGroup(email, name);
           var groupId = group.id;
           Logger.log("Skapade gruppen: " + email);
           
@@ -144,7 +149,7 @@ function Grupper() {
             var cell=selection.getCell(rad_nummer, grd["e-post"]+1);
             cell.setBackground("red");
           }
-        }        
+        }
         else if (name != group.name) { //Om namnet, men inte e-postadressen för gruppen ändrats
           
           Logger.log("Gruppnamnet har ändrats på rad " + rad_nummer);
@@ -160,12 +165,13 @@ function Grupper() {
           cell.setBackground("white");
         }
       }
-    }    
+    }
     if (update_group == "yes") {
       var cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1);
       updateGroup(groupId, scoutnet_list_id, cell_scoutnet_list_id, synk_option); //Uppdatera medlemmar av en grupp
     }
-  }  
+    changeGroupPermissions(email, postPermission);
+  }
   deleteRowsFromSpreadsheet(sheet, delete_rows);
 }
 
@@ -220,8 +226,7 @@ function createGroup(email, name) {
     "description": "Scoutnet"
   };
             
-  AdminDirectory.Groups.insert(tmp_group);        
-  changeGroupPermissions(email);
+  AdminDirectory.Groups.insert(tmp_group);
             
   var group = AdminDirectory.Groups.get(email);
   
@@ -379,7 +384,7 @@ function addGroupMember(groupId, email) {
  *
  * @param {string} email - E-postadress för en grupp
  */
-function changeGroupPermissions(email) {
+function changeGroupPermissions(email, postPermission) {
   
   var group = AdminGroupsSettings.newGroups();
   
@@ -388,7 +393,7 @@ function changeGroupPermissions(email) {
   group.whoCanInvite = 'ALL_MANAGERS_CAN_INVITE';
   group.whoCanAdd = 'ALL_MANAGERS_CAN_ADD';
   group.allowExternalMembers = true;
-  group.whoCanPostMessage = 'ANYONE_CAN_POST';
+  group.whoCanPostMessage = postPermission;
   group.primaryLanguage = 'sv';
   group.messageModerationLevel = 'MODERATE_NONE';
   group.replyTo = 'REPLY_TO_SENDER';
@@ -412,11 +417,11 @@ function createHeaders_Grupper() {
   
   // Våra värden vi vill ha som rubriker för de olika kolumnerna
   var values = [
-    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "grupp id hos Google RÖR EJ", "Länk"]
+    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Grupp-ID hos Google (RÖR EJ)", "Länk", "Begränsa åtkomst (valfritt)"]
   ];
 
   // Sätter området för cellerna som vi ska ändra
-  var range = sheet.getRange("A1:F1");
+  var range = sheet.getRange("A1:G1");
 
   // Sätter våra rubriker på vårt område
   range.setValues(values); 
