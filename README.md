@@ -16,7 +16,7 @@ Vid problem, fel, frågor eller tips på förbättringar eller fler funktioner s
 5. Besök script.google.com när du är inloggad på kårens webbansvariges Google-konto eller annat lämpligt Google-konto med hög behörighet på kårens G Suite.
 6. Tryck på "Nytt Script" och namnge sedan projektet till något lämpligt, t.ex Scoutnet.
 7. Till vänster på skärmen listas de olika filer som finns i projektet och vid nu vid starten finns endast en som heter Code.gs. Byt namn på den till "Användare" och ta bort den koden som står i filen.
-8. Klistra in koden från filen Användare.gs och spara (Ctrl+S).
+8. Klistra in koden från filen Anvandare.gs och spara (Ctrl+S).
 9. Gör samma sak för de andra filerna som slutar på .gs
 10. Under "Resources"/"Advanced Google Services" behöver du aktivera "Admin Directory API", "Google Sheets API" och "Group Settings API". På denna sida finns också en länk till "Google API Console" (https://console.cloud.google.com/apis/library?project) där du också behöver aktivera tjänsterna. Aktivera där "Admin SDK", "Google Sheets API", "Group Settings API".
 11. Gör inställningar enligt nedan för respektive fil.
