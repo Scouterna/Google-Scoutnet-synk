@@ -10,6 +10,10 @@ Denna lösning använder Google Apps Script.
 Vid problem, fel, frågor eller tips på förbättringar eller fler funktioner som du saknar;
 lägg ett ärende under "Issues" eller mejla emil.ohman@scouterna.se
 
+Du kan ladda ner den senaste versionen via
+https://github.com/scouternasetjanster/Google-Scoutnet-synk/releases/latest och där kan
+du också ser vilken funktionalitet som är ny i respektive version.
+
 ## Inställningar
 ### Generella inställningar
 
