@@ -17,9 +17,9 @@ function GrupperRubrikData() {
   gruppRubrikData["e-post"] = 1;
   gruppRubrikData["scoutnet_list_id"] = 2;
   gruppRubrikData["synk_option"] = 3;
-  gruppRubrikData["groupId"] = 4;
-  gruppRubrikData["cell_url"] = 5;
-  gruppRubrikData["post_permission"] = 6;
+  gruppRubrikData["groupId"] = 8;
+  gruppRubrikData["cell_url"] = 9;
+  gruppRubrikData["post_permission"] = 11;
                   
   return gruppRubrikData;
 }
@@ -43,6 +43,7 @@ function Grupper() {
     var synk_option = data[i][grd["synk_option"]];
     var groupId = data[i][grd["groupId"]];
     var postPermission = data[i][grd["post_permission"]];
+    
     if (!postPermission) {
       postPermission = "ANYONE_CAN_POST";
     }
@@ -214,7 +215,7 @@ function setCellValueCellUrl(selection, rad_nummer, column, email) {
  * med fördefinerade behörighetsinställningar
  *
  * @param {string} email - e-postadress för gruppen
- * @param {string} name - namn påe-postgruppen
+ * @param {string} name - namn på e-postgruppen
  *
  * @returns {Object} - Objekt av den nya skapade Googlegrupppen
  */
@@ -383,6 +384,7 @@ function addGroupMember(groupId, email) {
  * Ändra behörigheter för en grupp efter att den är skapad
  *
  * @param {string} email - E-postadress för en grupp
+ * @param {string} postPermission - Definierar vilka som ska få skicka till e-postlistan
  */
 function changeGroupPermissions(email, postPermission) {
   
@@ -405,33 +407,85 @@ function changeGroupPermissions(email, postPermission) {
 
 
 /*
- * Skapa kolumnrubriker i kalkylarket och dölj kolumnen med group-id
+ * Skapa kolumnrubriker i kalkylarket och dölj kolumnen med Grupp-ID
  */
 function createHeaders_Grupper() {
   var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper).getSheets()[0];
   
-  // Frys den översta raden på arket så att rubrikerna alltid syns
-  sheet.setFrozenRows(1);
+  // Frys de två översta raderna på arket så att rubrikerna alltid syns
+  sheet.setFrozenRows(2);
   
-  var grd = GrupperRubrikData();
+  /********Rad 1********************/
+  if (! (sheet.getRange("C1:D1").isPartOfMerge() ||
+         sheet.getRange("E1:F1").isPartOfMerge() ||
+      sheet.getRange("G1:H1").isPartOfMerge())) { //Inga angivna celler på rad 1 är sammanfogade
+    
+    Logger.log("Inga av de angivna cellerna på rad 1 är sammanfogade");
+    
+    sheet.getRange("C1:D1").merge();
+    sheet.getRange("E1:F1").merge();
+    sheet.getRange("G1:H1").merge();
+    
+    Logger.log("Vi har nu sammanfogat dem");    
+  }
+  else {
+    Logger.log("Några celler är sedan tidigare sammanfogade på rad 1, så vi gör inget åt det");
+  }
   
-  // Våra värden vi vill ha som rubriker för de olika kolumnerna
-  var values = [
-    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Grupp-ID hos Google (RÖR EJ)", "Länk", "Begränsa åtkomst (valfritt)"]
+  var values_rad1 = [
+    ["Kan skicka och ta emot", "", "Kan skicka", "", "Kan ta emot", ""]
   ];
 
   // Sätter området för cellerna som vi ska ändra
-  var range = sheet.getRange("A1:G1");
+  var range_rad1 = sheet.getRange("C1:H1");
+  range_rad1.setHorizontalAlignment("center");
+  range_rad1.setFontWeight("bold");
 
   // Sätter våra rubriker på vårt område
-  range.setValues(values); 
+  range_rad1.setValues(values_rad1);   
+  
+  /********************************/
+  
+  var grd = GrupperRubrikData();
+  
+  /*******Rad 2********************/
+  // Våra värden vi vill ha som rubriker för de olika kolumnerna
+  var values_rad2 = [
+    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Grupp-ID hos Google (RÖR EJ)", "Länk"]
+  ];
 
-  var column = sheet.getRange("E1:E100"); //Kolumnen för group-id
+  // Sätter området för cellerna som vi ska ändra
+  var range_rad2 = sheet.getRange("A2:J2");
+
+  // Sätter våra rubriker på vårt område
+  range_rad2.setValues(values_rad2);
+  range_rad2.setFontStyle("italic");
+  
+  /*******************************/
+  
+  /*******Sätt kantlinjer*********/
+  
+  var kolumn1 = sheet.getRange("C1:D100");
+  kolumn1.setBorder(null, true, null, true, null, null);
+  
+  var kolumn2 = sheet.getRange("E1:F100");
+  kolumn2.setBorder(null, true, null, true, null, null);
+  
+  var kolumn3 = sheet.getRange("G1:H100");
+  kolumn3.setBorder(null, true, null, true, null, null);
+  
+  
+  /*******************************/
+  
+  /*******Kolumn Grupp-ID*********/
+  var column = sheet.getRange("I1:I100"); //Kolumnen för Grupp-ID
   column.setBackground("orange");
   column.setFontColor("blue");
   
   //Dölj kolumnen med group-id
-  sheet.hideColumns(grd["groupId"]+1);    
+  sheet.hideColumns(grd["groupId"]+1);
+  
+  /*******************************/  
 }
 
  
