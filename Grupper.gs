@@ -15,11 +15,18 @@ function GrupperRubrikData() {
   var gruppRubrikData = {};
   gruppRubrikData["namn"] = 0;
   gruppRubrikData["e-post"] = 1;
+  
   gruppRubrikData["scoutnet_list_id"] = 2;
   gruppRubrikData["synk_option"] = 3;
+  gruppRubrikData["scoutnet_list_id_send"] = 4;
+  gruppRubrikData["synk_option_send"] = 5;
+  gruppRubrikData["scoutnet_list_id_receive"] = 6;
+  gruppRubrikData["synk_option_receive"] = 7;
+  
   gruppRubrikData["groupId"] = 8;
   gruppRubrikData["cell_url"] = 9;
-  gruppRubrikData["post_permission"] = 11;
+  
+  gruppRubrikData["post_permission"] = 11;  //FIXME Ta bort denna
                   
   return gruppRubrikData;
 }
@@ -412,24 +419,30 @@ function changeGroupPermissions(email, postPermission) {
 function createHeaders_Grupper() {
   var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper).getSheets()[0];
   
+  var grd = GrupperRubrikData();
+  
   // Frys de två översta raderna på arket så att rubrikerna alltid syns
   sheet.setFrozenRows(2);
   
   /********Rad 1********************/
-  if (! (sheet.getRange("C1:D1").isPartOfMerge() ||
-         sheet.getRange("E1:F1").isPartOfMerge() ||
-      sheet.getRange("G1:H1").isPartOfMerge())) { //Inga angivna celler på rad 1 är sammanfogade
+  var range1_rad1 = sheet.getRange(1, grd["scoutnet_list_id"]+1, 1, 2);
+  var range2_rad1 = sheet.getRange(1, grd["scoutnet_list_id_send"]+1, 1, 2);
+  var range3_rad1 = sheet.getRange(1, grd["scoutnet_list_id_receive"]+1, 1, 2);
+  
+  if (! (range1_rad1.isPartOfMerge() ||
+         range2_rad1.isPartOfMerge() ||
+      range3_rad1.isPartOfMerge())) { //Inga angivna celler på rad 1 är sammanfogade
     
     Logger.log("Inga av de angivna cellerna på rad 1 är sammanfogade");
     
-    sheet.getRange("C1:D1").merge();
-    sheet.getRange("E1:F1").merge();
-    sheet.getRange("G1:H1").merge();
+    range1_rad1.merge();
+    range2_rad1.merge();
+    range3_rad1.merge();
     
     Logger.log("Vi har nu sammanfogat dem");    
   }
   else {
-    Logger.log("Några celler är sedan tidigare sammanfogade på rad 1, så vi gör inget åt det");
+    Logger.log("Några celler är sedan tidigare sammanfogade på rad 1, så vi gör inget åt just det");
   }
   
   var values_rad1 = [
@@ -437,27 +450,26 @@ function createHeaders_Grupper() {
   ];
 
   // Sätter området för cellerna som vi ska ändra
-  var range_rad1 = sheet.getRange("C1:H1");
+  // De 6 kolumnerna för listId & synkinställning
+  var range_rad1 = sheet.getRange(1, grd["scoutnet_list_id"]+1, 1, 6);
   range_rad1.setHorizontalAlignment("center");
   range_rad1.setFontWeight("bold");
 
   // Sätter våra rubriker på vårt område
-  range_rad1.setValues(values_rad1);   
+  range_rad1.setValues(values_rad1);
   
   /********************************/
-  
-  var grd = GrupperRubrikData();
-  
+    
   /*******Rad 2********************/
-  // Våra värden vi vill ha som rubriker för de olika kolumnerna
+  // Våra värden vi vill ha som rubriker för de olika kolumnerna på rad 2
   var values_rad2 = [
     ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Grupp-ID hos Google (RÖR EJ)", "Länk"]
   ];
 
-  // Sätter området för cellerna som vi ska ändra
-  var range_rad2 = sheet.getRange("A2:J2");
+  // Sätter området för cellerna på rad 2 som vi ska ändra
+  var range_rad2 = sheet.getRange(2, 1, 1, values_rad2[0].length);
 
-  // Sätter våra rubriker på vårt område
+  // Sätter våra rubriker på vårt område med kursiv text
   range_rad2.setValues(values_rad2);
   range_rad2.setFontStyle("italic");
   
@@ -465,30 +477,88 @@ function createHeaders_Grupper() {
   
   /*******Sätt kantlinjer*********/
   
-  var kolumn1 = sheet.getRange("C1:D100");
+  var kolumn1 = getA1RangeOfColumns(sheet, grd["scoutnet_list_id"]+1, 2);
+  //Kolumnen för scoutnet_list_id;
   kolumn1.setBorder(null, true, null, true, null, null);
   
-  var kolumn2 = sheet.getRange("E1:F100");
+  var kolumn2 = getA1RangeOfColumns(sheet, grd["scoutnet_list_id_send"]+1, 2);
   kolumn2.setBorder(null, true, null, true, null, null);
   
-  var kolumn3 = sheet.getRange("G1:H100");
-  kolumn3.setBorder(null, true, null, true, null, null);
-  
+  var kolumn3 = getA1RangeOfColumns(sheet, grd["scoutnet_list_id_receive"]+1, 2);
+  kolumn3.setBorder(null, true, null, true, null, null);  
   
   /*******************************/
   
   /*******Kolumn Grupp-ID*********/
-  var column = sheet.getRange("I1:I100"); //Kolumnen för Grupp-ID
+  
+  var column = getA1RangeOfColumns(sheet, grd["groupId"]+1, 1); //Kolumnen för Grupp-ID  
   column.setBackground("orange");
   column.setFontColor("blue");
   
+  //Vi tar bort alla skyddade områden
+  var protections = sheet.getProtections(SpreadsheetApp.ProtectionType.RANGE);  
+  for (var i = 0; i < protections.length; i++) {
+    var protection = protections[i];
+    if (protection.canEdit()) {
+      protection.remove();
+    }
+  }
+  //Vi skyddar kolumnen för Grupp-ID så man inte råkar ändra av misstag
+  column.protect().setWarningOnly(true);
+  
   //Dölj kolumnen med group-id
-  sheet.hideColumns(grd["groupId"]+1);
+  sheet.hideColumn(column);
   
   /*******************************/  
 }
 
+
+/*
+ * Visar kolumner som styr avancerade inställningar
+ */
+function avanceradLayout() {
+  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper).getSheets()[0];
+  
+  var grd = GrupperRubrikData();
+  
+  sheet.showColumns(grd["scoutnet_list_id_send"]+1, 4);  
+}
+
+
+/*
+ * Döljer kolumner som styr avancerade inställningar
+ */
+function enkelLayout() {
+  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper).getSheets()[0];
+  
+  var grd = GrupperRubrikData();
+  
+  sheet.hideColumns(grd["scoutnet_list_id_send"]+1, 4);  
+}
+
+
+/*
+ * Ger området för en eller flera kolumner
+ *
+ * @param {Objekt} sheet - Ett ark
+ * @param {int} columnIndex - Kolumnindex
+ * @param {int} numColumns - Antal kolumner med columnIndex längst till vänster
+ *
+ * @returns {Objekt} - Området för hela kolumnen
+ */
+function getA1RangeOfColumns(sheet, columnIndex, numColumns) {
+  
+  var range = sheet.getRange(1, columnIndex, 2, numColumns);
+  //Vi anger att det ska vara två rader så att vi får en start och slutkolumn
+  var a1_cell_row_one = range.getA1Notation();
+  
+  var a1Notation = a1_cell_row_one.replace(/[0-9]/g, '');  
+  range = sheet.getRange(a1Notation);
+  
+  return range;
+}
  
+
 /*
  * Kontrollerar att formatet på en e-postadress är godkänt
  * genom att se om den innehåller @ och om domännamnet är godkänt
