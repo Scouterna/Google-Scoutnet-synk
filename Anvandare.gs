@@ -114,6 +114,7 @@ function Anvandare() {
   checkingIfToSuspendAccounts(useraccounts, memberNumbers);
 }
 
+
 /*
  * Läser in samtliga medlemmar som är med i någon av de e-postlistor eller kårfunk
  * som är specificerad i e-postlista eller kårfunktionär i listan userAccountConfig
@@ -419,7 +420,7 @@ function getGoogleAccounts(defaultOrgUnitPath) {
       domain: domain,
       query: "orgUnitPath='" + defaultOrgUnitPath + "'",
       orderBy: 'givenName',
-      maxResults: 150,
+      maxResults: 500,
       pageToken: pageToken
     });
     users = page.users;

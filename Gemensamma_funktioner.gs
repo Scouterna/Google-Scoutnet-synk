@@ -178,7 +178,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
     allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist(tmp_id[i], cell_scoutnet_list_id));
   }
   
-  var memberNumbers = getMemberNumbers(allMembers); //Medlemmar med dessa medlemsnummer ska användas //Problem med detta
+  var memberNumbers = getMemberNumbers(allMembers); //Medlemmar med dessa medlemsnummer ska användas
 //  Logger.log(memberNumbers);
   Logger.log("Fetch - getMemberNumbers klar");
   var members = getMembersByMemberNumbers(allMembers, memberNumbers);  
@@ -248,8 +248,7 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
     return allMembers;
   }
   
-  if (cell_scoutnet_list_id) {
-    
+  if (cell_scoutnet_list_id) {    
     cell_scoutnet_list_id.setBackground("white");  
     if (scoutnet_list_id=="") {
       cell_scoutnet_list_id.setBackground("yellow");
@@ -496,6 +495,13 @@ function removeDublicates(list) {
       }
     }
   return tmp_array;
+}
+
+
+String.prototype.endsWith = function(suffix) { 
+   if (this.length < suffix.length) 
+      return false; 
+   return this.lastIndexOf(suffix) === this.length - suffix.length; 
 }
 
 

@@ -25,13 +25,14 @@ function GrupperRubrikData() {
   
   gruppRubrikData["groupId"] = 8;
   gruppRubrikData["cell_url"] = 9;
-  
-  gruppRubrikData["post_permission"] = 11;  //FIXME Ta bort denna
                   
   return gruppRubrikData;
 }
 
 
+/*
+ * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
+ */
 function Grupper() {
   
   var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper).getSheets()[0];
@@ -40,26 +41,24 @@ function Grupper() {
   
   var grd = GrupperRubrikData();
   
+  var listOfEmailAdressesOfActiveAccounts = getEmailAdressesofAllActiveGoogleAccounts();
+  
   var delete_rows = [];
   
-  for (var i = 1; i < data.length; i++) {
+  for (var i = 2; i < data.length; i++) {
     
     var name = data[i][grd["namn"]];
     var email = data[i][grd["e-post"]];
     var scoutnet_list_id = data[i][grd["scoutnet_list_id"]];
     var synk_option = data[i][grd["synk_option"]];
     var groupId = data[i][grd["groupId"]];
-    var postPermission = data[i][grd["post_permission"]];
-    
-    if (!postPermission) {
-      postPermission = "ANYONE_CAN_POST";
-    }
     
     var rad_nummer = i+1;
     
-    Logger.log('Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id + ' Grupp-ID: ' + groupId + ' Inläggsbehörighet: ' + postPermission);
+    Logger.log('Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id + ' Grupp-ID: ' + groupId);
     
     var update_group = "yes";
+    
     
     if (groupId=="") { //Vi borde skapa en grupp
       
@@ -102,6 +101,8 @@ function Grupper() {
         }        
       }           
     }
+    
+    
     else if (groupId!="") {  //Gruppen finns sedan innan
       
       if (name=="" && email=="") { //Ta bort gruppen
@@ -173,12 +174,13 @@ function Grupper() {
           cell.setBackground("white");
         }
       }
-    }
+    }    
+    
     if (update_group == "yes") {
-      var cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1);
-      updateGroup(groupId, scoutnet_list_id, cell_scoutnet_list_id, synk_option); //Uppdatera medlemmar av en grupp
+      //Uppdatera medlemmar av en grupp
+      updateGroup(selection, rad_nummer, groupId, email, data[i], grd, listOfEmailAdressesOfActiveAccounts);
+      
     }
-    changeGroupPermissions(email, postPermission);
   }
   deleteRowsFromSpreadsheet(sheet, delete_rows);
 }
@@ -243,11 +245,31 @@ function createGroup(email, name) {
 
 
 /*
+ * Returnera fullständig information om en medlem i en grupp
+ *
+ * @param {string} groupId - Googles id för en grupp
+ * @param {string} memberKey - Unik identifierare för en medlem i en grupp
+ *
+ * @returns {Object[]} member - Ett medlemsobjekt
+ */
+function getGroupMember(groupId, memberkey) {
+  
+  try {
+    var groupMember = AdminDirectory.Members.get(groupId, memberkey);
+    return groupMember;
+  }
+  catch (e) {
+    Logger.log("Kunde inte lägga till e-postadress:" + email); 
+  }  
+}
+
+
+/*
  * Returnera gruppmedlemmar för en specifik grupp
  *
- * @param {string} groupId -Googles id för en grupp
+ * @param {string} groupId - Googles id för en grupp
  *
- * @returns {Object[]} members - Lista av medlemsobjekt med attributen email, role, status för medlemmar i en grupp
+ * @returns {Object[]} members - Lista av medlemsobjekt med attributen email, role för medlemmar i en grupp
  */
 function getGroupMembers(groupId) {
   
@@ -269,8 +291,7 @@ function getGroupMembers(groupId) {
         
         var member = {
           email: member.email.toLowerCase(),
-          role: member.role,
-          status: member.status
+          role: member.role
         };
         group.push(member);
       }
@@ -322,47 +343,437 @@ function getGoogleAccount(member_no) {
 /*
  * Uppdatera medlemmar för en grupp
  *
+ * @param {Objekt} selection - Hela området på kalkylarket som används
+ * @param {int} rad_nummer - Radnummer för aktuell grupp i kalkylarket
  * @param {string} groupId - Googles id för gruppen
- * @param {string} scoutnet_list_id - Scoutnets id för e-postgruppen i Scoutnet
- * @param {Objekt} cell_scoutnet_list_id - Google objekt för cellen i kalkylarket för Scoutnets list_id
- * @param {string} synk_option - Sträng som definerar synkroniseringsinställningar
+ * @param {string} email - Gruppens e-postadress
+ * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * @param {string[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
  */
-function updateGroup(groupId, scoutnet_list_id, cell_scoutnet_list_id, synk_option) {
+function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOfEmailAdressesOfActiveAccounts) {
+    
+  /*****Skicka och ta emot*/
+  var scoutnet_list_id_both = radInfo[grd["scoutnet_list_id"]]; //Själva datan
+  var cell_scoutnet_list_id_both = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
+  var synk_option_both = radInfo[grd["synk_option"]];
+  Logger.log("..........1Båda....................");
+  var allMembers_both = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_both, cell_scoutnet_list_id_both);
+  var allMembers_both_email = getMemberlistsMemberEmail(allMembers_both, synk_option_both);
+  Logger.log("..........1Slut Båda....................");
+  /***********************/
   
-  var allMembers = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id);
+  /*****Bara skicka*******/
+  var scoutnet_list_id_send = radInfo[grd["scoutnet_list_id_send"]]; //Själva datan
+  var cell_scoutnet_list_id_send = selection.getCell(rad_nummer, grd["scoutnet_list_id_send"]+1); //Range
+  var synk_option_send = radInfo[grd["synk_option_send"]];
+  Logger.log("..........1Bara skicka....................");
+  var allMembers_send = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_send, cell_scoutnet_list_id_send);
+  var allMembers_send_email = getMemberlistsMemberEmail(allMembers_send, synk_option_send);
+  Logger.log("..........1Slut bara skicka....................");
+  /***********************/
+  
+  /*****Bara ta emot******/
+  var scoutnet_list_id_receive = radInfo[grd["scoutnet_list_id_receive"]]; //Själva datan
+  var cell_scoutnet_list_id_receive = selection.getCell(rad_nummer, grd["scoutnet_list_id_receive"]+1); //Range
+  var synk_option_receive = radInfo[grd["synk_option_receive"]];
+  Logger.log("..........1Bara ta emot....................");
+  var allMembers_receive = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_receive, cell_scoutnet_list_id_receive);
+  var allMembers_receive_email = getMemberlistsMemberEmail(allMembers_receive, synk_option_receive);
+  Logger.log("..........1Slut bara ta emot....................");
+  /***********************/
+    
+  
+  /*****Vi ska flytta runt e-postadresserna mellan listorna om de finns i flera*****/
+  var email_lists = moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, allMembers_receive_email);
+  allMembers_both_email = email_lists[0]
+  allMembers_send_email = email_lists[1];
+  allMembers_receive_email = email_lists[2];
+  /***********************/
+  
+  
+  /*****Kolla vilka som ska få skicka till listan och flytta om lite igen*****/
+  var postPermission = 'ANYONE_CAN_POST';  
+  
+  if (!scoutnet_list_id_send && synk_option_send) { //Vänster tom, höger ej tom
+    postPermission = getPostPermissionFromString(synk_option_send); //Vi ska flytta personen också om det inte är tomt FIXME
+    //Kan ge
+    // --WRONG_INPUT ---> felaktig data
+    // --ALL_MANAGERS_CAN_POST ---> lista
+    // --ALL_IN_DOMAIN_CAN_POST ---> @    
+    
+    
+    /*********Felaktig data i synk_option_send******/
+    if (postPermission=='WRONG_INPUT') {      
+      postPermission = 'ANYONE_CAN_POST'; //Vi tillåter alla att skicka till listan vid fel
+      
+      var cell = selection.getCell(rad_nummer, grd["synk_option_send"]+1);
+      cell.setBackground("red");
+    }
+    else {
+      var cell = selection.getCell(rad_nummer, grd["synk_option_send"]+1);
+      cell.setBackground("white");
+      
+      cell_scoutnet_list_id_send.setBackground("white");
+    }    
+    /***********************************************/
+        
+    
+    /***Felaktig data i kolumnerna för "Ta emot"****/
+    if (scoutnet_list_id_receive) {      
+      cell_scoutnet_list_id_receive.setBackground("red");
+    }
+    else {
+      cell_scoutnet_list_id_receive.setBackground("white");
+    }
+    
+    if (synk_option_receive) {
+      var cell = selection.getCell(rad_nummer, grd["synk_option_receive"]+1);
+      cell.setBackground("red");
+    }
+    else {
+      var cell = selection.getCell(rad_nummer, grd["synk_option_receive"]+1);
+      cell.setBackground("white");
+    }    
+    /***********************************************/
+    
+    
+    if (postPermission=='ALL_MANAGERS_CAN_POST') { // lista
+      Logger.log("Alla på listan kan skicka till listan"); 
+    }      
+    
+    else if (postPermission=='ALL_IN_DOMAIN_CAN_POST') { //Höger == @
+      
+      Logger.log("Bara de med Google-konto ska få skicka till listan");
+      postPermission = 'ALL_MANAGERS_CAN_POST';
+      
+      //Kolumnerna för "Skicka" och bara "Ta emot" ska nu vara tomma
+      allMembers_send_email = []; //vi tömmer dem för säkerhets skull
+      allMembers_receive_email = [];
+      
+      //Vi ska då flytta alla som är i gruppen "skicka och ta emot" till gruppen "ta emot",
+      //men om de har ett av kårens google-konto så lägger vi till dem i listan "skicka och ta emot".
+      
+      var tmp_list = [];
+      tmp_list.push.apply(tmp_list, allMembers_both_email); //Vi skapar en kopia
+      allMembers_both_email = []; //Vi tömmer denna listan
+      
+      
+      for (var i = 0; i < tmp_list.length; i++) {        
+        var tmp_email = tmp_list[i];
+        if (tmp_email.endsWith(domain)) { //Om kåradress
+          allMembers_both_email.push(tmp_email);
+        }
+        else { //Om privat e-postadress
+          allMembers_receive_email.push(tmp_email);
+        }
+      }      
+      
+      //lägg till alla kårens googlekonton som ska kunna skicka i skickalistan
+      //om de inte finns med i Skicka och ta emot listan redan
+      for (var i = 0; i < listOfEmailAdressesOfActiveAccounts.length; i++) {
+        
+        var tmp_email = listOfEmailAdressesOfActiveAccounts[i];
+        if (!contains(allMembers_both_email, tmp_email)) {
+          allMembers_send_email.push(tmp_email);
+        }        
+      }
+    }    
+  }
+  else if (scoutnet_list_id_send) { //Vänster har en lista
+    
+    postPermission = 'ALL_MANAGERS_CAN_POST';
+    
+    var cell=selection.getCell(rad_nummer, grd["synk_option_send"]+1);
+    cell.setBackground("white");
+    //Vi ska då sätta att bara managers kan posta
+  }
+  else {
+    var cell=selection.getCell(rad_nummer, grd["synk_option_send"]+1);
+    cell.setBackground("white"); 
+  }
+  
+  
+  if (scoutnet_list_id_receive) { //Om Bara ta emot har en lista
+    postPermission = 'ALL_MANAGERS_CAN_POST';
+  }  
+  /***********************/
+    
+  
+  Logger.log("postPermission = " + postPermission);  
+  Logger.log("apan sitter på grenen");
   var allMembers_email = [];
+  allMembers_email.push.apply(allMembers_email, allMembers_both_email);
+  allMembers_email.push.apply(allMembers_email, allMembers_send_email);
+  allMembers_email.push.apply(allMembers_email, allMembers_receive_email);
+  allMembers_email = removeDublicates(allMembers_email);
+  // allMembers_email ==  alla distinkta e-postadresser som finns från alla tre grupper
   
   var group_members = getGroupMembers(groupId); //Alla gruppmedlemmar med deras roller
   var group_members_email = [];
   
-  for (var k = 0; k < allMembers.length; k++) {   
-    
-    allMembers_email.push.apply(allMembers_email, getEmailListSyncOption(allMembers[k], synk_option, true));
-  }  
-  
-  allMembers_email = removeDublicates(allMembers_email);  //Ifall samma e-postadress är hos flera medlemmar eller upprepas i olika kontaktfält.
-  //Sparar in på dataförfrågningar till Google något
-  
+  //Om finns i googlegrupp men inte i vår lista
   for (var i = 0; i < group_members.length; i++) {
    
-    if (group_members[i].role=='MEMBER') //Ta endast bort personer med rollen Member
-      if (!contains(allMembers_email, group_members[i].email)) {
-        
+    if (group_members[i].role=='MEMBER' || group_members[i].role=='MANAGER') {
+      //Ta endast bort personer med rollen Member eller Manager om saknas
+      
+      if (!contains(allMembers_email, group_members[i].email)) {  
         Logger.log(group_members[i].email + " Borde tas bort från " + groupId  + "Google e-postlista");
         AdminDirectory.Members.remove(groupId, group_members[i].email);
       }
+    }
     group_members_email.push(group_members[i].email);
-  }  
+  }   
+  
   
   for (var i = 0; i < allMembers_email.length; i++) { //Vi gör detta som nummer två för att spara lite tid,
     //och för att Google i bland ändrar e-postadress för en användare.
-       
-    if (!contains(group_members_email, allMembers_email[i])) { //Lägg till medlem till e-postlista
-       
-      Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista");
-      addGroupMember(groupId, allMembers_email[i]);
-    }    
-  }  
+    
+    //Denna e-post finns ej med, så vi lägger till personen
+    if (!contains(group_members_email, allMembers_email[i])) { //Lägg till person till e-postlista
+      
+      if (contains(allMembers_both_email, allMembers_email[i])) { //Lägg till så att både kan skicka och ta emot
+        Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Skicka och ta emot");
+        addGroupMember(groupId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
+      }
+      else if (contains(allMembers_send_email, allMembers_email[i])) { //Lägg till så att bara kan skicka
+        Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Bara skicka");
+        addGroupMember(groupId, allMembers_email[i], 'MANAGER', 'NONE');
+      }
+      else { //Lägg till så att bara kan ta emot
+        Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Bara ta emot");
+        addGroupMember(groupId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
+      }      
+    }
+    
+    //Denna e-post finns redan med i gruppen, men har kanske fel roll?
+    else {
+      //Both, Send, Receive
+      var memberTypeOld = getMembertype(groupId, group_members, allMembers_email[i])
+      
+      Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
+      
+      if (contains(allMembers_both_email, allMembers_email[i])) { //Ska kunna skicka och ta emot        
+        if (memberTypeOld!="Both") { //Har någon annan roll sedan innan
+          updateGroupMember(groupId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
+          Logger.log(allMembers_email[i] + " har nu rollen skicka och ta emot");
+        }
+      }
+      else if (contains(allMembers_send_email, allMembers_email[i])) { //Ska bara kunna skicka        
+        if (memberTypeOld!="Send") { //Har någon annan roll sedan innan
+          updateGroupMember(groupId, allMembers_email[i], 'MANAGER', 'NONE');
+          Logger.log(allMembers_email[i] + " har nu rollen bara skicka");
+        }
+      }
+      else { //Ska bara kunna ta emot        
+        if (memberTypeOld!="Receive") { //Har någon annan roll sedan innan
+          updateGroupMember(groupId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
+            Logger.log(allMembers_email[i] + " har nu rollen bara ta emot");
+        }
+      }      
+    }
+  } 
+  changeGroupPermissions(email, postPermission);  
+  
+  Logger.log("Slut på funktionen UpdateGroup");
+}
+
+
+/*
+ * Ger lista över alla aktiva Google-konton i denna domän
+ * om det finns flera domänen tillåter vi bara huvuddomänen
+ *
+ * @returns {string[]} - E-postadresser för aktiva Googlekonton
+ */
+function getEmailAdressesofAllActiveGoogleAccounts() {
+  
+  var emailAddresses = [];
+  var users;
+  var pageToken, page;
+  var catchAllAddress = "*@" + domain;
+  do {
+    page = AdminDirectory.Users.list({
+      domain: domain,
+      orderBy: 'givenName',
+      maxResults: 500,
+      viewType : 'domain_public', //Endast aktiva konton
+      pageToken: pageToken
+    });
+    users = page.users;
+    if (users) {
+      for (var i = 0; i < users.length; i++) {
+        var user = users[i];
+        //Logger.log('%s (%s)', user.name.fullName, user.primaryEmail);
+        for (var k = 0; k < user.emails.length; k++) { //Varje användare kan ha alias också
+          
+          var email = user.emails[k].address;
+          if (email.endsWith(domain)) { //Endast adresser för huvuddomänen
+            if (email!=catchAllAddress) {
+              emailAddresses.push(email);
+              //Logger.log(email);
+            }
+          }
+        }        
+      }
+    } else {
+      Logger.log('Ingen användare hittades.');
+      var empty = [];
+      return empty;
+    }
+    pageToken = page.nextPageToken;
+  } while (pageToken);
+  
+  return emailAddresses;  
+}
+
+
+/*
+ * Uppdatera en persons status i en specifik grupp
+ *
+ * @param {string} groupId - Id för denna grupp
+ * @param {string} email - E-postadress för en specifik medlem i gruppen
+ * @param {string} role - Önskad ny roll i gruppen
+ * @param {string} delivery_settings - Inställning för e-postleverans
+ */ 
+function updateGroupMember(groupId, email, role, delivery_settings) {
+   
+  var settings = {
+    delivery_settings: delivery_settings,
+    role: role
+  };
+  try {
+    AdminDirectory.Members.update(settings, groupId, email);
+  }
+  catch (e) {
+    Logger.log("Kunde inte ändra medlemens rolltyp för e-postadress:" + email); 
+  }
+}
+
+
+/*
+ * Returnerar vilken typ av person detta är på listan
+ *
+ * @param {string} groupId - Id för denna grupp
+ * @param {Objekt[]} group_members - Lista med medlemsobjekt
+ * @param {string} email - E-postadress för en specifik medlem i gruppen
+ *
+ * @returns {string} - Textsträng som förklarar medlemstypen i gruppen
+ */
+function getMembertype(groupId, group_members, email) {
+  
+  for (var i = 0; i < group_members.length; i++) {
+   
+		if (group_members[i].email==email)	{
+          
+          if (group_members[i].role=='MANAGER') {
+            var tmp_GroupMember = getGroupMember(groupId, email);
+            var delivery_settings = tmp_GroupMember.delivery_settings;
+            if(delivery_settings=='ALL_MAIL') {
+              return "Both";
+            }
+            else {
+              return "Send";
+            }            
+          }
+          else if  (group_members[i].role=='MEMBER') {
+            return "Receive";
+          }
+          else {
+            return "OWNER"
+          }
+          return group_members[i].role;
+		}	
+	}
+  return "Kunde inte hitta rollen på denna medlem " + email;
+}
+
+
+/*
+ * Flytta runt e-postadresser till korrekt lista om de finns i flera olika
+ *
+ * @param {string[]} allMembers_both_email - E-postlista för att skicka och ta emot e-brev
+ * @param {string[]} allMembers_send_email - E-postlista för att bara kunna skicka e-brev
+ * @param {string[]} allMembers_receive_email - E-postlista för att bara kunna ta emot e-brev
+ *
+ * @returns {string[allMembers_both_email, allMembers_send_email, allMembers_receive_email]}
+ */
+function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, allMembers_receive_email) {
+  
+  //Om e-post finns i "skicka" och "ta emot" ska de läggas till i "båda"
+  for (var i = 0; i < allMembers_send_email.length; i++) {
+    if (contains(allMembers_receive_email, allMembers_send_email[i])) {
+        allMembers_both_email.push(allMembers_send_email[i]);
+    }
+  }
+  
+  //Om e-post finns i "skicka" och "båda" ska de tas bort ur "skicka"
+  allMembers_send_email = getListsWithUniqueElements(allMembers_both_email, allMembers_send_email);
+  
+  //Om e-post finns i "ta emot" och "båda" ska de tas bort ur "ta emot"
+  allMembers_receive_email = getListsWithUniqueElements(allMembers_both_email, allMembers_receive_email);
+  
+  //Vi tar bort alla upprepade e-postadresser inom sina egna listor
+  allMembers_both_email = removeDublicates(allMembers_both_email);
+  allMembers_send_email = removeDublicates(allMembers_send_email);
+  allMembers_receive_email = removeDublicates(allMembers_receive_email);
+  
+  Logger.log("..........2Båda....................");
+  Logger.log(allMembers_both_email);
+  Logger.log("..........2Slut båda....................");
+  
+  Logger.log("..........2Bara skicka....................");
+  Logger.log(allMembers_send_email);
+  Logger.log("..........2Slut bara skicka....................");
+  
+  Logger.log("..........2Bara ta emot....................");
+  Logger.log(allMembers_receive_email);
+  Logger.log("..........2Slut bara ta emot....................");
+  
+  return [allMembers_both_email, allMembers_send_email, allMembers_receive_email];  
+}
+
+
+/*
+ * Ta bort element ur secondList om de finns i mainList
+ *
+ * @param {string[]} mainList - Lista som vi lämnar orörd
+ * @param {string[]} secondList - Lista som vi tar bort dubletter ur
+ *
+ * @returns {string[]} - Lista av secondList utan de element som fanns i mainList
+ */
+function getListsWithUniqueElements(mainList, secondList) {
+  
+  var tmp_email_list = [];
+  
+  for (var i = 0; i < secondList.length; i++) {
+    if (!contains(mainList, secondList[i])) {
+        tmp_email_list.push(secondList[i]);
+    }
+  }
+  return tmp_email_list;
+}
+
+
+/*
+ * Ger lista över alla unika e-postadresser för denna typ
+ *
+ * @param {Objekt[]} members - Objekt av medlemmar
+ * @param {string} synk_option - Synkroniseringsinställning
+ *
+ * @returns {string[]} - Lista över unika e-postadresser
+ */
+function getMemberlistsMemberEmail(members, synk_option) {
+  
+  var members_email = [];
+  
+  for (var k = 0; k < members.length; k++) {
+    members_email.push.apply(members_email, getEmailListSyncOption(members[k], synk_option, true));
+  }
+  members_email = removeDublicates(members_email);
+  //Ifall samma e-postadress är hos flera medlemmar eller upprepas i olika kontaktfält.
+  //Sparar in på dataförfrågningar till Google något
+  return members_email;
 }
 
 
@@ -370,13 +781,16 @@ function updateGroup(groupId, scoutnet_list_id, cell_scoutnet_list_id, synk_opti
  * Lägg till en medlem till en specifik grupp
  *
  * @param {string} groupId - Gruppens id hos Google
- * @param {string} email - e-postadress att lägg till
+ * @param {string} email - E-postadress att lägg till
+ * @param {string} role - Roll att tilldela
+ * @param {string} delivery_settings - Om person ska ta emot e-post eller ej
  */
-function addGroupMember(groupId, email) {
-  
+function addGroupMember(groupId, email, role, delivery_settings) {
+    
   var member = {
+    delivery_settings: delivery_settings,
     email: email,
-    role: 'MEMBER'
+    role: role
   };
   try {
     AdminDirectory.Members.insert(member, groupId);
@@ -388,26 +802,60 @@ function addGroupMember(groupId, email) {
 
 
 /*
+ * Analyserar input för att se vilka som ska få skicka till listan
+ *
+ * @param {string} postPermission - Textsträng
+ *
+ * @returns {string} - Textsträng som definierar vilka som får skicka till listan
+ */
+function getPostPermissionFromString(postPermission) {
+    
+  //Bara kårens konton får skicka
+  if (postPermission.indexOf("@")!=-1) { 
+    return 'ALL_IN_DOMAIN_CAN_POST';
+  }  
+  //Bara personer på listan får skicka, alltså bara managers
+  else if (postPermission.indexOf("lista")!=-1) {
+    return 'ALL_MANAGERS_CAN_POST';
+  }
+  else if (postPermission=="") {//Alla i hela världen får skicka
+    return 'ANYONE_CAN_POST'; 
+  }
+  return 'WRONG_INPUT';   
+}
+
+
+/*
  * Ändra behörigheter för en grupp efter att den är skapad
  *
  * @param {string} email - E-postadress för en grupp
  * @param {string} postPermission - Definierar vilka som ska få skicka till e-postlistan
  */
-function changeGroupPermissions(email, postPermission) {
+function changeGroupPermissions(email, postPermission) {  
   
+  if (postPermission=='WRONG_INPUT') {
+    postPermission = 'ANYONE_CAN_POST';
+  }
+  
+  Logger.log("postPermission " + postPermission);
   var group = AdminGroupsSettings.newGroups();
   
   group.whoCanJoin = 'INVITED_CAN_JOIN';
   group.whoCanViewMembership = 'ALL_MANAGERS_CAN_VIEW';
-  group.whoCanInvite = 'ALL_MANAGERS_CAN_INVITE';
-  group.whoCanAdd = 'ALL_MANAGERS_CAN_ADD';
+  group.whoCanViewGroup = 'ALL_MANAGERS_CAN_VIEW';
+  group.whoCanInvite = 'NONE_CAN_INVITE';
+  group.whoCanAdd = 'NONE_CAN_ADD';
   group.allowExternalMembers = true;
   group.whoCanPostMessage = postPermission;
   group.primaryLanguage = 'sv';
+  group.isArchived = 'true';
   group.messageModerationLevel = 'MODERATE_NONE';
   group.replyTo = 'REPLY_TO_SENDER';
-  group.membersCanPostAsTheGroup = false;
+  group.allowGoogleCommunication = false;
+  group.membersCanPostAsTheGroup = true;
+  group.includeInGlobalAddressList = true;
   group.whoCanLeaveGroup = 'NONE_CAN_LEAVE';
+  group.whoCanContactOwner = 'ALL_MANAGERS_CAN_CONTACT';
   
   AdminGroupsSettings.Groups.patch(group, email);
 }
