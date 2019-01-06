@@ -157,7 +157,7 @@ function fetchScoutnetMemberFieldAsString(medlem, fieldName, lowerCase) {
  */
 function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id) {
   
-  Logger.log("FetchScoutnetMembersMultipleMailinglists" + scoutnet_list_id);
+  Logger.log("FetchScoutnetMembersMultipleMailinglists " + scoutnet_list_id);
   Logger.log(typeof scoutnet_list_id);
   
   var allMembers = [];
@@ -173,9 +173,21 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   Logger.log("tmp_id[0] = " + tmp_id[0]);
   Logger.log("tmp_id[1] = " + tmp_id[1]);
 
+  var manuellEpostadress = [];
   
-  for (var i = 0; i < tmp_id.length; i++) {    
-    allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist(tmp_id[i], cell_scoutnet_list_id));
+  for (var i = 0; i < tmp_id.length; i++) {
+    
+    if (checkIfEmail(tmp_id[i])) { //Om e-postadress
+      
+      var tmp_member = {
+        manuell: tmp_id[i]       
+      };      
+      manuellEpostadress.push(tmp_member);
+      
+    }
+    else { //Om e-postlista från Scoutnet angiven
+      allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist(tmp_id[i], cell_scoutnet_list_id));
+    }
   }
   
   var memberNumbers = getMemberNumbers(allMembers); //Medlemmar med dessa medlemsnummer ska användas
@@ -185,6 +197,13 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   Logger.log("Fetch - getMembersByMemberNumbers klar");
   Logger.log("Hämta medlemmar från flera e-postlistor");
  
+  if (manuellEpostadress.length != 0) {
+    members.push.apply(members, manuellEpostadress);
+    Logger.log("Identifierade mannuellt tillagd e-post i stället för lista från Scoutnet");
+    Logger.log("Om detta är fel, kontrollera så att det inte finns något @ på fel ställe");
+    Logger.log("@ är ej ett tillåtet tecken för kommentarer");    
+  }
+  
   /* for (var i = 0; i < members.length; i++) {    
     Logger.log(members[i].first_name + " " + members[i].last_name);
   }*/
@@ -207,13 +226,25 @@ function getMemberNumbers(members) {
   
   for (var i = 0; i < members.length; i++) {
     var memberNumber = members[i].member_no;
-    memberNumbers.push(memberNumber);    
+    if (memberNumber) {
+      memberNumbers.push(memberNumber);
+    }
   }
   Logger.log(memberNumbers.length + " medlemsnummer innan dublettrensning");
   memberNumbers = removeDublicates(memberNumbers);
   Logger.log(memberNumbers.length + " medlemsnummer efter dublettrensning");
   return memberNumbers;
 }
+
+
+function checkIfEmail(email) {
+  
+  if (email.indexOf("@")!=-1) {
+    return true;
+  }
+  return false;  
+}
+
 
 /*
  * Hämta lista med personer för denna e-postlista
@@ -355,12 +386,19 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
   var email_alt = member.alt_email;
   var contact_email_alt = member.contact_alt_email;
   var extra_emails = member.extra_emails;
-  
-  var tmp_email = getGoogleAccount(member_no);
+  var manuell = member.manuell; //Om vi manuellt lägger till någon i kalkylarket
   
   synk_option = synk_option.toLowerCase().trim();
   
-  if (synk_option.indexOf("@")!=-1 && boolGoogleAccounts) { //Lägg bara till om personen har ett google-konto via kåren och lägg till deras google-konto
+  if (!member_no && manuell) { //Om ej medlem, alltså manuellt tillagd
+    member_emails.push(manuell);
+    return member_emails;
+  }
+  
+  var tmp_email = getGoogleAccount(member_no);
+  
+  if (synk_option.indexOf("@")!=-1 && boolGoogleAccounts) {
+    //Lägg bara till om personen har ett google-konto via kåren och lägg till deras google-konto
     
     if (tmp_email) { //Denna medlem har ett Googlekonto
       member_emails.push(tmp_email);
@@ -452,8 +490,10 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
       member_emails.push(tmp_email);
       Logger.log("9");
     }      
-  }    
-  Logger.log("(G248) Namn " + member.first_name + " " + member.last_name);
+  }
+  
+  
+  Logger.log("(G465) Namn " + member.first_name + " " + member.last_name); 
   Logger.log(member_emails);
   
   return member_emails;

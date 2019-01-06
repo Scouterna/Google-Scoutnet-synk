@@ -57,7 +57,6 @@ för instruktion om installation och funktionalitet.
    och som mestadels beror på antal grupper och e-postadresser i dessa.
    Det bör räcka med att synkronisera användare en gång per dygn och samma för grupper,
    förslagsvis mitt i natten.
-
    Synkroniseringen bör gå under minuten.
 
    Du kan här trycka på "notifications" och ställa in att att du får felmeddelanden om något
@@ -130,9 +129,16 @@ man har gjort rätt genom att trycka på länken till höger om varje e-postadre
 Om du vill att en person ska vara med i en Google-grupp utan att beröras av att tas
 bort vid en synkronisering lägger du till e-postadressen som ägare av gruppen.
 
+Du kan också lägga till e-postadresser manuellt i kalkylarket om du vill. I stället
+för att ange listid på något ställe så anger du en e-postadress eller flera med komma
+emellan. Det går bra att både använda listid och e-postadress till samma lista.
+
 #### Enkelt och avancerat läger
 Det går nu att ställa in om du vill visa samtliga kolumner i kalkylarket för olika
 inställningar eller endast de grundläggande. Detta för att kunna hålla det enkelt.
+I filen Grupper.gs finns det funkttionerna enkelLayout() och avanceradLayout() för detta.
+De visar och döljer egentligen bara olika kolumner i kalkylarket, så om man vill
+kan man anropa avanceradLayout() för att visa alla kolumner och sen dölja de man inte önskar.
 
 #### Begränsa åtkomst för att skicka och ta emot e-post
 Om du vill kan du ställa in att enbart vissa personer ska kunna skicka till en lista,
@@ -174,7 +180,7 @@ till en lista och några andra som bara ska få skicka.
   någon ändring.
 - Du hittar senaste versionen av programmet på 
   https://github.com/scouternasetjanster/Google-Scoutnet-synk/releases/latest och där kan
-  du också ser vilken funktionalitet som är ny i respektive version om om du behöver göra
+  du också ser vilken funktionalitet som är ny i respektive version och om du behöver göra
   något för att uppdatera förutom att uppdatera koden.
 - Kör de olika programmen manuellt en gång innan du kör med tidsinställning då det kan ha
   tillkommit någon ny funktionalitet som kräver ditt tillstånd.
@@ -194,7 +200,7 @@ till en lista och några andra som bara ska få skicka.
 
 
 ## Tekniska förtydliganden
-### E-postadresser kan tas bort för att igen läggs till.
+### E-postadresser kan tas bort för att läggas till igen.
 Synkroniseringen av användare bör gå under minuten och om det är personer som på något sätt har ställt
 in att deras e-postadress ska användas som ett slags alias för deras @gmail.com så kan det hända att
 deras adress tas bort från e-postlistan och sedan läggas till igen någon delsekund senare. Detta kan
