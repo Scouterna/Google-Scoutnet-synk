@@ -22,9 +22,10 @@ function GrupperRubrikData() {
   gruppRubrikData["synk_option_send"] = 5;
   gruppRubrikData["scoutnet_list_id_receive"] = 6;
   gruppRubrikData["synk_option_receive"] = 7;
+  gruppRubrikData["customFooterText"] = 8;
   
-  gruppRubrikData["groupId"] = 8;
-  gruppRubrikData["cell_url"] = 9;
+  gruppRubrikData["groupId"] = 9;
+  gruppRubrikData["cell_url"] = 10;
                   
   return gruppRubrikData;
 }
@@ -52,6 +53,7 @@ function Grupper() {
     var scoutnet_list_id = data[i][grd["scoutnet_list_id"]];
     var synk_option = data[i][grd["synk_option"]];
     var groupId = data[i][grd["groupId"]];
+    var customFooterText = data[i][grd["customFooterText"]];
     
     var rad_nummer = i+1;
     
@@ -172,6 +174,9 @@ function Grupper() {
           Logger.log("E-post ej ändrad för grupppen " + email);
           var cell=selection.getCell(rad_nummer, grd["e-post"]+1);
           cell.setBackground("white");
+        }
+        if (customFooterText != group.customFooterText) {
+          update_group = "yes";
         }
       }
     }    
@@ -573,8 +578,9 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
         }
       }      
     }
-  } 
-  changeGroupPermissions(email, postPermission);  
+  }
+  var customFooterText = radInfo[grd["customFooterText"]];
+  changeGroupPermissions(email, postPermission, customFooterText);  
   
   Logger.log("Slut på funktionen UpdateGroup");
 }
@@ -830,11 +836,22 @@ function getPostPermissionFromString(postPermission) {
  *
  * @param {string} email - E-postadress för en grupp
  * @param {string} postPermission - Definierar vilka som ska få skicka till e-postlistan
+ * @param {string} customFooterText - Text i sidfot om man så önskar för alla e-brev
  */
-function changeGroupPermissions(email, postPermission) {  
+function changeGroupPermissions(email, postPermission, customFooterText) {  
+  
+  var customFooterText = customFooterText.trim();
+  var includeCustomFooter = false;
   
   if (postPermission=='WRONG_INPUT') {
     postPermission = 'ANYONE_CAN_POST';
+  }
+  
+  if (customFooterText) {
+    includeCustomFooter = true;
+  }
+  else {
+    customFooterText = '';
   }
   
   Logger.log("postPermission " + postPermission);
@@ -851,6 +868,8 @@ function changeGroupPermissions(email, postPermission) {
   group.isArchived = 'true';
   group.messageModerationLevel = 'MODERATE_NONE';
   group.replyTo = 'REPLY_TO_SENDER';
+  group.includeCustomFooter = includeCustomFooter;
+  group.customFooterText = customFooterText;
   group.allowGoogleCommunication = false;
   group.membersCanPostAsTheGroup = true;
   group.includeInGlobalAddressList = true;
@@ -911,7 +930,7 @@ function createHeaders_Grupper() {
   /*******Rad 2********************/
   // Våra värden vi vill ha som rubriker för de olika kolumnerna på rad 2
   var values_rad2 = [
-    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Grupp-ID hos Google (RÖR EJ)", "Länk"]
+    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Sidfot", "Grupp-ID hos Google (RÖR EJ)", "Länk"]
   ];
 
   // Sätter området för cellerna på rad 2 som vi ska ändra
@@ -969,7 +988,7 @@ function avanceradLayout() {
   
   var grd = GrupperRubrikData();
   
-  sheet.showColumns(grd["scoutnet_list_id_send"]+1, 4);  
+  sheet.showColumns(grd["scoutnet_list_id_send"]+1, 5);  
 }
 
 
@@ -981,7 +1000,7 @@ function enkelLayout() {
   
   var grd = GrupperRubrikData();
   
-  sheet.hideColumns(grd["scoutnet_list_id_send"]+1, 4);  
+  sheet.hideColumns(grd["scoutnet_list_id_send"]+1, 5);  
 }
 
 
