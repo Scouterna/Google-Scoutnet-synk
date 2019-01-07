@@ -18,6 +18,7 @@ function AnvandareOchGrupper() {
 function Anvandare() {
   
   var defaultOrgUnitPath = "/Scoutnet";
+  var suspendedOrgUnitPath = defaultOrgUnitPath + "/" + "Avstängda";
   
   var allMembers = fetchScoutnetMembers(); //Alla medlemmar
   Logger.log("AllMembers.length by fetchScoutnetMembers = " + allMembers.length);
@@ -111,7 +112,7 @@ function Anvandare() {
       }
     }
   }   
-  checkingIfToSuspendAccounts(useraccounts, memberNumbers);
+  checkingIfToSuspendAccounts(useraccounts, memberNumbers, suspendedOrgUnitPath);
 }
 
 
@@ -219,10 +220,13 @@ function checkIfOrgUnitExists(orgUnitPath) {
  *
  * @param {Objects[]} userAccounts - Lista med objekt av Googlekonton
  * @param {number[]} - Lista med medlemsnummer
+ * @param {string} suspendedOrgUnitPath - Sökväg för underorganisationen för avstängda konton
  */
-function checkingIfToSuspendAccounts(userAccounts, memberNumbers) {  
+function checkingIfToSuspendAccounts(userAccounts, memberNumbers, suspendedOrgUnitPath) {  
   
   Logger.log("Kolla om ett konto ska stängas av");
+  
+  createSuborganisationIfNeeded(suspendedOrgUnitPath);
   
   for (var i = 0; i < userAccounts.length; i++) { //kolla alla Googlekonton
     
@@ -238,7 +242,7 @@ function checkingIfToSuspendAccounts(userAccounts, memberNumbers) {
       }        
     }
     if (!member_exists) { //Behöver inte loppa mer
-      suspendAccount(userAccounts[i]);
+      suspendAccount(userAccounts[i], suspendedOrgUnitPath);
     }
   }  
 }
@@ -383,16 +387,19 @@ function updateAccount(member, useraccount, orgUnitPath) {
  * Stäng av användarkonto om det inte redan är avstängt
  *
  * @param {Object} userAccount - Ett objekt av ett Googlekonto
+ * @param {string} suspendedOrgUnitPath - Sökväg för underorganisationen för avstängda konton
  */
-function suspendAccount(userAccount) {
+function suspendAccount(userAccount, suspendedOrgUnitPath) {
   
   var email = userAccount.primaryEmail;
   var suspended = userAccount.suspended;
-  
-  if (!suspended) {
+  var orgUnitPath = userAccount.orgUnitPath;
+    
+  if (!suspended || (orgUnitPath!=suspendedOrgUnitPath)) {
   
     var user = {
-      suspended: true
+      suspended: true,
+      "orgUnitPath": suspendedOrgUnitPath
     };
   
     user = AdminDirectory.Users.update(user, email);
