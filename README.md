@@ -8,6 +8,8 @@ Denna lösning använder Google Apps Script.
 
 Vid problem, fel, frågor eller tips på förbättringar eller fler funktioner som du saknar;
 lägg ett ärende under "Issues" eller mejla emil.ohman@scouterna.se
+I bland kommer det ny funktionalitet, så håll utkik på en ny version genom att trycka på knappen
+**Watch** uppe till höger på sidan för att du kunna bli notifieradvid en ny version.
 
 Du kan ladda ner den senaste versionen via
 https://github.com/scouternasetjanster/Google-Scoutnet-synk/releases/latest och där kan
@@ -193,7 +195,7 @@ till en lista och några andra som bara ska få skicka.
 - Kör de olika programmen manuellt en gång innan du kör med tidsinställning då det kan ha
   tillkommit någon ny funktionalitet som kräver ditt tillstånd.
 - Du kan hålla dig uppdaterad med nya versioner genom att om du är inloggad på Github trycka
-  på knappen "Watch" uppe till höger på sidan för att då bli notifierad vid ny version.
+  på knappen **Watch** uppe till höger på sidan för att då kunna bli notifierad vid ny version.
 
 ## Hjälp
 1. Om problem uppstått när du kört programmet tidsinställt, testa då att köra
