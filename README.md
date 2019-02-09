@@ -179,7 +179,7 @@ till en lista och några andra som bara ska få skicka.
   Webbkoppling under "Get a csv/xls/json list of members, based on mailing lists you have set up"
 - Skapa ett Google Kalkylark och klistra in webbadressen vid variabeln "spreadsheetUrl_Grupper"
 - Spara.
-- Välj funktionen GrupperRubrikData i Grupper.gs och kör den.
+- Välj funktionen createHeaders_Grupper i Grupper.gs och kör den.
 - Fyll i övriga fält i filen Konfiguration.gs vid behov och möjligt.
 - Klart.
 
