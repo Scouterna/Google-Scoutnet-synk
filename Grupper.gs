@@ -811,11 +811,11 @@ function addGroupMember(groupId, email, role, delivery_settings) {
   }
   catch (e) {
     
-    if (e.message=="Member already exists.") {
-      Logger.log("Kan inte lägga till e-postadress då den redan är tillagd denna omgång:" + email);
+    if (e.message.endsWith("Member already exists.")) {
+      Logger.log("Kan inte lägga till e-postadress då den redan är tillagd denna omgång eller ett alias för den: " + email);
     }
     else {       
-      Logger.log("Kan inte lägga till e-postadress:" + email);
+      Logger.log("Kan inte lägga till e-postadress:" + email + " pga " + e.message);
       //Logger.log("GruppId:" + groupId);
       //Logger.log("Role:" + role);
       //Logger.log("Devlivery_settings:" + delivery_settings);
