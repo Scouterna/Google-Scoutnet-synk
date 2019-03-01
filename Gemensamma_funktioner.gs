@@ -120,6 +120,22 @@ function getFileById(id){
 
 
 /*
+ * Tar bort punkter före @ om det är en gmailadress
+ *
+ * @param {string} email - E-postadress
+ *
+ * @returns {string}
+ */
+function getGmailAdressWithoutDots(email) {
+  
+  var regexGmailDots = /(?:\.|\+.*)(?=.*?@gmail\.com)/g;
+  
+  email = email.replace(regexGmailDots, "");
+  return email;  
+}
+
+
+/*
  * Hämta ett specificerat medlemsattributet för en specifik medlem
  * 
  * @param {Object} medlem - Ett medlemsobjekt
@@ -491,10 +507,9 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
       Logger.log("9");
     }      
   }
-  
-  
-  Logger.log("(G465) Namn " + member.first_name + " " + member.last_name); 
-  Logger.log(member_emails);
+    
+  //Logger.log("Namn " + member.first_name + " " + member.last_name); 
+  //Logger.log("med följande e-postadresser " + member_emails);
   
   return member_emails;
 }

@@ -26,6 +26,7 @@ function GrupperRubrikData() {
   
   gruppRubrikData["groupId"] = 9;
   gruppRubrikData["cell_url"] = 10;
+  gruppRubrikData["felmeddelande"] = 11;
                   
   return gruppRubrikData;
 }
@@ -259,12 +260,14 @@ function createGroup(email, name) {
  */
 function getGroupMember(groupId, memberkey) {
   
+  //Logger.log("Försöker lägga till i grupp:" + groupId);
+  //Logger.log("Försöker med memberKey:" + memberkey);
   try {
     var groupMember = AdminDirectory.Members.get(groupId, memberkey);
     return groupMember;
   }
   catch (e) {
-    Logger.log("Kunde inte lägga till e-postadress:" + email); 
+    Logger.log("Kunde inte lägga till e-postadress:" + memberkey);
   }  
 }
 
@@ -294,8 +297,9 @@ function getGroupMembers(groupId) {
       {
         var member = members[i];
         
+        var tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
         var member = {
-          email: member.email.toLowerCase(),
+          email: tmpEmail,
           role: member.role
         };
         group.push(member);
@@ -557,7 +561,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
       //Both, Send, Receive
       var memberTypeOld = getMembertype(groupId, group_members, allMembers_email[i])
       
-      Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
+      //Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
       
       if (contains(allMembers_both_email, allMembers_email[i])) { //Ska kunna skicka och ta emot        
         if (memberTypeOld!="Both") { //Har någon annan roll sedan innan
@@ -773,8 +777,12 @@ function getMemberlistsMemberEmail(members, synk_option) {
   
   var members_email = [];
   
-  for (var k = 0; k < members.length; k++) {
-    members_email.push.apply(members_email, getEmailListSyncOption(members[k], synk_option, true));
+  for (var i = 0; i < members.length; i++) {
+    members_email.push.apply(members_email, getEmailListSyncOption(members[i], synk_option, true));
+  }
+  
+  for (var k = 0; k < members_email.length; k++) {
+    members_email[k] = getGmailAdressWithoutDots(members_email[k]);
   }
   members_email = removeDublicates(members_email);
   //Ifall samma e-postadress är hos flera medlemmar eller upprepas i olika kontaktfält.
@@ -802,7 +810,16 @@ function addGroupMember(groupId, email, role, delivery_settings) {
     AdminDirectory.Members.insert(member, groupId);
   }
   catch (e) {
-    Logger.log("Kunde inte lägga till e-postadress:" + email); 
+    
+    if (e.message=="Member already exists.") {
+      Logger.log("Kan inte lägga till e-postadress då den redan är tillagd denna omgång:" + email);
+    }
+    else {       
+      Logger.log("Kan inte lägga till e-postadress:" + email);
+      //Logger.log("GruppId:" + groupId);
+      //Logger.log("Role:" + role);
+      //Logger.log("Devlivery_settings:" + delivery_settings);
+    }
   }
 }
 
@@ -930,9 +947,9 @@ function createHeaders_Grupper() {
   /*******Rad 2********************/
   // Våra värden vi vill ha som rubriker för de olika kolumnerna på rad 2
   var values_rad2 = [
-    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Sidfot", "Grupp-ID hos Google (RÖR EJ)", "Länk"]
+    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Sidfot", "Grupp-ID hos Google (RÖR EJ)", "Länk", "Felmeddelande"]
   ];
-
+  
   // Sätter området för cellerna på rad 2 som vi ska ändra
   var range_rad2 = sheet.getRange(2, 1, 1, values_rad2[0].length);
 
