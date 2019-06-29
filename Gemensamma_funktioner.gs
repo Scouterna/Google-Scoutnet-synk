@@ -559,7 +559,6 @@ String.prototype.endsWith = function(suffix) {
    return this.lastIndexOf(suffix) === this.length - suffix.length; 
 }
 
-
 /**
  * Ersätt specialtecken med deras engelska bokstavsmotsvarigheter
  * https://stackoverflow.com/questions/18123501/replacing-accented-characters-with-plain-ascii-ones
