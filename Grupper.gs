@@ -621,7 +621,6 @@ function getEmailAdressesofAllActiveGoogleAccounts() {
       domain: domain,
       orderBy: 'givenName',
       maxResults: 500,
-      viewType : 'domain_public', //Endast aktiva konton
       pageToken: pageToken
     });
     users = page.users;
@@ -629,16 +628,20 @@ function getEmailAdressesofAllActiveGoogleAccounts() {
       for (var i = 0; i < users.length; i++) {
         var user = users[i];
         //Logger.log('%s (%s)', user.name.fullName, user.primaryEmail);
-        for (var k = 0; k < user.emails.length; k++) { //Varje användare kan ha alias också
+        
+        if (!user.suspended) {
           
-          var email = user.emails[k].address;
-          if (email.endsWith(domain)) { //Endast adresser för huvuddomänen
-            if (email!=catchAllAddress) {
-              emailAddresses.push(email);
-              //Logger.log(email);
+          for (var k = 0; k < user.emails.length; k++) { //Varje användare kan ha alias också
+            
+            var email = user.emails[k].address;
+            if (email.endsWith(domain)) { //Endast adresser för huvuddomänen
+              if (email!=catchAllAddress) {
+                emailAddresses.push(email);
+                //Logger.log(email);
+              }
             }
           }
-        }        
+        }
       }
     } else {
       Logger.log('Ingen användare hittades.');
