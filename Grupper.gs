@@ -220,7 +220,11 @@ function deleteRowsFromSpreadsheet(sheet, delete_rows) {
 function setCellValueCellUrl(selection, rad_nummer, column, email) {
   
   var cell =selection.getCell(rad_nummer, column+1);
-  var cell_url = '=HYPERLINK("https://admin.google.com/AdminHome?groupId='+ email + '&chromeless=1#OGX:Group";"Länk")';
+  
+  var arr = email.split("@");
+  var list_name = arr[0];
+  
+  var cell_url = '=HYPERLINK("https://groups.google.com/a/' + domain + '/forum/#!managemembers/' + list_name + '/members/active";"Länk")';
   cell.setValue(cell_url);
 }
 
