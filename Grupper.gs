@@ -120,9 +120,9 @@ function Grupper() {
       else if (email=="") { //Om tom, hämta e-postadressen från systemet och sätt tillbaka den
         
         var tmp_usr = AdminDirectory.Groups.get(groupId);
-        var tmp_email = tmp_usr.email;
+        var email = tmp_usr.email;
         var cell=selection.getCell(rad_nummer,grd["e-post"]+1);
-        cell.setValue(tmp_email);
+        cell.setValue(email);
         cell.setBackground("white");
       }
       else if (email!="") { //Kontrollerar om vi behöver uppdatera
