@@ -113,7 +113,7 @@ Du kan i cellera för listid kommaseparera flera listor om du vill använda fler
 från Scoutnet för att bygga upp en större egen. Det går också bra att skriva kommentarer
 med parenteser.
 
-Du kan där för respektive e-postlistan ange följande
+Du kan där för synkinställning för respektive e-postlista ange följande
 - "@" Lägg till personens Google-konto om den har något, annars hoppa över personen
 - "-" Lägg endast till personens e-postadress som listad i Scoutnet
 - "&" Lägg till både personens e-postadress som listad i Scoutnet samt Google-konto
@@ -160,20 +160,15 @@ att vissa personer ska både kunna skicka och ta emot eller att vissa enbart ska
 ta emot e-post.
 Som standard om du fyller i "Scoutnet-id" och "Synkinställning" under "Kan skicka och
 ta emot" så är listan helt publik och vem som helst kan skicka till den. Du kan se detta
-som det vanligaste.
-Om du på detta enkla sätt vill ställa in att enbart kårens adresser (de e-postkonton som
-finns i kårens GSuite) ska kunna skicka till denna lista så skriver du in ett "@" (snabela)
-i rutan "synkinställning" under rukriken "Kan skicka". Och om du enbart vill att de som är
-på listan ska kunna skicka till listan så skriver du "lista" i den cellen i kalkylarket i
-stället. Du kan inte använda någon lista under rubrikerna "Kan skicka" eller "Kan ta emot"
-om du använder denna funktionalitet för en specifik grupp"
-T.ex kanske du vill har en e-postlista som går till föräldrar på en avdelning och då enbart
-vill att någon med en kåradress ska kunna skicka till den. Eller att du bara vill att de som
-är på en avdelning (förälder eller som ledare) ska kunna skicka till avdelningslistan.
+som det vanligaste alternativet.
+Om du däremot önskar att bara specifika personer ska få skicka till listan så anger du
+något Scoutnet-id i cellen under "Kan skicka". Om du önskar att bara kårens e-postdresser
+(de e-postkonton som finns i kårens GSuite) ska kunna skicka till en lista så skriver
+du in ett "@" (snabela) i rutan "Scoutnet-id" under rukriken "Kan skicka".
 
 Om du vill kan du också specificera vilka som ska få skicka och ta emot för en lista genom
 att ange list-ID under rubrikerna "Kan skicka" & "Kan ta emot". Du behöver dock inte ange
-under alla tre om du inte vill. Du kanske vill att några ska kunna skicka och ta emot,
+under alla tre typerna om du inte vill. Du kanske vill att några ska kunna skicka och ta emot,
 till en lista och några andra som bara ska få skicka.
 
 #### Inställningar (i Konfiguration.gs)
