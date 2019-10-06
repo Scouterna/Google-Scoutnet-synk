@@ -59,7 +59,7 @@ function Anvandare() {
           
     var membersInAList;
     if (scoutnetListId) {
-      membersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnetListId, "");
+      membersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnetListId, "", "");
     }
     else { //Om man ej anger listId för en e-postlista
       membersInAList = getScoutleaders(allMembers);
@@ -135,7 +135,7 @@ function readUserAccountConfigMembers(allMembers) {
     Logger.log("aaa ScoutnetListId = " + scoutnetListId);
     
     if (scoutnetListId) {
-      membersInMailingLists.push.apply(membersInMailingLists, fetchScoutnetMembersMultipleMailinglists(scoutnetListId, ""));
+      membersInMailingLists.push.apply(membersInMailingLists, fetchScoutnetMembersMultipleMailinglists(scoutnetListId, "", ""));
     }
     else {
       membersInMailingLists.push.apply(membersInMailingLists, getScoutleaders(allMembers));

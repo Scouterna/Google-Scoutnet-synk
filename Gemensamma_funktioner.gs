@@ -164,14 +164,14 @@ function fetchScoutnetMemberFieldAsString(medlem, fieldName, lowerCase) {
 
 
 /*
- * Hämtar lista med personer som är med i någon av de e-postlistor som specificeras
+ * Hämtar lista med personer som är med i någon av de e-postlistor eller e-postadresser som specificeras
  *
  * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en s-postlista i Scoutnet
  * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistorna
  */
-function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id) {
+function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, listOfEmailAdressesOfActiveAccounts) {
   
   Logger.log("FetchScoutnetMembersMultipleMailinglists " + scoutnet_list_id);
   Logger.log(typeof scoutnet_list_id);
@@ -192,14 +192,26 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   var manuellEpostadress = [];
   
   for (var i = 0; i < tmp_id.length; i++) {
-    
+  
     if (checkIfEmail(tmp_id[i])) { //Om e-postadress
       
       var tmp_member = {
         manuell: tmp_id[i]       
       };      
-      manuellEpostadress.push(tmp_member);
+      manuellEpostadress.push(tmp_member);      
+    }
+    else if ((tmp_id[i].length==1) && (tmp_id[i].indexOf("@")==0)) { //Om @ för kårens googlekonton
       
+      Logger.log("lägg till kårens googlekonton");
+      for (var i = 0; i < listOfEmailAdressesOfActiveAccounts.length; i++) {
+        
+        var tmp_email = listOfEmailAdressesOfActiveAccounts[i];
+        
+        var tmp_member = {
+          manuell: tmp_email       
+        };
+        manuellEpostadress.push(tmp_member);
+      }      
     }
     else { //Om e-postlista från Scoutnet angiven
       allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist(tmp_id[i], cell_scoutnet_list_id));
@@ -253,9 +265,18 @@ function getMemberNumbers(members) {
 }
 
 
+/*
+ * Indata en sträng
+ * Returnera sant eller falskt om det är en e-postadress
+ *
+ * @param {string} email - textsträng
+ *
+ * @returns {boolean} - sant eller falskt om det är en e-postadress
+ */
 function checkIfEmail(email) {
   
-  if (email.indexOf("@")!=-1) {
+  //Väldigt simpel koll a@b.c
+  if ((email.length>4) && (email.indexOf("@")!=-1) && (email.indexOf(".")!=-1)) {
     return true;
   }
   return false;  

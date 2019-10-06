@@ -385,7 +385,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   var cell_scoutnet_list_id_both = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
   var synk_option_both = radInfo[grd["synk_option"]];
   Logger.log("..........1Båda....................");
-  var allMembers_both = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_both, cell_scoutnet_list_id_both);
+  var allMembers_both = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_both, cell_scoutnet_list_id_both, listOfEmailAdressesOfActiveAccounts);
   var allMembers_both_email = getMemberlistsMemberEmail(allMembers_both, synk_option_both);
   Logger.log("..........1Slut Båda....................");
   /***********************/
@@ -395,7 +395,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   var cell_scoutnet_list_id_send = selection.getCell(rad_nummer, grd["scoutnet_list_id_send"]+1); //Range
   var synk_option_send = radInfo[grd["synk_option_send"]];
   Logger.log("..........1Bara skicka....................");
-  var allMembers_send = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_send, cell_scoutnet_list_id_send);
+  var allMembers_send = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_send, cell_scoutnet_list_id_send, listOfEmailAdressesOfActiveAccounts);
   var allMembers_send_email = getMemberlistsMemberEmail(allMembers_send, synk_option_send);
   Logger.log("..........1Slut bara skicka....................");
   /***********************/
@@ -405,7 +405,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   var cell_scoutnet_list_id_receive = selection.getCell(rad_nummer, grd["scoutnet_list_id_receive"]+1); //Range
   var synk_option_receive = radInfo[grd["synk_option_receive"]];
   Logger.log("..........1Bara ta emot....................");
-  var allMembers_receive = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_receive, cell_scoutnet_list_id_receive);
+  var allMembers_receive = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_receive, cell_scoutnet_list_id_receive, listOfEmailAdressesOfActiveAccounts);
   var allMembers_receive_email = getMemberlistsMemberEmail(allMembers_receive, synk_option_receive);
   Logger.log("..........1Slut bara ta emot....................");
   /***********************/
@@ -419,116 +419,18 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   /***********************/
   
   
-  /*****Kolla vilka som ska få skicka till listan och flytta om lite igen*****/
-  var postPermission = 'ANYONE_CAN_POST';  
+  /*****Kolla vilka som ska få skicka till listan*****/
+  var postPermission = 'ANYONE_CAN_POST';
   
-  if (!scoutnet_list_id_send && synk_option_send) { //Vänster tom, höger ej tom
-    postPermission = getPostPermissionFromString(synk_option_send); //Vi ska flytta personen också om det inte är tomt FIXME
-    //Kan ge
-    // --WRONG_INPUT ---> felaktig data
-    // --ALL_MANAGERS_CAN_POST ---> lista
-    // --ALL_IN_DOMAIN_CAN_POST ---> @    
-    
-    
-    /*********Felaktig data i synk_option_send******/
-    if (postPermission=='WRONG_INPUT') {      
-      postPermission = 'ANYONE_CAN_POST'; //Vi tillåter alla att skicka till listan vid fel
-      
-      var cell = selection.getCell(rad_nummer, grd["synk_option_send"]+1);
-      cell.setBackground("red");
-    }
-    else {
-      var cell = selection.getCell(rad_nummer, grd["synk_option_send"]+1);
-      cell.setBackground("white");
-      
-      cell_scoutnet_list_id_send.setBackground("white");
-    }    
-    /***********************************************/
-        
-    
-    /***Felaktig data i kolumnerna för "Ta emot"****/
-    if (scoutnet_list_id_receive) {      
-      cell_scoutnet_list_id_receive.setBackground("red");
-    }
-    else {
-      cell_scoutnet_list_id_receive.setBackground("white");
-    }
-    
-    if (synk_option_receive) {
-      var cell = selection.getCell(rad_nummer, grd["synk_option_receive"]+1);
-      cell.setBackground("red");
-    }
-    else {
-      var cell = selection.getCell(rad_nummer, grd["synk_option_receive"]+1);
-      cell.setBackground("white");
-    }    
-    /***********************************************/
-    
-    
-    if (postPermission=='ALL_MANAGERS_CAN_POST') { // lista
-      Logger.log("Alla på listan kan skicka till listan"); 
-    }      
-    
-    else if (postPermission=='ALL_IN_DOMAIN_CAN_POST') { //Höger == @
-      
-      Logger.log("Bara de med Google-konto ska få skicka till listan");
-      postPermission = 'ALL_MANAGERS_CAN_POST';
-      
-      //Kolumnerna för "Skicka" och bara "Ta emot" ska nu vara tomma
-      allMembers_send_email = []; //vi tömmer dem för säkerhets skull
-      allMembers_receive_email = [];
-      
-      //Vi ska då flytta alla som är i gruppen "skicka och ta emot" till gruppen "ta emot",
-      //men om de har ett av kårens google-konto så lägger vi till dem i listan "skicka och ta emot".
-      
-      var tmp_list = [];
-      tmp_list.push.apply(tmp_list, allMembers_both_email); //Vi skapar en kopia
-      allMembers_both_email = []; //Vi tömmer denna listan
-      
-      
-      for (var i = 0; i < tmp_list.length; i++) {        
-        var tmp_email = tmp_list[i];
-        if (tmp_email.endsWith(domain)) { //Om kåradress
-          allMembers_both_email.push(tmp_email);
-        }
-        else { //Om privat e-postadress
-          allMembers_receive_email.push(tmp_email);
-        }
-      }      
-      
-      //lägg till alla kårens googlekonton som ska kunna skicka i skickalistan
-      //om de inte finns med i Skicka och ta emot listan redan
-      for (var i = 0; i < listOfEmailAdressesOfActiveAccounts.length; i++) {
-        
-        var tmp_email = listOfEmailAdressesOfActiveAccounts[i];
-        if (!contains(allMembers_both_email, tmp_email)) {
-          allMembers_send_email.push(tmp_email);
-        }        
-      }
-    }    
-  }
-  else if (scoutnet_list_id_send) { //Vänster har en lista
+  if (scoutnet_list_id_send) { //Vi vill att bara några ska kunna skicka till listan
     
     postPermission = 'ALL_MANAGERS_CAN_POST';
-    
-    var cell=selection.getCell(rad_nummer, grd["synk_option_send"]+1);
-    cell.setBackground("white");
-    //Vi ska då sätta att bara managers kan posta
-  }
-  else {
-    var cell=selection.getCell(rad_nummer, grd["synk_option_send"]+1);
-    cell.setBackground("white"); 
-  }
-  
-  
-  if (scoutnet_list_id_receive) { //Om Bara ta emot har en lista
-    postPermission = 'ALL_MANAGERS_CAN_POST';
+    Logger.log("Bara på listan kan skicka till listan");    
   }  
   /***********************/
-    
   
-  Logger.log("postPermission = " + postPermission);  
-  Logger.log("apan sitter på grenen");
+  
+  Logger.log("postPermission = " + postPermission);
   var allMembers_email = [];
   allMembers_email.push.apply(allMembers_email, allMembers_both_email);
   allMembers_email.push.apply(allMembers_email, allMembers_send_email);
@@ -842,30 +744,6 @@ function addGroupMember(groupId, email, role, delivery_settings) {
       //Logger.log("Devlivery_settings:" + delivery_settings);
     }
   }
-}
-
-
-/*
- * Analyserar input för att se vilka som ska få skicka till listan
- *
- * @param {string} postPermission - Textsträng
- *
- * @returns {string} - Textsträng som definierar vilka som får skicka till listan
- */
-function getPostPermissionFromString(postPermission) {
-    
-  //Bara kårens konton får skicka
-  if (postPermission.indexOf("@")!=-1) { 
-    return 'ALL_IN_DOMAIN_CAN_POST';
-  }  
-  //Bara personer på listan får skicka, alltså bara managers
-  else if (postPermission.indexOf("lista")!=-1) {
-    return 'ALL_MANAGERS_CAN_POST';
-  }
-  else if (postPermission=="") {//Alla i hela världen får skicka
-    return 'ANYONE_CAN_POST'; 
-  }
-  return 'WRONG_INPUT';   
 }
 
 
