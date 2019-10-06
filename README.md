@@ -100,6 +100,10 @@ där X motsvarar en siffra från 1-5.
 - Ändra api-nyckeln som under Webbkoppling i Scoutnet står under
   "Get a detailed csv/xls/json list of all members"
 
+### Övrigt
+- Avstängda konton, alltså de som inte längre matchar de som ska synroniseras flyttas till
+  underorganisationen "/Scoutnet/Avstängda"
+  
 ### Google grupper - synkronisering med Scoutnet
 I kalkylarket kan du ställa in namn på de olika google-grupperna, dess e-postadress,
 vilken e-postlista i Scoutnet de ska synkroniseras mot samt hur den ska synkronisera
@@ -135,10 +139,10 @@ Du kan också lägga till e-postadresser manuellt i kalkylarket om du vill. I st
 för att ange listid på något ställe så anger du en e-postadress eller flera med komma
 emellan. Det går bra att både använda listid och e-postadress till samma lista.
 
-#### Enkelt och avancerat läger
-Det går nu att ställa in om du vill visa samtliga kolumner i kalkylarket för olika
+#### Enkelt och avancerat läge
+Det går att ställa in om du vill visa samtliga kolumner i kalkylarket för olika
 inställningar eller endast de grundläggande. Detta för att kunna hålla det enkelt.
-I filen Grupper.gs finns det funkttionerna enkelLayout() och avanceradLayout() för detta.
+I filen Grupper.gs finns funktionerna enkelLayout() och avanceradLayout() att använda för detta.
 De visar och döljer egentligen bara olika kolumner i kalkylarket, så om man vill
 kan man anropa avanceradLayout() för att visa alla kolumner och sen dölja de man inte önskar.
 
@@ -183,9 +187,9 @@ till en lista och några andra som bara ska få skicka.
 - Fyll i övriga fält i filen Konfiguration.gs vid behov och möjligt.
 - Klart.
 
-## Ny version
+## Ny version - Hur du gör för att uppgradera
 - Uppdatering av programmet sker genom att ladda ner en ny version och uppdatera filerna.
-- Om programmet använder kalkylark kan det hända att du behöver välja att visa samtliga
+- Om programmet använder kalkylark (för synkronisering av grupper) kan det hända att du behöver välja att visa samtliga
   kolumner i kalkylarket för att kunna infoga eller ta bort kolumner om det har skett
   någon ändring.
 - Du hittar senaste versionen av programmet på 
@@ -202,21 +206,60 @@ till en lista och några andra som bara ska få skicka.
    programmet manuellt en gång och se om felet uppstår då också. När man kör programmet
    manuellt kan det dyka upp rutor för att godkänna vissa saker som inte syns när man
    kör programmet tidsinställt.
+1. Om du fått något felmeddelande; titta bland de nedan som förklarar de felen som hittills
+   har frågats om bland andra kårer.
 1. Kolla i loggfilen genom att trycka Ctrl+Enter så kanske du lyckas se vad problemet är
 1. Det kan hända att det finns en bugg i den versionen av programmet som du kör vilket
    givet vissa specifika omständigheter yttrar sig för just dig. Se till att du har den
    senaste versionen av programmet.
 1. Lägg ett ärende under "Issues" eller mejla emil.ohman@scouterna.se
 
+### Hur gör jag för att...?
+Nedan finns en del exempel på hur du gör för att ställa in programmen så som du vill.
+Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.ohman@scouterna.se
+
+#### Användare - inställningar exempel
+*  Hur gör jag om jag bara vill synkronisera användare?
+   - Du kör funktionen "Anvandare" i filen "Anvandare.gs"
+
+#### Grupper - inställningar exempel
+* Hur gör jag om jag bara vill synkronisera grupper / e-postlistor?
+   - Du kör funktionen "Grupper" i filen "Grupper.gs"
+   
+*  Jag vill ha följande e-postlista
+   * Bara de med en e-postadress från kåren ska kunna skicka till listan.
+   * En grupp/avdelning/scoutföräldrar ska bara kunna ta emot från listan, EJ skicka. Vi vill
+   skicka till alla e-postadresser som är registrerad på någon medlem på avdelningen.
+      
+   Gör följande inställningar i kalkylarket
+
+	| Kan skicka och ta emot | Synkinställning | Kan skicka              | Synkinställning | Kan ta emot               |                 |
+	|------------------------|-----------------|-------------------------|-----------------|---------------------------|-----------------|
+	| Scoutnet-id            | Synkinställning | Scoutnet-id             | Synkinställning | Scoutnet-id               | Synkinställning |
+	|                        |                 | @ (kårens googlekonton) |                 | 1910 (id för avdelningen) |                 |
+   
+### Felmeddelanden och förslag till lösning
+*  ```
+   API-anrop till directory.users.insert misslyckades med felet: Domain user limit reached......
+   ```
+   Du har skapat maximalt antal Google-konton enligt din licens. Detta då din kår antaligen
+   inte har skaffat Google Nonprofit och kör på en gammal gratislicens. På admin.google.com
+   under Fakturering ska det stå "G Suite for Nonprofit" om du har det. Du kan läsa hos
+   https://www.techsoup.se hur du skaffar det.
 
 ## Tekniska förtydliganden
-### E-postadresser kan tas bort för att läggas till igen.
-Synkroniseringen av användare bör gå under minuten och om det är personer som på något sätt har ställt
-in att deras e-postadress ska användas som ett slags alias för deras @gmail.com så kan det hända att
-deras adress tas bort från e-postlistan och sedan läggas till igen någon delsekund senare. Detta kan
-om personen har t.ex adressen fornamn.efternamn@gmail.com men att det i Scoutnet står
-fornamnefternamn@gmail.com. Detta då detta program tolkar dessa som olika, men gmail tycker att de
-är lika.
+### E-postalias
+I vissa specifika fall kan det bli ett felmeddelande i loggen då ett alias till en e-postadress
+redan är tillagd. Detta kan vara då en användare t.ex själv har lagt till en e-postadress
+abc123@hotmail.se som en alternativ e-postadress för sitt Google-konto hos Google och vi lägger till
+hotmail.se-adressen då i e-postlistan för att sedan försöka lägga till den riktiga Gmail-adressen i listan,
+tex. abc123@gmail.com som. Det blir då ett fel då denna adress redan är tillagd som alias kan man typ säga,
+och Google-gruppen tolkar då dessa adressen som samma. Om båda dessa adresser (abc123@hotmail.se &
+abc123@gmail.com) läggs till kan dock inte programmet i förväg veta att de hör ihop utan det märker
+det först när den försöker lägga till den andra adressen.
+Du löser felet genom att köra programmet igen om du startade det manuellt alternativt invänta nästa
+schemalagda körning.
+
 ### E-postadresser genereras på följande sätt.
 1. För och efternamn görs om till gemener och tar bort alla mellanslag och
    andra tomrum som är skrivet i de fälten i Scoutnet.
