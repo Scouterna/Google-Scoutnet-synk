@@ -258,10 +258,10 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
 
 #### Google Team Drive - exempel
 Att koppla ihop grupper med delade enheter på Google Team Drive sker manuellt, men du kan använda grupperna som skapats enligt ovan för enkel uppdatering av åtkomst.
-Om du döper om själva gruppen, t.ex. e-postadressen, _kan_ gruppen tappa åtkomst till mappen.
+Om du döper om själva gruppen, t.ex. e-postadressen, _kan_ gruppen tappa åtkomst till mappen. Detta då gruppen tas bort och en ny skapas med det nya namnet.
 
-- Skapa en "Delad enhet" på Google Drive (https://drive.google.com) från ett konto med lämplig behörighet
-- Lägg till medlemmar till den delade enheten, du kan använda grupper som skapats ovan
+- Skapa en "Delad enhet" på Google Drive (https://drive.google.com) från ett konto med lämplig behörighet som finns med i kårens gSuite.
+- Lägg till medlemmar till den delade enheten, du kan ange grupper som skapats ovan som medlemmar.
 
 ### Felmeddelanden och förslag till lösning
 *  ```
