@@ -296,7 +296,7 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
   
   Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
   var email_fields = '&contact_fields=email_mum,email_dad,email_alt';
-  var url = 'https://' + scoutnet_url + '/api/group/customlists?id=' + groupId + '&key='+ api_key_mailinglists + '&list_id=' + scoutnet_list_id + email_fields;
+  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?id=' + groupId + '&key='+ api_key_mailinglists + '&list_id=' + scoutnet_list_id + email_fields;
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
   //Logger.log(response); 
   

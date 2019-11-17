@@ -480,7 +480,7 @@ function getScoutleaders(allMembers) {
  */
 function fetchScoutnetMembers() {  
   
-  var url = 'https://' + scoutnet_url + '/api/group/memberlist?id=' + groupId + '&key=' + api_key_list_all + '&pretty=1';
+  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist?id=' + groupId + '&key=' + api_key_list_all + '&pretty=1';
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
   //Logger.log(response); 
   

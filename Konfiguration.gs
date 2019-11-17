@@ -19,6 +19,10 @@ var api_key_mailinglists = '75f4995656454d0dce624'; //Kan hittas i Scoutnet om d
 //Länk till Google kalkylarket för att synkronisera google grupper
 var spreadsheetUrl_Grupper = 'https://docs.google.com/spreadsheets/d/1ru524kj9645454jydk0/edit#gid=0';
 
+
+//Typ av organisationsenhet
+var organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
+
 //Adressen till Scoutnet. Ska ej ändras
 var scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
 
