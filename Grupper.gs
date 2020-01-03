@@ -862,23 +862,22 @@ function changeGroupPermissions(email, postPermission, customFooterText) {
   group.whoCanJoin = 'INVITED_CAN_JOIN';
   group.whoCanViewMembership = 'ALL_MANAGERS_CAN_VIEW';
   group.whoCanViewGroup = 'ALL_MANAGERS_CAN_VIEW';
-  group.whoCanInvite = 'NONE_CAN_INVITE';                      //Denna slås ihop och blir whoCanModerateMembers
-  group.whoCanAdd = 'NONE_CAN_ADD';                            //Denna slås ihop och blir whoCanModerateMembers
   group.allowExternalMembers = true;
   group.whoCanPostMessage = postPermission;
   group.primaryLanguage = 'sv';
   group.isArchived = 'true';
   group.messageModerationLevel = 'MODERATE_NONE';
   group.spamModerationLevel = 'MODERATE';
+  group.whoCanModerateMembers = 'NONE';
   group.whoCanModerateContent = 'OWNERS_ONLY';
   group.replyTo = 'REPLY_TO_SENDER';
   group.includeCustomFooter = includeCustomFooter;
   group.customFooterText = customFooterText;
-  //group.membersCanPostAsTheGroup = true;  //Denna ska ha en bättre inställning typ moderate
-  group.whoCanDiscoverGroup = 'ALL_MEMBERS_CAN_DISCOVER'; //Denna är ny. Se om Google klagar :)
+  //group.membersCanPostAsTheGroup = true;  //TODO
   group.includeInGlobalAddressList = true;
   group.whoCanLeaveGroup = 'NONE_CAN_LEAVE';
   group.whoCanContactOwner = 'ALL_MANAGERS_CAN_CONTACT';
+  group.whoCanDiscoverGroup = 'ALL_MEMBERS_CAN_DISCOVER';
   
   AdminGroupsSettings.Groups.patch(group, email);
 }
