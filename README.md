@@ -94,11 +94,13 @@ Om det finns personer som har samma namn (för- och efternamn) angivet i Scoutne
 kommer de som skapas som nr2 osv skapas på formen fornamn.efternamnX@domännamn.se
 där X motsvarar en siffra från 1-5.
 
-#### Inställningar
+#### Inställningar (i Konfiguration.gs)
 - Ändra kårens domän namn på variabeln "domain"
 - Ändra kårens grupp-id som finns angivet i Scoutnet på sidan för Webbkoppling
 - Ändra api-nyckeln som under Webbkoppling i Scoutnet står under
   "Get a detailed csv/xls/json list of all members"
+- Om du gör detta för ett distrikt. Ändra variabeln "organisationType" från "group"
+  till "district".
 
 ### Övrigt
 - Avstängda konton, alltså de som inte längre matchar de som ska synroniseras flyttas till
@@ -177,16 +179,19 @@ till en lista och några andra som bara ska få skicka.
 - Ändra api-nyckeln med namn api_key_mailinglists som hittas i Scoutnet under
   Webbkoppling under "Get a csv/xls/json list of members, based on mailing lists you have set up"
 - Skapa ett Google Kalkylark och klistra in webbadressen vid variabeln "spreadsheetUrl_Grupper"
-- Spara.
+- Ändra vart e-post som misstänkts för skräppost ska skickas genom att uppdatera variabeln
+  "moderateContentEmail". Om inget anges skickas e-breven till den användare som kör detta program.
+- Om du gör detta för ett distrikt. Ändra variabeln "organisationType" från "group" till "district".
+- Spara filen.
 - Välj funktionen createHeaders_Grupper i Grupper.gs och kör den.
 - Fyll i övriga fält i filen Konfiguration.gs vid behov och möjligt.
 - Klart.
 
 ## Ny version - Hur du gör för att uppgradera
 - Uppdatering av programmet sker genom att ladda ner en ny version och uppdatera filerna.
-- Om programmet använder kalkylark (för synkronisering av grupper) kan det hända att du behöver välja att visa samtliga
-  kolumner i kalkylarket för att kunna infoga eller ta bort kolumner om det har skett
-  någon ändring.
+- Om programmet använder kalkylark (för synkronisering av grupper) kan det hända att du behöver
+  välja att visa samtliga kolumner i kalkylarket för att kunna infoga eller ta bort kolumner om
+  det har skett någon ändring.
 - Du hittar senaste versionen av programmet på 
   https://github.com/scouternasetjanster/Google-Scoutnet-synk/releases/latest och där kan
   du också ser vilken funktionalitet som är ny i respektive version och om du behöver göra

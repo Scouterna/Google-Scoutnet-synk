@@ -21,7 +21,8 @@ var spreadsheetUrl_Grupper = 'https://docs.google.com/spreadsheets/d/1ru524kj964
 
 //E-post eller scoutnetListId för vart mejl om misstänkt spam till grupper ska skickas till
 //För e-postlistor som anges skickas endast till primär e-postadress listad i Scoutnet
-var moderateContentEmail = 'webmaster@minscoutkår.se, 1234';
+//T.ex 'webmaster@minscoutkår.se, 1234'
+var moderateContentEmail = '';
 
 //Typ av organisationsenhet
 var organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
