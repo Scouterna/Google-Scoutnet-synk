@@ -409,13 +409,19 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   var allMembers_receive_email = getMemberlistsMemberEmail(allMembers_receive, synk_option_receive);
   Logger.log("..........1Slut bara ta emot....................");
   /***********************/
-    
+  
+  /*****Till vilka som ska bli informerade om misstänkt spam*****/
+  var emailAdressesToSendSpamNotification = getEmailadressesToSendSpamNotification();
+  /**************************************************************/
   
   /*****Vi ska flytta runt e-postadresserna mellan listorna om de finns i flera*****/
-  var email_lists = moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, allMembers_receive_email);
+  var email_lists = moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification);
   allMembers_both_email = email_lists[0]
   allMembers_send_email = email_lists[1];
   allMembers_receive_email = email_lists[2];
+  
+  var allMembers_both_email_admin = email_lists[3];
+  var allMembers_send_email_admin = email_lists[4];
   /***********************/
   
   
@@ -435,22 +441,22 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   allMembers_email.push.apply(allMembers_email, allMembers_both_email);
   allMembers_email.push.apply(allMembers_email, allMembers_send_email);
   allMembers_email.push.apply(allMembers_email, allMembers_receive_email);
+  
+  allMembers_email.push.apply(allMembers_email, allMembers_both_email_admin);
+  allMembers_email.push.apply(allMembers_email, allMembers_send_email_admin);
+  
   allMembers_email = removeDublicates(allMembers_email);
-  // allMembers_email ==  alla distinkta e-postadresser som finns från alla tre grupper
+  // allMembers_email ==  alla distinkta e-postadresser som finns från alla tre+två(admin) grupper
   
   var group_members = getGroupMembers(groupId); //Alla gruppmedlemmar med deras roller
   var group_members_email = [];
   
   //Om finns i googlegrupp men inte i vår lista
-  for (var i = 0; i < group_members.length; i++) {
-   
-    if (group_members[i].role=='MEMBER' || group_members[i].role=='MANAGER') {
-      //Ta endast bort personer med rollen Member eller Manager om saknas
+  for (var i = 0; i < group_members.length; i++) {    
       
-      if (!contains(allMembers_email, group_members[i].email)) {  
-        Logger.log(group_members[i].email + " Borde tas bort från " + groupId  + "Google e-postlista");
-        AdminDirectory.Members.remove(groupId, group_members[i].email);
-      }
+    if (!contains(allMembers_email, group_members[i].email)) {  
+      Logger.log(group_members[i].email + " Borde tas bort från " + groupId  + "Google e-postlista");
+      AdminDirectory.Members.remove(groupId, group_members[i].email);
     }
     group_members_email.push(group_members[i].email);
   }   
@@ -470,10 +476,19 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Bara skicka");
         addGroupMember(groupId, allMembers_email[i], 'MANAGER', 'NONE');
       }
-      else { //Lägg till så att bara kan ta emot
+      else if (contains(allMembers_receive_email, allMembers_email[i])){ //Lägg till så att bara kan ta emot
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Bara ta emot");
         addGroupMember(groupId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
-      }      
+      }
+      
+      else if (contains(allMembers_both_email_admin, allMembers_email[i])){ //Lägg till admin så att både kan skicka och ta emot
+        Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Admin Skicka och ta emot");
+        addGroupMember(groupId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
+      }
+      else if (contains(allMembers_send_email_admin, allMembers_email[i])){ //Lägg till admin så att bara kan skicka
+        Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Admin Bara skicka");
+        addGroupMember(groupId, allMembers_email[i], 'OWNER', 'DISABLED');
+      }
     }
     
     //Denna e-post finns redan med i gruppen, men har kanske fel roll?
@@ -486,21 +501,39 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
       if (contains(allMembers_both_email, allMembers_email[i])) { //Ska kunna skicka och ta emot        
         if (memberTypeOld!="Both") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
+          Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen skicka och ta emot");
         }
       }
       else if (contains(allMembers_send_email, allMembers_email[i])) { //Ska bara kunna skicka        
         if (memberTypeOld!="Send") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, allMembers_email[i], 'MANAGER', 'NONE');
+          Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara skicka");
         }
       }
-      else { //Ska bara kunna ta emot        
+      else if (contains(allMembers_receive_email, allMembers_email[i])) { //Ska bara kunna ta emot        
         if (memberTypeOld!="Receive") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
-            Logger.log(allMembers_email[i] + " har nu rollen bara ta emot");
+          Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
+          Logger.log(allMembers_email[i] + " har nu rollen bara ta emot");
         }
-      }      
+      }
+      
+      else if (contains(allMembers_both_email_admin, allMembers_email[i])) { //Ska kunna skicka och ta emot ADMIN        
+        if (memberTypeOld!="OWNER_Both") { //Har någon annan roll sedan innan
+          updateGroupMember(groupId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
+          Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
+          Logger.log(allMembers_email[i] + " har nu rollen bara ta emot ADMIN");
+        }
+      }
+      else if (contains(allMembers_send_email_admin, allMembers_email[i])) { //Ska bara kunna skicka ADMIN      
+        if (memberTypeOld!="OWNER_Send") { //Har någon annan roll sedan innan
+          updateGroupMember(groupId, allMembers_email[i], 'OWNER', 'DISABLED');
+          Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
+          Logger.log(allMembers_email[i] + " har nu rollen bara skicka ADMIN");
+        }
+      }
     }
   }
   var customFooterText = radInfo[grd["customFooterText"]];
@@ -609,11 +642,18 @@ function getMembertype(groupId, group_members, email) {
               return "Send";
             }            
           }
-          else if  (group_members[i].role=='MEMBER') {
-            return "Receive";
+          else if  (group_members[i].role=='OWNER') {
+            var tmp_GroupMember = getGroupMember(groupId, email);
+            var delivery_settings = tmp_GroupMember.delivery_settings;
+            if(delivery_settings=='ALL_MAIL') {
+              return "OWNER_Both";
+            }
+            else {
+              return "OWNER_Send";
+            }
           }
-          else {
-            return "OWNER"
+          else { 
+            return "Receive"
           }
           return group_members[i].role;
 		}	
@@ -628,10 +668,11 @@ function getMembertype(groupId, group_members, email) {
  * @param {string[]} allMembers_both_email - E-postlista för att skicka och ta emot e-brev
  * @param {string[]} allMembers_send_email - E-postlista för att bara kunna skicka e-brev
  * @param {string[]} allMembers_receive_email - E-postlista för att bara kunna ta emot e-brev
+ * @param {string[]} emailAdressesToSendSpamNotification - E-postlista för vart e-brev gällande misstänkt skräppost ska skickas till
  *
  * @returns {string[allMembers_both_email, allMembers_send_email, allMembers_receive_email]}
  */
-function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, allMembers_receive_email) {
+function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification) {
   
   //Om e-post finns i "skicka" och "ta emot" ska de läggas till i "båda"
   for (var i = 0; i < allMembers_send_email.length; i++) {
@@ -646,10 +687,46 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   //Om e-post finns i "ta emot" och "båda" ska de tas bort ur "ta emot"
   allMembers_receive_email = getListsWithUniqueElements(allMembers_both_email, allMembers_receive_email);
   
+  /*****E-postadresser för skräppostnotifikation*****/
+  var allMembers_both_email_admin = [];
+  var allMembers_send_email_admin = [];
+  
+  //Om e-post finns i "emailAdressesToSendSpamNotification" och i någon annan lista ska de läggas till i motsvarande adminlistan
+  for (var i = 0; i < emailAdressesToSendSpamNotification.length; i++) {
+    
+    if (contains(allMembers_both_email, emailAdressesToSendSpamNotification[i])) {
+      allMembers_both_email_admin.push(emailAdressesToSendSpamNotification[i]);
+    }
+    else if (contains(allMembers_receive_email, emailAdressesToSendSpamNotification[i])) {
+      allMembers_both_email_admin.push(emailAdressesToSendSpamNotification[i]);
+    }
+    else {
+      allMembers_send_email_admin.push(emailAdressesToSendSpamNotification[i]);
+    }
+  }  
+  
+  //Om e-post finns i "skicka admin" och "båda admin" ska de tas bort ur "skicka admin"
+  allMembers_send_email_admin = getListsWithUniqueElements(allMembers_both_email_admin, allMembers_send_email_admin);
+  
+  
+  //Om e-post finns i "båda" och "emailAdressesToSendSpamNotification" ska de tas bort ur "båda"
+  allMembers_both_email = getListsWithUniqueElements(emailAdressesToSendSpamNotification, allMembers_both_email);
+  
+  //Om e-post finns i "skicka" och "emailAdressesToSendSpamNotification" ska de tas bort ur "skicka"
+  allMembers_send_email = getListsWithUniqueElements(emailAdressesToSendSpamNotification, allMembers_send_email);
+  
+  //Om e-post finns i "ta emot" och "emailAdressesToSendSpamNotification" ska de tas bort ur "ta emot"
+  allMembers_receive_email = getListsWithUniqueElements(emailAdressesToSendSpamNotification, allMembers_receive_email);
+  
+  /*****************************/
+  
   //Vi tar bort alla upprepade e-postadresser inom sina egna listor
   allMembers_both_email = removeDublicates(allMembers_both_email);
   allMembers_send_email = removeDublicates(allMembers_send_email);
   allMembers_receive_email = removeDublicates(allMembers_receive_email);
+  
+  allMembers_both_email_admin = removeDublicates(allMembers_both_email_admin);
+  allMembers_send_email_admin = removeDublicates(allMembers_send_email_admin);
   
   Logger.log("..........2Båda....................");
   Logger.log(allMembers_both_email);
@@ -663,7 +740,16 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   Logger.log(allMembers_receive_email);
   Logger.log("..........2Slut bara ta emot....................");
   
-  return [allMembers_both_email, allMembers_send_email, allMembers_receive_email];  
+  Logger.log("............................................");
+  Logger.log("..........2Båda ADMIN....................");
+  Logger.log(allMembers_both_email_admin);
+  Logger.log("..........2Slut båda ADMIN....................");
+  
+  Logger.log("..........2Bara skicka ADMIN....................");
+  Logger.log(allMembers_send_email_admin);
+  Logger.log("..........2Slut bara skicka ADMIN....................");
+  
+  return [allMembers_both_email, allMembers_send_email, allMembers_receive_email, allMembers_both_email_admin, allMembers_send_email_admin];  
 }
 
 
@@ -782,7 +868,9 @@ function changeGroupPermissions(email, postPermission, customFooterText) {
   group.whoCanPostMessage = postPermission;
   group.primaryLanguage = 'sv';
   group.isArchived = 'true';
-  //group.messageModerationLevel = 'MODERATE_NONE';   //Denna ska bort
+  group.messageModerationLevel = 'MODERATE_NONE';
+  group.spamModerationLevel = 'MODERATE';
+  group.whoCanModerateContent = 'OWNERS_ONLY';
   group.replyTo = 'REPLY_TO_SENDER';
   group.includeCustomFooter = includeCustomFooter;
   group.customFooterText = customFooterText;
@@ -893,6 +981,29 @@ function createHeaders_Grupper() {
   sheet.hideColumn(column);
   
   /*******************************/  
+}
+
+
+/*
+ * Ger e-postadresser till vart information beträffande misstänkt skräppost ska skickas
+ *
+ * @returns {string[]} - Lista med e-postadresser
+ */
+function getEmailadressesToSendSpamNotification() {
+  
+  var emailAdresses = [];
+  if (typeof moderateContentEmail !=='undefined' && moderateContentEmail) {
+    emailAdresses = fetchScoutnetMembersMultipleMailinglists(moderateContentEmail, "", "");
+  }
+  else { //Om man ej anger listId för en e-postlista ska användaren som kör detta program bli notifierad
+    var tmp_member = {
+      manuell: Session.getActiveUser().getEmail()
+    };
+    emailAdresses.push(tmp_member);
+  }
+  emailAdresses = getMemberlistsMemberEmail(emailAdresses, "m-"); //Bara primäradress från Scoutnet
+  Logger.log(emailAdresses);
+  return emailAdresses;
 }
 
 
