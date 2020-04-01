@@ -1,6 +1,6 @@
 # Google-Scoutnet-synkronisering
-Du kan med dessa program synkronisera användarkonton med personer i Scoutnet som
-har en funktionärsroll samt synkronisera google-grupper med e-postlistor i Scoutnet.
+Du kan med dessa program synkronisera Google-användarkonton hos kåren med personer i Scoutnet
+samt synkronisera google-grupper med e-postlistor i Scoutnet
 Du kan använda dessa som e-postlistor eller som att lägga till att en specifik
 google-grupp ger behörighet till en specifik Team drive. Alltså automatisk synkronisering att
 t.ex Spårarledare ges behörighet till en Teamdrive för Spårare.
@@ -80,14 +80,18 @@ Synkroniserar personer som som är med på e-postlistor från Scoutnet genom att
 man anger id-nummret för e-postlistan i filen Konfiguration.gs. Det går bra att ange
 flera e-postlistor med kommatecken samt skriva kommentarer med parenteser inom
 variabelnamnet. Se exemplen i filen.
+
 Om inget id-nummer för en e-postlista anges så tolkar programmet det som alla
 personer i kåren som har en avdelningsroll eller roll på kårnivå och skapar
 användarkonton på kårens G Suite åt dem i den underorganisationen i G Suite som
 man specificerar.
+
 Om ett användarkonto vid nästkommande synkronisering ej matchar någon person
-som synkroniseras så inaktiveras konto.
+som synkroniseras så inaktiveras det specifika kontot.
+
 Om personen senare matchas aktiveras kontot igen. Det är bara konton som finns
 i organisationsstrukturen "Scoutnet" i G Suite som berörs vid en synkronisering.
+
 Användarkonton skapas på formen fornamn.efternamn@domännamn.se
 
 Om det finns personer som har samma namn (för- och efternamn) angivet i Scoutnet
