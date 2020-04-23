@@ -127,10 +127,11 @@ Du kan där för synkinställning för respektive e-postlista ange följande
 
 Det går också att ställa in i detta fält vilka e-postadressfält från scoutnet
 som ska läggas till
-- "m" Lägg endast till en medlems primära e-postadress
-- "f" Lägg endast till de e-postadresser som är angivet i fälten Anhörig 1,2.
+- "m" Lägg till en medlems primära e-postadress.
+- "f" Lägg till de e-postadresser som är angivet i fälten Anhörig 1,2.
   Alltså vanligtvis föräldrarna.
-- "e" Lägg endast till de fält som Scoutnet använder för att skicka till med
+- "a" Lägg till en medlems alternativa e-postadress.
+- "e" Lägg till de fält som Scoutnet använder för att skicka till med
   den inbyggda e-postlistsfunktionen.
 - Om man inte anger något används fälten primär e-postadress, anhörig 1,
   anhörig 2 och alternativ e-postadress.

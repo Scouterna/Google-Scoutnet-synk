@@ -295,7 +295,7 @@ function checkIfEmail(email) {
 function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list_id) {
   
   Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
-  var email_fields = '&contact_fields=email_mum,email_dad,email_alt';
+  var email_fields = '&contact_fields=email_mum,email_dad,alt_email';
   var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?id=' + groupId + '&key='+ api_key_mailinglists + '&list_id=' + scoutnet_list_id + email_fields;
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
   //Logger.log(response); 
@@ -445,7 +445,7 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
   
   else { //Lägg bara till Scoutnet-e-postnly add Scoutnet-email
     //Logger.log("Annars    ");
-    if (synk_option.indexOf("m")!=-1 || synk_option.indexOf("e")!=-1 || synk_option.indexOf("f")!=-1) {
+    if (synk_option.indexOf("m")!=-1 || synk_option.indexOf("e")!=-1 || synk_option.indexOf("f")!=-1 || synk_option.indexOf("a")!=-1) {
       if (synk_option.indexOf("m")!=-1) { //Lägg bara till medlemmar som har en personlig e-postadress
         if (email) { //Lägg bara till personer med en egen e-postadress      
           member_emails.push(email);
@@ -484,6 +484,17 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
         if (contact_email_dad) { //Lägg till mammor (Anhörig 1) med en e-postadress      
           member_emails.push(contact_email_dad);
           Logger.log("8_2 " + contact_email_dad);
+        }
+      }
+      
+      if (synk_option.indexOf("a")!=-1) { //Lägg till alternativ e-postadress
+        if (email_alt) { //Lägg till alternativ e-postadress      
+          member_emails.push(email_alt);
+          Logger.log("9_1");
+        }
+        if (contact_email_alt) { //Lägg till alternativ e-postadress      
+          member_emails.push(contact_email_alt);
+          Logger.log("9_2");
         }
       }
     }
