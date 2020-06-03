@@ -20,31 +20,22 @@ function Anvandare() {
   var defaultOrgUnitPath = "/Scoutnet";
   var suspendedOrgUnitPath = defaultOrgUnitPath + "/" + "Avstängda";
   
-  var allMembers = fetchScoutnetMembers(); //Alla medlemmar
+  var allMembers = fetchScoutnetMembers(); //Alla medlemmar med alla attribut som finns i APIt för konton
   Logger.log("AllMembers.length by fetchScoutnetMembers = " + allMembers.length);
   var useraccounts = getGoogleAccounts(defaultOrgUnitPath);
     
-  var membersFromMailingLists = readUserAccountConfigMembers(allMembers); //Lägg till alla medlemmar som är med i e-postlista eller annat specat i konfiguration
-  Logger.log("membersFromMailingLists.length by readUserAccountConfigMembers = " + membersFromMailingLists.length);
-  
-  var memberNumbers = getMemberNumbers(membersFromMailingLists); //Medlemmar med dessa unika medlemsnummer ska användas
-  var tmpMemberNumbers = memberNumbers.slice(0); //Gör kopia
-  var members = getMembersByMemberNumbers(membersFromMailingLists, memberNumbers);
+  var MembersProcessed = [];
   
   Logger.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-  Logger.log("MemberNumbers.length = " + memberNumbers.length);
-  Logger.log("tmpMemberNumbers.length = " + tmpMemberNumbers.length);
-  /*
-  Logger.log("Dessa Google-konton finns");
-  for (i = 0; i < useraccounts.length; i++) {    
-   Logger.log(useraccounts[i].name.fullName + " " + useraccounts[i].primaryEmail + " " + useraccounts[i].externalIds[0].value);     
-  }  
-  */
-    
-  for (var p = 0; p < userAccountConfig.length; p++) { //Gå igenom medlemslistorna
+  Logger.log("Antal medlemmar i scoutnet = % " , allMembers.length);
+
+  
+  for (var p = 0; p < userAccountConfig.length; p++) { //Gå igenom Listorna som är definierade i Konfiguration.gs, avsnitt "userAccountConfig"
     
     var scoutnetListId = userAccountConfig[p].scoutnetListId;
     var orgUnitPath = defaultOrgUnitPath;
+    var membersincluded = [];
+    var membersexcluded = [];
     
     if (userAccountConfig[p].orgUnitPath) {
       //Bara om man anger någon suborg så anger vi den, annars blir det knas med
@@ -53,7 +44,8 @@ function Anvandare() {
     }
       
     Logger.log("----------------------------------");
-    Logger.log("orgUnitPath = " + orgUnitPath);
+    Logger.log("orgUnitPath = %s", orgUnitPath);
+    Logger.log("Beskrivning: %s",userAccountConfig[p].description);
     
     createSuborganisationIfNeeded(orgUnitPath);
           
@@ -65,88 +57,47 @@ function Anvandare() {
       membersInAList = getScoutleaders(allMembers);
     }
     Logger.log("MembersInAlist antal personer= " + membersInAList.length);
-    Logger.log("TmpMemberNumbers.length = " + tmpMemberNumbers.length);
-    
-    var membersInAListFiltered = []; //Medlemmar i denna e-postlista som ska gälla för denna suborganisation
-        
-    LoopMembersInAList:
-    for (var i = 0; i < membersInAList.length; i++) {  //Här skapar vi listan över vilka i denna e-postlista som redan är tillagda i
-      for (var k = 0; k < tmpMemberNumbers.length; k++) { //någon organisation och inte ska läggas till i just denna.
-        if (membersInAList[i].member_no == tmpMemberNumbers[k]) {
-          
-          Logger.log("I denna e-postlista finns " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
-          membersInAListFiltered.push(membersInAList[i]);
-          tmpMemberNumbers.splice(k, 1); //Ta bort medlemsnumret ur listan
-          continue LoopMembersInAList;
-        }        
-      }        
-    }
-    
-    Logger.log("Antal Scoutnetkonton i denna suborg= " + membersInAListFiltered.length);
-    Logger.log("Antal Googlekonton i denna hela org= " + useraccounts.length);
-    
-    for (var k = 0; k < membersInAListFiltered.length; k++) { //Inom varje medlemslista
-      
-      var account_exists = false;
-      
-      userAccountsOuterLoop:
-      for (var i = 0; i < useraccounts.length; i++) { //Kolla alla Googlekonton        
-        var num_externalIds = useraccounts[i].externalIds.length;
-        //Logger.log("Antal externalIDS" + num_externalIds);        
-        for (var m = 0; m < num_externalIds; m++) {
-          
-          // Logger.log("Kollar om Scoutnet_member_id =" + membersInAListFiltered[k].member_no + " och Google id =" + useraccounts[i].externalIds[m].value);
-          if (membersInAListFiltered[k].member_no==useraccounts[i].externalIds[m].value) { //If member_id match. Account exists
-            
-            account_exists = true; //Träff
-            updateAccount(membersInAListFiltered[k], useraccounts[i], orgUnitPath); //Uppdatera konto vid behov
-            //Logger.log("Detta konto finns " + useraccounts[i].name.fullName + " " + useraccounts[i].primaryEmail + " " + useraccounts[i].externalIds[m].value);
-            break userAccountsOuterLoop;
-          }      
+
+    for (var i = 0; i < membersInAList.length; i++) {  //Här Processas alla medlemmar
+      if(MembersProcessed.find(o => o == membersInAList[i].member_no)) // Leta efter kontot i listan över redan processade konton
+      {
+        Logger.log("Användaren är redan processad: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
+      }
+      else
+      {
+        Logger.log("Användaren ska processas: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
+        MembersProcessed.push(membersInAList[i].member_no); //Lägg till kontot i listan över processade konton
+        var obj = allMembers.find(obj => obj.member_no == membersInAList[i].member_no); //Leta upp kontot i listan övar alla konton 
+        //anledningen till att inte använda objektet från epostlistan är att det finns bara begränsad information i det objektet
+
+        var GoUser = useraccounts.find(u => u.externalIds.some(extid => extid.type === "organization" && extid.value === obj.member_no)); // leta upp befintligt Googlekonto som representerar rätt objekt
+        if(GoUser) {
+        // Användaren fanns i listan
+          const ia = useraccounts.length
+          const indx = useraccounts.findIndex(v => v.id === GoUser.id);
+          useraccounts.splice(indx, indx >= 0 ? 1 : 0); // radera kontot ut listan med alla googlekonto, när updtateringen av alla konto är klar skall resterande konto i denna lista avaktiveras.
+          const ib = useraccounts.length
+          Logger.log("Hittade Googleanvändaren %s, id=%s ",GoUser.name.fullName,GoUser.id);
+          //Logger.log("Antal innan: %s, efter: %s",ia,ib );
+          updateAccount(obj, GoUser, orgUnitPath) //uppdatera alla uppgifter på googlekontot med uppgifter från Scoutnet
+        }
+        else
+        {
+          Logger.log("Skapar Ny Googleanvändare");
+          createAccount(obj, orgUnitPath); //Skapa Googlekonto för denna användare
         }
       }
-      
-      if (!account_exists) { //Inget konto med detta medlemsnummer, så skapa det
-        Logger.log("Dont exists K=" + k + membersInAListFiltered[k].first_name + " " + membersInAListFiltered[k].last_name);
-        createAccount(membersInAListFiltered[k], orgUnitPath); //Skapa Googlekonto för denna användare      
-      }
     }
-  }   
-  checkingIfToSuspendAccounts(useraccounts, memberNumbers, suspendedOrgUnitPath);
-}
-
-
-/*
- * Läser in samtliga medlemmar som är med i någon av de e-postlistor eller kårfunk
- * som är specificerad i e-postlista eller kårfunktionär i listan userAccountConfig
- *
- * @param {Object[]} allMembers - Lista över medlemsobjekt
- *
- * @returns {Object[]} - Lista med medlemmar som är med i någon av de listor från Scoutnet som ska synkroniseras
- */
-function readUserAccountConfigMembers(allMembers) {
-
-  var membersInMailingLists = [];
-  
-  for (var i = 0; i < userAccountConfig.length; i++) {
-    var scoutnetListId = userAccountConfig[i].scoutnetListId;
-    var orgUnitPath = userAccountConfig[i].orgUnitPath;
-    Logger.log("Read UserAccountConfig = " + i);
-    Logger.log("aaa ScoutnetListId = " + scoutnetListId);
-    
-    if (scoutnetListId) {
-      membersInMailingLists.push.apply(membersInMailingLists, fetchScoutnetMembersMultipleMailinglists(scoutnetListId, "", ""));
-    }
-    else {
-      membersInMailingLists.push.apply(membersInMailingLists, getScoutleaders(allMembers));
-    }
-
-    Logger.log(scoutnetListId + "   " + orgUnitPath);
   }
-  Logger.log("MembersInMailingLists.length " + membersInMailingLists.length); 
-  
-  return membersInMailingLists;
+  Logger.log("Googlekonton som är kvar: %s",  useraccounts.length);
+
+  for (var goacc in  useraccounts)
+  {
+    Logger.log("Stänger av konto, id: %s, %s",useraccounts[goacc].id, useraccounts[goacc].name.fullName);
+    suspendAccount(useraccounts[goacc], suspendedOrgUnitPath)
+  }
 }
+
 
 
 /**
@@ -213,39 +164,6 @@ function checkIfOrgUnitExists(orgUnitPath) {
   }  
 }
 
-
-/*
- * Kontrollera om ett användarkonto ska deaktiveras
- * Om det ej finns i listan med medlemsnummer så deaktiveras kontot
- *
- * @param {Objects[]} userAccounts - Lista med objekt av Googlekonton
- * @param {number[]} - Lista med medlemsnummer
- * @param {string} suspendedOrgUnitPath - Sökväg för underorganisationen för avstängda konton
- */
-function checkingIfToSuspendAccounts(userAccounts, memberNumbers, suspendedOrgUnitPath) {  
-  
-  Logger.log("Kolla om ett konto ska stängas av");
-  
-  createSuborganisationIfNeeded(suspendedOrgUnitPath);
-  
-  for (var i = 0; i < userAccounts.length; i++) { //kolla alla Googlekonton
-    
-    var member_exists = false;
-    var num_externalIds = userAccounts[i].externalIds.length;      
-      
-    for (var m = 0; m < num_externalIds; m++) {        
-      
-      if (contains(memberNumbers, userAccounts[i].externalIds[m].value)) { //Om member_id finns. Användarkonto finns
-          
-        member_exists = true; //Träff                  
-        //Logger.log("Detta konto har en träff " + userAccounts[i].name.fullName + " " + userAccounts[i].primaryEmail + " " + userAccounts[i].externalIds[m].value);
-      }        
-    }
-    if (!member_exists) { //Behöver inte loppa mer
-      suspendAccount(userAccounts[i], suspendedOrgUnitPath);
-    }
-  }  
-}
 
 
 /*
@@ -356,30 +274,66 @@ function checkIfEmailExists(email) {
  */
 function updateAccount(member, useraccount, orgUnitPath) {
   
-  var go_first_name = useraccount.name.givenName;
-  var go_last_name = useraccount.name.familyName;
-  var go_suspended = useraccount.suspended;
-  var go_orgUnitPath = useraccount.orgUnitPath;
+//  var phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
+  var update = false;
   
-  var first_name = member.first_name;  
-  var last_name = member.last_name;
-  
-  var email = useraccount.primaryEmail;
-  
-  if (go_first_name!=first_name || go_last_name!=last_name || go_suspended || go_orgUnitPath!=orgUnitPath) {
-  
-    var user = {
-    name: {
-      givenName: first_name,
-      familyName: last_name
-    },
-    suspended: false,
-    "orgUnitPath": orgUnitPath    
+  if ( useraccount.name.givenName != member.first_name || useraccount.name.familyName != member.last_name || useraccount.suspended || useraccount.orgUnitPath != orgUnitPath ) { // || ((!useraccount.recoveryEmail) && (member.email)) || ((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone)) 
+  // Något behöver uppdateras
+    Logger.log('Användare %s %s uppdateras', useraccount.name.givenName, useraccount.name.familyName);  
+
+    var user = {} // skapa kontoobjekt med det som skall ändras
+    
+    if(useraccount.name.givenName!=member.first_name){
+      if (!user.name)
+      {user.name = {}}
+      Logger.log("Nytt förnamn: %s",member.first_name);
+      user.name.givenName = member.first_name;
+      update = true;
+    }
+    if(useraccount.name.familyName!=member.last_name){
+      if (!user.name)
+      {user.name = {}}
+      Logger.log("Nytt efternamn: %s",member.last_name);
+      user.name.givenName = member.last_name;
+      update = true;
+    }
+    if(useraccount.orgUnitPath!=orgUnitPath){
+      Logger.log("Ny OrganizationUnit: %s",orgUnitPath);
+      user.orgUnitPath = orgUnitPath;
+      update = true;
+    }
+    if((!useraccount.recoveryEmail) && (member.email))
+    {
+      Logger.log("Ny återställningsepost: %s",member.email);
+      user.recoveryEmail = member.email;
+      update = true;
     };
-    user = AdminDirectory.Users.update(user, email);
-    Logger.log('Användare %s %s uppdaterad med namn till %s %s', go_first_name, go_last_name, first_name, last_name);  
-    Logger.log("Användaren är nu i org " + orgUnitPath);
-  }
+/* Lägg till återställningsinformation på Googlekontot
+    if((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone))
+    {  
+      if(phnum){
+        Logger.log("Nytt återställningsnummer: %s",phnum);
+        user.recoveryPhone = phnum;
+      update = true;
+      }
+
+    }
+    if(useraccount.suspended){
+      Logger.log("Aktiverad.");
+      user.suspended = false;
+    }
+*/
+    try{
+    user = AdminDirectory.Users.update(user, useraccount.primaryEmail);
+    //Logger.log("Användaren är nu i org " + orgUnitPath);
+    }
+    catch(err) {
+      Logger.log("--------------------------")
+      Logger.log("Error: %s",err.message);
+      Logger.log(user);
+      Logger.log("--------------------------")
+    }
+    }
 }
 
 
@@ -394,7 +348,9 @@ function suspendAccount(userAccount, suspendedOrgUnitPath) {
   var email = userAccount.primaryEmail;
   var suspended = userAccount.suspended;
   var orgUnitPath = userAccount.orgUnitPath;
-    
+  
+  createSuborganisationIfNeeded(suspendedOrgUnitPath);
+  
   if (!suspended || (orgUnitPath!=suspendedOrgUnitPath)) {
   
     var user = {
@@ -507,11 +463,12 @@ function fetchScoutnetMembers() {
     var member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
         
     //Logger.log("MEMBER print object " + member);
-    //Logger.log(member.member_no + "   " + member.first_name + "  " + member.last_name);
+    //Logger.log("%s %s, Medlem %s, Mobil %s",member.first_name, member.last_name, member.member_no, member.contact_mobile_phone); //member.member_no + "   " + member.first_name + "  " + member.last_name);
     //Logger.log(member.date_of_birth + "   " + member.confirmed_at + "  " + member.unit);
     //Logger.log(member.unit_role + "   " + member.group_role + "  " + member.email);
     //Logger.log(member.email_mum + "   " + member.email_dad + "  " + member.alt_email);
-    allMembers.push(member);    
+    allMembers.push(member); 
+    
   } 
   //Logger.log("FETCH MEMBERS print object " + allMembers);
   return allMembers;  
@@ -520,7 +477,7 @@ function fetchScoutnetMembers() {
 
 /*
  * Testfunktion för att lista alla Googlekonton som finns i underorganisationen "Scoutnet"
- * Max 100 stycken
+ * Max 200 stycken
  */
 function listAllUsers() {
   var pageToken, page;
@@ -529,7 +486,7 @@ function listAllUsers() {
       domain: domain,
       query: "orgUnitPath='/Scoutnet'",
       orderBy: 'givenName',
-      maxResults: 100,
+      maxResults: 200,
       pageToken: pageToken
     });
     var users = page.users;
