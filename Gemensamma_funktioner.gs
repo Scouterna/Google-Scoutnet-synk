@@ -622,7 +622,7 @@ function intphonenumber(phnum) {
         phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1)
       }
     else {
-//phnum = null
+        phnum = null
     }
   }
    //Logger.log('done... %s',phnum);  

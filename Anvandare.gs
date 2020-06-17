@@ -277,7 +277,7 @@ function updateAccount(member, useraccount, orgUnitPath) {
   var phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
   var update = false;
   
-  if ( useraccount.name.givenName != member.first_name || useraccount.name.familyName != member.last_name || useraccount.suspended || useraccount.orgUnitPath != orgUnitPath  || ((!useraccount.recoveryEmail) && (member.email)) || ((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone)) ){
+  if ( useraccount.name.givenName != member.first_name || useraccount.name.familyName != member.last_name || useraccount.suspended || useraccount.orgUnitPath != orgUnitPath  || ((!useraccount.recoveryEmail) && (member.email)) || ((phnum && useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone)) ){
   // Något behöver uppdateras
     Logger.log('Användare %s %s uppdateras', useraccount.name.givenName, useraccount.name.familyName);  
 
@@ -309,7 +309,7 @@ function updateAccount(member, useraccount, orgUnitPath) {
       update = true;
     };
     // Lägg till återställningsinformation på Googlekontot
-    if((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone))
+    if((phnum && useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone))
     {  
       if(phnum){
         Logger.log("Nytt återställningsnummer: %s",phnum);
@@ -501,4 +501,4 @@ function listAllUsers() {
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
-}Bandbredd
+}
