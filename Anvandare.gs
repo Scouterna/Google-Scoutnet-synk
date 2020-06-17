@@ -274,10 +274,10 @@ function checkIfEmailExists(email) {
  */
 function updateAccount(member, useraccount, orgUnitPath) {
   
-//  var phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
+  var phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
   var update = false;
   
-  if ( useraccount.name.givenName != member.first_name || useraccount.name.familyName != member.last_name || useraccount.suspended || useraccount.orgUnitPath != orgUnitPath ) { // || ((!useraccount.recoveryEmail) && (member.email)) || ((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone)) 
+  if ( useraccount.name.givenName != member.first_name || useraccount.name.familyName != member.last_name || useraccount.suspended || useraccount.orgUnitPath != orgUnitPath  || ((!useraccount.recoveryEmail) && (member.email)) || ((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone)) ){
   // Något behöver uppdateras
     Logger.log('Användare %s %s uppdateras', useraccount.name.givenName, useraccount.name.familyName);  
 
@@ -308,7 +308,7 @@ function updateAccount(member, useraccount, orgUnitPath) {
       user.recoveryEmail = member.email;
       update = true;
     };
-/* Lägg till återställningsinformation på Googlekontot
+    // Lägg till återställningsinformation på Googlekontot
     if((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone))
     {  
       if(phnum){
@@ -322,7 +322,7 @@ function updateAccount(member, useraccount, orgUnitPath) {
       Logger.log("Aktiverad.");
       user.suspended = false;
     }
-*/
+
     try{
     user = AdminDirectory.Users.update(user, useraccount.primaryEmail);
     //Logger.log("Användaren är nu i org " + orgUnitPath);
@@ -501,4 +501,4 @@ function listAllUsers() {
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
-}
+}Bandbredd
