@@ -584,6 +584,51 @@ function removeDublicates(list) {
   return tmp_array;
 }
 
+/**
+ * Gör strängen till ett svenskt internationellt nummer om möjligt
+ */
+
+function intphonenumber(phnum) {
+  var rx = /^\+/;      
+  //Logger.log('telefonnummer före: %s', phnum);  
+  var res = phnum.match(rx)
+  if(res)
+  {
+    var ccok = false;
+    Logger.log('Match');  
+ 
+    var ccodes =[];
+    ccodes.push("43"); //
+    ccodes.push("44"); //
+    ccodes.push("45"); //Danmark
+    ccodes.push("46"); //sverige
+    for(var info in ccodes)
+    {
+      rx = new RegExp('^\\+' + ccodes[info]  , 'g');   
+      if (phnum.match(rx))
+        {
+          phnum = "+" +  ccodes[info] + phnum.substr(3).replace(/[^0-9]/g, '');
+        ccok = true;
+        }
+    }
+    if (!ccok){phnum = null;}
+ //Logger.log('after cc %s',phnum);  
+  
+  }
+  else
+  {
+   // Logger.log('NoMatch');  
+    if (phnum.replace(/[^0-9]/g, '').match(/^0/)){
+        phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1)
+      }
+    else {
+//phnum = null
+    }
+  }
+   //Logger.log('done... %s',phnum);  
+  
+return phnum
+}
 
 String.prototype.endsWith = function(suffix) { 
    if (this.length < suffix.length) 

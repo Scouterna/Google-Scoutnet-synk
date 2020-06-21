@@ -44,14 +44,17 @@ var scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
 var userAccountConfig = [
   {
     scoutnetListId: "1234",  //
-    orgUnitPath: "Styrelsen" //om du skriver Ledare så är det egentligen underorganisationen /Scoutnet/Ledare
+    orgUnitPath: "Styrelsen",  //om du skriver Ledare så är det egentligen underorganisationen /Scoutnet/Ledare
+    description: "gruppen med personer i Styrelsen" // valfritt,  beskrivning för att kunna följa loggen lättare
   },
   {
     scoutnetListId: "8&rule_id=9874 (Roverscouter), 1122 (Kassör)", //Rover
-    orgUnitPath: "Kårfunk/Rover"
+    orgUnitPath: "Kårfunk/Rover",
+    description: "Rover och kassörer"
   },
   {
     scoutnetListId: "8 (Lurk)", //Ledare, Utmanare, Rover, Kårfunktionärer. Då alla roverscouter och kårkassören redan är med i en lista kommer de ej med här
-    orgUnitPath: "Kårfunk/LURK"
+    orgUnitPath: "Kårfunk/LURK",
+    description: "Ledare, Utmanare, Rover, Kårfunktionärer"
   }
 ];
