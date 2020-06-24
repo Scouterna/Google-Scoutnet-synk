@@ -265,6 +265,49 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
          </tr>
       </tbody>
    </table>
+   
+*  Jag vill ha följande e-postlista
+   * Vem som helst ska kunna skicka till listan.
+   * Alla scouter på avdelningen ska kunna ta emot från listan, men listan ska endast skicka till föräldrarnas e-postadresser för scouterna.
+   * Alla ledare på avdelningenska få alla mejl på listan, men listan ska endast skickas till deras e-postkonto hos kåren och inte till någon privat e-postadress.
+      
+   Gör följande inställningar i kalkylarket
+
+   <table>
+      <thead>
+         <tr>
+            <th colspan=2>Kan skicka och ta emot</th>
+            <th colspan=2>Kan skicka</th>
+            <th colspan=2>Kan ta emot</th>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+         </tr>
+         <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>1910&rule_id=1930 (id för avdelningen och regel för ledarna)</td>
+            <td>@</td>
+         </tr>
+         <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>1910&rule_id=1940 (id för avdelningen och regel för scouter på avdelningen), [e-postadressen till e-postlistan på raden ovan]</td>
+            <td>-f</td>
+         </tr>
+      </tbody>
+   </table>
 
 #### Google Team Drive - exempel
 Att koppla ihop grupper med delade enheter på Google Team Drive sker manuellt, men du kan använda grupperna som skapats enligt ovan för enkel uppdatering av åtkomst.
