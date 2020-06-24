@@ -1,6 +1,6 @@
 /**
  * @author Emil Öhman <emil.ohman@scouterna.se>
- * @website https://github.com/scouternasetjanster 
+ * @website https://github.com/Scouterna
  */
 
 var domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan till kåren utan www och som används i GSuite
