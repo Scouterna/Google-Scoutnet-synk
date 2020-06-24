@@ -342,6 +342,40 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
          </tr>
       </tbody>
    </table>
+   
+ * Jag vill ha följande e-postlista
+   * Vem som helst ska kunna skicka till listan.
+   * Jag vill manuellt lägga till vilka e-postadresser som ska vara med.
+      
+   Gör följande inställningar i kalkylarket
+
+   <table>
+      <thead>
+         <tr>
+            <th colspan=2>Kan skicka och ta emot</th>
+            <th colspan=2>Kan skicka</th>
+            <th colspan=2>Kan ta emot</th>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+         </tr>
+         <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>scoutnet@scouterna.se, scoutid@scouterna.se</td>
+            <td></td>
+         </tr>
+      </tbody>
+   </table>
 
 #### Google Team Drive - exempel
 Att koppla ihop grupper med delade enheter på Google Team Drive sker manuellt, men du kan använda grupperna som skapats enligt ovan för enkel uppdatering av åtkomst.
