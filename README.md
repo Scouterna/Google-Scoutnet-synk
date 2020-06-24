@@ -267,6 +267,40 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
    </table>
    
 *  Jag vill ha följande e-postlista
+   * Bara de som är med på listan samt de med en e-postadress från kåren ska kunna skicka till listan.
+   * För de som är med på listan ska e-posten bara skickas till en medlems primära e-postadress i Scoutnet.
+      
+   Gör följande inställningar i kalkylarket
+
+   <table>
+      <thead>
+         <tr>
+            <th colspan=2>Kan skicka och ta emot</th>
+            <th colspan=2>Kan skicka</th>
+            <th colspan=2>Kan ta emot</th>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+         </tr>
+         <tr>
+            <td>1910 (id för avdelningen)</td>
+            <td>-m</td>
+            <td>@ (kårens googlekonton)</td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+      </tbody>
+   </table>
+   
+*  Jag vill ha följande e-postlista
    * Vem som helst ska kunna skicka till listan.
    * Alla scouter på avdelningen ska kunna ta emot från listan, men listan ska endast skicka till föräldrarnas e-postadresser för scouterna.
    * Alla ledare på avdelningenska få alla mejl på listan, men listan ska endast skickas till deras e-postkonto hos kåren och inte till någon privat e-postadress.
