@@ -12,7 +12,7 @@ I bland kommer det ny funktionalitet, så håll utkik på en ny version genom at
 **Watch** uppe till höger på sidan för att du kunna bli notifieradvid en ny version.
 
 Du kan ladda ner den senaste versionen via
-https://github.com/scouternasetjanster/Google-Scoutnet-synk/releases/latest och där kan
+https://github.com/Scouterna/Google-Scoutnet-synk/releases/latest och där kan
 du också ser vilken funktionalitet som är ny i respektive version. Läs filen README.md
 för instruktion om installation och funktionalitet.
 
@@ -198,7 +198,7 @@ till en lista och några andra som bara ska få skicka.
   välja att visa samtliga kolumner i kalkylarket för att kunna infoga eller ta bort kolumner om
   det har skett någon ändring.
 - Du hittar senaste versionen av programmet på 
-  https://github.com/scouternasetjanster/Google-Scoutnet-synk/releases/latest och där kan
+  https://github.com/Scouterna/Google-Scoutnet-synk/releases/latest och där kan
   du också ser vilken funktionalitet som är ny i respektive version och om du behöver göra
   något för att uppdatera förutom att uppdatera koden.
 - Kör de olika programmen manuellt en gång innan du kör med tidsinställning då det kan ha
