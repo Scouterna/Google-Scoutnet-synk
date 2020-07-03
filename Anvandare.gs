@@ -330,28 +330,30 @@ function updateAccount(member, useraccount, orgUnitPath) {
       }
 
     }
-    if((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone)) {  
-      if(phnum) {
-        Logger.log("Nytt mobilnummer: %s", phnum);        
-        
-        var accountPhoneNumbersNotPrimaryOrTheSame = [];
-        if (typeof useraccount.phones !=='undefined' && useraccount.phones) {
-          if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.primary !== true)) {
-            accountPhoneNumbersNotPrimaryOrTheSame = useraccount.phones.filter(phoneNumber => phoneNumber.primary !== true && phoneNumber.value !== phnum);
+    if (typeof syncUserContactInfo !=='undefined' && syncUserContactInfo) {
+      if((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone)) {  
+        if(phnum) {
+          Logger.log("Nytt mobilnummer: %s", phnum);        
+          
+          var accountPhoneNumbersNotPrimaryOrTheSame = [];
+          if (typeof useraccount.phones !=='undefined' && useraccount.phones) {
+            if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.primary !== true)) {
+              accountPhoneNumbersNotPrimaryOrTheSame = useraccount.phones.filter(phoneNumber => phoneNumber.primary !== true && phoneNumber.value !== phnum);
+            }
           }
+          
+          var newPrimaryPhoneNumber = {
+            "value": phnum,
+            "primary": true,
+            "type": "mobile"
+          };
+          
+          accountPhoneNumbersNotPrimaryOrTheSame.push(newPrimaryPhoneNumber);
+          Logger.log("Dessa ska de nya numren för denna person vara");
+          Logger.log(accountPhoneNumbersNotPrimaryOrTheSame);
+          user.phones = accountPhoneNumbersNotPrimaryOrTheSame;
+          update = true;
         }
-        
-        var newPrimaryPhoneNumber = {
-          "value": phnum,
-          "primary": true,
-          "type": "mobile"
-        };
-        
-        accountPhoneNumbersNotPrimaryOrTheSame.push(newPrimaryPhoneNumber);
-        Logger.log("Dessa ska de nya numren för denna person vara");
-        Logger.log(accountPhoneNumbersNotPrimaryOrTheSame);
-        user.phones = accountPhoneNumbersNotPrimaryOrTheSame;
-        update = true;
       }
     }
     if(useraccount.suspended) {

@@ -24,6 +24,9 @@ var spreadsheetUrl_Grupper = 'https://docs.google.com/spreadsheets/d/1ru524kj964
 //T.ex 'webmaster@minscoutkår.se, 1234'
 var moderateContentEmail = '';
 
+//Inställning om viss kontaktinformation ska synkroniseras till användares GSuite-konto
+var syncUserContactInfo = true;
+
 //Typ av organisationsenhet
 var organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
 
