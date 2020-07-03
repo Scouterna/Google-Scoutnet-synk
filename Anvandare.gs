@@ -277,63 +277,99 @@ function updateAccount(member, useraccount, orgUnitPath) {
   var phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
   var update = false;
   
-  if ( useraccount.name.givenName != member.first_name || useraccount.name.familyName != member.last_name || useraccount.suspended || useraccount.orgUnitPath != orgUnitPath  || ((!useraccount.recoveryEmail) && (member.email)) || ((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone)) ){
-  // Något behöver uppdateras
+  var accountPrimaryPhoneNumber = "";
+  if (typeof useraccount.phones !=='undefined' && useraccount.phones) {
+    if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.type === "mobile" && phoneNumber.primary === true)) {
+      accountPrimaryPhoneNumber = useraccount.phones.find(phoneNumber => phoneNumber.type === "mobile" && phoneNumber.primary === true).value;
+    }
+  }
+  
+  if ( useraccount.name.givenName != member.first_name 
+      || useraccount.name.familyName != member.last_name 
+      || useraccount.suspended 
+      || useraccount.orgUnitPath != orgUnitPath  
+      || ((!useraccount.recoveryEmail) && (member.email))
+      || ((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone)) 
+      || ((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone)) )  {
+    // Något behöver uppdateras
+    
     Logger.log('Användare %s %s uppdateras', useraccount.name.givenName, useraccount.name.familyName);  
 
     var user = {} // skapa kontoobjekt med det som skall ändras
     
-    if(useraccount.name.givenName!=member.first_name){
+    if(useraccount.name.givenName!=member.first_name) {
       if (!user.name)
       {user.name = {}}
       Logger.log("Nytt förnamn: %s",member.first_name);
       user.name.givenName = member.first_name;
       update = true;
     }
-    if(useraccount.name.familyName!=member.last_name){
+    if(useraccount.name.familyName!=member.last_name) {
       if (!user.name)
       {user.name = {}}
       Logger.log("Nytt efternamn: %s",member.last_name);
       user.name.givenName = member.last_name;
       update = true;
     }
-    if(useraccount.orgUnitPath!=orgUnitPath){
+    if(useraccount.orgUnitPath!=orgUnitPath)  {
       Logger.log("Ny OrganizationUnit: %s",orgUnitPath);
       user.orgUnitPath = orgUnitPath;
       update = true;
     }
-    if((!useraccount.recoveryEmail) && (member.email))
-    {
+    if((!useraccount.recoveryEmail) && (member.email))  {
       Logger.log("Ny återställningsepost: %s",member.email);
       user.recoveryEmail = member.email;
       update = true;
     };
     // Lägg till återställningsinformation på Googlekontot
-    if((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone))
-    {  
-      if(phnum){
+    if((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone)) {  
+      if(phnum) {
         Logger.log("Nytt återställningsnummer: %s",phnum);
         user.recoveryPhone = phnum;
-      update = true;
+        update = true;
       }
 
     }
-    if(useraccount.suspended){
+    if((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone)) {  
+      if(phnum) {
+        Logger.log("Nytt mobilnummer: %s", phnum);        
+        
+        var accountPhoneNumbersNotPrimaryOrTheSame = [];
+        if (typeof useraccount.phones !=='undefined' && useraccount.phones) {
+          if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.primary !== true)) {
+            accountPhoneNumbersNotPrimaryOrTheSame = useraccount.phones.filter(phoneNumber => phoneNumber.primary !== true && phoneNumber.value !== phnum);
+          }
+        }
+        
+        var newPrimaryPhoneNumber = {
+          "value": phnum,
+          "primary": true,
+          "type": "mobile"
+        };
+        
+        accountPhoneNumbersNotPrimaryOrTheSame.push(newPrimaryPhoneNumber);
+        Logger.log("Dessa ska de nya numren för denna person vara");
+        Logger.log(accountPhoneNumbersNotPrimaryOrTheSame);
+        user.phones = accountPhoneNumbersNotPrimaryOrTheSame;
+        update = true;
+      }
+    }
+    if(useraccount.suspended) {
       Logger.log("Aktiverad.");
       user.suspended = false;
     }
 
-    try{
-    user = AdminDirectory.Users.update(user, useraccount.primaryEmail);
-    //Logger.log("Användaren är nu i org " + orgUnitPath);
+    try {
+      user = AdminDirectory.Users.update(user, useraccount.primaryEmail);
+      //Logger.log("Användaren är nu i org " + orgUnitPath);
     }
-    catch(err) {
+    catch(err)  {
       Logger.log("--------------------------")
       Logger.log("Error: %s",err.message);
       Logger.log(user);
       Logger.log("--------------------------")
     }
-    }
+  }
 }
 
 
