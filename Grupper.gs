@@ -26,7 +26,11 @@ function GrupperRubrikData() {
   
   gruppRubrikData["groupId"] = 9;
   gruppRubrikData["cell_url"] = 10;
-  gruppRubrikData["felmeddelande"] = 11;
+  
+  gruppRubrikData["isArchived"] = 11;
+  gruppRubrikData["group_moderate_content_email"] = 12;
+  
+  gruppRubrikData["felmeddelande"] = 13;
                   
   return gruppRubrikData;
 }
@@ -55,6 +59,8 @@ function Grupper() {
     var synk_option = data[i][grd["synk_option"]];
     var groupId = data[i][grd["groupId"]];
     var customFooterText = data[i][grd["customFooterText"]];
+    var isArchived = data[i][grd["isArchived"]];
+    var group_moderate_content_email = data[i][grd["group_moderate_content_email"]];
     
     var rad_nummer = i+1;
     
@@ -128,7 +134,7 @@ function Grupper() {
       else if (email!="") { //Kontrollerar om vi behöver uppdatera
         
         var group = AdminDirectory.Groups.get(groupId);
-        
+                
         if (email!=group.email) { //E-postadressen har ändrats
           
           Logger.log("E-postadress för gruppen har ändrats på raden " + rad_nummer);          
@@ -176,8 +182,16 @@ function Grupper() {
           var cell=selection.getCell(rad_nummer, grd["e-post"]+1);
           cell.setBackground("white");
         }
+        
+        group = AdminGroupsSettings.Groups.get(email);
         if (customFooterText != group.customFooterText) {
+          Logger.log("Sidfot ska ändras för gruppen");
           update_group = "yes";
+        }
+        
+        if (checkIfIsArchivedShouldChange(isArchived, group.isArchived)) {
+          Logger.log("Arkivinställning ska ändras för gruppen");
+          update_group = "yes";          
         }
       }
     }    
@@ -189,6 +203,49 @@ function Grupper() {
     }
   }
   deleteRowsFromSpreadsheet(sheet, delete_rows);
+}
+
+
+/*
+ * Konvertera inställning om att arkivera e-brev till boolean
+ *
+ * @param {string} input - cellvärde från kalkylark
+ *
+ * @returns {string} - Om vi ska arkivera e-brev eller ej
+ */
+function convertInputForIsArchivedToBoolString(input) {
+  
+  if (input) { //Cellvärde finns
+    if ("false" == input || "nej" == input) {
+      return "false";
+    }
+    else {
+      return "true";
+    }   
+  }
+  return "false";  
+}
+
+
+/*
+ * Ta reda på om inställning för att arkivera e-post har ändrats
+ *
+ * @param {string} input - cellvärde från kalkylark
+ * @param {boolean} boolIfArchive - boolean om aktuell inställning
+ *
+ * @returns {boolean} - Om arkiveringsinställningen ska ändras eller ej
+ */
+function checkIfIsArchivedShouldChange(input, boolIfArchive) {
+   
+  input = convertInputForIsArchivedToBoolString(input);
+  
+  //Logger.log("Cellvärde för att arkivera " + input);
+  //Logger.log("Databasvärde för att arkivera " + boolIfArchive);
+  
+  if (input == boolIfArchive) {
+    return false;
+  }
+  return true;
 }
 
 
@@ -537,7 +594,8 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
     }
   }
   var customFooterText = radInfo[grd["customFooterText"]];
-  changeGroupPermissions(email, postPermission, customFooterText);  
+  var isArchived = radInfo[grd["isArchived"]];
+  changeGroupPermissions(email, postPermission, customFooterText, isArchived);  
   
   Logger.log("Slut på funktionen UpdateGroup");
 }
@@ -839,11 +897,15 @@ function addGroupMember(groupId, email, role, delivery_settings) {
  * @param {string} email - E-postadress för en grupp
  * @param {string} postPermission - Definierar vilka som ska få skicka till e-postlistan
  * @param {string} customFooterText - Text i sidfot om man så önskar för alla e-brev
+ * @param {string} isArchived - Text som definerar om e-brev ska arkiveras
  */
-function changeGroupPermissions(email, postPermission, customFooterText) {  
+function changeGroupPermissions(email, postPermission, customFooterText, isArchived) {  
   
   var customFooterText = customFooterText.trim();
   var includeCustomFooter = false;
+  
+  isArchived = convertInputForIsArchivedToBoolString(isArchived);
+  Logger.log("IsArchived " + isArchived);
   
   if (postPermission=='WRONG_INPUT') {
     postPermission = 'ANYONE_CAN_POST';
@@ -857,6 +919,8 @@ function changeGroupPermissions(email, postPermission, customFooterText) {
   }
   
   Logger.log("postPermission " + postPermission);
+  Logger.log("Include custom footer " + includeCustomFooter);
+  
   var group = AdminGroupsSettings.newGroups();
   
   group.whoCanJoin = 'INVITED_CAN_JOIN';
@@ -865,7 +929,7 @@ function changeGroupPermissions(email, postPermission, customFooterText) {
   group.allowExternalMembers = true;
   group.whoCanPostMessage = postPermission;
   group.primaryLanguage = 'sv';
-  group.isArchived = 'true';
+  group.isArchived = isArchived;
   group.messageModerationLevel = 'MODERATE_NONE';
   group.spamModerationLevel = 'MODERATE';
   group.whoCanModerateMembers = 'NONE';
@@ -933,7 +997,7 @@ function createHeaders_Grupper() {
   /*******Rad 2********************/
   // Våra värden vi vill ha som rubriker för de olika kolumnerna på rad 2
   var values_rad2 = [
-    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Sidfot", "Grupp-ID hos Google (RÖR EJ)", "Länk", "Felmeddelande"]
+    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Sidfot", "Grupp-ID hos Google (RÖR EJ)", "Länk", "Arkivera e-post", "E-post skräppostmoderator", "Felmeddelande"]
   ];
   
   // Sätter området för cellerna på rad 2 som vi ska ändra
@@ -1015,6 +1079,7 @@ function avanceradLayout() {
   var grd = GrupperRubrikData();
   
   sheet.showColumns(grd["scoutnet_list_id_send"]+1, 5);  
+  sheet.showColumns(grd["isArchived"]+1, 2);
 }
 
 
@@ -1027,6 +1092,7 @@ function enkelLayout() {
   var grd = GrupperRubrikData();
   
   sheet.hideColumns(grd["scoutnet_list_id_send"]+1, 5);  
+  sheet.hideColumns(grd["isArchived"]+1, 2);
 }
 
 
