@@ -468,7 +468,9 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   /***********************/
   
   /*****Till vilka som ska bli informerade om misstänkt spam*****/
-  var emailAdressesToSendSpamNotification = getEmailadressesToSendSpamNotification();
+  var group_moderate_content_email = radInfo[grd["group_moderate_content_email"]]; //Själva datan
+  var cell_group_moderate_content_email = selection.getCell(rad_nummer, grd["group_moderate_content_email"]+1); //Range
+  var emailAdressesToSendSpamNotification = getEmailadressesToSendSpamNotification(group_moderate_content_email, cell_group_moderate_content_email);
   /**************************************************************/
   
   /*****Vi ska flytta runt e-postadresserna mellan listorna om de finns i flera*****/
@@ -1052,10 +1054,15 @@ function createHeaders_Grupper() {
  *
  * @returns {string[]} - Lista med e-postadresser
  */
-function getEmailadressesToSendSpamNotification() {
+function getEmailadressesToSendSpamNotification(group_moderate_content_email, cell_group_moderate_content_email) {
   
   var emailAdresses = [];
-  if (typeof moderateContentEmail !=='undefined' && moderateContentEmail) {
+  
+  emailAdresses = fetchScoutnetMembersMultipleMailinglists(group_moderate_content_email, cell_group_moderate_content_email, "")
+  if (0 != emailAdresses.length) {
+    Logger.log("E-post för skräppostmoderator är angiven");
+  }
+  else if (typeof moderateContentEmail !=='undefined' && moderateContentEmail) {
     emailAdresses = fetchScoutnetMembersMultipleMailinglists(moderateContentEmail, "", "");
   }
   else { //Om man ej anger listId för en e-postlista ska användaren som kör detta program bli notifierad
