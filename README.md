@@ -2,8 +2,8 @@
 Du kan med dessa program synkronisera Google-användarkonton hos kåren med personer i Scoutnet
 samt synkronisera google-grupper med e-postlistor i Scoutnet
 Du kan använda dessa som e-postlistor eller som att lägga till att en specifik
-google-grupp ger behörighet till en specifik Team drive. Alltså automatisk synkronisering att
-t.ex Spårarledare ges behörighet till en Teamdrive för Spårare.
+google-grupp ger behörighet till en specifik "Delad enhet". Alltså automatisk synkronisering att
+t.ex Spårarledare ges behörighet till en "Delad enhet" för Spårare.
 Denna lösning använder Google Apps Script.
 
 Vid problem, fel, frågor eller tips på förbättringar eller fler funktioner som du saknar;
@@ -377,8 +377,8 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
       </tbody>
    </table>
 
-#### Google Team Drive - exempel
-Att koppla ihop grupper med delade enheter på Google Team Drive sker manuellt, men du kan använda grupperna som skapats enligt ovan för enkel uppdatering av åtkomst.
+#### Google Drive - exempel
+Att koppla ihop grupper med delade enheter på Google Drive sker manuellt, men du kan använda grupperna som skapats enligt ovan för enkel uppdatering av åtkomst.
 Om du döper om själva gruppen, t.ex. e-postadressen, _kan_ gruppen tappa åtkomst till mappen. Detta då gruppen tas bort och en ny skapas med det nya namnet.
 
 - Skapa en "Delad enhet" på Google Drive (https://drive.google.com) från ett konto med lämplig behörighet som finns med i kårens gSuite.
