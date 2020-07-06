@@ -37,9 +37,37 @@ function GrupperRubrikData() {
 
 
 /*
+ * Funktion för att ange att enbart vissa radintervall i kalkylarket ska synkroniseras
+ *
+ * Exempelvis rad 0 till 10. Helt fritt att ändra själv
+ */
+function GrupperVissaRader1() {
+  Grupper(0, 10);
+}
+
+/*
+ * Funktion för att ange att enbart vissa radintervall i kalkylarket ska synkroniseras
+ *
+ * Exempelvis rad 11 till 20. Helt fritt att ändra själv
+ */
+function GrupperVissaRader2() {
+  Grupper(11, 20);
+}
+
+/*
+ * Funktion för att ange att enbart vissa radintervall i kalkylarket ska synkroniseras
+ *
+ * Exempelvis 21 till 30. Helt fritt att ändra själv
+ */
+function GrupperVissaRader3() {
+  Grupper(21, 30);
+}
+
+
+/*
  * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
  */
-function Grupper() {
+function Grupper(start, slut) {
   
   var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper).getSheets()[0];
   var selection = sheet.getDataRange();
@@ -51,7 +79,13 @@ function Grupper() {
   
   var delete_rows = [];
   
-  for (var i = 2; i < data.length; i++) {
+  var rowsToSync = findWhatRowsToSync(start, slut, data.length);
+  start = rowsToSync.start;
+  slut = rowsToSync.slut;
+  
+  Logger.log("Startrad " + start + " slutrad " + slut);
+  
+  for (var i = start-1; i < slut; i++) {
     
     var name = data[i][grd["namn"]];
     var email = data[i][grd["e-post"]];
@@ -64,10 +98,9 @@ function Grupper() {
     
     var rad_nummer = i+1;
     
-    Logger.log('Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id + ' Grupp-ID: ' + groupId);
+    Logger.log('Rad: ' + rad_nummer + ' Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id + ' Grupp-ID: ' + groupId);
     
     var update_group = "yes";
-    
     
     if (groupId=="") { //Vi borde skapa en grupp
       
@@ -203,6 +236,34 @@ function Grupper() {
     }
   }
   deleteRowsFromSpreadsheet(sheet, delete_rows);
+}
+
+
+/*
+ * Tar reda på vilka rader i kalkylarket som ska synkroniseras
+ *
+ * @param {string} start - önskad startrad att synkronisera från
+ * @param {string} slut - önskad slutrad att synkronisera till
+ * @param {string} maxRowNumer - maximalt radnummer som går att synkronisera
+ *
+ * @returns {Object} - Objekt med start- och slutrad att synkronisera
+ */
+function findWhatRowsToSync(start, slut, maxRowNumber) {
+  
+  var minRowStart = 3;
+  
+  if (typeof start ==='undefined' || start < minRowStart) {
+    start = minRowStart; 
+  }
+  if (typeof slut ==='undefined' || slut > maxRowNumber) {
+    slut = maxRowNumber; 
+  }
+  
+  var rowsToSync = {
+    "start": start,
+    "slut": slut
+  };
+  return rowsToSync;  
 }
 
 

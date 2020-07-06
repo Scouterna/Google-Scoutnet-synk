@@ -9,7 +9,7 @@ Denna lösning använder Google Apps Script.
 Vid problem, fel, frågor eller tips på förbättringar eller fler funktioner som du saknar;
 lägg ett ärende under "Issues" eller mejla emil.ohman@scouterna.se
 I bland kommer det ny funktionalitet, så håll utkik på en ny version genom att trycka på knappen
-**Watch** uppe till höger på sidan för att du kunna bli notifieradvid en ny version.
+**Watch** uppe till höger på sidan för att du kunna bli notifierad vid en ny version.
 
 Du kan ladda ner den senaste versionen via
 https://github.com/Scouterna/Google-Scoutnet-synk/releases/latest och där kan
@@ -44,7 +44,8 @@ för instruktion om installation och funktionalitet.
    starten finns endast en som heter Code.gs. Byt namn på den till "Användare" och
    ta bort den koden som står i filen.
 1. Klistra in koden från filen Anvandare.gs och spara (Ctrl+S).
-1. Gör samma sak för de andra filerna som slutar på .gs
+1. Gör samma sak för de andra filerna som slutar på .gs genom att skapa nya filer och
+   klistra in koden för respektive.
 1. Under "Resources"/"Advanced Google Services" behöver du aktivera "Admin Directory API",
    "Google Sheets API" och "Group Settings API". På denna sida finns också en länk till
    "Google API Console" (https://console.cloud.google.com/apis/library?project) där du
@@ -59,7 +60,12 @@ för instruktion om installation och funktionalitet.
    och som mestadels beror på antal grupper och e-postadresser i dessa.
    Det bör räcka med att synkronisera användare en gång per dygn och samma för grupper,
    förslagsvis mitt i natten.
-   Synkroniseringen bör gå under minuten.
+
+   Om du har många användare och grupper som ska synkroniseras kan det hända att det tar
+   för lång tid för programmet att klara av allt under en körning. Du kan då ställa in en
+   körning av "Användare" och en för "Grupper". Om körningen för "Grupper" trots allt tar
+   för lång tid finns i Grupper.gs funktionerna "GrupperVissaRader1" osv. som du kan ställa
+   in att enbart vissa rader i kalkylarket för att synkronisera grupper ska synkroniseras.
 
    Du kan här trycka på "notifications" och ställa in att att du får felmeddelanden om något
    skulle gå fel. Om du vill att synkroniseringen av användarkonton och grupper ska ske
@@ -76,10 +82,10 @@ för instruktion om installation och funktionalitet.
 
 ## Manual
 ### Google användarkonton - synkronisering med Scoutnet
-Synkroniserar personer som som är med på e-postlistor från Scoutnet genom att
-man anger id-nummret för e-postlistan i filen Konfiguration.gs. Det går bra att ange
-flera e-postlistor med kommatecken samt skriva kommentarer med parenteser inom
-variabelnamnet. Se exemplen i filen.
+Synkroniserar personer som är med på e-postlistor från Scoutnet genom att man
+anger id-nummret för e-postlistan i filen Konfiguration.gs i variabeln "userAccountConfig".
+Det går bra att ange flera e-postlistor med kommatecken samt skriva kommentarer med
+parenteser inom variabelnamnet. Se exemplen i filen.
 
 Om inget id-nummer för en e-postlista anges så tolkar programmet det som alla
 personer i kåren som har en avdelningsroll eller roll på kårnivå och skapar
@@ -139,12 +145,9 @@ som ska läggas till
 Det går att enkelt kontrollera vilka som är med i en google-grupp för att se att
 man har gjort rätt genom att trycka på länken till höger om varje e-postadress i kalkylarket.
 
-Om du vill att en person ska vara med i en Google-grupp utan att beröras av att tas
-bort vid en synkronisering lägger du till e-postadressen som ägare av gruppen.
-
-Du kan också lägga till e-postadresser manuellt i kalkylarket om du vill. I stället
-för att ange listid på något ställe så anger du en e-postadress eller flera med komma
-emellan. Det går bra att både använda listid och e-postadress till samma lista.
+Du kan också lägga till e-postadresser manuellt till en grupp i kalkylarket om du vill.
+I stället för att ange listid på något ställe så anger du en e-postadress eller flera med
+komma emellan. Det går bra att både använda listid och e-postadress till samma lista.
 
 #### Enkelt och avancerat läge
 Det går att ställa in om du vill visa samtliga kolumner i kalkylarket för olika
@@ -159,7 +162,7 @@ Bra till t.ex en e-postlista för ledare eller utmanare så att alla vet hur de 
 för att skicka till alla. Detta kanske man glömmer bort att nämna för nya och om man vill
 slippa tänka på att komma ihåg att nämna det när det kommer någon ny så står det då i
 alla e-brev som de får skickat till sig via e-postlistan.
-Förtydligar också vilken lista som brevet skickades till och vilka som var mottagarna.
+Kan också förtydliga vilken lista som brevet skickades till och vilka som var mottagarna.
 
 #### Begränsa åtkomst för att skicka och ta emot e-post
 Om du vill kan du ställa in att enbart vissa personer ska kunna skicka till en lista,
