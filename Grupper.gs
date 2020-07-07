@@ -965,20 +965,20 @@ function addGroupMember(groupId, email, role, delivery_settings) {
 function changeGroupPermissions(email, postPermission, customFooterText, isArchived) {  
   
   var customFooterText = customFooterText.trim();
-  var includeCustomFooter = false;
+  var includeCustomFooter = "false";
   
   isArchived = convertInputForIsArchivedToBoolString(isArchived);
   Logger.log("IsArchived " + isArchived);
   
-  if (postPermission=='WRONG_INPUT') {
-    postPermission = 'ANYONE_CAN_POST';
+  if (postPermission=="WRONG_INPUT") {
+    postPermission = "ANYONE_CAN_POST";
   }
   
   if (customFooterText) {
-    includeCustomFooter = true;
+    includeCustomFooter = "true";
   }
   else {
-    customFooterText = '';
+    customFooterText = "";
   }
   
   Logger.log("postPermission " + postPermission);
@@ -986,25 +986,25 @@ function changeGroupPermissions(email, postPermission, customFooterText, isArchi
   
   var group = AdminGroupsSettings.newGroups();
   
-  group.whoCanJoin = 'INVITED_CAN_JOIN';
-  group.whoCanViewMembership = 'ALL_MANAGERS_CAN_VIEW';
-  group.whoCanViewGroup = 'ALL_MANAGERS_CAN_VIEW';
-  group.allowExternalMembers = true;
+  group.whoCanJoin = "INVITED_CAN_JOIN";
+  group.whoCanViewMembership = "ALL_MANAGERS_CAN_VIEW";
+  group.whoCanViewGroup = "ALL_MANAGERS_CAN_VIEW";
+  group.allowExternalMembers = "true";
   group.whoCanPostMessage = postPermission;
-  group.primaryLanguage = 'sv';
+  group.primaryLanguage = "sv";
   group.isArchived = isArchived;
-  group.messageModerationLevel = 'MODERATE_NONE';
-  group.spamModerationLevel = 'MODERATE';
-  group.whoCanModerateMembers = 'NONE';
-  group.whoCanModerateContent = 'OWNERS_ONLY';
-  group.replyTo = 'REPLY_TO_SENDER';
+  group.messageModerationLevel = "MODERATE_NONE";
+  group.spamModerationLevel = "MODERATE";
+  group.whoCanModerateMembers = "NONE";
+  group.whoCanModerateContent = "OWNERS_ONLY";
+  group.replyTo = "REPLY_TO_SENDER";
   group.includeCustomFooter = includeCustomFooter;
   group.customFooterText = customFooterText;
   //group.membersCanPostAsTheGroup = true;  //TODO
-  group.includeInGlobalAddressList = true;
-  group.whoCanLeaveGroup = 'NONE_CAN_LEAVE';
-  group.whoCanContactOwner = 'ALL_MANAGERS_CAN_CONTACT';
-  group.whoCanDiscoverGroup = 'ALL_MEMBERS_CAN_DISCOVER';
+  group.includeInGlobalAddressList = "true";
+  group.whoCanLeaveGroup = "NONE_CAN_LEAVE";
+  group.whoCanContactOwner = "ALL_MANAGERS_CAN_CONTACT";
+  group.whoCanDiscoverGroup = "ALL_MEMBERS_CAN_DISCOVER";
   
   AdminGroupsSettings.Groups.patch(group, email);
 }
