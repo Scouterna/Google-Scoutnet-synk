@@ -150,7 +150,7 @@ function Grupper(start, slut) {
       if (name=="" && email=="") { //Ta bort gruppen
         
         Logger.log("Försöker ta bort " + groupId + " rad " + rad_nummer);
-        AdminDirectory.Groups.remove(groupId);
+        deleteGroup(groupId);
         Logger.log(groupId + " raderades");
         
         delete_rows.push(rad_nummer);
@@ -373,6 +373,17 @@ function createGroup(email, name) {
 
 
 /*
+ * Tar bort en grupp med angiven e-postadress
+ *
+ * @param {string} groupId - Googles id för en grupp
+ */
+function deleteGroup(groupId) {
+  Logger.log("Försöker radera grupp " + groupId);
+  AdminDirectory.Groups.remove(groupId);
+}
+
+
+/*
  * Returnera fullständig information om en medlem i en grupp
  *
  * @param {string} groupId - Googles id för en grupp
@@ -576,7 +587,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
       
     if (!contains(allMembers_email, group_members[i].email)) {  
       Logger.log(group_members[i].email + " Borde tas bort från " + groupId  + "Google e-postlista");
-      AdminDirectory.Members.remove(groupId, group_members[i].email);
+      deleteGroupMember(groupId, group_members[i].email);
     }
     group_members_email.push(group_members[i].email);
   }   
@@ -733,7 +744,8 @@ function updateGroupMember(groupId, email, role, delivery_settings) {
     AdminDirectory.Members.update(settings, groupId, email);
   }
   catch (e) {
-    Logger.log("Kunde inte ändra medlemens rolltyp för e-postadress:" + email); 
+    Logger.log("Kunde inte ändra medlemens rolltyp för e-postadress:" + email);
+    deleteGroupMember(groupId, email);    
   }
 }
 
@@ -950,6 +962,27 @@ function addGroupMember(groupId, email, role, delivery_settings) {
       //Logger.log("Role:" + role);
       //Logger.log("Devlivery_settings:" + delivery_settings);
     }
+  }
+}
+
+
+/*
+ * Tar bort en medlem tillhörande en specifik grupp
+ *
+ * @param {string} groupId - Gruppens id hos Google
+ * @param {string} email - E-postadress att lägg till
+ */
+function deleteGroupMember(groupId, email) {
+  
+  Logger.log("groupId " + groupId);
+  Logger.log("email " + email);  
+  
+  try {
+    Logger.log("Försöker ta bort " + email);
+    AdminDirectory.Members.remove(groupId, email);
+  }
+  catch (e) {      
+    Logger.log("Kan inte ta bort till e-postadress:" + email + " pga " + e.message);
   }
 }
 

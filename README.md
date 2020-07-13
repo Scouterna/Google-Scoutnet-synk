@@ -120,10 +120,9 @@ där X motsvarar en siffra från 1-5.
   underorganisationen "/Scoutnet/Avstängda"
   
 ### Google grupper - synkronisering med Scoutnet
-I kalkylarket kan du ställa in namn på de olika google-grupperna, dess e-postadress,
+I ett Google kalkylark kan du ställa in namn på google-grupper, dess e-postadress,
 vilken e-postlista i Scoutnet de ska synkroniseras mot samt hur den ska synkronisera
 i fältet Synkinställning.
-
 Du kan i cellera för listid kommaseparera flera listor om du vill använda flera listor
 från Scoutnet för att bygga upp en större egen. Det går också bra att skriva kommentarer
 med parenteser.
