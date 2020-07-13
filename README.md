@@ -52,6 +52,8 @@ för instruktion om installation och funktionalitet.
    "Google API Console" (https://console.cloud.google.com/apis/library?project) där du
    också behöver aktivera tjänsterna. Aktivera där "Admin SDK", "Google Sheets API", "Group Settings API".
 1. Gör inställningar enligt nedan för respektive fil.
+   [Användare](#inställningar-för-att-komma-igång-i-konfigurationgs), 
+   [Grupper](#inställningar-för-att-komma-igång-i-konfigurationgs-1)
 1. Kör programmet en gång genom att trycka på filen Användare.gs och välja funktionen
    "AnvändareOchGrupper" upp bland menyn och tryck sedan på playknappen.
 1. Du kan nu tidinställa hur ofta som programmen ska köra/synkronisera genom att trycka
