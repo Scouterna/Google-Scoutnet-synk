@@ -36,7 +36,8 @@ för instruktion om installation och funktionalitet.
    Det går också att aktivera kontaktdelning inom kåren vilket kan underlätta
    kommunikationen internt.
 1. Det går också att sätta på / stänga av inställningar under Admin/Appar/Ytterligare
-   tjänster från Google.
+   tjänster från Google. Om ni har stängt av det tidigare behöver "Google Cloud Platform"
+   aktiveras för den användare som ska köra detta program.
 1. Besök script.google.com när du är inloggad på kårens webbansvariges Google-konto
    eller annat lämpligt Google-konto med hög behörighet på kårens G Suite.
 1. Tryck på "Nytt Script" och namnge sedan projektet till något lämpligt, t.ex Scoutnet.
@@ -65,7 +66,7 @@ för instruktion om installation och funktionalitet.
    för lång tid för programmet att klara av allt under en körning. Du kan då ställa in en
    körning av "Användare" och en för "Grupper". Om körningen för "Grupper" trots allt tar
    för lång tid finns i Grupper.gs funktionerna "GrupperVissaRader1" osv. som du kan ställa
-   in att enbart vissa rader i kalkylarket för att synkronisera grupper ska synkroniseras.
+   in att enbart vissa rader i kalkylarket ska synkroniseras.
 
    Du kan här trycka på "notifications" och ställa in att att du får felmeddelanden om något
    skulle gå fel. Om du vill att synkroniseringen av användarkonton och grupper ska ske
@@ -104,7 +105,7 @@ Om det finns personer som har samma namn (för- och efternamn) angivet i Scoutne
 kommer de som skapas som nr2 osv skapas på formen fornamn.efternamnX@domännamn.se
 där X motsvarar en siffra från 1-5.
 
-#### Inställningar (i Konfiguration.gs)
+#### Inställningar för att komma igång (i Konfiguration.gs)
 - Ändra kårens domän namn på variabeln "domain"
 - Ändra kårens grupp-id som finns angivet i Scoutnet på sidan för Webbkoppling
 - Ändra api-nyckeln som under Webbkoppling i Scoutnet står under
@@ -181,9 +182,10 @@ att ange list-ID under rubrikerna "Kan skicka" & "Kan ta emot". Du behöver dock
 under alla tre typerna om du inte vill. Du kanske vill att några ska kunna skicka och ta emot,
 till en lista och några andra som bara ska få skicka.
 
-#### Inställningar (i Konfiguration.gs)
+#### Inställningar för att komma igång (i Konfiguration.gs)
 - Ändra kårens domännamn på variabeln "domain"
-- Ändra kårens grupp-id som finns angivet i Scoutnet på sidan för Webbkoppling
+- Ändra kårens "Kår-ID för webbtjänster" på variabeln "groupId. Hittas i Scoutnet på sidan för
+  Webbkoppling
 - Ändra api-nyckeln med namn api_key_mailinglists som hittas i Scoutnet under
   Webbkoppling under "Get a csv/xls/json list of members, based on mailing lists you have set up"
 - Skapa ett Google Kalkylark och klistra in webbadressen vid variabeln "spreadsheetUrl_Grupper"
@@ -191,7 +193,7 @@ till en lista och några andra som bara ska få skicka.
   "moderateContentEmail". Om inget anges skickas e-breven till den användare som kör detta program.
 - Om du gör detta för ett distrikt. Ändra variabeln "organisationType" från "group" till "district".
 - Spara filen.
-- Välj funktionen createHeaders_Grupper i Grupper.gs och kör den.
+- Välj funktionen "createHeaders_Grupper" i Grupper.gs och kör den.
 - Fyll i övriga fält i filen Konfiguration.gs vid behov och möjligt.
 - Klart.
 
@@ -223,7 +225,8 @@ till en lista och några andra som bara ska få skicka.
 1. Lägg ett ärende under "Issues" eller mejla emil.ohman@scouterna.se
 
 ### Hur gör jag för att...?
-Nedan finns en del exempel på hur du gör för att ställa in programmen så som du vill.
+Nedan finns en del exempel med olika Scoutnet-id och e-postadresser på hur du gör för att
+ställa in programmen så som du vill.
 Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.ohman@scouterna.se
 
 #### Användare - inställningar exempel
