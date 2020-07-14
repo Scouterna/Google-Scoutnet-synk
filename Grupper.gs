@@ -373,7 +373,7 @@ function createGroup(email, name) {
 
 
 /*
- * Tar bort en grupp med angiven e-postadress
+ * Tar bort en grupp med angivet id för en grupp
  *
  * @param {string} groupId - Googles id för en grupp
  */
@@ -1151,10 +1151,12 @@ function createHeaders_Grupper() {
 function getEmailadressesToSendSpamNotification(group_moderate_content_email, cell_group_moderate_content_email) {
   
   var emailAdresses = [];
+  var boolModerateGroupEmail = false;
   
   emailAdresses = fetchScoutnetMembersMultipleMailinglists(group_moderate_content_email, cell_group_moderate_content_email, "")
   if (0 != emailAdresses.length) {
     Logger.log("E-post för skräppostmoderator är angiven");
+    boolModerateGroupEmail = true;
   }
   else if (typeof moderateContentEmail !=='undefined' && moderateContentEmail) {
     emailAdresses = fetchScoutnetMembersMultipleMailinglists(moderateContentEmail, "", "");
@@ -1166,6 +1168,31 @@ function getEmailadressesToSendSpamNotification(group_moderate_content_email, ce
     emailAdresses.push(tmp_member);
   }
   emailAdresses = getMemberlistsMemberEmail(emailAdresses, "m-"); //Bara primäradress från Scoutnet
+  
+  var tmp_emailAdresses = [];
+  
+  for (var i = 0; i < emailAdresses.length; i++) {
+    if (checkIfEmailIsAGroup(emailAdresses[i])) {
+      cell_group_moderate_content_email.setBackground("red");
+    }
+    else {
+      tmp_emailAdresses.push(emailAdresses[i]);
+    }
+  }
+  
+  if (tmp_emailAdresses.length == emailAdresses.length) {
+    if (boolModerateGroupEmail) {
+      //E-post för skräppostmoderator är angiven
+      cell_group_moderate_content_email.setBackground("white");
+    }
+    else {
+      //E-post för skräppostmoderator är ej angiven
+      cell_group_moderate_content_email.setBackground("yellow");
+    }
+  }
+  emailAdresses = tmp_emailAdresses;
+  
+  Logger.log("EmailAdresses");
   Logger.log(emailAdresses);
   return emailAdresses;
 }
@@ -1236,6 +1263,23 @@ function checkEmailFormat(email) {
        return true;
   }
   return false;  
+}
+
+
+/*
+ * Returnerar true eller false om en e-post är en googlegrupp
+ *
+ * @param {string} email - E-postadress
+ *
+ * @returns {boolean} - Om e-postadressen är en googlegrupp
+ */
+function checkIfEmailIsAGroup(email) {
+  
+  if (!checkEmailFormat(email)) {
+    Logger.log("Ogiltigt format på e-postadress");
+    return false;
+  }
+  return checkIfGroupExists(email);  
 }
 
 

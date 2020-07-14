@@ -192,6 +192,8 @@ till en lista och några andra som bara ska få skicka.
 - Skapa ett Google Kalkylark och klistra in webbadressen vid variabeln "spreadsheetUrl_Grupper"
 - Ändra vart e-post som misstänkts för skräppost ska skickas genom att uppdatera variabeln
   "moderateContentEmail". Om inget anges skickas e-breven till den användare som kör detta program.
+  Det går inte att ange en av kårens grupper som mottagare, men enskilda e-postadresser och
+  Scoutnet-id går bra.
 - Om du gör detta för ett distrikt. Ändra variabeln "organisationType" från "group" till "district".
 - Spara filen.
 - Välj funktionen "createHeaders_Grupper" i Grupper.gs och kör den.
