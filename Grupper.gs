@@ -214,6 +214,12 @@ function Grupper(start, slut) {
           Logger.log("E-post ej ändrad för grupppen " + email);
           var cell=selection.getCell(rad_nummer, grd["e-post"]+1);
           cell.setBackground("white");
+
+          var cell=selection.getCell(rad_nummer, grd["cell_url"]+1).getValue();
+          if (cell=="") {
+            Logger.log("Denna cell för länk är tom och ska upppdateras");
+            setCellValueCellUrl(selection, rad_nummer, grd["cell_url"], email);
+          }
         }
         
         group = AdminGroupsSettings.Groups.get(email);
