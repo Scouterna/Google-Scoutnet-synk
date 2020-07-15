@@ -841,7 +841,6 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   //Om e-post finns i "skicka admin" och "båda admin" ska de tas bort ur "skicka admin"
   allMembers_send_email_admin = getListsWithUniqueElements(allMembers_both_email_admin, allMembers_send_email_admin);
   
-  
   //Om e-post finns i "båda" och "emailAdressesToSendSpamNotification" ska de tas bort ur "båda"
   allMembers_both_email = getListsWithUniqueElements(emailAdressesToSendSpamNotification, allMembers_both_email);
   
@@ -850,6 +849,25 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   
   //Om e-post finns i "ta emot" och "emailAdressesToSendSpamNotification" ska de tas bort ur "ta emot"
   allMembers_receive_email = getListsWithUniqueElements(emailAdressesToSendSpamNotification, allMembers_receive_email);
+  
+  
+  //Om e-post är en grupp och finns i "båda" ska den tas bort ur "båda" och läggas till i "ta emot"
+  var tmp_Emails = getEmailsSortedAsGroupOrNot(allMembers_both_email);
+  var tmp_groupEmails = tmp_Emails[0];
+  var tmp_notGroupEmails = tmp_Emails[1];
+  allMembers_both_email = tmp_notGroupEmails;
+  allMembers_receive_email.push.apply(allMembers_receive_email, tmp_groupEmails);
+  
+  //Om e-post är en grupp och finns i "skicka" ska den tas bort ur "skicka" och informera i loggen
+  var tmp_Emails = getEmailsSortedAsGroupOrNot(allMembers_send_email);
+  var tmp_groupEmails = tmp_Emails[0];
+  var tmp_notGroupEmails = tmp_Emails[1];
+  allMembers_send_email = tmp_notGroupEmails;
+  if (0 != tmp_groupEmails.length) {
+    Logger.log("Följande e-postadresser står i kolumnen skicka.");
+    Logger.log("De är dock grupper och får ej stå med där och kommer tas bort");
+    Logger.log(tmp_groupEmails);
+  }
   
   /*****************************/
   
@@ -1263,6 +1281,30 @@ function checkEmailFormat(email) {
        return true;
   }
   return false;  
+}
+
+
+/*
+ * Returnerar en lista med e-postadresser som tillhör googlegrupper
+ *
+ * @param {string[]} emails - Lista med e-postadresser
+ *
+ * @returns {string[groupEmails, notGroupEmails]} - Lista med e-postadresser sorterade som grupp eller ej
+ */       
+function getEmailsSortedAsGroupOrNot(emails) {
+  
+  var groupEmails = [];
+  var notGroupEmails = [];
+  
+  for (var i = 0; i < emails.length; i++) {    
+    if(checkIfEmailIsAGroup(emails[i])) {
+      groupEmails.push(emails[i]);
+    }
+    else {
+      notGroupEmails.push(emails[i]);
+    }
+  }
+  return [groupEmails, notGroupEmails];
 }
 
 
