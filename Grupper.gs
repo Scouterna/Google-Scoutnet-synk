@@ -349,6 +349,7 @@ function setCellValueCellUrl(selection, rad_nummer, column, email) {
   var list_name = arr[0];
   
   var cell_url = '=HYPERLINK("https://groups.google.com/a/' + domain + '/g/' + list_name + '/members";"Länk")';
+  
   cell.setValue(cell_url);
 }
 
@@ -966,7 +967,7 @@ function getMemberlistsMemberEmail(members, synk_option) {
  * @param {string} delivery_settings - Om person ska ta emot e-post eller ej
  */
 function addGroupMember(groupId, email, role, delivery_settings) {
-    
+  
   var member = {
     delivery_settings: delivery_settings,
     email: email,
