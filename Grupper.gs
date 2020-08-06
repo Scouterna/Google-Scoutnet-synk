@@ -400,15 +400,25 @@ function deleteGroup(groupId) {
  */
 function getGroupMember(groupId, memberkey) {
   
-  //Logger.log("Försöker lägga till i grupp:" + groupId);
+  //Logger.log("Försöker hämta gruppmedlem:" + groupId);
   //Logger.log("Försöker med memberKey:" + memberkey);
-  try {
-    var groupMember = AdminDirectory.Members.get(groupId, memberkey);
-    return groupMember;
+  
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen getGroupMember körs " + n);
+    
+    try {
+      var groupMember = AdminDirectory.Members.get(groupId, memberkey);
+      //Logger.log(groupMember);
+      return groupMember;
+    }
+    catch (e) {
+      Logger.log("Problem med att anropa Members.get i getGroupMember med:" + memberkey);
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
   }
-  catch (e) {
-    Logger.log("Kunde inte lägga till e-postadress:" + memberkey);
-  }  
 }
 
 
