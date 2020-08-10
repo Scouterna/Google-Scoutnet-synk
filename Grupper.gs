@@ -222,7 +222,7 @@ function Grupper(start, slut) {
           }
         }
         
-        group = AdminGroupsSettings.Groups.get(email);
+        group = getAdminGroupSettings(email);
         if (customFooterText != group.customFooterText) {
           Logger.log("Sidfot ska ändras för gruppen");
           update_group = "yes";
@@ -1230,6 +1230,33 @@ function getEmailadressesToSendSpamNotification(group_moderate_content_email, ce
   Logger.log("EmailAdresses");
   Logger.log(emailAdresses);
   return emailAdresses;
+}
+
+
+/*
+ * Returnera AdminGroupSettings
+ *
+ * @param {string} email - E-postadress för gruppen
+ *
+ * @returns {object} - En Googlegrupp
+ */
+function getAdminGroupSettings(email) {
+  
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen getAdminGroupSettings körs " + n);
+    
+    try {
+      var group = AdminGroupsSettings.Groups.get(email);
+      return group;
+    }
+    catch (e) {
+      Logger.log("Problem med att anropa AdminGroupsSettings.Groups.get i getAdminGroupSettings med:" + email);
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
 }
 
 
