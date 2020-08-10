@@ -1074,7 +1074,7 @@ function changeGroupPermissions(email, postPermission, customFooterText, isArchi
   group.whoCanContactOwner = "ALL_MANAGERS_CAN_CONTACT";
   group.whoCanDiscoverGroup = "ALL_MEMBERS_CAN_DISCOVER";
   
-  AdminGroupsSettings.Groups.patch(group, email);
+  patchAdminGroupSettings(group, email);
 }
 
 
@@ -1230,6 +1230,32 @@ function getEmailadressesToSendSpamNotification(group_moderate_content_email, ce
   Logger.log("EmailAdresses");
   Logger.log(emailAdresses);
   return emailAdresses;
+}
+
+
+/*
+ * Patcha AdminGroupSettings
+ *
+ * @param {object} group - Gruppinställningar
+ * @param {string} email - E-postadress för gruppen
+ */
+function patchAdminGroupSettings(group, email) {
+  
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen patchAdminGroupSettings körs " + n);
+    
+    try {
+      AdminGroupsSettings.Groups.patch(group, email);
+      return;
+    }
+    catch (e) {
+      Logger.log("Problem med att anropa AdminGroupsSettings.Groups.patch i patchAdminGroupSettings med:" + email);
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
 }
 
 
