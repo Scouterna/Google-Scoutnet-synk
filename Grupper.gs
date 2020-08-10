@@ -158,7 +158,7 @@ function Grupper(start, slut) {
       }
       else if (email=="") { //Om tom, hämta e-postadressen från systemet och sätt tillbaka den
         
-        var tmp_usr = AdminDirectory.Groups.get(groupId);
+        var tmp_usr = getAdminDirectoryGroup(groupId);
         var email = tmp_usr.email;
         var cell=selection.getCell(rad_nummer,grd["e-post"]+1);
         cell.setValue(email);
@@ -166,7 +166,7 @@ function Grupper(start, slut) {
       }
       else if (email!="") { //Kontrollerar om vi behöver uppdatera
         
-        var group = AdminDirectory.Groups.get(groupId);
+        var group = getAdminDirectoryGroup(groupId);
                 
         if (email!=group.email) { //E-postadressen har ändrats
           
@@ -373,7 +373,7 @@ function createGroup(email, name) {
             
   AdminDirectory.Groups.insert(tmp_group);
             
-  var group = AdminDirectory.Groups.get(email);
+  var group = getAdminDirectoryGroup(email);
   
   return group;
 }
@@ -1250,6 +1250,33 @@ function patchAdminGroupSettings(group, email) {
     }
     catch (e) {
       Logger.log("Problem med att anropa AdminGroupsSettings.Groups.patch i patchAdminGroupSettings med:" + email);
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
+}
+
+
+/*
+ * Returna en grupp via AdminDirectory
+ *
+ * @param {string} groupId - Id för gruppen
+ *
+ * @returns {object} - En Googlegrupp
+ */
+function getAdminDirectoryGroup(groupKey) {
+  
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen getAdminDirectoryGroup körs " + n);
+    
+    try {
+      var group = AdminDirectory.Groups.get(groupKey);
+      return group;
+    }
+    catch (e) {
+      Logger.log("Problem med att anropa AdminDirectory.Groups.get i getAdminDirectoryGroup med:" + groupKey);
       if (n == 5) {
         throw e;
       } 
