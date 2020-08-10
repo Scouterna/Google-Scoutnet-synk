@@ -207,7 +207,7 @@ function Grupper(start, slut) {
           var tmp_group = {
             name: name
           };
-          patchAdminDirectoryGroup(group, groupId);
+          patchAdminDirectoryGroup(tmp_group, groupId);
         }
         else if (email == group.email) { //Om e-posten är oförändrad. Behöver ändra bakgrund om man
           //ändrat till en ogiltig e-postadress och sen ändrar tillbaka
