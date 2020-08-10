@@ -207,7 +207,7 @@ function Grupper(start, slut) {
           var tmp_group = {
             name: name
           };
-          AdminDirectory.Groups.patch(tmp_group, groupId);
+          patchAdminDirectoryGroup(group, groupId);
         }
         else if (email == group.email) { //Om e-posten är oförändrad. Behöver ändra bakgrund om man
           //ändrat till en ogiltig e-postadress och sen ändrar tillbaka
@@ -1250,6 +1250,32 @@ function patchAdminGroupSettings(group, email) {
     }
     catch (e) {
       Logger.log("Problem med att anropa AdminGroupsSettings.Groups.patch i patchAdminGroupSettings med:" + email);
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
+}
+
+
+/*
+ * Patcha AdminDirectoryGroup
+ *
+ * @param {object} group - Gruppinställningar
+ * @param {string} groupId - Id för gruppen
+ */
+function patchAdminDirectoryGroup(group, groupId) {
+  
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen patchAdminDirectoryGroup körs " + n);
+    
+    try {
+      AdminDirectory.Groups.patch(tmp_group, groupId);
+      return;
+    }
+    catch (e) {
+      Logger.log("Problem med att anropa AdminDirectory.Groups.patch i patchAdminDirectoryGroup med:" + groupId);
       if (n == 5) {
         throw e;
       } 
