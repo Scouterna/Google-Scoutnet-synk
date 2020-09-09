@@ -70,7 +70,7 @@ function Anvandare() {
         var obj = allMembers.find(obj => obj.member_no == membersInAList[i].member_no); //Leta upp kontot i listan övar alla konton 
         //anledningen till att inte använda objektet från epostlistan är att det finns bara begränsad information i det objektet
 
-        var GoUser = useraccounts.find(u => u.externalIds.some(extid => extid.type === "organization" && extid.value === obj.member_no)); // leta upp befintligt Googlekonto som representerar rätt objekt
+        var GoUser = useraccounts.find(u => u.externalIds !== undefined && u.externalIds.some(extid => extid.type === "organization" && extid.value === obj.member_no)); // leta upp befintligt Googlekonto som representerar rätt objekt
         if(GoUser) {
         // Användaren fanns i listan
           const ia = useraccounts.length
