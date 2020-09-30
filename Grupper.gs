@@ -1503,7 +1503,7 @@ function TestListAllGroups() {
     if (groups) {
       for (var i = 0; i < groups.length; i++) {
         var group = groups[i];
-        Logger.log('%s (%s)', group.name, group.email);
+        Logger.log('%s (%s), %s', group.name, group.email, group.id);
       }
     } else {
       Logger.log('Inga grupper hittades.');
