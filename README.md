@@ -311,14 +311,16 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
    
 *  Jag vill ha följande e-postlista
    * Vem som helst ska kunna skicka till listan.
-   * Alla scouter på avdelningen ska kunna ta emot från listan, men listan ska endast skicka till föräldrarnas e-postadresser för scouterna.
-   * Alla ledare på avdelningenska få alla mejl på listan, men listan ska endast skickas till deras e-postkonto hos kåren och inte till någon privat e-postadress.
+   * Alla scouter på avdelningen ska ta emot alla e-brev från listan, men listan ska endast skicka till föräldrarnas e-postadresser för scouterna.
+   * Alla ledare på avdelningen ska ta emot alla e-brev från listan, men listan ska endast skicka till deras e-postkonto hos kåren och inte till någon privat e-postadress.
       
    Gör följande inställningar i kalkylarket
+   I exemplet är det minavdelning@hasselbyscout.se som ska användas som följande e-postlista.
 
    <table>
       <thead>
          <tr>
+            <th colspan=1></th>
             <th colspan=2>Kan skicka och ta emot</th>
             <th colspan=2>Kan skicka</th>
             <th colspan=2>Kan ta emot</th>
@@ -326,6 +328,7 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
       </thead>
       <tbody>
          <tr>
+            <td>E-post</td>
             <td>Scoutnet-id</td>
             <td>Synkinställning</td>
             <td>Scoutnet-id</td>
@@ -334,6 +337,7 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
             <td>Synkinställning</td>
          </tr>
          <tr>
+            <td>ledareavdelning@hasselbyscout.se</td>
             <td></td>
             <td></td>
             <td></td>
@@ -342,11 +346,12 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
             <td>@</td>
          </tr>
          <tr>
+            <td>minavdelning@hasselbyscout.se</td>
             <td></td>
             <td></td>
             <td></td>
             <td></td>
-            <td>1910&rule_id=1940 (id för avdelningen och regel för scouter på avdelningen), [e-postadressen till e-postlistan på raden ovan]</td>
+            <td>1910&rule_id=1940 (id för avdelningen och regel för scouter på avdelningen), ledareavdelning@hasselbyscout.se</td>
             <td>-f</td>
          </tr>
       </tbody>
