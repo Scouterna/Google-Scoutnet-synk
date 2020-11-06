@@ -175,7 +175,7 @@ ta emot" så är listan helt publik och vem som helst kan skicka till den. Du ka
 som det vanligaste alternativet.
 Om du däremot önskar att bara specifika personer ska få skicka till listan så anger du
 något Scoutnet-id i cellen under "Kan skicka". Om du önskar att bara kårens e-postdresser
-(de e-postkonton som finns i kårens GSuite) ska kunna skicka till en lista så skriver
+(de e-postkonton som finns i kårens Google Workspace) ska kunna skicka till en lista så skriver
 du in ett "@" (snabela) i rutan "Scoutnet-id" under rukriken "Kan skicka".
 
 Om du vill kan du också specificera vilka som ska få skicka och ta emot för en lista genom
@@ -430,7 +430,7 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
 Att koppla ihop grupper med delade enheter på Google Drive sker manuellt, men du kan använda grupperna som skapats enligt ovan för enkel uppdatering av åtkomst.
 Om du döper om själva gruppen, t.ex. e-postadressen, _kan_ gruppen tappa åtkomst till mappen. Detta då gruppen tas bort och en ny skapas med det nya namnet.
 
-- Skapa en "Delad enhet" på Google Drive (https://drive.google.com) från ett konto med lämplig behörighet som finns med i kårens gSuite.
+- Skapa en "Delad enhet" på Google Drive (https://drive.google.com) från ett konto med lämplig behörighet som finns med i kårens Google Workspace.
 - Lägg till medlemmar till den delade enheten, du kan ange grupper som skapats ovan som medlemmar.
 
 ### Felmeddelanden och förslag till lösning

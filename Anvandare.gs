@@ -20,15 +20,16 @@ function Anvandare() {
   var defaultOrgUnitPath = "/Scoutnet";
   var suspendedOrgUnitPath = defaultOrgUnitPath + "/" + "Avstängda";
   
-  var allMembers = fetchScoutnetMembers(); //Alla medlemmar med alla attribut som finns i APIt för konton
-  Logger.log("AllMembers.length by fetchScoutnetMembers = " + allMembers.length);
-  var useraccounts = getGoogleAccounts(defaultOrgUnitPath);
-    
-  var MembersProcessed = [];
+  if ("group" == organisationType) {
+    var allMembers = fetchScoutnetMembers(); //Alla medlemmar med alla attribut som finns i APIt för konton
+    Logger.log("AllMembers.length by fetchScoutnetMembers = " + allMembers.length);
+    Logger.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    Logger.log("Antal medlemmar i scoutnet = % " , allMembers.length);
+  }
   
-  Logger.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-  Logger.log("Antal medlemmar i scoutnet = % " , allMembers.length);
-
+  var useraccounts = getGoogleAccounts(defaultOrgUnitPath);
+  
+  var MembersProcessed = [];
   
   for (var p = 0; p < userAccountConfig.length; p++) { //Gå igenom Listorna som är definierade i Konfiguration.gs, avsnitt "userAccountConfig"
     
@@ -53,7 +54,7 @@ function Anvandare() {
     if (scoutnetListId) {
       membersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnetListId, "", "");
     }
-    else { //Om man ej anger listId för en e-postlista
+    else if ("group" == organisationType) { //Om man ej anger listId för en e-postlista; endast för kårer, ej distrikt
       membersInAList = getScoutleaders(allMembers);
     }
     Logger.log("MembersInAlist antal personer= " + membersInAList.length);
@@ -67,9 +68,13 @@ function Anvandare() {
       {
         Logger.log("Användaren ska processas: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
         MembersProcessed.push(membersInAList[i].member_no); //Lägg till kontot i listan över processade konton
-        var obj = allMembers.find(obj => obj.member_no == membersInAList[i].member_no); //Leta upp kontot i listan övar alla konton 
-        //anledningen till att inte använda objektet från epostlistan är att det finns bara begränsad information i det objektet
-
+        if ("group" == organisationType) { //Alla attribut endast för kårer, ej distrikt
+          var obj = allMembers.find(obj => obj.member_no == membersInAList[i].member_no); //Leta upp kontot i listan övar alla konton
+          //anledningen till att inte använda objektet från epostlistan är att det finns bara begränsad information i det objektet
+        }
+        else { //För distrikt
+          var obj = membersInAList[i];
+        }
         var GoUser = useraccounts.find(u => u.externalIds !== undefined && u.externalIds.some(extid => extid.type === "organization" && extid.value === obj.member_no)); // leta upp befintligt Googlekonto som representerar rätt objekt
         if(GoUser) {
         // Användaren fanns i listan
@@ -235,7 +240,7 @@ function createAccount(member, orgUnitPath) {
 
 /*
  * Kontrollera om ett konto med denna e-postadress existerar
- * @param {string} email - En e-postadress inom kårens GSuite
+ * @param {string} email - En e-postadress inom kårens Google Workspace
  *
  * @returns {boolean} - True eller false om e-postadressen finns
  */
@@ -274,6 +279,10 @@ function checkIfEmailExists(email) {
  */
 function updateAccount(member, useraccount, orgUnitPath) {
   
+  if (member.mobile_phone) {  //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
+    member.contact_mobile_phone = member.mobile_phone;
+  }
+ 
   var phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
   var update = false;
   

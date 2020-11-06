@@ -3,28 +3,29 @@
  * @website https://github.com/Scouterna
  */
 
-var domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan till kåren utan www och som används i GSuite
+var domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan till kåren utan www och som används i Google Workspace
 
 var groupId = '12'; //Kårens id som kan hittas i Scoutnet om du har tillräcklig behörighet
 
 
 //Get a detailed csv/xls/json list of all members
 //Används bland annat för att synkronisera användarkonton med Scoutnet
-var api_key_list_all = '7315979a2a864664695671c7dfe7'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
+//Används vid synkronisering för kårer, ej distrikt
+var api_key_list_all = '999888777315979a2a864664695671c7dfe7'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
 
 //Get a csv/xls/json list of members, based on mailing lists you have set up
 //Används bland annat för att synkronisera Google grupper med Scoutnet
-var api_key_mailinglists = '75f4995656454d0dce624'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
+var api_key_mailinglists = '11122233356454d0dce624'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
 
-//Länk till Google kalkylarket för att synkronisera google grupper
-var spreadsheetUrl_Grupper = 'https://docs.google.com/spreadsheets/d/1ru524kj9645454jydk0/edit#gid=0';
+//Länk till ert egenskapade Google kalkylark för att synkronisera google grupper
+var spreadsheetUrl_Grupper = 'https://docs.google.com/spreadsheets/d/12345abcdefg45454jydk0/edit#gid=0';
 
 //E-post eller scoutnetListId för vart mejl om misstänkt spam till grupper ska skickas till
 //För e-postlistor som anges skickas endast till primär e-postadress listad i Scoutnet
 //T.ex 'webmaster@minscoutkår.se, 1234'
 var moderateContentEmail = '';
 
-//Inställning om viss kontaktinformation ska synkroniseras till användares GSuite-konto
+//Inställning om viss kontaktinformation ska synkroniseras till användares Google Workspace-konto
 var syncUserContactInfo = true;
 
 //Typ av organisationsenhet

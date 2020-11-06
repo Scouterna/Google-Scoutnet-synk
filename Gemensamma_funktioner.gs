@@ -295,7 +295,7 @@ function checkIfEmail(email) {
 function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list_id) {
   
   Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
-  var email_fields = '&contact_fields=email_mum,email_dad,alt_email';
+  var email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
   var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?id=' + groupId + '&key='+ api_key_mailinglists + '&list_id=' + scoutnet_list_id + email_fields;
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
   //Logger.log(response); 
@@ -323,13 +323,13 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
     }
   }
   
-  var medlemmar = data.data;  
+  var medlemmar = data.data;
   //Logger.log(medlemmar);
   
   for (x in medlemmar) {
     var medlem = medlemmar[x];
     
-    var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name'];
+    var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
     
     //Dessa attributvärden ska användas som gemener för bättre jämförelser
     var variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails'];
