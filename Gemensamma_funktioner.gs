@@ -587,7 +587,6 @@ function removeDublicates(list) {
 /**
  * Gör strängen till ett svenskt internationellt nummer om möjligt
  */
-
 function intphonenumber(phnum) {
   var rx = /^\+/;      
   //Logger.log('telefonnummer före: %s', phnum);  
@@ -622,19 +621,30 @@ function intphonenumber(phnum) {
         phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1)
       }
     else {
-//phnum = null
+      //phnum = null
     }
   }
    //Logger.log('done... %s',phnum);  
   
-return phnum
+  return phnum
 }
+
+
+/**
+ * Testa om telefonnumret följer E.164 format
+ */
+function validatePhonenumberForE164(phnum) {
+    const regEx = /^\+[1-9]\d{1,14}$/;
+    return regEx.test(phnum);
+}
+
 
 String.prototype.endsWith = function(suffix) { 
    if (this.length < suffix.length) 
       return false; 
    return this.lastIndexOf(suffix) === this.length - suffix.length; 
 }
+
 
 /**
  * Ersätt specialtecken med deras engelska bokstavsmotsvarigheter

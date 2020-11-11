@@ -286,6 +286,8 @@ function updateAccount(member, useraccount, orgUnitPath) {
   var phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
   var update = false;
   
+  var phnum_recovery = validatePhonenumberForE164(phnum);
+  
   var accountPrimaryPhoneNumber = "";
   if (typeof useraccount.phones !=='undefined' && useraccount.phones) {
     if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.type === "mobile" && phoneNumber.primary === true)) {
