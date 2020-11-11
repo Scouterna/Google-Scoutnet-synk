@@ -213,7 +213,9 @@ function Grupper(start, slut) {
           //ändrat till en ogiltig e-postadress och sen ändrar tillbaka
           Logger.log("E-post ej ändrad för grupppen " + email);
           var cell=selection.getCell(rad_nummer, grd["e-post"]+1);
-          cell.setBackground("white");
+          if ("#ffffff" != cell.getBackground()) {
+            cell.setBackground("white");
+          }
 
           var cell=selection.getCell(rad_nummer, grd["cell_url"]+1).getValue();
           if (cell=="") {
@@ -400,7 +402,7 @@ function deleteGroup(groupId) {
  */
 function getGroupMember(groupId, memberkey) {
   
-  //Logger.log("Försöker hämta gruppmedlem:" + groupId);
+  //Logger.log("Försöker hämta grupp:" + groupId);
   //Logger.log("Försöker med memberKey:" + memberkey);
   
   for (var n=0; n<6; n++) {
