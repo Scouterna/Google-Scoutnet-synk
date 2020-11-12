@@ -286,7 +286,13 @@ function updateAccount(member, useraccount, orgUnitPath) {
   var phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
   var update = false;
   
-  var phnum_recovery = validatePhonenumberForE164(phnum);
+  var phnum_recovery = "";
+  if (validatePhonenumberForE164(phnum)) {
+    phnum_recovery = phnum;
+  }
+  else {
+    phnum_recovery = "";
+  }
   
   var accountPrimaryPhoneNumber = "";
   if (typeof useraccount.phones !=='undefined' && useraccount.phones) {
@@ -300,7 +306,7 @@ function updateAccount(member, useraccount, orgUnitPath) {
       || useraccount.suspended 
       || useraccount.orgUnitPath != orgUnitPath  
       || ((!useraccount.recoveryEmail) && (member.email))
-      || ((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone)) 
+      || ((useraccount.recoveryPhone != phnum_recovery) && (member.contact_mobile_phone) && (typeof useraccount.recoveryPhone !=='undefined')) 
       || ((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone)) )  {
     // Något behöver uppdateras
     
@@ -333,14 +339,12 @@ function updateAccount(member, useraccount, orgUnitPath) {
       update = true;
     };
     // Lägg till återställningsinformation på Googlekontot
-    if((useraccount.recoveryPhone != phnum) && (member.contact_mobile_phone)) {  
-      if(phnum) {
-        Logger.log("Nytt återställningsnummer: %s",phnum);
-        user.recoveryPhone = phnum;
+    if((useraccount.recoveryPhone != phnum_recovery) && (member.contact_mobile_phone)) {    
+        Logger.log("Nytt återställningsnummer: %s", phnum_recovery);
+        user.recoveryPhone = phnum_recovery;
         update = true;
-      }
-
     }
+    
     if (typeof syncUserContactInfo !=='undefined' && syncUserContactInfo) {
       if((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone)) {  
         if(phnum) {
@@ -366,7 +370,8 @@ function updateAccount(member, useraccount, orgUnitPath) {
           update = true;
         }
       }
-    }
+    }        
+        
     if(useraccount.suspended) {
       Logger.log("Aktiverad.");
       user.suspended = false;
