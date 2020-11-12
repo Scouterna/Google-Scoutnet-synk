@@ -2,17 +2,17 @@
 Du kan med dessa program synkronisera Google-användarkonton hos kåren med personer i Scoutnet
 samt synkronisera google-grupper med e-postlistor i Scoutnet
 Du kan använda dessa som e-postlistor eller som att lägga till att en specifik
-google-grupp ger behörighet till en specifik Team drive. Alltså automatisk synkronisering att
-t.ex Spårarledare ges behörighet till en Teamdrive för Spårare.
+google-grupp ger behörighet till en specifik "Delad enhet". Alltså automatisk synkronisering att
+t.ex Spårarledare ges behörighet till en "Delad enhet" för Spårare.
 Denna lösning använder Google Apps Script.
 
 Vid problem, fel, frågor eller tips på förbättringar eller fler funktioner som du saknar;
 lägg ett ärende under "Issues" eller mejla emil.ohman@scouterna.se
 I bland kommer det ny funktionalitet, så håll utkik på en ny version genom att trycka på knappen
-**Watch** uppe till höger på sidan för att du kunna bli notifieradvid en ny version.
+**Watch** uppe till höger på sidan för att du kunna bli notifierad vid en ny version.
 
 Du kan ladda ner den senaste versionen via
-https://github.com/scouternasetjanster/Google-Scoutnet-synk/releases/latest och där kan
+https://github.com/Scouterna/Google-Scoutnet-synk/releases/latest och där kan
 du också ser vilken funktionalitet som är ny i respektive version. Läs filen README.md
 för instruktion om installation och funktionalitet.
 
@@ -36,7 +36,8 @@ för instruktion om installation och funktionalitet.
    Det går också att aktivera kontaktdelning inom kåren vilket kan underlätta
    kommunikationen internt.
 1. Det går också att sätta på / stänga av inställningar under Admin/Appar/Ytterligare
-   tjänster från Google.
+   tjänster från Google. Om ni har stängt av det tidigare behöver "Google Cloud Platform"
+   aktiveras för den användare som ska köra detta program.
 1. Besök script.google.com när du är inloggad på kårens webbansvariges Google-konto
    eller annat lämpligt Google-konto med hög behörighet på kårens G Suite.
 1. Tryck på "Nytt Script" och namnge sedan projektet till något lämpligt, t.ex Scoutnet.
@@ -44,12 +45,15 @@ för instruktion om installation och funktionalitet.
    starten finns endast en som heter Code.gs. Byt namn på den till "Användare" och
    ta bort den koden som står i filen.
 1. Klistra in koden från filen Anvandare.gs och spara (Ctrl+S).
-1. Gör samma sak för de andra filerna som slutar på .gs
+1. Gör samma sak för de andra filerna som slutar på .gs genom att skapa nya filer och
+   klistra in koden för respektive.
 1. Under "Resources"/"Advanced Google Services" behöver du aktivera "Admin Directory API",
    "Google Sheets API" och "Group Settings API". På denna sida finns också en länk till
    "Google API Console" (https://console.cloud.google.com/apis/library?project) där du
    också behöver aktivera tjänsterna. Aktivera där "Admin SDK", "Google Sheets API", "Group Settings API".
 1. Gör inställningar enligt nedan för respektive fil.
+   [Användare](#inställningar-för-att-komma-igång-i-konfigurationgs), 
+   [Grupper](#inställningar-för-att-komma-igång-i-konfigurationgs-1)
 1. Kör programmet en gång genom att trycka på filen Användare.gs och välja funktionen
    "AnvändareOchGrupper" upp bland menyn och tryck sedan på playknappen.
 1. Du kan nu tidinställa hur ofta som programmen ska köra/synkronisera genom att trycka
@@ -59,7 +63,12 @@ för instruktion om installation och funktionalitet.
    och som mestadels beror på antal grupper och e-postadresser i dessa.
    Det bör räcka med att synkronisera användare en gång per dygn och samma för grupper,
    förslagsvis mitt i natten.
-   Synkroniseringen bör gå under minuten.
+
+   Om du har många användare och grupper som ska synkroniseras kan det hända att det tar
+   för lång tid för programmet att klara av allt under en körning. Du kan då ställa in en
+   körning av "Användare" och en för "Grupper". Om körningen för "Grupper" trots allt tar
+   för lång tid finns i Grupper.gs funktionerna "GrupperVissaRader1" osv. som du kan ställa
+   in att enbart vissa rader i kalkylarket ska synkroniseras.
 
    Du kan här trycka på "notifications" och ställa in att att du får felmeddelanden om något
    skulle gå fel. Om du vill att synkroniseringen av användarkonton och grupper ska ske
@@ -76,10 +85,10 @@ för instruktion om installation och funktionalitet.
 
 ## Manual
 ### Google användarkonton - synkronisering med Scoutnet
-Synkroniserar personer som som är med på e-postlistor från Scoutnet genom att
-man anger id-nummret för e-postlistan i filen Konfiguration.gs. Det går bra att ange
-flera e-postlistor med kommatecken samt skriva kommentarer med parenteser inom
-variabelnamnet. Se exemplen i filen.
+Synkroniserar personer som är med på e-postlistor från Scoutnet genom att man
+anger id-nummret för e-postlistan i filen Konfiguration.gs i variabeln "userAccountConfig".
+Det går bra att ange flera e-postlistor med kommatecken samt skriva kommentarer med
+parenteser inom variabelnamnet. Se exemplen i filen.
 
 Om inget id-nummer för en e-postlista anges så tolkar programmet det som alla
 personer i kåren som har en avdelningsroll eller roll på kårnivå och skapar
@@ -98,7 +107,7 @@ Om det finns personer som har samma namn (för- och efternamn) angivet i Scoutne
 kommer de som skapas som nr2 osv skapas på formen fornamn.efternamnX@domännamn.se
 där X motsvarar en siffra från 1-5.
 
-#### Inställningar (i Konfiguration.gs)
+#### Inställningar för att komma igång (i Konfiguration.gs)
 - Ändra kårens domän namn på variabeln "domain"
 - Ändra kårens grupp-id som finns angivet i Scoutnet på sidan för Webbkoppling
 - Ändra api-nyckeln som under Webbkoppling i Scoutnet står under
@@ -111,10 +120,9 @@ där X motsvarar en siffra från 1-5.
   underorganisationen "/Scoutnet/Avstängda"
   
 ### Google grupper - synkronisering med Scoutnet
-I kalkylarket kan du ställa in namn på de olika google-grupperna, dess e-postadress,
+I ett Google kalkylark kan du ställa in namn på google-grupper, dess e-postadress,
 vilken e-postlista i Scoutnet de ska synkroniseras mot samt hur den ska synkronisera
 i fältet Synkinställning.
-
 Du kan i cellera för listid kommaseparera flera listor om du vill använda flera listor
 från Scoutnet för att bygga upp en större egen. Det går också bra att skriva kommentarer
 med parenteser.
@@ -139,12 +147,9 @@ som ska läggas till
 Det går att enkelt kontrollera vilka som är med i en google-grupp för att se att
 man har gjort rätt genom att trycka på länken till höger om varje e-postadress i kalkylarket.
 
-Om du vill att en person ska vara med i en Google-grupp utan att beröras av att tas
-bort vid en synkronisering lägger du till e-postadressen som ägare av gruppen.
-
-Du kan också lägga till e-postadresser manuellt i kalkylarket om du vill. I stället
-för att ange listid på något ställe så anger du en e-postadress eller flera med komma
-emellan. Det går bra att både använda listid och e-postadress till samma lista.
+Du kan också lägga till e-postadresser manuellt till en grupp i kalkylarket om du vill.
+I stället för att ange listid på något ställe så anger du en e-postadress eller flera med
+komma emellan. Det går bra att både använda listid och e-postadress till samma lista.
 
 #### Enkelt och avancerat läge
 Det går att ställa in om du vill visa samtliga kolumner i kalkylarket för olika
@@ -159,7 +164,7 @@ Bra till t.ex en e-postlista för ledare eller utmanare så att alla vet hur de 
 för att skicka till alla. Detta kanske man glömmer bort att nämna för nya och om man vill
 slippa tänka på att komma ihåg att nämna det när det kommer någon ny så står det då i
 alla e-brev som de får skickat till sig via e-postlistan.
-Förtydligar också vilken lista som brevet skickades till och vilka som var mottagarna.
+Kan också förtydliga vilken lista som brevet skickades till och vilka som var mottagarna.
 
 #### Begränsa åtkomst för att skicka och ta emot e-post
 Om du vill kan du ställa in att enbart vissa personer ska kunna skicka till en lista,
@@ -178,17 +183,20 @@ att ange list-ID under rubrikerna "Kan skicka" & "Kan ta emot". Du behöver dock
 under alla tre typerna om du inte vill. Du kanske vill att några ska kunna skicka och ta emot,
 till en lista och några andra som bara ska få skicka.
 
-#### Inställningar (i Konfiguration.gs)
+#### Inställningar för att komma igång (i Konfiguration.gs)
 - Ändra kårens domännamn på variabeln "domain"
-- Ändra kårens grupp-id som finns angivet i Scoutnet på sidan för Webbkoppling
+- Ändra kårens "Kår-ID för webbtjänster" på variabeln "groupId. Hittas i Scoutnet på sidan för
+  Webbkoppling
 - Ändra api-nyckeln med namn api_key_mailinglists som hittas i Scoutnet under
   Webbkoppling under "Get a csv/xls/json list of members, based on mailing lists you have set up"
 - Skapa ett Google Kalkylark och klistra in webbadressen vid variabeln "spreadsheetUrl_Grupper"
 - Ändra vart e-post som misstänkts för skräppost ska skickas genom att uppdatera variabeln
   "moderateContentEmail". Om inget anges skickas e-breven till den användare som kör detta program.
+  Det går inte att ange en av kårens grupper som mottagare, men enskilda e-postadresser och
+  Scoutnet-id går bra.
 - Om du gör detta för ett distrikt. Ändra variabeln "organisationType" från "group" till "district".
 - Spara filen.
-- Välj funktionen createHeaders_Grupper i Grupper.gs och kör den.
+- Välj funktionen "createHeaders_Grupper" i Grupper.gs och kör den.
 - Fyll i övriga fält i filen Konfiguration.gs vid behov och möjligt.
 - Klart.
 
@@ -198,7 +206,7 @@ till en lista och några andra som bara ska få skicka.
   välja att visa samtliga kolumner i kalkylarket för att kunna infoga eller ta bort kolumner om
   det har skett någon ändring.
 - Du hittar senaste versionen av programmet på 
-  https://github.com/scouternasetjanster/Google-Scoutnet-synk/releases/latest och där kan
+  https://github.com/Scouterna/Google-Scoutnet-synk/releases/latest och där kan
   du också ser vilken funktionalitet som är ny i respektive version och om du behöver göra
   något för att uppdatera förutom att uppdatera koden.
 - Kör de olika programmen manuellt en gång innan du kör med tidsinställning då det kan ha
@@ -220,7 +228,8 @@ till en lista och några andra som bara ska få skicka.
 1. Lägg ett ärende under "Issues" eller mejla emil.ohman@scouterna.se
 
 ### Hur gör jag för att...?
-Nedan finns en del exempel på hur du gör för att ställa in programmen så som du vill.
+Nedan finns en del exempel med olika Scoutnet-id och e-postadresser på hur du gör för att
+ställa in programmen så som du vill.
 Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.ohman@scouterna.se
 
 #### Användare - inställningar exempel
@@ -265,9 +274,120 @@ Om du saknar något exempel eller behöver hjälp är det bara att mejla emil.oh
          </tr>
       </tbody>
    </table>
+   
+*  Jag vill ha följande e-postlista
+   * Bara de som är med på listan samt de med en e-postadress från kåren ska kunna skicka till listan.
+   * För de som är med på listan ska e-posten bara skickas till en medlems primära e-postadress i Scoutnet.
+      
+   Gör följande inställningar i kalkylarket
 
-#### Google Team Drive - exempel
-Att koppla ihop grupper med delade enheter på Google Team Drive sker manuellt, men du kan använda grupperna som skapats enligt ovan för enkel uppdatering av åtkomst.
+   <table>
+      <thead>
+         <tr>
+            <th colspan=2>Kan skicka och ta emot</th>
+            <th colspan=2>Kan skicka</th>
+            <th colspan=2>Kan ta emot</th>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+         </tr>
+         <tr>
+            <td>1910 (id för avdelningen)</td>
+            <td>-m</td>
+            <td>@ (kårens googlekonton)</td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+      </tbody>
+   </table>
+   
+*  Jag vill ha följande e-postlista
+   * Vem som helst ska kunna skicka till listan.
+   * Alla scouter på avdelningen ska kunna ta emot från listan, men listan ska endast skicka till föräldrarnas e-postadresser för scouterna.
+   * Alla ledare på avdelningenska få alla mejl på listan, men listan ska endast skickas till deras e-postkonto hos kåren och inte till någon privat e-postadress.
+      
+   Gör följande inställningar i kalkylarket
+
+   <table>
+      <thead>
+         <tr>
+            <th colspan=2>Kan skicka och ta emot</th>
+            <th colspan=2>Kan skicka</th>
+            <th colspan=2>Kan ta emot</th>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+         </tr>
+         <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>1910&rule_id=1930 (id för avdelningen och regel för ledarna)</td>
+            <td>@</td>
+         </tr>
+         <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>1910&rule_id=1940 (id för avdelningen och regel för scouter på avdelningen), [e-postadressen till e-postlistan på raden ovan]</td>
+            <td>-f</td>
+         </tr>
+      </tbody>
+   </table>
+   
+ * Jag vill ha följande e-postlista
+   * Vem som helst ska kunna skicka till listan.
+   * Jag vill manuellt lägga till vilka e-postadresser som ska vara med.
+      
+   Gör följande inställningar i kalkylarket
+
+   <table>
+      <thead>
+         <tr>
+            <th colspan=2>Kan skicka och ta emot</th>
+            <th colspan=2>Kan skicka</th>
+            <th colspan=2>Kan ta emot</th>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+            <td>Scoutnet-id</td>
+            <td>Synkinställning</td>
+         </tr>
+         <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>scoutnet@scouterna.se, scoutid@scouterna.se</td>
+            <td></td>
+         </tr>
+      </tbody>
+   </table>
+
+#### Google Drive - exempel
+Att koppla ihop grupper med delade enheter på Google Drive sker manuellt, men du kan använda grupperna som skapats enligt ovan för enkel uppdatering av åtkomst.
 Om du döper om själva gruppen, t.ex. e-postadressen, _kan_ gruppen tappa åtkomst till mappen. Detta då gruppen tas bort och en ny skapas med det nya namnet.
 
 - Skapa en "Delad enhet" på Google Drive (https://drive.google.com) från ett konto med lämplig behörighet som finns med i kårens gSuite.
@@ -280,7 +400,7 @@ Om du döper om själva gruppen, t.ex. e-postadressen, _kan_ gruppen tappa åtko
    Du har skapat maximalt antal Google-konton enligt din licens. Detta då din kår antaligen
    inte har skaffat Google Nonprofit och kör på en gammal gratislicens. På admin.google.com
    under Fakturering ska det stå "G Suite for Nonprofit" om du har det. Du kan läsa hos
-   https://www.techsoup.se hur du skaffar det.
+   https://www.techsoup.se hur du skaffar Google Nonprofit.
 
 ## Tekniska förtydliganden
 ### E-postalias

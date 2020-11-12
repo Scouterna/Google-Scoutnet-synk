@@ -1,6 +1,6 @@
 /**
  * @author Emil Öhman <emil.ohman@scouterna.se>
- * @website https://github.com/scouternasetjanster 
+ * @website https://github.com/Scouterna
  */
 
 var domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan till kåren utan www och som används i GSuite
@@ -23,6 +23,9 @@ var spreadsheetUrl_Grupper = 'https://docs.google.com/spreadsheets/d/1ru524kj964
 //För e-postlistor som anges skickas endast till primär e-postadress listad i Scoutnet
 //T.ex 'webmaster@minscoutkår.se, 1234'
 var moderateContentEmail = '';
+
+//Inställning om viss kontaktinformation ska synkroniseras till användares GSuite-konto
+var syncUserContactInfo = true;
 
 //Typ av organisationsenhet
 var organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
