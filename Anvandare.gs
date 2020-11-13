@@ -300,11 +300,17 @@ function updateAccount(member, useraccount, orgUnitPath) {
   }
   
   var accountKeywordAvatarUpdated = "";
-  if (typeof useraccount.keywords !=='undefined' && useraccount.keywords) {
+  if (typeof useraccount.keywords !== 'undefined' && useraccount.keywords) {
     if (-1 != useraccount.keywords.findIndex(keyword => keyword.type === "custom" && keyword.customType === "avatar_updated")) {
       accountKeywordAvatarUpdated = useraccount.keywords.find(keyword => keyword.type === "custom" && keyword.customType === "avatar_updated").value;
     }
-  }  
+  }
+  
+  if (typeof syncUserAvatar === 'undefined' || !syncUserAvatar) {
+    Logger.log("Ska ej synkronisera profilbild");
+    member.avatar_updated = "";
+  }
+  
   var shouldBeKeywordAvatarUpdated = member.avatar_updated;
   if (typeof useraccount.thumbnailPhotoEtag !=='undefined') {
     shouldBeKeywordAvatarUpdated += useraccount.thumbnailPhotoEtag;
@@ -394,7 +400,7 @@ function updateAccount(member, useraccount, orgUnitPath) {
       var keywordAvatarUpdatedToUpdate = "";
       
       if (!member.avatar_updated) { //Ingen profilbild i Scoutnet
-        Logger.log("Ingen profilbild i Scoutnet");        
+        Logger.log("Ingen profilbild i Scoutnet eller avaktiverad synkronisering");        
         //Om tomt i Scoutnet, ta bort bilden i Google Workspace
         
         try {
@@ -441,7 +447,7 @@ function updateAccount(member, useraccount, orgUnitPath) {
       };
       keywordArray.push(tmp_avatarUpdated);
       user.keywords = keywordArray;
-      update = true;      
+      update = true;
     }
     if (useraccount.suspended) {
       Logger.log("Aktiverad.");

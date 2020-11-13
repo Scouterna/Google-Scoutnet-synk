@@ -28,6 +28,9 @@ var moderateContentEmail = '';
 //Inställning om viss kontaktinformation ska synkroniseras till användares Google Workspace-konto
 var syncUserContactInfo = true;
 
+//Inställning om medlems profilbild ska synkroniseras till användares Google Workspace-konto
+var syncUserAvatar = true;
+
 //Typ av organisationsenhet
 var organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
 
