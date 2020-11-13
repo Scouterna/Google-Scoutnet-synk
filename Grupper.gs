@@ -1296,7 +1296,8 @@ function patchAdminGroupSettings(group, email) {
  * @returns {object} - En Googlegrupp
  */
 function getAdminDirectoryGroup(groupKey) {
-  
+  Logger.log("GroupKey");
+  Logger.log(groupKey);
   for (var n=0; n<6; n++) {
     Logger.log("Funktionen getAdminDirectoryGroup körs " + n);
     

@@ -49,7 +49,7 @@ function Anvandare() {
     Logger.log("Beskrivning: %s",userAccountConfig[p].description);
     
     createSuborganisationIfNeeded(orgUnitPath);
-          
+    
     var membersInAList;
     if (scoutnetListId) {
       membersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnetListId, "", "");
@@ -60,8 +60,8 @@ function Anvandare() {
     Logger.log("MembersInAlist antal personer= " + membersInAList.length);
 
     for (var i = 0; i < membersInAList.length; i++) {  //Här Processas alla medlemmar
-      if(MembersProcessed.find(o => o == membersInAList[i].member_no)) // Leta efter kontot i listan över redan processade konton
-      {
+      Logger.log("**************");
+      if(MembersProcessed.find(o => o == membersInAList[i].member_no)) {// Leta efter kontot i listan över redan processade konton
         Logger.log("Användaren är redan processad: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
       }
       else
@@ -86,8 +86,7 @@ function Anvandare() {
           //Logger.log("Antal innan: %s, efter: %s",ia,ib );
           updateAccount(obj, GoUser, orgUnitPath) //uppdatera alla uppgifter på googlekontot med uppgifter från Scoutnet
         }
-        else
-        {
+        else {
           Logger.log("Skapar Ny Googleanvändare");
           createAccount(obj, orgUnitPath); //Skapa Googlekonto för denna användare
         }
@@ -96,8 +95,7 @@ function Anvandare() {
   }
   Logger.log("Googlekonton som är kvar: %s",  useraccounts.length);
 
-  for (var goacc in  useraccounts)
-  {
+  for (var goacc in  useraccounts) {
     Logger.log("Stänger av konto, id: %s, %s",useraccounts[goacc].id, useraccounts[goacc].name.fullName);
     suspendAccount(useraccounts[goacc], suspendedOrgUnitPath)
   }
@@ -301,13 +299,30 @@ function updateAccount(member, useraccount, orgUnitPath) {
     }
   }
   
+  var accountKeywordAvatarUpdated = "";
+  if (typeof useraccount.keywords !=='undefined' && useraccount.keywords) {
+    if (-1 != useraccount.keywords.findIndex(keyword => keyword.type === "custom" && keyword.customType === "avatar_updated")) {
+      accountKeywordAvatarUpdated = useraccount.keywords.find(keyword => keyword.type === "custom" && keyword.customType === "avatar_updated").value;
+    }
+  }  
+  var shouldBeKeywordAvatarUpdated = member.avatar_updated;
+  if (typeof useraccount.thumbnailPhotoEtag !=='undefined') {
+    shouldBeKeywordAvatarUpdated += useraccount.thumbnailPhotoEtag;
+  }
+  
+  Logger.log("shouldBeKeywordAvatarUpdated " + shouldBeKeywordAvatarUpdated);
+  Logger.log("accountKeywordAvatarUpdated  " + accountKeywordAvatarUpdated);
+  //Logger.log("Avatar updated " + member.avatar_updated);
+  Logger.log("Avatar url " + member.avatar_url);
+  
   if ( useraccount.name.givenName != member.first_name 
       || useraccount.name.familyName != member.last_name 
       || useraccount.suspended 
       || useraccount.orgUnitPath != orgUnitPath  
       || ((!useraccount.recoveryEmail) && (member.email))
       || ((useraccount.recoveryPhone != phnum_recovery) && (member.contact_mobile_phone) && (typeof useraccount.recoveryPhone !=='undefined')) 
-      || ((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone)) )  {
+      || ((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone))
+      || (accountKeywordAvatarUpdated != shouldBeKeywordAvatarUpdated))  {
     // Något behöver uppdateras
     
     Logger.log('Användare %s %s uppdateras', useraccount.name.givenName, useraccount.name.familyName);  
@@ -370,9 +385,65 @@ function updateAccount(member, useraccount, orgUnitPath) {
           update = true;
         }
       }
-    }        
+    }
+    
+    if (accountKeywordAvatarUpdated != shouldBeKeywordAvatarUpdated) {
+      Logger.log("Profilbilden ska uppdateras");
+      
+      var userPhoto;
+      var keywordAvatarUpdatedToUpdate = "";
+      
+      if (!member.avatar_updated) { //Ingen profilbild i Scoutnet
+        Logger.log("Ingen profilbild i Scoutnet");        
+        //Om tomt i Scoutnet, ta bort bilden i Google Workspace
         
-    if(useraccount.suspended) {
+        try {
+          userPhoto = AdminDirectory.Users.Photos.remove(useraccount.primaryEmail);
+          Logger.log("Tagit bort profilbild");
+        }
+        catch(err)  {
+          Logger.log("--------------------------");
+          Logger.log("Error: %s",err.message);
+          Logger.log("--------------------------");
+        }
+      }
+      else { //Om bild i Scoutnet, uppdatera bild i Google Workspace
+        Logger.log("Finns ny profilbild i Scoutnet");        
+        try {
+          var blob = UrlFetchApp.fetch(member.avatar_url).getBlob();
+          var data = Utilities.base64EncodeWebSafe(blob.getBytes());
+          userPhoto = AdminDirectory.Users.Photos.update({photoData: data}, useraccount.primaryEmail);
+        }
+        catch(err)  {
+          Logger.log("--------------------------");
+          Logger.log("Error: %s",err.message);
+          Logger.log("--------------------------");
+        }
+        
+        try {
+          userPhoto = AdminDirectory.Users.get(useraccount.primaryEmail);          
+          keywordAvatarUpdatedToUpdate = member.avatar_updated + userPhoto.thumbnailPhotoEtag;
+          Logger.log("Uppdaterat profilbild");
+        }
+        catch(err)  {
+          Logger.log("--------------------------");
+          Logger.log("Error: %s",err.message);
+          Logger.log("--------------------------");
+        }
+      }
+      //Uppdatera sen Userfältet med avatar_updated och bildens etag
+      Logger.log("Den nya avatarUpdated " + keywordAvatarUpdatedToUpdate);
+      var keywordArray = [];
+      var tmp_avatarUpdated = {
+        "value": keywordAvatarUpdatedToUpdate,
+        "type": "custom",
+        "customType": "avatar_updated"
+      };
+      keywordArray.push(tmp_avatarUpdated);
+      user.keywords = keywordArray;
+      update = true;      
+    }
+    if (useraccount.suspended) {
       Logger.log("Aktiverad.");
       user.suspended = false;
     }
@@ -509,7 +580,8 @@ function fetchScoutnetMembers() {
                                         'sex', 'address_co', 'address_1', 'address_2' , 'address_3', 'postcode', 'town',
                                         'country', 'contact_mobile_phone', 'contact_home_phone', 'contact_mothers_name',
                                         'contact_mobile_mum', 'contact_telephone_mum', 'contact_fathers_name', 'contact_mobile_dad',
-                                       'contact_telephone_dad', 'prev_term', 'prev_term_due_date', 'current_term', 'current_term_due_date'];
+                                        'contact_telephone_dad', 'prev_term', 'prev_term_due_date', 'current_term',
+                                        'current_term_due_date', 'avatar_updated', 'avatar_url'];
     
     //Dessa attributvärden ska användas som gemener för bättre jämförelser
     var variabel_lista_lowercase = ['email', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email', 'extra_emails'];
