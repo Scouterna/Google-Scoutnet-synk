@@ -325,7 +325,7 @@ function updateAccount(member, useraccount, orgUnitPath) {
       || useraccount.name.familyName != member.last_name 
       || useraccount.suspended 
       || useraccount.orgUnitPath != orgUnitPath  
-      || ((!useraccount.recoveryEmail) && (member.email))
+      || ((useraccount.recoveryEmail != member.email) && (!(!useraccount.recoveryEmail && member.email==="")))
       || ((useraccount.recoveryPhone != phnum_recovery) && (member.contact_mobile_phone) && (typeof useraccount.recoveryPhone !=='undefined')) 
       || ((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone))
       || (accountKeywordAvatarUpdated != shouldBeKeywordAvatarUpdated))  {
@@ -338,29 +338,38 @@ function updateAccount(member, useraccount, orgUnitPath) {
     if(useraccount.name.givenName!=member.first_name) {
       if (!user.name)
       {user.name = {}}
-      Logger.log("Nytt förnamn: %s",member.first_name);
+      Logger.log("Nytt förnamn: %s", member.first_name);
       user.name.givenName = member.first_name;
       update = true;
     }
     if(useraccount.name.familyName!=member.last_name) {
       if (!user.name)
       {user.name = {}}
-      Logger.log("Nytt efternamn: %s",member.last_name);
+      Logger.log("Nytt efternamn: %s", member.last_name);
       user.name.givenName = member.last_name;
       update = true;
     }
     if(useraccount.orgUnitPath!=orgUnitPath)  {
-      Logger.log("Ny OrganizationUnit: %s",orgUnitPath);
+      Logger.log("Ny OrganizationUnit: %s", orgUnitPath);
       user.orgUnitPath = orgUnitPath;
       update = true;
     }
-    if((!useraccount.recoveryEmail) && (member.email))  {
-      Logger.log("Ny återställningsepost: %s",member.email);
+        
+    //Logger.log("useraccount.recoveryEmail " + useraccount.recoveryEmail);
+    //Logger.log("useraccount.recoveryEmail typeof " + typeof useraccount.recoveryEmail);
+    //Logger.log("member.email " + member.email);
+    //Logger.log("member.email typeof " + typeof member.email);
+    if((useraccount.recoveryEmail != member.email) && (!(!useraccount.recoveryEmail && member.email==="")))  {
+      Logger.log("Ny återställningse-post: %s",member.email);
       user.recoveryEmail = member.email;
       update = true;
     };
     // Lägg till återställningsinformation på Googlekontot
-    if((useraccount.recoveryPhone != phnum_recovery) && (member.contact_mobile_phone)) {    
+    //Logger.log("useraccount.recoveryPhone " + useraccount.recoveryPhone);
+    //Logger.log("phnum_recovery " + phnum_recovery);
+    //Logger.log("phnum " + phnum);
+    //Logger.log("member.contact_mobile_phone " + member.contact_mobile_phone);
+    if((useraccount.recoveryPhone != phnum_recovery) && (member.contact_mobile_phone)) {
         Logger.log("Nytt återställningsnummer: %s", phnum_recovery);
         user.recoveryPhone = phnum_recovery;
         update = true;
