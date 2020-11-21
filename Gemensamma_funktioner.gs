@@ -295,7 +295,7 @@ function checkIfEmail(email) {
 function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list_id) {
   
   Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
-  var email_fields = '&contact_fields=email_mum,email_dad,alt_email';
+  var email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
   var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?id=' + groupId + '&key='+ api_key_mailinglists + '&list_id=' + scoutnet_list_id + email_fields;
   var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
   //Logger.log(response); 
@@ -323,13 +323,13 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
     }
   }
   
-  var medlemmar = data.data;  
+  var medlemmar = data.data;
   //Logger.log(medlemmar);
   
   for (x in medlemmar) {
     var medlem = medlemmar[x];
     
-    var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name'];
+    var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
     
     //Dessa attributvärden ska användas som gemener för bättre jämförelser
     var variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails'];
@@ -587,7 +587,6 @@ function removeDublicates(list) {
 /**
  * Gör strängen till ett svenskt internationellt nummer om möjligt
  */
-
 function intphonenumber(phnum) {
   var rx = /^\+/;      
   //Logger.log('telefonnummer före: %s', phnum);  
@@ -622,19 +621,30 @@ function intphonenumber(phnum) {
         phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1)
       }
     else {
-//phnum = null
+      //phnum = null
     }
   }
    //Logger.log('done... %s',phnum);  
   
-return phnum
+  return phnum
 }
+
+
+/**
+ * Testa om telefonnumret följer E.164 format
+ */
+function validatePhonenumberForE164(phnum) {
+    const regEx = /^\+[1-9]\d{1,14}$/;
+    return regEx.test(phnum);
+}
+
 
 String.prototype.endsWith = function(suffix) { 
    if (this.length < suffix.length) 
       return false; 
    return this.lastIndexOf(suffix) === this.length - suffix.length; 
 }
+
 
 /**
  * Ersätt specialtecken med deras engelska bokstavsmotsvarigheter
