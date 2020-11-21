@@ -1,13 +1,14 @@
 # Google-Scoutnet-synkronisering
 Du kan med dessa program synkronisera Google-användarkonton hos kåren med personer i Scoutnet
-samt synkronisera google-grupper med e-postlistor i Scoutnet
+samt synkronisera google-grupper med e-postlistor i Scoutnet.
+
 Du kan använda dessa som e-postlistor eller som att lägga till att en specifik
 google-grupp ger behörighet till en specifik "Delad enhet". Alltså automatisk synkronisering att
 t.ex Spårarledare ges behörighet till en "Delad enhet" för Spårare.
 Denna lösning använder Google Apps Script.
 
 Vid problem, fel, frågor eller tips på förbättringar eller fler funktioner som du saknar;
-lägg ett ärende under "Issues" eller mejla emil.ohman@scouterna.se
+lägg ett ärende under "Issues" eller mejla emil.ohman@scouterna.se.
 I bland kommer det ny funktionalitet, så håll utkik på en ny version genom att trycka på knappen
 **Watch** uppe till höger på sidan för att du kunna bli notifierad vid en ny version.
 
@@ -16,9 +17,9 @@ Du kan ladda ner den senaste versionen [här]
 du också ser vilken funktionalitet som är ny i respektive version. Läs filen README.md
 för instruktion om installation och funktionalitet.
 
-## Inställningar
-### Generella inställningar
+## [Dokumentation - läs mer här](https://github.com/Scouterna/Google-Scoutnet-synk/wiki)
 
+## Inställningar
 ### Synkronisera användare & grupper
 1. Logga in till Adminkonsolen för G Suite med ditt adminkonto och tryck på "Säkerhet".
    Tryck på "API-referens", och tryck på kryssrutan för att "Aktivera API-åtkomst".
