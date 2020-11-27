@@ -277,7 +277,7 @@ function checkIfEmailExists(email) {
  */
 function updateAccount(member, useraccount, orgUnitPath) {
   
-  if (member.mobile_phone) {  //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
+  if ("district" == organisationType) {  //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
     member.contact_mobile_phone = member.mobile_phone;
   }
  
