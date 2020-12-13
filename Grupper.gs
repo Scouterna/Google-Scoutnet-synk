@@ -429,7 +429,7 @@ function getGroupMember(groupId, memberkey) {
  *
  * @param {string} groupId - Googles id för en grupp
  *
- * @returns {Object[]} members - Lista av medlemsobjekt med attributen email, role för medlemmar i en grupp
+ * @returns {Object[]} members - Lista av medlemsobjekt med attributen email, role, memberId för medlemmar i en grupp
  */
 function getGroupMembers(groupId) {
   
@@ -452,7 +452,8 @@ function getGroupMembers(groupId) {
         var tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
         var member = {
           email: tmpEmail,
-          role: member.role
+          role: member.role,
+          memberId: member.id
         };
         group.push(member);
       }
@@ -606,7 +607,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
       
     if (!contains(allMembers_email, group_members[i].email)) {  
       Logger.log(group_members[i].email + " Borde tas bort från " + groupId  + "Google e-postlista");
-      deleteGroupMember(groupId, group_members[i].email);
+      deleteGroupMember(groupId, group_members[i].memberId);
     }
     group_members_email.push(group_members[i].email);
   }   
@@ -644,27 +645,28 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
     //Denna e-post finns redan med i gruppen, men har kanske fel roll?
     else {
       //Both, Send, Receive
-      var memberTypeOld = getMembertype(groupId, group_members, allMembers_email[i])
+      var memberTypeOld = getMembertype(groupId, group_members, allMembers_email[i]);
+      var memberId = getMemberId(groupId, group_members, allMembers_email[i])
       
       //Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
       
       if (contains(allMembers_both_email, allMembers_email[i])) { //Ska kunna skicka och ta emot        
         if (memberTypeOld!="Both") { //Har någon annan roll sedan innan
-          updateGroupMember(groupId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
+          updateGroupMember(groupId, memberId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen skicka och ta emot");
         }
       }
       else if (contains(allMembers_send_email, allMembers_email[i])) { //Ska bara kunna skicka        
         if (memberTypeOld!="Send") { //Har någon annan roll sedan innan
-          updateGroupMember(groupId, allMembers_email[i], 'MANAGER', 'NONE');
+          updateGroupMember(groupId, memberId, allMembers_email[i], 'MANAGER', 'NONE');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara skicka");
         }
       }
       else if (contains(allMembers_receive_email, allMembers_email[i])) { //Ska bara kunna ta emot        
         if (memberTypeOld!="Receive") { //Har någon annan roll sedan innan
-          updateGroupMember(groupId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
+          updateGroupMember(groupId, memberId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara ta emot");
         }
@@ -672,14 +674,14 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
       
       else if (contains(allMembers_both_email_admin, allMembers_email[i])) { //Ska kunna skicka och ta emot ADMIN        
         if (memberTypeOld!="OWNER_Both") { //Har någon annan roll sedan innan
-          updateGroupMember(groupId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
+          updateGroupMember(groupId, memberId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara ta emot ADMIN");
         }
       }
       else if (contains(allMembers_send_email_admin, allMembers_email[i])) { //Ska bara kunna skicka ADMIN      
         if (memberTypeOld!="OWNER_Send") { //Har någon annan roll sedan innan
-          updateGroupMember(groupId, allMembers_email[i], 'OWNER', 'DISABLED');
+          updateGroupMember(groupId, memberId, allMembers_email[i], 'OWNER', 'DISABLED');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara skicka ADMIN");
         }
@@ -753,18 +755,18 @@ function getEmailAdressesofAllActiveGoogleAccounts() {
  * @param {string} role - Önskad ny roll i gruppen
  * @param {string} delivery_settings - Inställning för e-postleverans
  */ 
-function updateGroupMember(groupId, email, role, delivery_settings) {
+function updateGroupMember(groupId, memberId, email, role, delivery_settings) {
    
   var settings = {
     delivery_settings: delivery_settings,
     role: role
   };
   try {
-    AdminDirectory.Members.update(settings, groupId, email);
+    AdminDirectory.Members.update(settings, groupId, memberId);
   }
   catch (e) {
     Logger.log("Kunde inte ändra medlemens rolltyp för e-postadress:" + email);
-    deleteGroupMember(groupId, email);    
+    deleteGroupMember(groupId, memberId);    
   }
 }
 
@@ -785,7 +787,7 @@ function getMembertype(groupId, group_members, email) {
 		if (group_members[i].email==email)	{
           
           if (group_members[i].role=='MANAGER') {
-            var tmp_GroupMember = getGroupMember(groupId, email);
+            var tmp_GroupMember = getGroupMember(groupId, group_members[i].memberId);
             var delivery_settings = tmp_GroupMember.delivery_settings;
             if(delivery_settings=='ALL_MAIL') {
               return "Both";
@@ -795,7 +797,7 @@ function getMembertype(groupId, group_members, email) {
             }            
           }
           else if  (group_members[i].role=='OWNER') {
-            var tmp_GroupMember = getGroupMember(groupId, email);
+            var tmp_GroupMember = getGroupMember(groupId, group_members[i].memberId);
             var delivery_settings = tmp_GroupMember.delivery_settings;
             if(delivery_settings=='ALL_MAIL') {
               return "OWNER_Both";
@@ -811,6 +813,26 @@ function getMembertype(groupId, group_members, email) {
 		}	
 	}
   return "Kunde inte hitta rollen på denna medlem " + email;
+}
+
+/*
+ * Returnerar gruppmedlemens id givet dess email
+ *
+ * @param {string} groupId - Id för denna grupp
+ * @param {Objekt[]} group_members - Lista med medlemsobjekt
+ * @param {string} email - E-postadress för en specifik medlem i gruppen
+ *
+ * @returns {string} - Medlems
+ */
+function getMemberId(groupId, group_members, email) {
+  
+  for (var i = 0; i < group_members.length; i++) {
+   
+		if (group_members[i].email==email)	{
+          return group_members[i].memberId;
+		}	
+	}
+  return email;
 }
 
 
