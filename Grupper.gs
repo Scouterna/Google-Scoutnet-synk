@@ -607,7 +607,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
       
     if (!contains(allMembers_email, group_members[i].email)) {  
       Logger.log(group_members[i].email + " Borde tas bort från " + groupId  + "Google e-postlista");
-      deleteGroupMember(groupId, group_members[i].memberId);
+      deleteGroupMember(groupId, group_members[i].memberId, group_members[i].email);
     }
     group_members_email.push(group_members[i].email);
   }   
@@ -646,7 +646,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
     else {
       //Both, Send, Receive
       var memberTypeOld = getMembertype(groupId, group_members, allMembers_email[i]);
-      var memberId = getMemberId(groupId, group_members, allMembers_email[i])
+      var memberId = getMemberId(groupId, group_members, allMembers_email[i]);
       
       //Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
       
@@ -750,7 +750,8 @@ function getEmailAdressesofAllActiveGoogleAccounts() {
 /*
  * Uppdatera en persons status i en specifik grupp
  *
- * @param {string} groupId - Id för denna grupp
+ * @param {string} groupId - Gruppens id hos grupp
+ * @param {string} memberId - E-postadressens id hos Google
  * @param {string} email - E-postadress för en specifik medlem i gruppen
  * @param {string} role - Önskad ny roll i gruppen
  * @param {string} delivery_settings - Inställning för e-postleverans
@@ -766,7 +767,7 @@ function updateGroupMember(groupId, memberId, email, role, delivery_settings) {
   }
   catch (e) {
     Logger.log("Kunde inte ändra medlemens rolltyp för e-postadress:" + email);
-    deleteGroupMember(groupId, memberId);    
+    deleteGroupMember(groupId, memberId, email);    
   }
 }
 
@@ -815,6 +816,7 @@ function getMembertype(groupId, group_members, email) {
   return "Kunde inte hitta rollen på denna medlem " + email;
 }
 
+
 /*
  * Returnerar gruppmedlemens id givet dess email
  *
@@ -822,14 +824,13 @@ function getMembertype(groupId, group_members, email) {
  * @param {Objekt[]} group_members - Lista med medlemsobjekt
  * @param {string} email - E-postadress för en specifik medlem i gruppen
  *
- * @returns {string} - Medlems
+ * @returns {string} - Unik nyckel för gruppen
  */
 function getMemberId(groupId, group_members, email) {
   
-  for (var i = 0; i < group_members.length; i++) {
-   
+  for (var i = 0; i < group_members.length; i++) {   
 		if (group_members[i].email==email)	{
-          return group_members[i].memberId;
+      return group_members[i].memberId;
 		}	
 	}
   return email;
@@ -1029,16 +1030,17 @@ function addGroupMember(groupId, email, role, delivery_settings) {
  * Tar bort en medlem tillhörande en specifik grupp
  *
  * @param {string} groupId - Gruppens id hos Google
+ * @param {string} memberId - E-postadressens id hos Google
  * @param {string} email - E-postadress att lägg till
  */
-function deleteGroupMember(groupId, email) {
+function deleteGroupMember(groupId, memberId, email) {
   
   Logger.log("groupId " + groupId);
   Logger.log("email " + email);  
   
   try {
     Logger.log("Försöker ta bort " + email);
-    AdminDirectory.Members.remove(groupId, email);
+    AdminDirectory.Members.remove(groupId, memberId);
   }
   catch (e) {      
     Logger.log("Kan inte ta bort till e-postadress:" + email + " pga " + e.message);
@@ -1313,7 +1315,7 @@ function patchAdminGroupSettings(group, email) {
 /*
  * Returna en grupp via AdminDirectory
  *
- * @param {string} groupId - Id för gruppen
+ * @param {string} groupKey - Unik nyckel för gruppen
  *
  * @returns {object} - En Googlegrupp
  */
