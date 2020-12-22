@@ -2,7 +2,7 @@
 Dessa program är tänkta att användas för kåren vid migrering från att kåren tidigare har använt vanlig Google drive och att nu börja använda Googles
 Delade enheter.
 
-För att hjälpa till med migreringen har olika skript tagits fram som du kan läsa mer om nedan
+För att hjälpa till med migreringen har olika skript tagits fram som du kan läsa mer om nedan.
 
 ## Skillnad mellan Google drive och Google Delade enheter
 Vanliga Google drive kan beskrivas som att varje person som skapar en fil eller mapp äger den och inga andra kan ta bort den utan kan bara ta bort den hos
@@ -30,7 +30,18 @@ skriptet till.
 Skript för att få fram vilka som äger alla filer och undermappar till en given mapp.
 
 ### Ta bort länkdelning och redigerare för filer och undermappar i en mapp
-Skript som tar bort länkdelning och redigerare för alla filer och undermappar till en given mapp. De enda som är kvar är fil/mapp-ägaren och du.
+Skript som tar bort länkdelning och redigerare för alla filer och undermappar till en given mapp. De enda som är kvar är fil/mapp-ägaren och du själv.
 
 ### Skapa nya filer som du själv äger
 Skript som skapar filer som du själv äger som är kopior och tar bort orginalfilen för dig. Skriver också över orginalfilen med ny data.
+
+## Förslag till utförandesteg
+1. Ladda ner en kopia från Google drive för den mappen du vill flytta för att ha som säkerhetskopia.
+1. Sätt upp alla skripten enligt instruktionerna.
+1. Kör skriptet `ListaÄgare` för att få fram e-postadresser på vilka som äger alla filer och undermappar.
+1. Skicka ett mejl och dela skriptet `BytaÄgare` enligt instruktionen till de det berör. Du kommer få massor av e-brev när någon kör skriptet så att du vet. Se också till att de du skickar skriptet till har e-postkonto på samma domän som de ska överföra ägarskapet till.
+1. Nu är förhoppningsvis allt överfört till dig om alla har kört skriptet. Kör skriptet `ListaÄgare` för att se om det nu bara är du som är listad som ägare.
+1. När du är nöjd; kör skriptet `ÄndraDelning` för att se till så att inte alla längre har tillgång till alla filer. Det kan behövas lite manuellt arbete med ändring av behörighetsdelning efter körningen om inte programmet lyckas ändra på alla ställen.
+1. Kör skriptet `KopiaNyÄgare` för att skapa kopior på de filer som du ej äger så att du nu äger de nya filerna. Orginalfilerna skrivs över och raderas htl för alla förutom orginalägaren. 
+1.  Kör skriptet `ÄndraDelning` igen då det kan ha blivit problem med att ta bort behörigheten för ägaren till orginalfilerna från kopian.
+1. Börja flytta över alla filer till den delade enheten. Mapparna får du skapa på nytt på den delade enheten och de gamla mapparna ska raderas.

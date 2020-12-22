@@ -12,20 +12,11 @@
  * - Ta bort ägaren till orginalfilen från den nya kopian 
  */
 function copyFileNewOwner() {
-  
-  var emailOfAdmin = "webmaster@dinegnascoutkår.se";
-  
-  var domain = "dinegnascoutkår.se";
-  
+   
   //Mappen vi ska leta filer i
   //T.ex https://drive.google.com/drive/u/0/folders/qwer-asdfghjklzxcvbnmqwertyuio
   var folderId = "qwer-asdfghjklzxcvbnmqwertyuio";
 
-
-  if (!emailOfAdmin.endsWith(domain)) {
-    Logger.log("Felaktig domän på e-postadress!!");
-    return;
-  }
   
   //Din e-postadress för att veta vilka filer/mappar vi kan ändra ägare på
   var yourEmail = Session.getActiveUser().getEmail();
@@ -162,6 +153,8 @@ function makeNewFile(file, folder, yourEmail) {
  */
 function checkMimeTypeIfOkToMakeNew(mimeType) {
 
+    //return true;
+
   //Listan över de att välja över hittas på
   //https://developers.google.com/drive/api/v3/ref-export-formats
 
@@ -172,7 +165,9 @@ function checkMimeTypeIfOkToMakeNew(mimeType) {
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/msword",
     "application/vnd.ms-excel",
+    "application/vnd.ms-powerpoint",
     "application/x-vnd.oasis.opendocument.spreadsheet",
     "text/csv",
     "text/tab-separated-values",
@@ -181,7 +176,8 @@ function checkMimeTypeIfOkToMakeNew(mimeType) {
     "image/svg+xml",
     "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     "application/vnd.oasis.opendocument.presentation",
-    "application/vnd.google-apps.document"
+    "application/vnd.google-apps.document",
+    "application/vnd.google-apps.spreadsheet"
   ];
 
   if (mimeTypesToTouch.includes(mimeType)) {
