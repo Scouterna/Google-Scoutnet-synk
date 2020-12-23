@@ -155,8 +155,8 @@ function checkMimeTypeIfOkToMakeNew(mimeType) {
 
     //return true;
 
-  //Listan över de att välja över hittas på
-  //https://developers.google.com/drive/api/v3/ref-export-formats
+    //Listan över de att välja över hittas på
+    //https://developers.google.com/drive/api/v3/ref-export-formats
 
   var mimeTypesToTouch = [
     "text/plain",
