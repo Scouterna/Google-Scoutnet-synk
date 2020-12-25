@@ -20,8 +20,8 @@ e-postadresser för vem den nya ägaren ska vara för att detta skript ska komma
 på kårens domän och det andra som ändrar till ditt privata @gmail.com konto.
 
 ## Inställningar
-1. Besök när du är inloggad på kårens webbansvariges Google-konto eller annat lämpligt Google-konto med hög behörighet på kårens Google Workspace den mapp på Google drive där du vill lagra projektet. Där skapar du en ny fil på formatet `Google Apps Script`. Om du ska dela skriptet för olika mappar till olika personer är det lämpligt att skriva i projektnamnet också vilken mapp det är frågan om.
-1. Till vänster på skärmen listas de olika filer som finns i projektet och nu vid starten finns endast en som heter Code.gs. Byt namn på den till `BytaÄgare` och ta bort den koden som står i filen.
+1. Besök när du är inloggad på kårens webbansvariges Google-konto eller annat lämpligt Google-konto med hög behörighet på kårens Google Workspace den mapp på Google drive där du vill lagra projektet. Där skapar du en ny fil på formatet **Google Apps Script**. Om du ska dela skriptet för olika mappar till olika personer är det lämpligt att skriva i projektnamnet också vilken mapp det är frågan om.
+1. Till vänster på skärmen listas de olika filer som finns i projektet och nu vid starten finns endast en som heter `Code.gs`. Byt namn på den till `BytaÄgare` och ta bort den koden som står i filen.
 1. Klistra in koden från filen `BytaÄgare.gs` och spara (Ctrl+S).
 1. Ändra följande variabler i koden
     -   Styr till vilket Google-konto som skriptet ska försöka överföra ägarskapet till.
@@ -38,5 +38,5 @@ på kårens domän och det andra som ändrar till ditt privata @gmail.com konto.
             ```    
 1. Ta reda på vilka du ska skicka skriptet till.
 1. Ändra delningsinställningarna för skriptet via inställningarna uppe till höger. Förslagsvis så att andra enbart kan visa skriptet och inte ändra.
-1. Dela länken till skriptet och be dem köra det genom att trycka på `Run`.
+1. Dela länken till skriptet och be dem köra det genom att trycka på **Run**.
    -    Observera att du kommer att få ett mejl till din inkorg för alla filer som skriptet påverkar när någon kör det, så det rekommenderas att vara beredd på det.
