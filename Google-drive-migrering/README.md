@@ -19,12 +19,12 @@ ta bort filen helt och hållet, så filen kommer finnas kvar och eventuellt kunn
 Skripten hjälper till med detta arbete vilket kan vara omständigt om det görs manuellt.
 
 ## Skript
-### Steg 1 - Ge bort ägarskap
+### [Steg 1 - Ge bort ägarskap](Steg1-ge-bort-ägarskap)
 #### Ge bort ditt ägarskap för filer och mappar
 Skript för att dela med användare i kåren som har tillgång till en given mapp och undermappar för att flytta deras ägarskap till dig eller given
 e-postadress.
 
-### Steg 2 - Tvingad ändring av filägare
+### [Steg 2 - Tvingad ändring av filägare](Steg2-tvingad-ändring-filägare)
 #### Lista vilka som äger filer och undermappar i en mapp
 Skript för att få fram vilka som äger alla filer och undermappar till en given mapp.
 
@@ -34,7 +34,7 @@ Skript som tar bort länkdelning och redigerare för alla filer och undermappar 
 #### Skapa nya filer som du själv äger
 Skript som skapar filer som du själv äger som är kopior och tar bort orginalfilen för dig. Skriver också över orginalfilen med ny data.
 
-### Steg 3 - Flytta filer
+### [Steg 3 - Flytta filer](Steg3-flytta-filer)
 #### Radera tomma mappar
 Skript som raderar tomma mappar.
 
@@ -44,13 +44,13 @@ Skript som flyttar dina filer och kopierar över mappar.
 ## Förslag till utförandesteg
 1. Ladda ner en kopia från Google drive för den mappen du vill flytta för att ha som säkerhetskopia.
 1. Sätt upp alla skripten enligt instruktionerna.
-1. Kör skriptet `ListaÄgare` för att få fram e-postadresser på vilka som äger alla filer och undermappar.
-1. Skicka ett mejl och dela skriptet `BytaÄgare` enligt instruktionen till de det berör. Du kommer få massor av e-brev när någon kör skriptet så att du vet. Se också till att de du skickar skriptet till har e-postkonto på samma domän som de ska överföra ägarskapet till.
-1. Nu är förhoppningsvis allt överfört till dig om alla har kört skriptet. Kör skriptet `ListaÄgare` för att se om det nu bara är du som är listad som ägare.
-1. När du är nöjd; kör skriptet `ÄndraDelning` för att se till så att inte alla längre har tillgång till alla filer. Det kan behövas lite manuellt arbete med ändring av behörighetsdelning efter körningen om inte programmet lyckas ändra på alla ställen.
-1. Kör skriptet `KopiaNyÄgare` för att skapa kopior på de filer som du ej äger så att du nu äger de nya filerna. Orginalfilerna skrivs över och raderas för alla förutom orginalägaren. 
-1.  Kör skriptet `ÄndraDelning` igen då det kan ha blivit problem med att ta bort behörigheten för ägaren till orginalfilerna från kopian.
-1. Kör skriptet `RaderaTommaMappar` för att radera alla tomma undermappar till den mapp du ska flytta filerna ifrån.
-1. Kör skriptet `FlyttaFiler` för att flytta över dina egna filer till den delade enheten samt få med alla mappar.
-1. Kör skriptet `RaderaTommaMappar` igen för att radera alla tomma undermappar till den mapp du har flyttat filerna ifrån. Detta då det antagligen har blivit en hel del tomma mappar nu.
+1. Kör skriptet [`ListaÄgare`](Steg2-tvingad-ändring-filägare) för att få fram e-postadresser på vilka som äger alla filer och undermappar.
+1. Skicka ett mejl och dela skriptet [`BytaÄgare`](Steg1-ge-bort-ägarskap) enligt instruktionen till de det berör. Du kommer få massor av e-brev när någon kör skriptet så att du vet. Se också till att de du skickar skriptet till har e-postkonto på samma domän som de ska överföra ägarskapet till.
+1. Nu är förhoppningsvis allt överfört till dig om alla har kört skriptet. Kör skriptet [`ListaÄgare`](Steg2-tvingad-ändring-filägare) för att se om det nu bara är du som är listad som ägare.
+1. När du är nöjd; kör skriptet [`ÄndraDelning`](Steg2-tvingad-ändring-filägare) för att se till så att inte alla längre har tillgång till alla filer. Det kan behövas lite manuellt arbete med ändring av behörighetsdelning efter körningen om inte programmet lyckas ändra på alla ställen.
+1. Kör skriptet [`KopiaNyÄgare`](Steg2-tvingad-ändring-filägare) för att skapa kopior på de filer som du ej äger så att du nu äger de nya filerna. Orginalfilerna skrivs över och raderas för alla förutom orginalägaren. 
+1.  Kör skriptet [`ÄndraDelning`](Steg2-tvingad-ändring-filägare) igen då det kan ha blivit problem med att ta bort behörigheten för ägaren till orginalfilerna från kopian.
+1. Kör skriptet [`RaderaTommaMappar`](Steg3-flytta-filer) för att radera alla tomma undermappar till den mapp du ska flytta filerna ifrån.
+1. Kör skriptet [`FlyttaFiler`](Steg3-flytta-filer) för att flytta över dina egna filer till den delade enheten samt få med alla mappar.
+1. Kör skriptet [`RaderaTommaMappar`](Steg3-flytta-filer) igen för att radera alla tomma undermappar till den mapp du har flyttat filerna ifrån. Detta då det antagligen har blivit en hel del tomma mappar nu.
 1. Manuellt flytta över på lämpligt sätt de filer som är kvar att flytta samt radera mappar.
