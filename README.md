@@ -12,8 +12,7 @@ lägg ett ärende under "Issues" eller mejla emil.ohman@scouterna.se.
 I bland kommer det ny funktionalitet, så håll utkik på en ny version genom att trycka på knappen
 **Watch** uppe till höger på sidan för att du kunna bli notifierad vid en ny version.
 
-Du kan ladda ner den senaste versionen [här]
-(https://github.com/Scouterna/Google-Scoutnet-synk/releases/latest) och där kan
+Du kan ladda ner den senaste versionen [här](https://github.com/Scouterna/Google-Scoutnet-synk/releases/latest) och där kan
 du också ser vilken funktionalitet som är ny i respektive version. Läs filen README.md
 för instruktion om installation och funktionalitet.
 
