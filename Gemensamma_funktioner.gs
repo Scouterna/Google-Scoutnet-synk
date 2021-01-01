@@ -10,7 +10,8 @@
 function Allt() {
  
   Anvandare();
-  Grupper(); 
+  Grupper();
+  Medlemslistor();
 }
 
 

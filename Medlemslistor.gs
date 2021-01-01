@@ -125,6 +125,29 @@ function Medlemslistor(start, slut) {
 
 
 /**
+ * Skapa kolumnrubriker i kalkylarket för medlemslistor konfig
+ */
+function skapaRubrikerMedlemslistor() {
+
+  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Medlemslistor).getSheets()[0];
+
+  // Frys de två översta raderna på arket så att rubrikerna alltid syns
+  sheet.setFrozenRows(2);
+
+  var range_rubrik = sheet.getRange(2, 1, 1, 3);
+
+  var rubriker = [
+    ["Namn", "Scoutnet-id", "Länk till kalkylark"]
+  ];
+
+  // Sätter våra rubriker på vårt område
+  range_rubrik.setValues(rubriker);
+  range_rubrik.setFontWeight("bold");
+  range_rubrik.setFontStyle("italic");
+}
+
+
+/**
  * Uppdatera en lista över medlemmar
  * 
  * @param {Objekt} selection - området på kalkylarket för alla listor som används just nu
