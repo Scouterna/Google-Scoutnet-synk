@@ -570,53 +570,6 @@ function getScoutleaders(allMembers) {
 
 
 /*
- * Hämta lista över alla medlemmar
- *
- * @returns {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
- */
-function fetchScoutnetMembers() {  
-  
-  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist?id=' + groupId + '&key=' + api_key_list_all + '&pretty=1';
-  var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
-  //Logger.log(response); 
-  
-  var json = response.getContentText();
-  var data = JSON.parse(json);
-  
-  var medlemmar = data.data;
-  var allMembers = [];
-  
-  //Logger.log(medlemmar);
-  for (x in medlemmar) {
-    var medlem = medlemmar[x];
-    
-    var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'ssno', 'note', 'date_of_birth', 'status',
-                                        'created_at', 'confirmed_at', 'group', 'unit', 'patrol', 'unit_role', 'group_role',
-                                        'sex', 'address_co', 'address_1', 'address_2' , 'address_3', 'postcode', 'town',
-                                        'country', 'contact_mobile_phone', 'contact_home_phone', 'contact_mothers_name',
-                                        'contact_mobile_mum', 'contact_telephone_mum', 'contact_fathers_name', 'contact_mobile_dad',
-                                        'contact_telephone_dad', 'prev_term', 'prev_term_due_date', 'current_term',
-                                        'current_term_due_date', 'avatar_updated', 'avatar_url'];
-    
-    //Dessa attributvärden ska användas som gemener för bättre jämförelser
-    var variabel_lista_lowercase = ['email', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email', 'extra_emails'];
-    
-    var member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
-        
-    //Logger.log("MEMBER print object " + member);
-    //Logger.log("%s %s, Medlem %s, Mobil %s",member.first_name, member.last_name, member.member_no, member.contact_mobile_phone); //member.member_no + "   " + member.first_name + "  " + member.last_name);
-    //Logger.log(member.date_of_birth + "   " + member.confirmed_at + "  " + member.unit);
-    //Logger.log(member.unit_role + "   " + member.group_role + "  " + member.email);
-    //Logger.log(member.email_mum + "   " + member.email_dad + "  " + member.alt_email);
-    allMembers.push(member); 
-    
-  } 
-  //Logger.log("FETCH MEMBERS print object " + allMembers);
-  return allMembers;  
-}
-
-
-/*
  * Testfunktion för att lista alla Googlekonton som finns i underorganisationen "Scoutnet"
  * Max 200 stycken
  */

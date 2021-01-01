@@ -5,7 +5,7 @@ Dessa skript gör olika saker och hjälper till med
 - Skapa filer som du själv äger som är kopior av orginalen och tar bort orginalfilen för dig så att du kan flytta över filerna.
 
 ## Inställningar - gemensamt
-1. Besök när du är inloggad på kårens webbansvariges Google-konto eller annat lämpligt Google-konto med hög behörighet på kårens Google Workspace den mapp på Google drive där du vill lagra projektet. Där skapar du en ny fil på formatet `Google Apps Script`.
+1. Besök när du är inloggad på kårens webbansvariges Google-konto eller annat lämpligt Google-konto med hög behörighet på kårens Google Workspace den mapp på Google drive där du vill lagra projektet. Där skapar du en ny fil på formatet **Google Apps Script**.
 1. Till vänster på skärmen listas de olika filer som finns i projektet och nu vid starten finns endast en som heter `Code.gs`. Byt namn på den till `ListaÄgare` och ta bort den kod som står i filen.
 1. Klistra in koden från filen `ListaÄgare.gs` och spara (Ctrl+S).
 1. Skapa också nya filer för `ÄndraDelning` och `KopiaNyÄgare` och klistra in respektive kod där för att sen spara.
