@@ -75,8 +75,7 @@ function Medlemslistor(start, slut) {
     var scoutnet_list_id = data[i][grd["scoutnet_list_id"]];
     var spreadsheetUrl = data[i][grd["spreadsheetUrl"]];
     
-    var rad_nummer = i+1;
-    
+    var rad_nummer = i+1;    
     Logger.log('Rad: ' + rad_nummer + ' Namn: ' + name + ' Scoutnet: ' + scoutnet_list_id + ' spreadsheetUrl: ' + spreadsheetUrl);
     
     var update_group = "yes";
@@ -116,11 +115,412 @@ function Medlemslistor(start, slut) {
 
     if (update_group == "yes") {
       //Uppdatera aktuell medlemslista
-      updateMemberlist(selection, rad_nummer, data[i], grd, allMembers, rowSpreadsheet);     
+      updateMemberlist(selection, rad_nummer, data[i], grd, allMembers, rowSpreadsheet);
+      
+      //skicka ut e-brev till de i medlemslistan
+      skickaMedlemslista(selection, rad_nummer, data[i], grd, rowSpreadsheet);
     }
   }
   //Ta bort tomma radera i kalkylarket
   deleteRowsFromSpreadsheet(sheet, delete_rows);
+}
+
+
+/**
+ * Skickar ut e-brev till de i aktuell medlemlista
+ * 
+ * @param {Object} selection - området på kalkylarket för alla listor som används just nu
+ * @param {number} rad_nummer - radnummer för aktuell medlemslista i kalkylarket
+ * @param {string[]} radInfo - lista med data för aktuell rad i kalkylarket
+ * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
+ * @param {Object[]} rowSpreadsheet - ett googleobjekt av typen Spreadsheet där listan finns
+ */
+function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)  {
+
+  var email_draft_subject = radInfo[grd["email_draft_subject"]];
+  var email_sender_name = radInfo[grd["email_sender_name"]];
+  var email_sender_email = radInfo[grd["email_sender_email"]];
+  var email_replyto = radInfo[grd["email_replyto"]];
+  var email_noreply = radInfo[grd["email_noreply"]].toString();
+  var email_recipient = radInfo[grd["email_recipient"]];
+  var email_cc = radInfo[grd["email_cc"]];
+  var email_bcc = radInfo[grd["email_bcc"]];
+
+  var sheet = rowSpreadsheet.getSheets()[0];
+  var lastRow = sheet.getLastRow();
+  var lastColumn = sheet.getLastColumn();
+  Logger.log("lastColumn ska vara " + lastColumn);
+  Logger.log("lastRow ska vara " + lastRow); 
+
+  var attribut = getVerkligaRubriker(sheet);
+  var data = getVerkligMedlemslista(sheet);
+
+  /***Dessa celler ska färgmarkeras eller ändras vid fel***/
+  var cell_email_sender_email = selection.getCell(rad_nummer, grd["email_sender_email"]+1);
+  var cell_email_replyto = selection.getCell(rad_nummer, grd["email_replyto"]+1);
+  var cell_email_noreply = selection.getCell(rad_nummer, grd["email_noreply"]+1);
+  /*******************************************/
+
+  /***Dessa data hämta från utkastet och är lika för alla vid giltighetskontrollen***/
+  Logger.log("Ämne på e-post i utkast " + email_draft_subject);
+  var draft = getDraft(email_draft_subject);
+
+  var cell=selection.getCell(rad_nummer, grd["email_draft_subject"]+1);
+  if (!draft) { //Kolla om ämnesraden är korrekt
+    Logger.log("Ogiltig ämmnesrad " + email_draft_subject);
+    cell.setBackground("red");
+    return;
+  }
+  else {
+    if ("#ffffff" != cell.getBackground()) {
+      cell.setBackground("white");
+    }
+  }
+
+  var cell=selection.getCell(rad_nummer, grd["email_sender_name"]+1);
+  if (email_sender_name) { //Kolla om fältet för avsändarnamn är angivet
+    if ("#ffffff" != cell.getBackground()) {
+      cell.setBackground("white");
+    }
+  }
+  else {
+    Logger.log("Inget avsändarnamn angivet");
+    cell.setBackground("yellow");
+  }
+  /**************************************************************************/  
+
+  for (var i = 0; i<data.length; i++) {
+    Logger.log("Rad  i kalkylarket " + i);
+    var emailOptions = {};
+    /***Hämta & Ersätt text***/
+    
+    /***Ämnesrad***/
+    var tmp_subject = replaceTemplate(email_draft_subject, attribut, data[i]);
+    /***Ämnesrad - Slut***/
+
+    /***Avsändarnamn***/
+    if (email_sender_name)  {
+      var tmp_email_sender_name = replaceTemplate(email_sender_name, attribut, data[i]);
+      emailOptions["name"] = tmp_email_sender_name;
+    }
+    /***Avsändarnamn - Slut***/
+
+    /***Avsändaradress***/
+    var tmp_email_sender_email = getSender(email_sender_email, "avsändaradress", attribut, data[i], cell_email_sender_email, emailOptions);
+    if (!tmp_email_sender_email) {
+      continue;
+    }
+    /***Avsändaradress - Slut***/
+
+    /***Svarsadress e-post***/
+    var tmp_email_replyto = getSender(email_replyto, "svarsadress", attribut, data[i], cell_email_replyto, emailOptions);
+    if (!tmp_email_replyto) {
+      continue;
+    }
+    /***Svarsadress e-post - Slut***/
+
+    /***Svara-ej***/
+    var tmp_email_noreply = replaceTemplate(email_noreply, attribut, data[i]);
+    if (tmp_email_noreply)  { //Om den ej är tom
+      tmp_email_noreply = JSON.parse(tmp_email_noreply);
+    }
+    if (tmp_email_noreply)  {
+      cell_email_noreply.setValue(true);
+      Logger.log("Svara-ej är påslagen " + tmp_email_noreply);
+      emailOptions["noReply"] = true;
+    }
+    else {
+      cell_email_noreply.setValue(false);
+      Logger.log("Svara-ej är avstängd " + tmp_email_noreply);
+    }
+    /***Svara-ej - Slut***/
+
+    /***Mottagare e-post***/
+    var tmp_email_recipient = getRecipient(email_recipient, "mottagaradress", attribut, data[i]);
+    /***Mottagare e-post- Slut***/
+
+    /***Kopia e-post***/
+    var tmp_email_cc = getRecipient(email_cc, "kopia e-post", attribut, data[i]);
+    if (tmp_email_cc) {
+      emailOptions["cc"] = tmp_email_cc;
+    }
+    /***Kopia e-post - Slut***/
+
+    /***Blindkopia e-post***/
+    var tmp_email_bcc = getRecipient(email_bcc, "blindkopia e-post", attribut, data[i]);
+    if (tmp_email_bcc) {
+      emailOptions["bcc"] = tmp_email_bcc;
+    }
+    /***Blindkopia e-post - Slut***/
+
+    if (!(tmp_email_recipient || tmp_email_cc || tmp_email_bcc))  {
+      Logger.log("Ingen mottagare är angiven på något sätt. Vi hoppar över denna person");
+      continue;
+    }
+    
+    var body = draft.getBody();
+    body = replaceTemplate(body, attribut, data[i]);    
+
+    var attachments = draft.getAttachments();    
+    
+    Logger.log("tmp_email_recipient " + tmp_email_recipient);
+    Logger.log("tmp_subject " + tmp_subject);
+    Logger.log("body " + body);    
+    Logger.log("Bilagor " + attachments);
+    Logger.log("emailOptions");
+    Logger.log(emailOptions);
+
+  }
+}
+
+
+/**
+ * Givet en mall returnerar funktionen en personlig e-postadress
+ * att använda som avsändaradress respektive svarsadress beroende på
+ * syfte. Data läggs till i objekten emailOptions för hur e-post ska
+ * skickas. Ändrar färg på cell i kalkylark vid statusändring.
+ * 
+ * @param {string} variable - en textmall innehållande ev kortkoder
+ * @param {string} nameOfVariable - en textsträng med namnet på e-postattributet
+ * @param {Object} attribut - ett objekt med kolumnrubriker och dess 
+ * @param {string[]} data - en lista innehållande persondata för en person
+ * @param {Object} cell - ett objekt av typen Range
+ * @param {Object} emailOptions - ett objekt där extra data för att skicka e-posten finns
+ *
+ * @returns {string} - en textsträng utan kommentarer eller mellanrum
+ */
+function getSender(variable, nameOfVariable, attribut, data, cell, emailOptions)  {
+
+  var tmp_variable = replaceTemplate(variable, attribut, data);
+  tmp_variable = getCleanString(tmp_variable);
+  tmp_variable = tmp_variable.toLowerCase();
+
+  if ("avsändaradress"==nameOfVariable && isFromEmailAdressAllowed(tmp_variable)) {
+    if ("#ffffff" != cell.getBackground()) {
+      cell.setBackground("white");
+    }
+    emailOptions["from"] = tmp_variable;
+  }
+  else if ("svarsadress"==nameOfVariable && checkIfEmail(tmp_variable))  {
+    if ("#ffffff" != cell.getBackground()) {
+      cell.setBackground("white");
+    }
+    emailOptions["replyTo"] = tmp_variable;
+  }
+  else if (!tmp_variable)  {
+    Logger.log("Ingen " + nameOfVariable + " angiven");
+    cell.setBackground("yellow");
+  }
+  else {
+    Logger.log("Ogiltig " + nameOfVariable + " angiven " + tmp_variable +". Vi hoppar över denna person");
+    cell.setBackground("red");
+    return false;
+  }
+  return true;
+}
+
+
+/**
+ * Givet en mall returnerar funktionen en personlig gjord kommaseparerad
+ * textsträng
+ * 
+ * @param {string} variable - en textmall innehållande ev kortkoder
+ * @param {string} nameOfVariable - en textsträng med namnet på e-postattributet
+ * @param {Object} attribut - ett objekt med kolumnrubriker och dess 
+ * @param {string[]} data - en lista innehållande persondata för en person
+ *
+ * @returns {string} - en textsträng utan kommentarer eller mellanrum
+ */
+function getRecipient(variable, nameOfVariable, attribut, data) {
+
+  var tmp_variable = replaceTemplate(variable, attribut, data);
+  tmp_variable = getCleanEmailArray(tmp_variable).toString();
+  Logger.log(nameOfVariable);
+  Logger.log(tmp_variable);
+  if (tmp_variable)  {
+    Logger.log(nameOfVariable + " är angiven " + tmp_variable);
+  }
+  else {
+    Logger.log("Ingen " + nameOfVariable + " är angiven " + tmp_variable);
+  }
+  return tmp_variable;
+}
+
+
+/**
+ * Givet en variabel returnerar funktionen en kommaseparerad textsträng
+ * där endast de element som är e-postadresser är med
+ * 
+ * @param {string} input - en variabel
+ *
+ * @returns {string[]} - en textsträng utan kommentarer eller mellanrum
+ */
+function getCleanEmailArray(input) {
+
+  var emailArray = [];
+  input = getCleanString(input);  
+  var tmpArray = input.split(",");
+
+  for (var i = 0; i<tmpArray.length; i++) {
+    if (checkIfEmail(tmpArray[i]))  {
+      emailArray.push(tmpArray[i]);
+    }
+  }
+  return emailArray;
+}
+
+
+/**
+ * Ger sant eller falskt om angiven e-postadress är tillåten
+ * som avsändareadress
+ * 
+ * @param {string} email - en e-postadress
+ *
+ * @returns {boolean} - om avsändaradressen är tillåten
+ */
+function isFromEmailAdressAllowed(email) {  
+  return contains(getAllowedFromEmailAdresses(), email);
+}
+
+
+/**
+ * Ger vilka e-postadresser som det går att ange som avsändare
+ *
+ * @returns {string[]} - en lista med e-postadresser
+ */
+function getAllowedFromEmailAdresses() {
+  
+  var aliases = GmailApp.getAliases();
+  var min_adress = Session.getEffectiveUser().getEmail();
+  
+  aliases.push(min_adress);
+  //Logger.log(aliases);
+  return aliases;
+}
+
+
+/**
+ * Ger en personlig text givet indatatext med kortkoder
+ * 
+ * @param {string} textInput - en textmall innehållande ev kortkoder
+ * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - en lista innehållande persondata för en person
+ *
+ * @returns {string} - en personligfierad textsträng
+ */
+function replaceTemplate(textInput, attribut, dataArray)  {
+
+  var text = textInput.slice();
+  //Skapar en lista med alla kortkoder som används
+  var textMatches = text.match(/\{\{[^\{\}]+\}\}/g);
+
+  for (var i = 0; textMatches && i<textMatches.length; i++)  {
+    
+    //Ta bort måsvingarna
+    var textMatch = textMatches[i].replace(/[\{\}][\{\}]/g, '');
+    //Vilken kolumn (0-index) som kortkoden finns i kalkylarket
+    var textColMatch = attribut[textMatch];
+    //Ny data = den som finns i kolumn textColMatch för denna person
+    var replaceData = dataArray[textColMatch];
+    //Ersätt koden med personlig data
+    text = text.replace(textMatches[i], replaceData || '');
+
+    //Logger.log(textMatch);
+    //Logger.log(textColMatch);
+    //Logger.log(replaceData);
+  }
+  //Logger.log(text);
+  return text;
+}
+
+
+/**
+ * Ger en matris med data för medlemslistan i kalkylarket
+ * 
+ * @param {Object} sheet - ett objekt av typen Sheet
+ *
+ * @returns {string[][]} - en matris innehållande persondata
+ */
+function getVerkligMedlemslista(sheet) {
+
+  var lastRow = sheet.getLastRow();
+  var lastColumn = sheet.getLastColumn();
+  var range = sheet.getRange(2, 1, lastRow-1, lastColumn);
+
+  var values = range.getDisplayValues();
+
+  Logger.log("Data i kalkylarket för medlemslista");
+  Logger.log(values);
+  return values;
+}
+
+
+/**
+ * Ger ett objekt med rubrikerna i kalkylarket som nycklar och
+ * dess respektive kolumnplacering som värde
+ * 
+ * @param {Object} sheet - ett objekt av typen Sheet
+ *
+ * @returns {Object} - ett objekt med kolumnrubriker och dess placeringar
+ */
+function getVerkligaRubriker(sheet) {
+
+  var lastColumn = sheet.getLastColumn();
+  var range = sheet.getRange(1, 1, 1, lastColumn);
+
+  var values = range.getDisplayValues()[0];
+
+  Logger.log("Rubriker i kalkylarket");
+  Logger.log(values);
+
+  var data = {};
+  for (var i = 0; i<values.length; i++) {
+    data[values[i]] = i;
+  }
+  return data;
+}
+
+
+/**
+ * Ger ett e-postutkast om det finns givet ämnesraden på det
+ * 
+ * @param {string} subject - ämnesrad på e-postutkast
+ *
+ * @returns {Object} - ett e-postutkast av typen GmailMessage
+ */
+function getDraft(subject)  {
+
+  subject = getComparableString(subject);
+
+  var drafts = GmailApp.getDraftMessages();
+  for (var i = 0; i<drafts.length; i++) {
+
+    var draftSubject = drafts[i].getSubject();
+    draftSubject = getComparableString(draftSubject);
+
+    if (draftSubject == subject)  {
+      Logger.log(draftSubject);
+      return drafts[i];
+    }
+  }
+  return false;
+}
+
+
+/**
+ * Gör om en textsträng till gemener och tar bort tomrum
+ * 
+ * @param {string} text - textsträng
+ *
+ * @returns {string} - textsträng som är enklare att jämföra
+ */
+function getComparableString(text)  {
+
+  //Ta bort tomma mellanrum vid start och slut och konvertera till gemener
+  text = text.toLowerCase().trim();
+  //Ta bort alla tomma mellanrum
+  text = text.replace(/([\s])+/g, '');
+  return text;
 }
 
 
@@ -131,26 +531,74 @@ function skapaRubrikerMedlemslistor() {
 
   var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Medlemslistor).getSheets()[0];
 
+  var mlkrd = getMedlemslistorKonfigRubrikData();
+
   // Frys de två översta raderna på arket så att rubrikerna alltid syns
   sheet.setFrozenRows(2);
 
-  var range_rubrik = sheet.getRange(2, 1, 1, 3);
+  /********Rad 1********************/
+  var range1_rad1 = sheet.getRange(1, mlkrd["email_sender_name"]+1, 1, 4);
+  var range2_rad1 = sheet.getRange(1, mlkrd["email_recipient"]+1, 1, 3);
+  
+  //Inga angivna celler på rad 1 är sammanfogade
+  if (! (range1_rad1.isPartOfMerge() || range2_rad1.isPartOfMerge())) { 
+    
+    Logger.log("Inga av de angivna cellerna på rad 1 är sammanfogade");
+    
+    range1_rad1.merge();
+    range2_rad1.merge();
+    
+    Logger.log("Vi har nu sammanfogat dem");    
+  }
+  else {
+    Logger.log("Några celler är sedan tidigare sammanfogade på rad 1, så vi gör inget åt just det");
+  }
 
-  var rubriker = [
-    ["Namn", "Scoutnet-id", "Länk till kalkylark"]
+  var values_rad1 = [
+    ["Avsändare", "", "", "", "Mottagare", "", ""]
   ];
 
+  // Sätter området för cellerna som vi ska ändra
+  // De 7 kolumnerna för att styra e-postinställningar
+  var range_rad1 = sheet.getRange(1, mlkrd["email_sender_name"]+1, 1, 7);
+  range_rad1.setHorizontalAlignment("center");
+  range_rad1.setFontWeight("bold");
+
   // Sätter våra rubriker på vårt område
-  range_rubrik.setValues(rubriker);
-  range_rubrik.setFontWeight("bold");
-  range_rubrik.setFontStyle("italic");
+  range_rad1.setValues(values_rad1);
+
+  /*******Rad 2********************/
+  // Våra värden vi vill ha som rubriker för de olika kolumnerna på rad 2
+  var values_rad2 = [
+    ["Namn", "Scoutnet-id", "Länk till kalkylark", "Ämnesrad på utkastet i Gmail",
+    "Avsändare namn", "Avsändare e-post", "Svarsadress e-post", "Svara-ej",
+    "Mottagare e-post", "Kopia e-post", "Blindkopia e-post"]
+  ];
+
+  // Sätter området för cellerna på rad 2 som vi ska ändra
+  var range_rad2 = sheet.getRange(2, 1, 1, values_rad2[0].length);
+
+  // Sätter våra rubriker på vårt område
+  range_rad2.setValues(values_rad2);
+  range_rad2.setFontWeight("bold");
+  range_rad2.setFontStyle("italic");
+  /*******************************/
+
+  /*******Sätt kantlinjer*********/  
+  var kolumn1 = getA1RangeOfColumns(sheet, mlkrd["email_sender_name"]+1, 4);
+  //Kolumnen för scoutnet_list_id;
+  kolumn1.setBorder(null, true, null, true, null, null);
+  
+  var kolumn2 = getA1RangeOfColumns(sheet, mlkrd["email_recipient"]+1, 3);
+  kolumn2.setBorder(null, true, null, true, null, null);  
+  /*******************************/
 }
 
 
 /**
  * Uppdatera en lista över medlemmar
  * 
- * @param {Objekt} selection - området på kalkylarket för alla listor som används just nu
+ * @param {Object} selection - området på kalkylarket för alla listor som används just nu
  * @param {number} rad_nummer - radnummer för aktuell medlemslista i kalkylarket
  * @param {string[]} radInfo - lista med data för aktuell rad i kalkylarket
  * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
@@ -159,7 +607,7 @@ function skapaRubrikerMedlemslistor() {
  */
 function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, spreadsheet) {
 
-  /******/
+  /************************/
   var scoutnet_list_id = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   var cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
   Logger.log(".......Synkronisering - hämta data............");
@@ -175,12 +623,10 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
     Logger.log(obj);
   }
 
-
   var mlrd = getMedlemslistorRubrikData();
   Logger.log(mlrd);
   var numAttrMembers = mlrd.length;
   Logger.log("Antal medlemsattribut att använda " + numAttrMembers);
-
 
   var sheet = spreadsheet.getSheets()[0];
 
@@ -328,7 +774,17 @@ function getMedlemslistorKonfigRubrikData() {
   medlemslistaKonfigRubrikData["namn"] = 0;
   medlemslistaKonfigRubrikData["scoutnet_list_id"] = 1;  
   medlemslistaKonfigRubrikData["spreadsheetUrl"] = 2;
-                  
+  medlemslistaKonfigRubrikData["email_draft_subject"] = 3;
+
+  medlemslistaKonfigRubrikData["email_sender_name"] = 4;
+  medlemslistaKonfigRubrikData["email_sender_email"] = 5;
+  medlemslistaKonfigRubrikData["email_replyto"] = 6;
+  medlemslistaKonfigRubrikData["email_noreply"] = 7;
+  
+  medlemslistaKonfigRubrikData["email_recipient"] = 8;
+  medlemslistaKonfigRubrikData["email_cc"] = 9;
+  medlemslistaKonfigRubrikData["email_bcc"] = 10;
+
   return medlemslistaKonfigRubrikData;
 }
 

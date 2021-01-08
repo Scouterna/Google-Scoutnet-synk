@@ -178,9 +178,8 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   Logger.log(typeof scoutnet_list_id);
   
   var allMembers = [];
-  scoutnet_list_id = scoutnet_list_id.toString(); //Vi gör om till string för att metoden replace ska fungera
-  scoutnet_list_id = scoutnet_list_id.replace(/\(.*?\)/g, ''); //Ta bort kommentarer inom parentes så de inte kommer med
-  scoutnet_list_id = scoutnet_list_id.replace(/\s+/g, ''); //Ta bort tomma mellanrum
+
+  scoutnet_list_id = getCleanString(scoutnet_list_id);
   
   Logger.log("Innan splitt " + scoutnet_list_id);
   var tmp_id = scoutnet_list_id.split(",");
@@ -620,6 +619,24 @@ function findWhatRowsToSync(start, slut, maxRowNumber) {
     "slut": slut
   };
   return rowsToSync;  
+}
+
+
+/**
+ * Tar bort kommentarer inom parens samt tomrum i
+ * angiven variabel
+ * 
+ * @param {string} input - en variabel
+ *
+ * @returns {string} - en textsträng utan kommentarer eller mellanrum
+ */
+function getCleanString(input)  {
+
+  input = input.toString(); //Vi gör om till string för att metoden replace ska fungera
+  input = input.replace(/\(.*?\)/g, ''); //Ta bort kommentarer inom parentes så de inte kommer med
+  input = input.replace(/\s+/g, ''); //Ta bort tomma mellanrum
+
+  return input;
 }
 
 
