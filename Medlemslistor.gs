@@ -189,6 +189,10 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
   }
   /**************************************************************************/  
 
+  var body = draft.getBody();
+  var plainBody = draft.getPlainBody();
+  var attachments = draft.getAttachments();
+
   for (var i = 0; i<data.length; i++) {
     Logger.log("Rad  i kalkylarket " + i);
     var emailOptions = {};
@@ -257,19 +261,26 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
       Logger.log("Ingen mottagare är angiven på något sätt. Vi hoppar över denna person");
       continue;
     }
-    
-    var body = draft.getBody();
-    body = replaceTemplate(body, attribut, data[i]);    
 
-    var attachments = draft.getAttachments();    
+    /***Bilagor***/
+    emailOptions["attachments"] = attachments;
+    /***Bilagor - Slut***/
+
+    /***Brödtext***/
+    var tmp_plainBody = replaceTemplate(plainBody, attribut, data[i]);
+    var tmp_body = replaceTemplate(body, attribut, data[i]);
+    emailOptions["htmlBody"] = tmp_body;    
+    /***Brödtext  Slut***/
+
     
     Logger.log("tmp_email_recipient " + tmp_email_recipient);
     Logger.log("tmp_subject " + tmp_subject);
-    Logger.log("body " + body);    
+    Logger.log("tmp_plainBody " + tmp_plainBody);
     Logger.log("Bilagor " + attachments);
     Logger.log("emailOptions");
     Logger.log(emailOptions);
 
+    GmailApp.sendEmail(tmp_email_recipient, tmp_subject, tmp_plainBody, emailOptions);
   }
 }
 
