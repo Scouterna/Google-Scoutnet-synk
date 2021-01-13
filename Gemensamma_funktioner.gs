@@ -15,51 +15,6 @@ function Allt() {
 }
 
 
-/**
- * @todo
- */
-function GetAttachments(inputString) {
-  
-  var filelist = inputString.split(",");
-  
-  var files_to_attach = [];
-  
-  for (var i = 0; i < filelist.length; i++) {    
-    var fil = filelist[i] = filelist[i].trim();
-    
-    var file = getFileById(fil);
-    if (!file) {
-      file = getFileByName(fil);
-      if(!file) {
-        Logger.log(fil + " kunde inte hittas på Google Drive, kontrollera indata och behörighet");
-        //return false; //Gör detta så att man kan ändra färg om något är fel
-      }
-    }
-    
-    if (file) { //Denna fil ska läggas till
-      files_to_attach.push(file);
-      Logger.log(file + " finns");
-    }    
-  }  
-  return files_to_attach;
-}
-
-
-/*
- * Returerna Google Drive fil om fil med namnet är tillgänglig
- * @todo
- */
-function getFileByName(namn){  
-  
-  var file = DriveApp.getFilesByName(namn);
-  
-  if (file.hasNext()) {    
-    return file.next();
-  }
-  return false;
-}
-
-
 /*
  * Returnera åldern på en medlem
  * @todo
