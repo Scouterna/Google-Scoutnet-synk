@@ -16,66 +16,6 @@ function Allt() {
 
 
 /*
- * Returnera åldern på en medlem
- * @todo
- */
-function getAge(medlem) {
-  
-  var today = new Date();
-  
-  //today.setDate(-60); //Test, sätt dag i månaden som dagens datum
-  var ms_today = today.getTime();
-    
-  var medlem_born = convertStringToDate(medlem.date_of_birth); //Todays date as a Date object 
-  var ms_medlem_born = medlem_born.getTime();
-    
-  Logger.log("Dagens datum " + ms_today);
-  Logger.log("Födelsetid " + ms_medlem_born);
-  
-  var ms = ms_today - ms_medlem_born;
-  today.setTime(ms);
-  var age = today.getFullYear() - 1970;
-  Logger.log("Ålder " + age);
-  return age;
-}
-
-
-/*
- * Konvertera textsträng på formen ÅÅÅÅ-MM-DD till ett datumobjekt
- */
-function convertStringToDate(inputString) {
-  
-  Logger.log(inputString);
-  var yyyy = inputString.substring(0, 4);
-  var mm = inputString.substring(5, 7)-1; //January is 0!
-  var dd = inputString.substring(8, 10);
-  
-  Logger.log("YYYY " + yyyy);
-  Logger.log("mm " + mm);
-  Logger.log("dd " + dd);
-  
-  var myDate = new Date();
-  myDate.setFullYear(yyyy);
-  myDate.setMonth(mm);
-  myDate.setDate(dd);
-  
-  return myDate;
-}
-
-
-/*
- * Returerna Google Drive fil om fil med id är tillgänglig
- */
-function getFileById(id){  
-  try {    
-    return DriveApp.getFileById(id);    
-  } catch (err) {    
-    return false;    
-  }
-}
-
-
-/*
  * Tar bort punkter före @ om det är en gmailadress
  *
  * @param {string} email - E-postadress
