@@ -339,29 +339,24 @@ function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray
     var tmp_copy_id;
     try {
       var docName = documentToMerge[i].getName();
-      tmp_copy_id = documentToMerge[i].makeCopy(docName).getId();
+      var newDocName = replaceTemplate(docName, attribut, dataArray);
+      tmp_copy_id = documentToMerge[i].makeCopy(newDocName).getId();
       var tmp_copy = DocumentApp.openById(tmp_copy_id);
 
-      var tmp_copy_body = tmp_copy.getBody();
-      tmp_copy_body_text = tmp_copy_body.getText();
+      var body = tmp_copy.getBody();
+      replaceContentOfDocument(body, attribut, dataArray);
+
+      var header = tmp_copy.getHeader();
+      replaceContentOfDocument(header, attribut, dataArray);
+
+      var footer = tmp_copy.getFooter();
+      replaceContentOfDocument(footer, attribut, dataArray);
       
-      //Skapar en lista med alla kortkoder som används
-      var textMatches = getListOfUsedShortcodes(tmp_copy_body_text);
-
-      for (var j = 0; textMatches && j<textMatches.length; j++)  {
-
-        //Ny data för aktuell person som ska ersätta kortkoden
-        var replaceData = getReplaceDataForShortcode(textMatches[j], attribut, dataArray);
-
-        //Ersätt koden med personlig data
-        tmp_copy_body.replaceText(textMatches[j], replaceData || '');
-      }
-
 
       Logger.log("URL för temporärt skapad fil är");
       Logger.log(tmp_copy.getUrl());
       tmp_copy.saveAndClose();
-
+      
       var tmp_pdf = DocumentApp.openById(tmp_copy_id).getAs('application/pdf');
       tmp_attachments.push(tmp_pdf);
       Logger.log("Lägger till den personliga bilagan " + tmp_pdf.getName());
@@ -380,6 +375,33 @@ function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray
     }
   }
   return tmp_attachments;
+}
+
+
+/**
+ * Ersätter kortkoder med personlig text i ett Google-dokument
+ * inom ett typområde i dokumentet
+ * 
+ * @param {Object} section - ett objekt av typen för ett typområde i ett dokument
+ * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - en lista innehållande persondata för en person
+ */
+function replaceContentOfDocument(section, attribut, dataArray) {
+
+  var section_text = section.getText();
+  
+  //Skapar en lista med alla kortkoder som används
+  var textMatches = getListOfUsedShortcodes(section_text);
+
+  //Mycket här i kan läggas i en egen funktion
+  for (var i = 0; textMatches && i<textMatches.length; i++)  {
+
+    //Ny data för aktuell person som ska ersätta kortkoden
+    var replaceData = getReplaceDataForShortcode(textMatches[i], attribut, dataArray);
+
+    //Ersätt koden med personlig data
+    section.replaceText(textMatches[i], replaceData || '');
+  }
 }
 
 
