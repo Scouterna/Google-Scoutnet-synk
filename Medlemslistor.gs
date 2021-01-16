@@ -75,7 +75,7 @@ function Medlemslistor(start, slut) {
     var scoutnet_list_id = data[i][grd["scoutnet_list_id"]];
     var spreadsheetUrl = data[i][grd["spreadsheetUrl"]];
     
-    var rad_nummer = i+1;    
+    var rad_nummer = i+1;
     Logger.log('Rad: ' + rad_nummer + ' Namn: ' + name + ' Scoutnet: ' + scoutnet_list_id + ' spreadsheetUrl: ' + spreadsheetUrl);
     
     var update_group = "yes";
@@ -223,6 +223,21 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
 
   for (var i = 0; i<data.length; i++) {
     Logger.log("Rad  i kalkylarket " + i);
+
+    /***Villkor***/    
+    var tmp_email_condition = replaceTemplate(email_condition, attribut, data[i]);
+    if (tmp_email_condition)  {
+      if (!eval(tmp_email_condition)) {
+        Logger.log("Uppfyller INTE villkoren " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
+        Logger.log(tmp_email_condition);
+        continue;
+      }
+    }
+    
+    Logger.log("Uppfyller villkoren " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
+    Logger.log(tmp_email_condition);
+    /***Villkor - Slut***/
+
     var emailOptions = {};
     /***Hämta & Ersätt text***/
     
