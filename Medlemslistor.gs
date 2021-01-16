@@ -9,8 +9,10 @@
  * 
  * @param {number} start - rad att börja synkronisera på
  * @param {number} slut - rad att sluta synkronisera på
+ * @param {boolean} shouldUpdate - om medlemslistan ska uppdateras
+ * @param {boolean} shouldSend - om e-brev ska skickas ut till medlemlemslistan
  */
-function Medlemslistor(start, slut) {
+function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
   
   var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Medlemslistor).getSheets()[0];
   var selection = sheet.getDataRange();
@@ -74,11 +76,15 @@ function Medlemslistor(start, slut) {
     }    
 
     if (update_group == "yes") {
-      //Uppdatera aktuell medlemslista
-      updateMemberlist(selection, rad_nummer, data[i], grd, allMembers, rowSpreadsheet);
-      
-      //skicka ut e-brev till de i medlemslistan
-      skickaMedlemslista(selection, rad_nummer, data[i], grd, rowSpreadsheet);
+
+      if (null == shouldUpdate || shouldUpdate) {
+        //Uppdatera aktuell medlemslista
+        updateMemberlist(selection, rad_nummer, data[i], grd, allMembers, rowSpreadsheet);
+      }
+      if (null == shouldSend || shouldSend) {
+        //skicka ut e-brev till de i medlemslistan
+        skickaMedlemslista(selection, rad_nummer, data[i], grd, rowSpreadsheet);
+      }      
     }
   }
   //Ta bort tomma radera i kalkylarket

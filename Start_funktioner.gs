@@ -54,20 +54,30 @@ function MedlemslistorAllaRader() {
 
 /**
  * Funktioner för att ange att enbart vissa radintervall i kalkylarket
- * för medlemslistor ska synkroniseras och e-brev skickas ut
+ * för medlemslistor ska synkroniseras och e-brev skickas ut.
+ * Samt ställa in om medlemslistor enbart ska uppdateras alternativt om
+ * gällande om e-brev ska skickas ut till listan
  *
  * Exempelvis rad 0 till 10. Helt fritt att ändra själv
  */
-function MedlemslistorVissaRader1() {
-  Medlemslistor(0, 10);
+function MedlemslistorVissaRaderUppdateraOchSkicka1() {
+  Medlemslistor(0, 10, true, true);
 }
 
-function MedlemslistorVissaRader2() {
-  Medlemslistor(11, 20);
+function MedlemslistorVissaRaderUppdateraOchSkicka2() {
+  Medlemslistor(11, 20, true, true);
 }
 
-function MedlemslistorVissaRader2() {
-  Medlemslistor(21, 30);
+function MedlemslistorVissaRaderUppdateraOchSkicka3() {
+  Medlemslistor(21, 30, true, true);
+}
+
+function MedlemslistorVissaRaderUppdateraEnbart1() {
+  Medlemslistor(0, 10, true, false);
+}
+
+function MedlemslistorVissaRaderSkickaEnbart1() {
+  Medlemslistor(0, 10, false, true);
 }
 
 /**
