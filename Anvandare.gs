@@ -3,14 +3,6 @@
  * @website https://github.com/Scouterna
  */
 
-/**
- * Anropa denna funktion om du vill synkronisera både användare och grupper direkt efter varandra
- */
-function AnvandareOchGrupper() {  
-  Anvandare();
-  Grupper();
-}
-
 
 /*
  * Huvudfunktion för att hantera synkronisering av användarkonton med Scoutnet

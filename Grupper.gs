@@ -37,34 +37,6 @@ function GrupperRubrikData() {
 
 
 /*
- * Funktion för att ange att enbart vissa radintervall i kalkylarket ska synkroniseras
- *
- * Exempelvis rad 0 till 10. Helt fritt att ändra själv
- */
-function GrupperVissaRader1() {
-  Grupper(0, 10);
-}
-
-/*
- * Funktion för att ange att enbart vissa radintervall i kalkylarket ska synkroniseras
- *
- * Exempelvis rad 11 till 20. Helt fritt att ändra själv
- */
-function GrupperVissaRader2() {
-  Grupper(11, 20);
-}
-
-/*
- * Funktion för att ange att enbart vissa radintervall i kalkylarket ska synkroniseras
- *
- * Exempelvis 21 till 30. Helt fritt att ändra själv
- */
-function GrupperVissaRader3() {
-  Grupper(21, 30);
-}
-
-
-/*
  * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
  */
 function Grupper(start, slut) {

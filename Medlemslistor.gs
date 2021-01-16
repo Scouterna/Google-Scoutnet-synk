@@ -5,46 +5,6 @@
 
 
 /**
- * Returnerar lista med objekt för specialkolumner i kalkylarket med namn
- * och formel
- *
- * @returns {Object[]} - Lista med objekt för specialkolumner i kalkylarket
- */
-function getCustomFunctions() {
-
-  var cf = [
-    {'namn': 'Ålder', 'formel': '=DATEDIF(R[0]C[-37], TODAY(), "Y")'},   
-    {'namn': 'Dagar till nästa födelsedag', 'formel': '=DATE(YEAR(R[0]C[-38])+DATEDIF(R[0]C[-38],TODAY(),"Y")+1,MONTH(R[0]C[-38]),DAY(R[0]C[-38]))-TODAY()'},
-    {'namn': 'Antal dagar som medlem i kåren', 'formel': '=DATEDIF(R[0]C[-36],TODAY(), "D")'}
-  ];
-  
-  return cf;
-}
-
-
-/**
- * Funktion för att ange att enbart vissa radintervall i kalkylarket
- * för medlemslistor ska synkroniseras
- *
- * Exempelvis rad 0 till 10. Helt fritt att ändra själv
- */
-function MedlemslistorVissaRader1() {
-  Medlemslistor(0, 10);
-}
-
-
-/**
- * Funktion för att ange att enbart vissa radintervall i kalkylarket
- * för medlemslistor ska synkroniseras
- *
- * Exempelvis rad 11 till 20. Helt fritt att ändra själv
- */
-function MedlemslistorVissaRader2() {
-  Medlemslistor(11, 20);
-}
-
-
-/**
  * Huvudfunktion för att hantera synkronisering av medlemslistor med Scoutnet
  * 
  * @param {number} start - rad att börja synkronisera på
@@ -97,7 +57,7 @@ function Medlemslistor(start, slut) {
       }
       update_group = "no";          
     }
-
+    
     var cell=selection.getCell(rad_nummer, grd["spreadsheetUrl"]+1);
     var rowSpreadsheet;
     try {
@@ -224,7 +184,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
   for (var i = 0; i<data.length; i++) {
     Logger.log("Rad  i kalkylarket " + i);
 
-    /***Villkor***/    
+    /***Villkor***/
     var tmp_email_condition = replaceTemplate(email_condition, attribut, data[i]);
     if (tmp_email_condition)  {
       if (!eval(tmp_email_condition)) {
@@ -371,7 +331,7 @@ function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray
       Logger.log("URL för temporärt skapad fil är");
       Logger.log(tmp_copy.getUrl());
       tmp_copy.saveAndClose();
-      
+
       var tmp_pdf = DocumentApp.openById(tmp_copy_id).getAs('application/pdf');
       tmp_attachments.push(tmp_pdf);
       Logger.log("Lägger till den personliga bilagan " + tmp_pdf.getName());
@@ -944,7 +904,7 @@ function createMemberlistRow(member, mlrd)  {
  */
 function setCustomColumns(sheet, startCol, numRow)  {
 
-  var cf = getCustomFunctions();
+  var cf = medlemslista_egna_attribut_funktioner;
   var num_cf = cf.length;
 
   /***********Rubriker**********/
