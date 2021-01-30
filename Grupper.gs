@@ -37,34 +37,6 @@ function GrupperRubrikData() {
 
 
 /*
- * Funktion för att ange att enbart vissa radintervall i kalkylarket ska synkroniseras
- *
- * Exempelvis rad 0 till 10. Helt fritt att ändra själv
- */
-function GrupperVissaRader1() {
-  Grupper(0, 10);
-}
-
-/*
- * Funktion för att ange att enbart vissa radintervall i kalkylarket ska synkroniseras
- *
- * Exempelvis rad 11 till 20. Helt fritt att ändra själv
- */
-function GrupperVissaRader2() {
-  Grupper(11, 20);
-}
-
-/*
- * Funktion för att ange att enbart vissa radintervall i kalkylarket ska synkroniseras
- *
- * Exempelvis 21 till 30. Helt fritt att ändra själv
- */
-function GrupperVissaRader3() {
-  Grupper(21, 30);
-}
-
-
-/*
  * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
  */
 function Grupper(start, slut) {
@@ -248,34 +220,6 @@ function Grupper(start, slut) {
 
 
 /*
- * Tar reda på vilka rader i kalkylarket som ska synkroniseras
- *
- * @param {string} start - önskad startrad att synkronisera från
- * @param {string} slut - önskad slutrad att synkronisera till
- * @param {string} maxRowNumer - maximalt radnummer som går att synkronisera
- *
- * @returns {Object} - Objekt med start- och slutrad att synkronisera
- */
-function findWhatRowsToSync(start, slut, maxRowNumber) {
-  
-  var minRowStart = 3;
-  
-  if (typeof start ==='undefined' || start < minRowStart) {
-    start = minRowStart; 
-  }
-  if (typeof slut ==='undefined' || slut > maxRowNumber) {
-    slut = maxRowNumber; 
-  }
-  
-  var rowsToSync = {
-    "start": start,
-    "slut": slut
-  };
-  return rowsToSync;  
-}
-
-
-/*
  * Konvertera inställning om att arkivera e-brev till boolean
  *
  * @param {string} input - cellvärde från kalkylark
@@ -315,23 +259,6 @@ function checkIfIsArchivedShouldChange(input, boolIfArchive) {
     return false;
   }
   return true;
-}
-
-
-/*
- * Ta bort rader från kalkylarket
- *
- * @param {Object} sheet - Googleobjekt
- * @param {numbers[]} delete_rows - Lista med villka rader som ska tas bort
- */
-function deleteRowsFromSpreadsheet(sheet, delete_rows) {
-  
-  for (var k = delete_rows.length-1; k >= 0 ; k--) { //Tar bort rader, starta nerifrån
-    
-    var tmp_row = delete_rows[k];
-    Logger.log("Remove row " + tmp_row);
-    sheet.deleteRow(tmp_row);
-  }  
 }
 
 

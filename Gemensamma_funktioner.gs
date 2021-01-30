@@ -10,112 +10,8 @@
 function Allt() {
  
   Anvandare();
-  Grupper(); 
-}
-
-
-/**
- * @todo
- */
-function GetAttachments(inputString) {
-  
-  var filelist = inputString.split(",");
-  
-  var files_to_attach = [];
-  
-  for (var i = 0; i < filelist.length; i++) {    
-    var fil = filelist[i] = filelist[i].trim();
-    
-    var file = getFileById(fil);
-    if (!file) {
-      file = getFileByName(fil);
-      if(!file) {
-        Logger.log(fil + " kunde inte hittas på Google Drive, kontrollera indata och behörighet");
-        //return false; //Gör detta så att man kan ändra färg om något är fel
-      }
-    }
-    
-    if (file) { //Denna fil ska läggas till
-      files_to_attach.push(file);
-      Logger.log(file + " finns");
-    }    
-  }  
-  return files_to_attach;
-}
-
-
-/*
- * Returerna Google Drive fil om fil med namnet är tillgänglig
- * @todo
- */
-function getFileByName(namn){  
-  
-  var file = DriveApp.getFilesByName(namn);
-  
-  if (file.hasNext()) {    
-    return file.next();
-  }
-  return false;
-}
-
-
-/*
- * Returnera åldern på en medlem
- * @todo
- */
-function getAge(medlem) {
-  
-  var today = new Date();
-  
-  //today.setDate(-60); //Test, sätt dag i månaden som dagens datum
-  var ms_today = today.getTime();
-    
-  var medlem_born = convertStringToDate(medlem.date_of_birth); //Todays date as a Date object 
-  var ms_medlem_born = medlem_born.getTime();
-    
-  Logger.log("Dagens datum " + ms_today);
-  Logger.log("Födelsetid " + ms_medlem_born);
-  
-  var ms = ms_today - ms_medlem_born;
-  today.setTime(ms);
-  var age = today.getFullYear() - 1970;
-  Logger.log("Ålder " + age);
-  return age;
-}
-
-
-/*
- * Konvertera textsträng på formen ÅÅÅÅ-MM-DD till ett datumobjekt
- */
-function convertStringToDate(inputString) {
-  
-  Logger.log(inputString);
-  var yyyy = inputString.substring(0, 4);
-  var mm = inputString.substring(5, 7)-1; //January is 0!
-  var dd = inputString.substring(8, 10);
-  
-  Logger.log("YYYY " + yyyy);
-  Logger.log("mm " + mm);
-  Logger.log("dd " + dd);
-  
-  var myDate = new Date();
-  myDate.setFullYear(yyyy);
-  myDate.setMonth(mm);
-  myDate.setDate(dd);
-  
-  return myDate;
-}
-
-
-/*
- * Returerna Google Drive fil om fil med id är tillgänglig
- */
-function getFileById(id){  
-  try {    
-    return DriveApp.getFileById(id);    
-  } catch (err) {    
-    return false;    
-  }
+  Grupper();
+  Medlemslistor();
 }
 
 
@@ -177,9 +73,8 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   Logger.log(typeof scoutnet_list_id);
   
   var allMembers = [];
-  scoutnet_list_id = scoutnet_list_id.toString(); //Vi gör om till string för att metoden replace ska fungera
-  scoutnet_list_id = scoutnet_list_id.replace(/\(.*?\)/g, ''); //Ta bort kommentarer inom parentes så de inte kommer med
-  scoutnet_list_id = scoutnet_list_id.replace(/\s+/g, ''); //Ta bort tomma mellanrum
+
+  scoutnet_list_id = getCleanString(scoutnet_list_id);
   
   Logger.log("Innan splitt " + scoutnet_list_id);
   var tmp_id = scoutnet_list_id.split(",");
@@ -544,6 +439,116 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
   //Logger.log("med följande e-postadresser " + member_emails);
   
   return member_emails;
+}
+
+
+/*
+ * Hämta lista över alla medlemmar
+ *
+ * @returns {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
+ */
+function fetchScoutnetMembers() {  
+  
+  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist?id=' + groupId + '&key=' + api_key_list_all + '&pretty=1';
+  var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
+  //Logger.log(response); 
+  
+  var json = response.getContentText();
+  var data = JSON.parse(json);
+  
+  var medlemmar = data.data;
+  var allMembers = [];
+  
+  //Logger.log(medlemmar);
+  for (x in medlemmar) {
+    var medlem = medlemmar[x];
+    
+    var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'ssno', 'note', 'date_of_birth', 'status',
+                                        'created_at', 'confirmed_at', 'group', 'unit', 'patrol', 'unit_role', 'group_role',
+                                        'sex', 'address_co', 'address_1', 'address_2' , 'address_3', 'postcode', 'town',
+                                        'country', 'contact_mobile_phone', 'contact_home_phone', 'contact_mothers_name',
+                                        'contact_mobile_mum', 'contact_telephone_mum', 'contact_fathers_name', 'contact_mobile_dad',
+                                        'contact_telephone_dad', 'contact_leader_interest', 'prev_term', 'prev_term_due_date',  
+                                        'current_term', 'current_term_due_date', 'avatar_updated', 'avatar_url'];
+    
+    //Dessa attributvärden ska användas som gemener för bättre jämförelser
+    var variabel_lista_lowercase = ['email', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email', 'extra_emails'];
+    
+    var member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
+        
+    //Logger.log("MEMBER print object " + member);
+    //Logger.log("%s %s, Medlem %s, Mobil %s",member.first_name, member.last_name, member.member_no, member.contact_mobile_phone); //member.member_no + "   " + member.first_name + "  " + member.last_name);
+    //Logger.log(member.date_of_birth + "   " + member.confirmed_at + "  " + member.unit);
+    //Logger.log(member.unit_role + "   " + member.group_role + "  " + member.email);
+    //Logger.log(member.email_mum + "   " + member.email_dad + "  " + member.alt_email);
+    allMembers.push(member); 
+    
+  } 
+  //Logger.log("FETCH MEMBERS print object " + allMembers);
+  return allMembers;  
+}
+
+
+/*
+ * Tar reda på vilka rader i kalkylarket som ska synkroniseras
+ *
+ * @param {string} start - önskad startrad att synkronisera från
+ * @param {string} slut - önskad slutrad att synkronisera till
+ * @param {string} maxRowNumer - maximalt radnummer som går att synkronisera
+ *
+ * @returns {Object} - Objekt med start- och slutrad att synkronisera
+ */
+function findWhatRowsToSync(start, slut, maxRowNumber) {
+  
+  var minRowStart = 3;
+  
+  if (typeof start ==='undefined' || start < minRowStart) {
+    start = minRowStart; 
+  }
+  if (typeof slut ==='undefined' || slut > maxRowNumber) {
+    slut = maxRowNumber; 
+  }
+  
+  var rowsToSync = {
+    "start": start,
+    "slut": slut
+  };
+  return rowsToSync;  
+}
+
+
+/**
+ * Tar bort kommentarer inom parens samt tomrum i
+ * angiven variabel
+ * 
+ * @param {string} input - en variabel
+ *
+ * @returns {string} - en textsträng utan kommentarer eller mellanrum
+ */
+function getCleanString(input)  {
+
+  input = input.toString(); //Vi gör om till string för att metoden replace ska fungera
+  input = input.replace(/\(.*?\)/g, ''); //Ta bort kommentarer inom parentes så de inte kommer med
+  input = input.replace(/\s+/g, ''); //Ta bort tomma mellanrum
+
+  return input;
+}
+
+
+/*
+ * Ta bort rader från kalkylarket
+ *
+ * @param {Object} sheet - Googleobjekt
+ * @param {numbers[]} delete_rows - Lista med villka rader som ska tas bort
+ */
+function deleteRowsFromSpreadsheet(sheet, delete_rows) {
+  
+  for (var k = delete_rows.length-1; k >= 0 ; k--) { //Tar bort rader, starta nerifrån
+    
+    var tmp_row = delete_rows[k];
+    Logger.log("Remove row " + tmp_row);
+    sheet.deleteRow(tmp_row);
+  }  
 }
 
 
