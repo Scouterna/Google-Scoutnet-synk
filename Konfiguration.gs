@@ -20,6 +20,9 @@ var api_key_mailinglists = '11122233356454d0dce624'; //Kan hittas i Scoutnet om 
 //Länk till ert egenskapade Google kalkylark för att synkronisera google grupper
 var spreadsheetUrl_Grupper = 'https://docs.google.com/spreadsheets/d/12345abcdefg45454jydk0/edit#gid=0';
 
+//Länk till Google kalkylarket för att synkronisera google medlemslistor
+var spreadsheetUrl_Medlemslistor = 'https://docs.google.com/spreadsheets/d/54321fedcba45454kdyj0/edit#gid=0';
+
 //E-post eller scoutnetListId för vart mejl om misstänkt spam till grupper ska skickas till
 //För e-postlistor som anges skickas endast till primär e-postadress listad i Scoutnet
 //T.ex 'webmaster@minscoutkår.se, 1234'
