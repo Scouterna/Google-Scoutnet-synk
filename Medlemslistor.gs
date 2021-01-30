@@ -5,6 +5,37 @@
 
 
 /**
+ * Funktion att använda för att enbart uppdatera en specifik
+ * medlemslista på en specifik rad
+ */
+function MedlemslistorVissaRaderUppdateraEnbartTmp() {
+  MedlemslistorEnRad(1, true, false);
+}
+
+
+/**
+ * Funktion att använda för att enbart skicka ut e-brev till
+ * en specifik medlemslista på en specifik rad
+ */
+function MedlemslistorVissaRaderSkickaEnbartTmp() {
+  MedlemslistorEnRad(1, false, true);
+}
+
+
+/**
+ * Funktion att använda för att ställa in att start- och slutrad
+ * är lika
+ * 
+ * @param {number} radNummer - rad att synkronisera
+ * @param {boolean} shouldUpdate - om medlemslistan ska uppdateras
+ * @param {boolean} shouldSend - om e-brev ska skickas ut till medlemlemslistan
+ */
+function MedlemslistorEnRad(radNummer, shouldUpdate, shouldSend) {
+  Medlemslistor(radNummer, radNummer, shouldUpdate, shouldSend)
+}
+
+
+/**
  * Huvudfunktion för att hantera synkronisering av medlemslistor med Scoutnet
  * 
  * @param {number} start - rad att börja synkronisera på
@@ -59,7 +90,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
       }
       update_group = "no";          
     }
-    
+
     var cell=selection.getCell(rad_nummer, grd["spreadsheetUrl"]+1);
     var rowSpreadsheet;
     try {
@@ -697,7 +728,7 @@ function getComparableString(text)  {
 /**
  * Skapa kolumnrubriker i kalkylarket för medlemslistor konfig
  */
-function skapaRubrikerMedlemslistor() {
+function skapaRubrikerML() {
 
   var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Medlemslistor).getSheets()[0];
 

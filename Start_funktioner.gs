@@ -16,7 +16,14 @@ function AnvandareOchGrupper() {
 
 /***Grupper***/
 /**
- * Funktion för att alla rader i kalkylarket för medlemslistor
+ * Anropar funktion för att skapa kolumnrubriker för kalkylarket
+ * för grupper
+ */
+function skapaRubrikerGrupper() {
+  createHeaders_Grupper();
+}
+/**
+ * Funktion för att alla rader i kalkylarket för grupper
  * ska synkroniseras och e-brev skickas ut
  */
 function GrupperAllaRader() {
@@ -44,6 +51,13 @@ function GrupperVissaRader3() {
 
 
 /***Medlemslistor***/
+/**
+ * Anropar funktion för att skapa kolumnrubriker för kalkylarket
+ * för medlemslistor konfig
+ */
+function skapaRubrikerMedlemslistor() {
+  skapaRubrikerML();
+}
 /**
  * Funktion för att alla rader i kalkylarket för medlemslistor
  * ska synkroniseras och e-brev skickas ut
