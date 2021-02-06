@@ -348,8 +348,8 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
         }      
       }
       
-      if (synk_option.indexOf("e")!=-1) { //Lägg bara till medlemmar med med fältet extra_emails
-        //Alltså att rutan i Scoutnet är förbockad att e-postadressen ska användas vid den interna e-postlistsfunktionen
+      if (synk_option.indexOf("e")!=-1) {
+        //Lägg till medlemmars primära e-postadress + kopior enligt medlemsprofil
         if (extra_emails) { //Lägg till extra e-postadresser om det finns några      
           
           Logger.log("(G179) extra emails " + extra_emails);
@@ -360,7 +360,11 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
           member_emails.push.apply(member_emails, extra_email_list);
           
           Logger.log("(G185) 10");
-        }      
+        }
+        if (email) { //Lägg till medlemmars primära e-postadress      
+          member_emails.push(email);
+          Logger.log("6");
+        }   
       }
       
       if (synk_option.indexOf("f")!=-1) { //Lägg bara tilll föräldrars e-postadress
