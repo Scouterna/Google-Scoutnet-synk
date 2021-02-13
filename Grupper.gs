@@ -178,10 +178,7 @@ function Grupper(start, slut) {
         else if (name != group.name) { //Om namnet, men inte e-postadressen för gruppen ändrats
           
           Logger.log("Gruppnamnet har ändrats på rad " + rad_nummer);
-          var tmp_group = {
-            name: name
-          };
-          patchAdminDirectoryGroup(tmp_group, groupId);
+          patchAdminDirectoryGroup(name, groupId);
         }
         else if (email == group.email) { //Om e-posten är oförändrad. Behöver ändra bakgrund om man
           //ändrat till en ogiltig e-postadress och sen ändrar tillbaka
@@ -1281,11 +1278,15 @@ function getAdminDirectoryGroup(groupKey) {
 /*
  * Patcha AdminDirectoryGroup
  *
- * @param {object} group - Gruppinställningar
+ * @param {string} newName - Nytt namn för gruppen
  * @param {string} groupId - Id för gruppen
  */
-function patchAdminDirectoryGroup(group, groupId) {
+function patchAdminDirectoryGroup(newName, groupId) {
   
+  var tmp_group = {
+    name: newName
+  };
+
   for (var n=0; n<6; n++) {
     Logger.log("Funktionen patchAdminDirectoryGroup körs " + n);
     
