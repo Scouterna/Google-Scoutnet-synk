@@ -55,6 +55,8 @@ function Grupper(start, slut) {
   start = rowsToSync.start;
   slut = rowsToSync.slut;
   
+  updateListOfGroups();
+
   Logger.log("Startrad " + start + " slutrad " + slut);
   
   for (var i = start-1; i < slut; i++) {
@@ -94,7 +96,7 @@ function Grupper(start, slut) {
           email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
           email = removeDiacritics(email);
           
-          var group = createGroup(email, name);
+          var group = createGroup(email, name, true);
           var groupId = group.id;
           Logger.log("Skapade gruppen: " + email);
           
@@ -122,9 +124,9 @@ function Grupper(start, slut) {
       if (name=="" && email=="") { //Ta bort gruppen
         
         Logger.log("Försöker ta bort " + groupId + " rad " + rad_nummer);
-        deleteGroup(groupId);
+        deleteGroup(groupId, true);
         Logger.log(groupId + " raderades");
-        
+
         delete_rows.push(rad_nummer);
         update_group = "no";
       }
@@ -150,11 +152,11 @@ function Grupper(start, slut) {
             email = removeDiacritics (email);            
             
             Logger.log("try remove " + groupId + " row " + rad_nummer);
-            AdminDirectory.Groups.remove(groupId); //Vi gör på detta sätt då det varit stora problem
+            deleteGroup(groupId, false);  //Vi gör på detta sätt då det varit stora problem
             //med att tjänsten ej svarat tidigare om vi gjort en patch/update
             Logger.log(groupId + " togs bort");
             
-            var group = createGroup(email, name);
+            var group = createGroup(email, name, true);
             Logger.log("Uppdaterat e-postadress för gruppen: " + email);            
             groupId = group.id;
             
@@ -212,7 +214,6 @@ function Grupper(start, slut) {
     if (update_group == "yes") {
       //Uppdatera medlemmar av en grupp
       updateGroup(selection, rad_nummer, groupId, email, data[i], grd, listOfEmailAdressesOfActiveAccounts);
-      
     }
   }
   deleteRowsFromSpreadsheet(sheet, delete_rows);
@@ -289,10 +290,11 @@ function setCellValueCellUrl(selection, rad_nummer, column, email) {
  *
  * @param {string} email - e-postadress för gruppen
  * @param {string} name - namn på e-postgruppen
+ * @param {boolean} shouldUpdateListOfGroups - om listan över grupper ska uppdateras
  *
  * @returns {Object} - Objekt av den nya skapade Googlegrupppen
  */
-function createGroup(email, name) {
+function createGroup(email, name, shouldUpdateListOfGroups) {
 
   var tmp_group = {
     "email": email,
@@ -303,6 +305,10 @@ function createGroup(email, name) {
   AdminDirectory.Groups.insert(tmp_group);
             
   var group = getAdminDirectoryGroup(email);
+
+  if (shouldUpdateListOfGroups) {
+    updateListOfGroups();
+  }
   
   return group;
 }
@@ -312,10 +318,15 @@ function createGroup(email, name) {
  * Tar bort en grupp med angivet id för en grupp
  *
  * @param {string} groupId - Googles id för en grupp
+ * @param {boolean} shouldUpdateListOfGroups - om listan över grupper ska uppdateras
  */
-function deleteGroup(groupId) {
+function deleteGroup(groupId, shouldUpdateListOfGroups) {
   Logger.log("Försöker radera grupp " + groupId);
   AdminDirectory.Groups.remove(groupId);
+
+  if (shouldUpdateListOfGroups) {
+    updateListOfGroups();
+  }
 }
 
 
@@ -1410,7 +1421,36 @@ function checkIfEmailIsAGroup(email) {
  * @returns {boolean} - Om gruppen finns eller ej
  */
 function checkIfGroupExists(email) {
-  
+
+  var tmpList = getListOfGroups();
+  Logger.log(tmpList);
+
+  if(contains(tmpList, email))  {
+    return true;
+  }
+  return false;
+}
+
+
+var listOfGroups = [];
+/**
+ * Ger listan över e-postadresser för grupper
+ *
+ * @returns {string[]} - Lista över e-postadresser för grupper
+ */
+function getListOfGroups()  {
+  return listOfGroups;
+}
+
+
+/**
+ * Uppdaterar listan över e-postadresser för grupper
+ */
+function updateListOfGroups() {
+  listOfGroups = [];
+
+  Logger.log("Uppdaterar listan över e-postadresser för grupper");
+
   var pageToken, page;
   do {
     page = AdminDirectory.Groups.list({
@@ -1419,26 +1459,19 @@ function checkIfGroupExists(email) {
       pageToken: pageToken
     });
     var groups = page.groups;
-    if (groups) {
-      
+    if (groups) {      
       for (var i = 0; i < groups.length; i++) {
-        
-        var group = groups[i];
-        if (group.email==email) { //Träff hittad
-          
-          Logger.log('Denna grupp finns redan. ' + email);
-          return true;
-        }        
+        listOfGroups.push(groups[i].email);        
       }      
     }
     else {
-      Logger.log('Ingen grupp hittades med e-postadress. ' + email);      
+      Logger.log('Inga grupper hittades.');      
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
-  
-  Logger.log('Ingen grupp hittades med e-postadress. ' + email);
-  return false;
+
+  Logger.log(listOfGroups);
+  return listOfGroups;
 }
 
 
