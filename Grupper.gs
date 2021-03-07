@@ -41,7 +41,8 @@ function GrupperRubrikData() {
  */
 function Grupper(start, slut) {
   
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper).getSheets()[0];
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
+
   var selection = sheet.getDataRange();
   var data = selection.getValues();
   
@@ -1043,7 +1044,8 @@ function changeGroupPermissions(email, postPermission, customFooterText, isArchi
  * Skapa kolumnrubriker i kalkylarket och dölj kolumnen med Grupp-ID
  */
 function createHeaders_Grupper() {
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper).getSheets()[0];
+  
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
   
   var grd = GrupperRubrikData();
   
@@ -1309,7 +1311,8 @@ function patchAdminDirectoryGroup(newName, groupId) {
  * Visar kolumner som styr avancerade inställningar
  */
 function avanceradLayout() {
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper).getSheets()[0];
+  
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
   
   var grd = GrupperRubrikData();
   
@@ -1322,7 +1325,8 @@ function avanceradLayout() {
  * Döljer kolumner som styr avancerade inställningar
  */
 function enkelLayout() {
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper).getSheets()[0];
+  
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
   
   var grd = GrupperRubrikData();
   
@@ -1506,7 +1510,7 @@ function TestListAllGroups() {
  */
 function TestReadSpreadSheet() {
   
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Grupper);
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
   var data = sheet.getDataRange().getValues();
   var grd = GrupperRubrikData();
   
