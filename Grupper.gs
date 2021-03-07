@@ -42,6 +42,9 @@ function GrupperRubrikData() {
 function Grupper(start, slut) {
   
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
+  if (sheet == null) {
+    Logger.log("Bladet Grupper finns ej i kalkylarket");
+  }
 
   var selection = sheet.getDataRange();
   var data = selection.getValues();
@@ -1046,6 +1049,9 @@ function changeGroupPermissions(email, postPermission, customFooterText, isArchi
 function createHeaders_Grupper() {
   
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
+  if (sheet == null) {
+    Logger.log("Bladet Grupper finns ej i kalkylarket");
+  }
   
   var grd = GrupperRubrikData();
   
@@ -1313,6 +1319,9 @@ function patchAdminDirectoryGroup(newName, groupId) {
 function avanceradLayout() {
   
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
+  if (sheet == null) {
+    Logger.log("Bladet Grupper finns ej i kalkylarket");
+  }
   
   var grd = GrupperRubrikData();
   
@@ -1327,6 +1336,9 @@ function avanceradLayout() {
 function enkelLayout() {
   
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
+  if (sheet == null) {
+    Logger.log("Bladet Grupper finns ej i kalkylarket");
+  }
   
   var grd = GrupperRubrikData();
   
@@ -1511,6 +1523,9 @@ function TestListAllGroups() {
 function TestReadSpreadSheet() {
   
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
+  if (sheet == null) {
+    Logger.log("Bladet Grupper finns ej i kalkylarket");
+  }
   var data = sheet.getDataRange().getValues();
   var grd = GrupperRubrikData();
   

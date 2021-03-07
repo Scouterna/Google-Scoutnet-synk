@@ -45,7 +45,10 @@ function MedlemslistorEnRad(radNummer, shouldUpdate, shouldSend) {
  */
 function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
   
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Medlemslistor).getSheets()[0];
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Medlemslistor");
+  if (sheet == null) {
+    Logger.log("Bladet Medlemslistor finns ej i kalkylarket");
+  }
   var selection = sheet.getDataRange();
   var data = selection.getValues();
   
@@ -730,7 +733,10 @@ function getComparableString(text)  {
  */
 function skapaRubrikerML() {
 
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Medlemslistor).getSheets()[0];
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Medlemslistor");
+  if (sheet == null) {
+    Logger.log("Bladet Medlemslistor finns ej i kalkylarket");
+  }
 
   var mlkrd = getMedlemslistorKonfigRubrikData();
 
