@@ -329,6 +329,14 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
 
 
 /**
+ * Funktion att använda för att uppdatera samtliga medlemslistor
+ */
+function MedlemslistorUppdateraEnbart() {
+  Medlemslistor(0, 100, true, false);
+}
+
+
+/**
  * Ger en lista med de bilagor som ska skickas
  * genom att använda de bilagor som finns i utkastet samt de
  * dokument som ska kopplas
