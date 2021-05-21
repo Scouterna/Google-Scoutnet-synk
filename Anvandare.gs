@@ -22,6 +22,7 @@ function Anvandare() {
   var useraccounts = getGoogleAccounts(defaultOrgUnitPath);
 
   var defaultUserAvatar = getByteArrayOfDefaultImage();
+  var defaultUserAvatarId = getAvatarId(defaultUserAvatar);
   
   var MembersProcessed = [];
   
@@ -78,7 +79,7 @@ function Anvandare() {
           const ib = useraccounts.length
           Logger.log("Hittade Googleanvändaren %s, id=%s ",GoUser.name.fullName,GoUser.id);
           //Logger.log("Antal innan: %s, efter: %s",ia,ib );
-          updateAccount(obj, GoUser, orgUnitPath, defaultUserAvatar) //uppdatera alla uppgifter på googlekontot med uppgifter från Scoutnet
+          updateAccount(obj, GoUser, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) //uppdatera alla uppgifter på googlekontot med uppgifter från Scoutnet
         }
         else {
           Logger.log("Skapar Ny Googleanvändare");
@@ -272,6 +273,19 @@ function getByteArrayOfDefaultImage() {
 
 
 /**
+ * Ger egenskapat id för en bild
+ * 
+ * @prams {Byte[]} avatar - Byte array för en bild
+ * 
+ * @returns {string} - Ett id som en sträng
+ */
+function getAvatarId(avatar) {
+  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, avatar);
+  return digest.toString();
+}
+
+
+/**
  * Ger en UTF-8 byte array för en bild givet en url alternativt
  * en tom sträng om bild ej finns
  * 
@@ -317,16 +331,16 @@ function getByteArrayImageToUse(avatar_url, defaultAvatar) {
  * om den ej finns så ett id för standardbild
  * 
  * @param {String} avatar_updated - Id bild i Scoutnet
- * @param {Byte[]} defaultAvatar - Byte array för standardbilden
+ * @param {String} defaultAvatarId - Id för standardbilden
  * 
  * @returns {String} - Id för den bild som ska användas
  */
-function getAvatarIdImageToUse(avatar_updated, defaultAvatar) {
+function getAvatarIdImageToUse(avatar_updated, defaultAvatarId) {
 
   if (avatar_updated) {
     return avatar_updated;
   }
-  return defaultAvatar.toString().substring(0,14);
+  return defaultAvatarId;
 }
 
 
@@ -338,8 +352,9 @@ function getAvatarIdImageToUse(avatar_updated, defaultAvatar) {
  * @param {Object} useraccount - Ett Googlekontoobjekt
  * @param {string} orgUnitPath - Sökväg för en underorganisation
  * @param {Byte[]} defaultUserAvatar - Byte array för en standardbild
+ * @param {String} defaultUserAvatarId - Id för standardbilden
  */
-function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar) {
+function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) {
     
   if ("district" == organisationType) {  //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
     member.contact_mobile_phone = member.mobile_phone;
@@ -380,7 +395,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar) {
 
     //Finns en länk till en standardbild att använda
     if (typeof defaultUserAvatar !=='undefined' && defaultUserAvatar) {
-      shouldBeKeywordAvatarUpdated = defaultUserAvatar.toString().substring(0,14);
+      shouldBeKeywordAvatarUpdated = defaultUserAvatarId;
     }
   }
 
@@ -512,7 +527,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar) {
         
         try {
           userPhoto = AdminDirectory.Users.get(useraccount.primaryEmail);          
-          var avatarId = getAvatarIdImageToUse(member.avatar_updated, defaultUserAvatar);
+          var avatarId = getAvatarIdImageToUse(member.avatar_updated, defaultUserAvatarId);
 
           keywordAvatarUpdatedToUpdate = avatarId + userPhoto.thumbnailPhotoEtag;
           Logger.log("Uppdaterat profilbild");

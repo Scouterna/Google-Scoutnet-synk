@@ -29,7 +29,7 @@ var syncUserContactInfo = true;
 var syncUserAvatar = true;
 
 //Adress till profilbild att använda för Googlekonton om ingen finns i Scoutnet
-var defaultUserAvatarUrl = "";
+var defaultUserAvatarUrl = "https://web.cdn.scouterna.net/uploads/sites/57/2021/05/avatar.png";
 
 //Typ av organisationsenhet
 var organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
