@@ -11,7 +11,26 @@ function Allt() {
  
   Anvandare();
   Grupper();
-  Medlemslistor();
+  //Medlemslistor();
+}
+
+
+/**
+ * Funktion för att skapa menyn i kalkylarket
+ */
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('Scoutnet')
+    .addSubMenu(ui.createMenu('Användare')
+      .addItem('Synkronisera användare', 'Anvandare'))
+    .addSubMenu(ui.createMenu('Grupper')
+      .addItem('Synkronisera alla grupper', 'Grupper')
+      .addItem('Synkronisera GrupperVissaRader1', 'GrupperVissaRader1')
+      .addItem('Synkronisera GrupperVissaRader2', 'GrupperVissaRader2')
+      .addItem('Synkronisera GrupperVissaRader3', 'GrupperVissaRader3'))
+    .addSubMenu(ui.createMenu('Medlemslistor')
+      .addItem('Uppdatera alla', 'MedlemslistorUppdateraEnbart'))
+    .addToUi();
 }
 
 
