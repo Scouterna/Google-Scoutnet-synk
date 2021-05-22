@@ -45,7 +45,10 @@ function MedlemslistorEnRad(radNummer, shouldUpdate, shouldSend) {
  */
 function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
   
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Medlemslistor).getSheets()[0];
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Medlemslistor");
+  if (sheet == null) {
+    Logger.log("Bladet Medlemslistor finns ej i kalkylarket");
+  }
   var selection = sheet.getDataRange();
   var data = selection.getValues();
   
@@ -322,6 +325,14 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
 
     GmailApp.sendEmail(tmp_email_recipient, tmp_subject, tmp_plainBody, emailOptions);
   }
+}
+
+
+/**
+ * Funktion att använda för att uppdatera samtliga medlemslistor
+ */
+function MedlemslistorUppdateraEnbart() {
+  Medlemslistor(0, 100, true, false);
 }
 
 
@@ -730,7 +741,10 @@ function getComparableString(text)  {
  */
 function skapaRubrikerML() {
 
-  var sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Medlemslistor).getSheets()[0];
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Medlemslistor");
+  if (sheet == null) {
+    Logger.log("Bladet Medlemslistor finns ej i kalkylarket");
+  }
 
   var mlkrd = getMedlemslistorKonfigRubrikData();
 

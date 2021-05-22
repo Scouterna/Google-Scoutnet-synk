@@ -20,6 +20,9 @@ function Anvandare() {
   }
   
   var useraccounts = getGoogleAccounts(defaultOrgUnitPath);
+
+  var defaultUserAvatar = getByteArrayOfDefaultImage();
+  var defaultUserAvatarId = getAvatarId(defaultUserAvatar);
   
   var MembersProcessed = [];
   
@@ -76,7 +79,7 @@ function Anvandare() {
           const ib = useraccounts.length
           Logger.log("Hittade Googleanvändaren %s, id=%s ",GoUser.name.fullName,GoUser.id);
           //Logger.log("Antal innan: %s, efter: %s",ia,ib );
-          updateAccount(obj, GoUser, orgUnitPath) //uppdatera alla uppgifter på googlekontot med uppgifter från Scoutnet
+          updateAccount(obj, GoUser, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) //uppdatera alla uppgifter på googlekontot med uppgifter från Scoutnet
         }
         else {
           Logger.log("Skapar Ny Googleanvändare");
@@ -259,6 +262,88 @@ function checkIfEmailExists(email) {
 }
 
 
+/**
+ * Ger en UTF-8 byte array för standardprofilbild om det finns
+ * 
+ * @returns {Byte[] | String} - Byte array för standardprofilbild eller tom sträng
+ */
+function getByteArrayOfDefaultImage() {
+  return getByteArrayOfAnImage(defaultUserAvatarUrl);
+}
+
+
+/**
+ * Ger egenskapat id för en bild
+ * 
+ * @prams {Byte[]} avatar - Byte array för en bild
+ * 
+ * @returns {string} - Ett id som en sträng
+ */
+function getAvatarId(avatar) {
+  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, avatar);
+  return digest.toString();
+}
+
+
+/**
+ * Ger en UTF-8 byte array för en bild givet en url alternativt
+ * en tom sträng om bild ej finns
+ * 
+ * @param {String} url - Url för en bild
+ * 
+ * @returns {Byte[] | String} - Byte array för bild eller tom sträng
+ */
+function getByteArrayOfAnImage(url) {
+  try {
+    var blob = UrlFetchApp.fetch(url).getBlob();
+    var data = Utilities.base64EncodeWebSafe(blob.getBytes());
+    return data;
+  }
+  catch(err)  {
+    Logger.log("--------------------------");
+    Logger.log("Error: %s",err.message);
+    Logger.log("--------------------------");
+  }
+  return "";
+}
+
+
+/**
+ * Ger en UTF-8 byte array för en bild givet en url alternativt
+ * om den ej finns så ges byte array för standardbild
+ * 
+ * @param {String} avatar_url - Url för en medlems bild i Scoutnet
+ * @param {Byte[]} defaultAvatar - Byte array för standardbilden
+ * 
+ * @returns {Byte[]} - Byte array för den bild som ska användas
+ */
+function getByteArrayImageToUse(avatar_url, defaultAvatar) {
+
+  if (avatar_url) {
+    return getByteArrayOfAnImage(avatar_url);
+  }
+  return defaultAvatar;
+}
+
+
+/**
+ * Ger en ett id för en medlems profilbild i Scoutnet alternativt
+ * om den ej finns så ett id för standardbild
+ * 
+ * @param {String} avatar_updated - Id bild i Scoutnet
+ * @param {String} defaultAvatarId - Id för standardbilden
+ * 
+ * @returns {String} - Id för den bild som ska användas
+ */
+function getAvatarIdImageToUse(avatar_updated, defaultAvatarId) {
+
+  if (avatar_updated) {
+    return avatar_updated;
+  }
+  return defaultAvatarId;
+}
+
+
 /*
  * Uppdatera konto vid behov
  * Uppdatera namn, organisationssökväg och avbryt avstängning vid behov
@@ -266,9 +351,11 @@ function checkIfEmailExists(email) {
  * @param {Object} member - Ett medlemsobjekt
  * @param {Object} useraccount - Ett Googlekontoobjekt
  * @param {string} orgUnitPath - Sökväg för en underorganisation
+ * @param {Byte[]} defaultUserAvatar - Byte array för en standardbild
+ * @param {String} defaultUserAvatarId - Id för standardbilden
  */
-function updateAccount(member, useraccount, orgUnitPath) {
-  
+function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) {
+    
   if ("district" == organisationType) {  //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
     member.contact_mobile_phone = member.mobile_phone;
   }
@@ -304,6 +391,14 @@ function updateAccount(member, useraccount, orgUnitPath) {
   }
   
   var shouldBeKeywordAvatarUpdated = member.avatar_updated;
+  if (!shouldBeKeywordAvatarUpdated)  {
+
+    //Finns en länk till en standardbild att använda
+    if (typeof defaultUserAvatar !=='undefined' && defaultUserAvatar) {
+      shouldBeKeywordAvatarUpdated = defaultUserAvatarId;
+    }
+  }
+
   if (typeof useraccount.thumbnailPhotoEtag !=='undefined') {
     shouldBeKeywordAvatarUpdated += useraccount.thumbnailPhotoEtag;
   }
@@ -352,6 +447,7 @@ function updateAccount(member, useraccount, orgUnitPath) {
     //Logger.log("member.email " + member.email);
     //Logger.log("member.email typeof " + typeof member.email);
     if((useraccount.recoveryEmail != member.email) && (!(!useraccount.recoveryEmail && member.email==="")))  {
+     
       Logger.log("Ny återställningse-post: %s",member.email);
       user.recoveryEmail = member.email;
       update = true;
@@ -396,14 +492,16 @@ function updateAccount(member, useraccount, orgUnitPath) {
     
     if (accountKeywordAvatarUpdated != shouldBeKeywordAvatarUpdated) {
       Logger.log("Profilbilden ska uppdateras");
+
+      Logger.log("accountKeywordAvatarUpdated " + accountKeywordAvatarUpdated);
+      Logger.log("shouldBeKeywordAvatarUpdated " + shouldBeKeywordAvatarUpdated);
       
       var userPhoto;
       var keywordAvatarUpdatedToUpdate = "";
       
-      if (!member.avatar_updated) { //Ingen profilbild i Scoutnet
-        Logger.log("Ingen profilbild i Scoutnet eller avaktiverad synkronisering");        
-        //Om tomt i Scoutnet, ta bort bilden i Google Workspace
-        
+      if (!shouldBeKeywordAvatarUpdated) {  //Ingen tillgänglig bild samt har ej någon bild i Google Workspace
+        Logger.log("Ingen profilbild från Scoutnet eller standardbild är tillgänglig" + shouldBeKeywordAvatarUpdated);
+
         try {
           userPhoto = AdminDirectory.Users.Photos.remove(useraccount.primaryEmail);
           Logger.log("Tagit bort profilbild");
@@ -414,11 +512,11 @@ function updateAccount(member, useraccount, orgUnitPath) {
           Logger.log("--------------------------");
         }
       }
-      else { //Om bild i Scoutnet, uppdatera bild i Google Workspace
-        Logger.log("Finns ny profilbild i Scoutnet");        
+      else { //Om tillgänglig bild, uppdatera bild i Google Workspace
+        Logger.log("Finns ny profilbild. Antingen i Scoutnet eller ny standardbild");        
+        
         try {
-          var blob = UrlFetchApp.fetch(member.avatar_url).getBlob();
-          var data = Utilities.base64EncodeWebSafe(blob.getBytes());
+          var data = getByteArrayImageToUse(member.avatar_url, defaultUserAvatar);
           userPhoto = AdminDirectory.Users.Photos.update({photoData: data}, useraccount.primaryEmail);
         }
         catch(err)  {
@@ -429,7 +527,9 @@ function updateAccount(member, useraccount, orgUnitPath) {
         
         try {
           userPhoto = AdminDirectory.Users.get(useraccount.primaryEmail);          
-          keywordAvatarUpdatedToUpdate = member.avatar_updated + userPhoto.thumbnailPhotoEtag;
+          var avatarId = getAvatarIdImageToUse(member.avatar_updated, defaultUserAvatarId);
+
+          keywordAvatarUpdatedToUpdate = avatarId + userPhoto.thumbnailPhotoEtag;
           Logger.log("Uppdaterat profilbild");
         }
         catch(err)  {
