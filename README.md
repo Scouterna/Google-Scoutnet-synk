@@ -41,7 +41,7 @@ Du kan med dessa program göra följande
    ska köra dessa program.
 1. Besök [följande mall](https://docs.google.com/spreadsheets/d/1JEm7uBhAXE4InmzTsjIqR6dUOsk_uonFppE2hwSu2Ho/edit#gid=0) inloggad med ditt adminkonto.
 1. Skapa en egen kopia av kalkylarket genom att trycka på **Arkiv-->Kopiera** och placera den på lämpligt ställe.
-1. Du hittar konfigurationsfilen `Konfiguration.gs` i menyn i kalkylarket under **Verktyg-->Skriptredigerare**.6.  
+1. Du hittar konfigurationsfilen `Konfiguration.gs` i menyn i kalkylarket under **Verktyg-->Skriptredigerare**.  
 1.  Gör inställningar enligt följande för respektive skript för att sätta upp dem.
    [Användare](https://github.com/Scouterna/Google-Scoutnet-synk/wiki/Manual-Användare#inställningar-för-att-komma-igång-i-konfigurationgs), 
    [Grupper](https://github.com/Scouterna/Google-Scoutnet-synk/wiki/Manual-Grupper#inställningar-för-att-komma-igång-i-konfigurationgs), [Medlemslistor](https://github.com/Scouterna/Google-Scoutnet-synk/wiki/Manual-Medlemslistor#inställningar-för-att-komma-igång-i-konfigurationgs)
