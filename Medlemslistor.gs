@@ -31,7 +31,7 @@ function MedlemslistorVissaRaderSkickaEnbartTmp() {
  * @param {boolean} shouldSend - om e-brev ska skickas ut till medlemlemslistan
  */
 function MedlemslistorEnRad(radNummer, shouldUpdate, shouldSend) {
-  Medlemslistor(radNummer, radNummer, shouldUpdate, shouldSend)
+  Medlemslistor(radNummer, radNummer, shouldUpdate, shouldSend);
 }
 
 
