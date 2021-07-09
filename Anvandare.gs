@@ -433,7 +433,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
       if (!user.name)
       {user.name = {}}
       Logger.log("Nytt efternamn: %s", member.last_name);
-      user.name.givenName = member.last_name;
+      user.name.familyName = member.last_name;
       update = true;
     }
     if(useraccount.orgUnitPath!=orgUnitPath)  {
