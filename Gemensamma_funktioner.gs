@@ -34,12 +34,12 @@ function onOpen() {
 }
 
 
-/*
+/**
  * Tar bort punkter före @ om det är en gmailadress
  *
- * @param {string} email - E-postadress
+ * @param {String} email - E-postadress
  *
- * @returns {string}
+ * @returns {String} - E-postadress utan punkter före @ om gmailadress
  */
 function getGmailAdressWithoutDots(email) {
   
@@ -509,6 +509,105 @@ function fetchScoutnetMembers() {
   } 
   //Logger.log("FETCH MEMBERS print object " + allMembers);
   return allMembers;  
+}
+
+
+/*
+ * Returnerar true eller false om en e-post är en googlegrupp
+ *
+ * @param {string} email - E-postadress
+ *
+ * @returns {boolean} - Om e-postadressen är en googlegrupp
+ */
+function checkIfEmailIsAGroup(email) {
+  
+  if (!checkEmailFormat(email)) {
+    Logger.log("Ogiltigt format på e-postadress");
+    return false;
+  }
+  return checkIfGroupExists(email); 
+}
+
+
+/*
+ * Kontrollerar att formatet på en e-postadress är godkänt
+ * genom att se om den innehåller @ och om domännamnet är godkänt
+ *
+ * @param {string} email - En e-postadress
+ *
+ * @returns {boolean} - Om e-postadressen är skriven på rätt format
+ */
+function checkEmailFormat(email) {
+  
+  var arr = email.split("@");
+  var tmp_domain = arr[1];
+  
+  if (tmp_domain==domain) {
+       return true;
+  }
+  return false;  
+}
+
+
+/*
+ * Returnerar true eller false om en googlegrupp finns
+ *
+ * @param {string} email - E-postadress för en googlegrupp
+ *
+ * @returns {boolean} - Om gruppen finns eller ej
+ */
+function checkIfGroupExists(email) {
+
+  var tmpList = getListOfGroups();
+  Logger.log(tmpList);
+
+  if(contains(tmpList, email))  {
+    return true;
+  }
+  return false;
+}
+
+
+var listOfGroups = [];
+/**
+ * Ger listan över e-postadresser för grupper
+ *
+ * @returns {string[]} - Lista över e-postadresser för grupper
+ */
+function getListOfGroups()  {
+  return listOfGroups;
+}
+
+
+/**
+ * Uppdaterar listan över e-postadresser för grupper
+ */
+function updateListOfGroups() {
+  listOfGroups = [];
+
+  Logger.log("Uppdaterar listan över e-postadresser för grupper");
+
+  var pageToken, page;
+  do {
+    page = AdminDirectory.Groups.list({
+      domain: domain,
+      maxResults: 150,
+      pageToken: pageToken
+    });
+    var groups = page.groups;
+    if (groups) {      
+      for (var i = 0; i < groups.length; i++) {
+        listOfGroups.push(groups[i].email);        
+      }      
+    }
+    else {
+      Logger.log('Inga grupper hittades.');      
+    }
+    pageToken = page.nextPageToken;
+  } while (pageToken);
+
+  Logger.log(listOfGroups);
+  return listOfGroups;
 }
 
 
