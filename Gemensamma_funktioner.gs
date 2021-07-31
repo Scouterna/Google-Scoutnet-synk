@@ -513,6 +513,57 @@ function fetchScoutnetMembers() {
 
 
 /*
+ * Om en medlem (dennes member_no) har ett Googlekonto
+ * så returnerar vi dennes e-postadress. Annars bara en tom sträng
+ *
+ * @param {string} member_no - Medlemsnummer för en medlem
+ *
+ * @returns {string} - E-postadress för medlem om finns, annars tom sträng
+ */
+function getGoogleAccount(member_no) {
+  
+  var users;
+  
+  var qry = "externalId='"+ member_no +"'";
+  
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen getGoogleAcount körs " + n);
+    try {
+      
+      var pageToken, page;
+      do {
+        page = AdminDirectory.Users.list({
+          domain: domain,
+          query: qry,
+          orderBy: 'givenName',
+          maxResults: 150,
+          pageToken: pageToken
+        });
+        users = page.users;
+        if (users) {
+          
+          //Logger.log('%s (%s)', users[0].name.fullName, users[0].primaryEmail);
+          return users[0].primaryEmail;
+          
+        } else {
+          //Logger.log('Inga användare hittades.');
+          return "";
+        }
+        pageToken = page.nextPageToken;
+      } while (pageToken);    
+      
+    } catch(e) {
+      Logger.log("Problem med att anropa GoogleTjänst Users.list i funktionen getGoogleAccount");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }    
+  }  
+}
+
+
+/*
  * Returnerar true eller false om en e-post är en googlegrupp
  *
  * @param {string} email - E-postadress
