@@ -81,8 +81,9 @@ function fetchScoutnetMemberFieldAsString(medlem, fieldName, lowerCase) {
 /*
  * Hämtar lista med personer som är med i någon av de e-postlistor eller e-postadresser som specificeras
  *
- * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en s-postlista i Scoutnet
+ * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en e-postlista i Scoutnet
  * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
+ * @param {String[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistorna
  */
