@@ -361,19 +361,3 @@ function getKontaktGruppKonfigRubrikData() {
 
   return kontaktgruppKonfigRubrikData;
 }
-
-
-/**
- * Tar bort punkter före @ om det är en gmailadress
- *
- * @param {String} email - E-postadress
- *
- * @returns {String} - E-postadress utan punkter före @ om gmailadress
- */
-function getGmailAdressWithoutDots(email) {
-  
-  var regexGmailDots = /(?:\.|\+.*)(?=.*?@gmail\.com)/g;
-  
-  email = email.replace(regexGmailDots, "");
-  return email;  
-}
