@@ -72,6 +72,13 @@ function doGet(e) {
 }
 
 
+/**
+ * Hämta data över alla kontaktgrupper aktuella för angivna Google Grupper
+ *
+ * @param {String[]} listOfGroupEmails - Lista över e-postadresser för Google Grupper
+ * 
+ * @returns {Objekt[[]]} - Lista med medlemsobjekt för aktuella kontaktgrupper
+ */
 function getContactGroupsData(listOfGroupEmails)  {
   let spreadsheetUrl_Kontakter = 'https://docs.google.com/spreadsheets/d/kjdskdjf32332/edit';
 
@@ -175,7 +182,7 @@ function getContactGroupsData(listOfGroupEmails)  {
  * @param {String[]} grd - Lista med vilka kolumnindex som respektive parameter har
  * @param {Objekt[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
  * 
- * @returns {Objekt[]} - Lista med medlemsobjekt anpassade för de i aktuell lista
+ * @returns {Objekt[]} - Lista med medlemsobjekt anpassade för de i aktuell kontaktgrupp
  */
 function getUpdateForContactGroup(selection, rad_nummer, radInfo, grd, allMembers) {
 
@@ -199,7 +206,7 @@ function getUpdateForContactGroup(selection, rad_nummer, radInfo, grd, allMember
     let obj = allMembers.find(obj => obj.member_no == tmpMembersInAList[i].member_no);
 
     let emailList = getEmailListSyncOption(obj, synk_option, true);
-    
+
     obj.google_contact_group = makeStringForGoogleContactGroup(emailList);
     membersInAList.push(obj);
     //Logger.log("obj");
@@ -337,10 +344,10 @@ function getListOfGroupsEmails(groups)  {
 }
 
 
-/*
+/**
  * Returnerar lista med vilket index som olika rubriker har i kalkylarket
  *
- * @returns {number[]} - Lista med rubrikindex för respektive rubrik
+ * @returns {Objekt[]} - Objekt med rubrik som attribut och dess rubrikindex som värde
  */
 function getKontaktGruppKonfigRubrikData() {
   
