@@ -4,20 +4,20 @@
  */
 
 
-var domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan www till kåren och som används i Google Workspace
+let domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan www till kåren och som används i Google Workspace
 
-var groupId = '12'; //Kårens id som kan hittas i Scoutnet om du har tillräcklig behörighet
+let groupId = '12'; //Kårens id som kan hittas i Scoutnet om du har tillräcklig behörighet
 
 
-var api_key_list_all = 'jkdf949348948'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
+let api_key_list_all = 'jkdf949348948'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
 
-var api_key_mailinglists = 'jhshdfh98489498'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
+let api_key_mailinglists = 'jhshdfh98489498'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
 
 //Typ av organisationsenhet
-var organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
+let organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
 
 //Adressen till Scoutnet. Ska ej ändras
-var scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
+let scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
 
 
 /**
@@ -26,7 +26,7 @@ var scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
  * vid den bortkommenterade variabeln memberKey
  */
 function testaDoGet() {
-  var e = {
+  let e = {
     parameters : {
       username: "en e-postadress",
       password: "lösenord"
@@ -46,11 +46,11 @@ function testaDoGet() {
  */
 function doGet(e) {
   
-  var params = e.parameters;
-  var username = params.username;
-  var password = params.password;
+  let params = e.parameters;
+  let username = params.username;
+  let password = params.password;
 
-  var memberKey = checkCredentials(username, password);
+  let memberKey = checkCredentials(username, password);
   //memberKey = "123456712345671234567";  //För testsyfte
   
   let contactGroupsList;
@@ -86,8 +86,8 @@ function getContactGroupsData(listOfGroupEmails)  {
   if (sheet == null) {
     Logger.log("Bladet Kontakter finns ej i kalkylarket");
   }
-  var selection = sheet.getDataRange();
-  var data = selection.getValues();
+  let selection = sheet.getDataRange();
+  let data = selection.getValues();
 
   let grd = getKontaktGruppKonfigRubrikData();
 
