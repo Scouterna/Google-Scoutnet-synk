@@ -61,9 +61,6 @@ function doGet(e) {
 
     let listOfGroupEmails = getListOfGroupsEmails(groups);
 
-    //groups = getListOfGroupsAllowedToSendTo(groups, memberKey);
-    //var listOfGroupsRecipients = getListOfGroupsRecipients(groups);
-
     contactGroupsList = getContactGroupsData(listOfGroupEmails);
   }
 
@@ -360,44 +357,6 @@ function getKontaktGruppKonfigRubrikData() {
 
 
 /**
- * Ger lista över de grupper som denna person får skicka till
- * och som inte hela världen får skicka till
- * 
- * @param {Object[]} groups - Lista över grupper som denna person är med i
- * @param {String} memberKey - Unik identifierare för en medlem i en grupp
- *
- * @returns {Object[]} - Lista över grupper som denna person får skicka till
- */
-function getListOfGroupsAllowedToSendTo(groups, memberKey) {
-
-  Logger.log("Hämtar lista över alla grupper som denna person får skicka till");
-  var groupsAllowedToSendTo = [];
-
-  for (var i = 0; i < groups.length; i++) {
-    var group = groups[i];
-    //Logger.log(group);
-    var groupSettings = getAdminGroupSettings(group.email);
-    var postPermission = groupSettings.whoCanPostMessage;
-
-    //Så inte vem som helst i hela världen får skicka till den
-    if ('ALL_MANAGERS_CAN_POST' == postPermission) {
-      
-      var member = getGroupMember(group.id, memberKey);
-      Logger.log(group.email + " " + member.email + " " + member.role);
-
-      if ('MANAGER' == member.role) {       
-        groupsAllowedToSendTo.push(group);
-      }      
-    }
-  }
-  Logger.log("Grupper som denna person får skicka till");
-  Logger.log(groupsAllowedToSendTo);
-  Logger.log("Antal grupper som får skicka till - " + groupsAllowedToSendTo.length);
-  return groupsAllowedToSendTo;
-}
-
-
-/**
  * Returnera AdminGroupSettings
  *
  * @param {String} email - E-postadress för gruppen
@@ -451,31 +410,6 @@ function getGroupMember(groupId, memberkey) {
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
     }
   }
-}
-
-
-/**
- * Ger lista över de som är mottagare i grupper givet lista över grupper
- * 
- * @param {Object[]} groups - Lista över grupper
- *
- * @returns {Object[[]]} groupsRecipients - Lista över grupper med listor för respektive
- */
-function getListOfGroupsRecipients(groups) {
-
-  var groupsRecipients = [];
-  for (var i = 0; i < groups.length; i++) {
-    var group = groups[i];
-    var members = getGroupMembers(group);
-    members = getGroupRecipients(group, members);
-
-    var antalMottagare = members.length - 1;
-    Logger.log("Antal mottagare i gruppen " + antalMottagare);
-    if (1 != members.length)  {
-      groupsRecipients.push(members);
-    }
-  }
-  return groupsRecipients;
 }
 
 
