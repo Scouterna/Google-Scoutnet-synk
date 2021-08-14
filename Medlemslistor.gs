@@ -308,7 +308,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     /***Brödtext***/
     var tmp_plainBody = replaceTemplate(plainBody, attribut, data[i]);
     var tmp_body = replaceTemplate(body, attribut, data[i]);
-    emailOptions["htmlBody"] = tmp_body;    
+    emailOptions["htmlBody"] = tmp_body;   
     /***Brödtext  Slut***/
     
     /***Bilagor***/
@@ -425,6 +425,33 @@ function replaceContentOfDocument(section, attribut, dataArray) {
     //Ersätt koden med personlig data
     section.replaceText(textMatches[i], replaceData || '');
   }
+}
+
+
+/**
+ * Ger en personlig text givet indatatext med kortkoder
+ * 
+ * @param {string} textInput - en textmall innehållande ev kortkoder
+ * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - en lista innehållande persondata för en person
+ *
+ * @returns {string} - en personligfierad textsträng
+ */
+function replaceTemplate(textInput, attribut, dataArray)  {
+
+  var text = textInput.slice();
+  //Skapar en lista med alla kortkoder som används
+  var textMatches = getListOfUsedShortcodes(text);
+
+  for (var i = 0; textMatches && i<textMatches.length; i++)  {
+    
+    //Ny data för aktuell personsom ska ersätta kortkoden
+    var replaceData = getReplaceDataForShortcode(textMatches[i], attribut, dataArray);
+    //Ersätt koden med personlig data
+    text = text.replace(textMatches[i], replaceData || '');
+  }
+  //Logger.log(text);
+  return text;
 }
 
 
@@ -591,62 +618,6 @@ function getCleanEmailArray(input) {
 
 
 /**
- * Ger sant eller falskt om angiven e-postadress är tillåten
- * som avsändareadress
- * 
- * @param {string} email - en e-postadress
- *
- * @returns {boolean} - om avsändaradressen är tillåten
- */
-function isFromEmailAdressAllowed(email) {  
-  return contains(getAllowedFromEmailAdresses(), email);
-}
-
-
-/**
- * Ger vilka e-postadresser som det går att ange som avsändare
- *
- * @returns {string[]} - en lista med e-postadresser
- */
-function getAllowedFromEmailAdresses() {
-  
-  var aliases = GmailApp.getAliases();
-  var min_adress = Session.getEffectiveUser().getEmail();
-  
-  aliases.push(min_adress);
-  //Logger.log(aliases);
-  return aliases;
-}
-
-
-/**
- * Ger en personlig text givet indatatext med kortkoder
- * 
- * @param {string} textInput - en textmall innehållande ev kortkoder
- * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} dataArray - en lista innehållande persondata för en person
- *
- * @returns {string} - en personligfierad textsträng
- */
-function replaceTemplate(textInput, attribut, dataArray)  {
-
-  var text = textInput.slice();
-  //Skapar en lista med alla kortkoder som används
-  var textMatches = getListOfUsedShortcodes(text);
-
-  for (var i = 0; textMatches && i<textMatches.length; i++)  {
-    
-    //Ny data för aktuell personsom ska ersätta kortkoden
-    var replaceData = getReplaceDataForShortcode(textMatches[i], attribut, dataArray);
-    //Ersätt koden med personlig data
-    text = text.replace(textMatches[i], replaceData || '');
-  }
-  //Logger.log(text);
-  return text;
-}
-
-
-/**
  * Ger en matris med data för medlemslistan i kalkylarket
  * 
  * @param {Object} sheet - ett objekt av typen Sheet
@@ -690,49 +661,6 @@ function getVerkligaRubriker(sheet) {
     data[values[i]] = i;
   }
   return data;
-}
-
-
-/**
- * Ger ett e-postutkast om det finns givet ämnesraden på det
- * 
- * @param {string} subject - ämnesrad på e-postutkast
- *
- * @returns {Object} - ett e-postutkast av typen GmailMessage
- */
-function getDraft(subject)  {
-
-  subject = getComparableString(subject);
-
-  var drafts = GmailApp.getDraftMessages();
-  for (var i = 0; i<drafts.length; i++) {
-
-    var draftSubject = drafts[i].getSubject();
-    draftSubject = getComparableString(draftSubject);
-
-    if (draftSubject == subject)  {
-      Logger.log(draftSubject);
-      return drafts[i];
-    }
-  }
-  return false;
-}
-
-
-/**
- * Gör om en textsträng till gemener och tar bort tomrum
- * 
- * @param {string} text - textsträng
- *
- * @returns {string} - textsträng som är enklare att jämföra
- */
-function getComparableString(text)  {
-
-  //Ta bort tomma mellanrum vid start och slut och konvertera till gemener
-  text = text.toLowerCase().trim();
-  //Ta bort alla tomma mellanrum
-  text = text.replace(/([\s])+/g, '');
-  return text;
 }
 
 

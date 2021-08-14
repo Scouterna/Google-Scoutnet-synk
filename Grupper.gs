@@ -364,47 +364,6 @@ function getGroupMember(groupId, memberkey) {
 
 
 /*
- * Returnera gruppmedlemmar för en specifik grupp
- *
- * @param {string} groupId - Googles id för en grupp
- *
- * @returns {Object[]} members - Lista av medlemsobjekt med attributen email, role, memberId för medlemmar i en grupp
- */
-function getGroupMembers(groupId) {
-  
-  var group = [];
-  
-  var pageToken, page;
-  do {
-    page = AdminDirectory.Members.list(groupId,{
-      domainName: domain,
-      maxResults: 150,
-      pageToken: pageToken,
-    });
-    var members = page.members
-    if (members)
-    {
-      for (var i = 0; i < members.length; i++)
-      {
-        var member = members[i];
-        
-        var tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
-        var member = {
-          email: tmpEmail,
-          role: member.role,
-          memberId: member.id
-        };
-        group.push(member);
-      }
-    }
-    pageToken = page.nextPageToken;
-  } while (pageToken);
-      
-  return group;
-}
-
-
-/*
  * Uppdatera medlemmar för en grupp
  *
  * @param {Objekt} selection - Hela området på kalkylarket som används

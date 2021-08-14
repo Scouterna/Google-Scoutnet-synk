@@ -51,6 +51,47 @@ function getGmailAdressWithoutDots(email) {
 
 
 /*
+ * Returnera gruppmedlemmar för en specifik grupp
+ *
+ * @param {string} groupId - Googles id för en grupp
+ *
+ * @returns {Object[]} members - Lista av medlemsobjekt med attributen email, role, memberId för medlemmar i en grupp
+ */
+function getGroupMembers(groupId) {
+  
+  var group = [];
+  
+  var pageToken, page;
+  do {
+    page = AdminDirectory.Members.list(groupId,{
+      domainName: domain,
+      maxResults: 150,  //Öka denna??, kanske på fler ställen också??
+      pageToken: pageToken,
+    });
+    var members = page.members
+    if (members)
+    {
+      for (var i = 0; i < members.length; i++)
+      {
+        var member = members[i];
+        
+        var tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
+        var member = {
+          email: tmpEmail,
+          role: member.role,
+          memberId: member.id
+        };
+        group.push(member);
+      }
+    }
+    pageToken = page.nextPageToken;
+  } while (pageToken);
+      
+  return group;
+}
+
+
+/*
  * Hämta ett specificerat medlemsattributet för en specifik medlem
  * 
  * @param {Object} medlem - Ett medlemsobjekt
@@ -611,7 +652,7 @@ function checkEmailFormat(email) {
 function checkIfGroupExists(email) {
 
   var tmpList = getListOfGroups();
-  Logger.log(tmpList);
+  //Logger.log(tmpList);
 
   if(contains(tmpList, email))  {
     return true;
@@ -660,6 +701,78 @@ function updateListOfGroups() {
 
   Logger.log(listOfGroups);
   return listOfGroups;
+}
+
+
+/**
+ * Ger sant eller falskt om angiven e-postadress är tillåten
+ * som avsändareadress
+ * 
+ * @param {string} email - en e-postadress
+ *
+ * @returns {boolean} - om avsändaradressen är tillåten
+ */
+function isFromEmailAdressAllowed(email) {  
+  return contains(getAllowedFromEmailAdresses(), email);
+}
+
+
+/**
+ * Ger vilka e-postadresser som det går att ange som avsändare
+ *
+ * @returns {string[]} - en lista med e-postadresser
+ */
+function getAllowedFromEmailAdresses() {
+  
+  var aliases = GmailApp.getAliases();
+  var min_adress = Session.getEffectiveUser().getEmail();
+  
+  aliases.push(min_adress);
+  //Logger.log(aliases);
+  return aliases;
+}
+
+
+/**
+ * Ger ett e-postutkast om det finns givet ämnesraden på det
+ * 
+ * @param {string} subject - ämnesrad på e-postutkast
+ *
+ * @returns {Object} - ett e-postutkast av typen GmailMessage
+ */
+function getDraft(subject)  {
+
+  subject = getComparableString(subject);
+
+  var drafts = GmailApp.getDraftMessages();
+  for (var i = 0; i<drafts.length; i++) {
+
+    var draftSubject = drafts[i].getSubject();
+    draftSubject = getComparableString(draftSubject);
+
+    if (draftSubject == subject)  {
+      Logger.log(draftSubject);
+      return drafts[i];
+    }
+  }
+  return false;
+}
+
+
+/**
+ * Gör om en textsträng till gemener och tar bort tomrum
+ * 
+ * @param {string} text - textsträng
+ *
+ * @returns {string} - textsträng som är enklare att jämföra
+ */
+function getComparableString(text)  {
+
+  //Ta bort tomma mellanrum vid start och slut och konvertera till gemener
+  text = text.toLowerCase().trim();
+  //Ta bort alla tomma mellanrum
+  text = text.replace(/([\s])+/g, '');
+  return text;
 }
 
 
