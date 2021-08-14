@@ -20,10 +20,27 @@ let organisationType = 'group'; //Ska enbart ändras om du kör programmet för 
 let scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
 
 
+
+let contact_groups_email_subject = "Användaruppgifter - Google kontaktgrupper synkning";
+
+let contact_groups_email_sender_name = "";
+
+let contact_groups_email_sender_from = "";
+
+//Skapa din egen med hjälp av funktionen testGetHtmlEmailBody
+/***Brödtext enkel***/
+let contact_groups_email_plainBody = "Hej, Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper. Vänligen använd följande uppgifter i stället: E-postadress: {{userEmail}} Lösenord: {{password}} Mvh";
+/***Brödtext enkel - Slut***/
+
+/***Brödtext Html***/
+let contact_groups_email_htmlBody = '<div dir="ltr">Hej,<div><br></div><div>Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper.</div><div><br></div><div>Vänligen använd följande uppgifter i stället:</div><div><br></div><div>E-postadress: {{userEmail}}</div><div>Lösenord: {{password}}</div><div><br></div><div>Mvh</div></div>';
+/***Brödtext Html - Slut***/
+
+
+
 /**
- * Testfunktion för att anropa
- * Om direktanrop utan användarnamn/lösenord kan konto-id anges
- * vid den bortkommenterade variabeln memberKey
+ * Testfunktion för att testa anrop med olika
+ * användarnamn/lösenord
  */
 function testaDoGet() {
   let e = {
@@ -39,29 +56,26 @@ function testaDoGet() {
 /**
  * Körs vid GET-anrop till webbappen
  * 
- * @param {String} e - Unikt identifierare för en person
+ * @param {Objekt} e - Query-parametrar vid GET-anrop till webbappen
  *
- * @returns {Object[[]]} - Lista över kontaktgrupper och vilka medlemmar
- * för respektive
+ * @returns {Object} - Ett objekt av typen TextOutput
  */
 function doGet(e) {
-  
+
   let params = e.parameters;
-  let username = params.username;
-  let password = params.password;
+  let userEmail = params.username;
+  let userPassword = params.password;
 
-  let memberKey = checkCredentials(username, password);
-  //memberKey = "123456712345671234567";  //För testsyfte
-  
+  Logger.log("userEmail " + userEmail);
+
   let contactGroupsList;
-  Logger.log("userkey " + userKey);
-  if (userKey) {
+
+  if (checkCredentials_(userEmail, userPassword)) {
     //Hämta en lista över alla Google Grupper som denna person är med i
-    let groups = getListOfGroupsForAUser(userKey);
+    let groups = getListOfGroupsForAUser_(userEmail);
+    let listOfGroupEmails = getListOfGroupsEmails_(groups);
 
-    let listOfGroupEmails = getListOfGroupsEmails(groups);
-
-    contactGroupsList = getContactGroupsData(listOfGroupEmails);
+    contactGroupsList = getContactGroupsData_(listOfGroupEmails);
   }
 
   Logger.log("Svar");
@@ -73,23 +87,226 @@ function doGet(e) {
 
 
 /**
+ * Uppdatera kalkylbladet med de användare som ska ha behörigheter
+ */
+function updateContactGroupsAuthnSheetUsers()  {
+
+  let sheetDataKontakterAnvandare = getDataFromSheet_("Kontakter-Användare");
+
+  let sheet = sheetDataKontakterAnvandare["sheet"];
+  let selection = sheetDataKontakterAnvandare["selection"];
+  let data = sheetDataKontakterAnvandare["data"];
+
+  let grd = getKontaktGruppAuthnRubrikData_();
+
+  let delete_rows = [];
+
+  let listOfEmailsAlreadyAccess = [];
+  
+  var rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  let start = rowsToSync.start;
+  let slut = rowsToSync.slut;
+  
+
+  let listOfAllGoogleGroupsShouldHaveAccess = getListOfAllGoogleGroupsShouldHaveAccess_();
+  let listOfEmailsShouldHaveAccess = getAllEmailsShouldHaveAccess_(listOfAllGoogleGroupsShouldHaveAccess);
+
+  Logger.log("Startrad " + start + " slutrad " + slut);
+
+  for (let i = start-1; i < slut; i++) {
+    
+    let email = data[i][grd["e-post"]];
+    let password = data[i][grd["lösenord"]];
+    let last_authn = data[i][grd["senast_använd"]];
+
+    let rad_nummer = i+1;
+    
+    Logger.log('Rad: ' + rad_nummer + ' E-post: ' + email + ' Lösenord: ' + password + ' Senast använd: ' + last_authn);
+
+    email = getGmailAdressWithoutDots(email.toLowerCase());
+    if(!contains(listOfEmailsShouldHaveAccess, email))  {
+      Logger.log("Användare har ej behörighet längre till en kontaktgrupp " + email);
+      Logger.log("Försöker ta bort rad " + rad_nummer);
+      delete_rows.push(rad_nummer);
+      continue;
+    }
+    else  {
+      Logger.log("Användare finns redan i listan " + email);
+      listOfEmailsAlreadyAccess.push(email);
+
+      if (!password)  {
+        Logger.log("Lösenord saknas för denna användare");
+        Logger.log("Skapar lösenord för denna användare");
+
+        let cell=selection.getCell(rad_nummer, grd["lösenord"]+1);
+        let password = createRandomPasswordForContactGroupsUser_();
+        cell.setValue(password);
+      }
+    }
+  }
+  deleteRowsFromSpreadsheet(sheet, delete_rows);
+
+  Logger.log("Lägga till dessa så att de får behörighet")
+  for (let i = 0; i < listOfEmailsShouldHaveAccess.length; i++) {
+    
+    let email = listOfEmailsShouldHaveAccess[i];
+    if(!contains(listOfEmailsAlreadyAccess, email))  {
+      
+      Logger.log(email);
+      let password = createRandomPasswordForContactGroupsUser_();
+      sheet.appendRow([email, password]);      
+    }
+  }  
+}
+
+
+/**
+ * Generera ett lösenord för en användare för kontaktgrupper
+ * 
+ * @returns {String} - Ett slumpvis genererat lösenord
+ */
+function createRandomPasswordForContactGroupsUser_() {
+
+  let lengthForPassword = 15;
+
+  let password = "";
+  let possibleCharacters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz0123456789";
+
+  for (let i = 0; i < lengthForPassword; i++) {
+    password += possibleCharacters.charAt(Math.floor(Math.random() * possibleCharacters.length));
+  }
+  Logger.log(password);
+  return password;
+}
+
+
+/**
+ * Ger lista över de Google-grupper vars medlemmar ska ha behörighet
+ * 
+ * @returns {String[]} - Lista över e-postadresser för Google-grupper
+ */
+function getListOfAllGoogleGroupsShouldHaveAccess_()  {
+
+  updateListOfGroups();
+
+  let sheetDataKontakter = getDataFromSheet_("Kontakter");
+
+  let data = sheetDataKontakter["data"];
+
+  var rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  let start = rowsToSync.start;
+  let slut = rowsToSync.slut;
+
+  let listOfAllGoogleGroupsShouldHaveAccess = [];
+
+  let grd = getKontaktGruppKonfigRubrikData_();
+
+  Logger.log("Lista över e-postadresser för Google-grupper vars medlemmar ska ha behörighet");
+
+  for (let i = start-1; i < slut; i++) {
+
+    let email = data[i][grd["e-post"]];
+    if (checkIfGroupExists(email)) {
+      listOfAllGoogleGroupsShouldHaveAccess.push(email);
+    }
+  }
+
+  Logger.log(listOfAllGoogleGroupsShouldHaveAccess);
+  return listOfAllGoogleGroupsShouldHaveAccess;
+}
+
+
+/**
+ * Ger e-postadresser för de som är medlemmar i angivna Google-grupper
+ * 
+ * @param {String[]} listOfAllGoogleGroupsShouldHaveAccess - Lista över e-postadresser för Google-grupper
+ * 
+ * @returns {String[]} - Lista över e-postadresser för de som är med i angivna Google-grupper
+ */
+function getAllEmailsShouldHaveAccess_(listOfAllGoogleGroupsShouldHaveAccess) {
+
+  let listOfAllEmails = [];
+
+  for (let i = 0; i < listOfAllGoogleGroupsShouldHaveAccess.length; i++) {
+    
+    let email = listOfAllGoogleGroupsShouldHaveAccess[i];
+
+    let groupMembers = getGroupMembers(email);
+
+    let listOfEmails = getListOfEmailsFromListOfGroupMembers_(groupMembers);
+    listOfAllEmails.push.apply(listOfAllEmails, listOfEmails);
+  }
+
+  Logger.log("Användare som ska ha behörighet");
+  listOfAllEmails = removeDublicates(listOfAllEmails);
+  Logger.log(listOfAllEmails);
+  return listOfAllEmails;
+}
+
+
+/**
+ * Ger lista med e-postadresser för de medlemsobjekt i angiven lista
+ * 
+ * @param {Objekt[]} groupMembers - Lista med medlemsobjekt
+ * 
+ * @returns {String[]} - Lista över e-postadresser för de angivna medlemsobjekten
+ */
+function getListOfEmailsFromListOfGroupMembers_(groupMembers)  {
+
+  let listOfEmails = [];
+
+  for (let i = 0; i < groupMembers.length; i++) {
+
+    let email = groupMembers[i].email;
+    listOfEmails.push(email);
+  }
+  return listOfEmails;
+}
+
+
+/**
+ * Hämta data från ett kalkylblad
+ *
+ * @param {String} nameOfSheet - Namn på kalkylbladet
+ * 
+ * @returns {Objekt} - Objekt bestående av data från aktuellt kalkylblad
+ */
+function getDataFromSheet_(nameOfSheet)  {
+  let spreadsheetUrl_Kontakter = 'https://docs.google.com/spreadsheets/d/kjdskdjf32332/edit';
+
+  let sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Kontakter).getSheetByName(nameOfSheet);
+  if (sheet == null) {
+    Logger.log("Bladet " + nameOfSheet + " finns ej i kalkylarket");
+  }
+  let selection = sheet.getDataRange();
+  let data = selection.getValues();
+
+  let sheetData = {};
+  sheetData["sheet"] = sheet;
+  sheetData["selection"] = selection;
+  sheetData["data"] = data;
+
+  Logger.log(sheetData["data"]);
+  return sheetData;
+}
+
+
+/**
  * Hämta data över alla kontaktgrupper aktuella för angivna Google Grupper
  *
  * @param {String[]} listOfGroupEmails - Lista över e-postadresser för Google Grupper
  * 
  * @returns {Objekt[[]]} - Lista med medlemsobjekt för aktuella kontaktgrupper
  */
-function getContactGroupsData(listOfGroupEmails)  {
-  let spreadsheetUrl_Kontakter = 'https://docs.google.com/spreadsheets/d/kjdskdjf32332/edit';
+function getContactGroupsData_(listOfGroupEmails)  {
 
-  let sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Kontakter).getSheetByName("Kontakter");
-  if (sheet == null) {
-    Logger.log("Bladet Kontakter finns ej i kalkylarket");
-  }
-  let selection = sheet.getDataRange();
-  let data = selection.getValues();
+  let sheetDataKontakter = getDataFromSheet_("Kontakter");
 
-  let grd = getKontaktGruppKonfigRubrikData();
+  let sheet = sheetDataKontakter["sheet"];
+  let selection = sheetDataKontakter["selection"];
+  let data = sheetDataKontakter["data"];
+
+  let grd = getKontaktGruppKonfigRubrikData_();
 
   let delete_rows = [];
 
@@ -97,9 +314,11 @@ function getContactGroupsData(listOfGroupEmails)  {
 
   //Hämta lista med alla medlemmar i kåren och alla deras attribut
   let allMembers = fetchScoutnetMembers();
+  allMembers = filterMemberAttributes_(allMembers);
 
-  let start = 3;
-  let slut = data.length;
+  var rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  let start = rowsToSync.start;
+  let slut = rowsToSync.slut;
 
   updateListOfGroups();
 
@@ -160,16 +379,119 @@ function getContactGroupsData(listOfGroupEmails)  {
 
     if (updateContactGroup) {
       //Hämta uppdatering av kontaktgruppsinfo
-      let membersInAList = getUpdateForContactGroup(selection, rad_nummer, data[i], grd, allMembers);
-      Logger.log("membersInAList");
-      Logger.log(membersInAList);
+      let memberNumbersInAList = getUpdateForContactGroup_(selection, rad_nummer, data[i], grd);
+      Logger.log("memberNumbersInAList");
+      Logger.log(memberNumbersInAList);
 
-      contactGroupsList.push(membersInAList);      
+      contactGroupsList.push(memberNumbersInAList);   
     }
   }
+  
+  let memberNumbersList = getMemberNumbersFromContactGroupsList_(contactGroupsList);
+  let memberList = getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbersList);
+  //Logger.log("memberlist");
+  //Logger.log(memberList);
+
+  //Lägga memberList först i en listan
+  contactGroupsList.unshift(memberList);
+
   deleteRowsFromSpreadsheet(sheet, delete_rows);
 
   return contactGroupsList;
+}
+
+
+/**
+ * Ger lista med unika medlemsnummer för de som är med i någon kontaktgrupp
+ *
+ * @param {Objekt[]} allMembers - Lista av medlemsobjekt
+ * @param {Number[]} - Lista med medlemsnummer
+ *  
+ * @returns {Objekt[]} - Lista av medlemsobjekt för endast de med angivna
+ * medlemsnummer samt tillagt attribut anpassat för Google Kontakter
+ */
+function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers) {
+
+  let memberList = [];
+
+  for (let i = 0; i < memberNumbers.length; i++) {
+
+    let obj = allMembers.find(obj => obj.member_no == memberNumbers[i]);
+
+    let emailList = getEmailListSyncOption(obj, "", false);
+
+    obj.google_contact_group = makeStringForGoogleContactGroup_(emailList);
+    memberList.push(obj);
+
+    //Logger.log("obj");
+    //Logger.log(obj);
+  }
+
+  return memberList;
+}
+
+
+/**
+ * Ger lista med unika medlemsnummer för de som är med i någon kontaktgrupp
+ *
+ * @param {Objekt[[]]} contactGroupsList - Lista av listor med kontaktgruppsinformation och medlemsnummer för de i respektive grupp
+ *  
+ * @returns {Number[]} - Lista med unika medlemsnummer för de som är med i någon kontaktgrupp
+ */
+function getMemberNumbersFromContactGroupsList_(contactGroupsList)  {
+
+  let memberNumbers = [];
+
+  for (let i = 0; i<contactGroupsList.length; i++) {
+
+    let contactGroupList = contactGroupsList[i];
+    for (let k = 1; k<contactGroupList.length; k++) {
+      memberNumbers.push(contactGroupList[k]);
+    }
+  }
+
+  //Ta bort dubletter
+  memberNumbers = removeDublicates(memberNumbers);
+
+  Logger.log("memberNumbers");
+  Logger.log(memberNumbers);
+  return memberNumbers;
+}
+
+
+/**
+ * Ger lista av medlemsobjekt där vissa medlemsattribut tagits bort
+ *
+ * @param {Objekt[]} medlemmar - Lista av medlemsobjekt
+ *  
+ * @returns {Objekt[]} - Lista av medlemsobjekt med färre medlemsattribut
+ */
+function filterMemberAttributes_(medlemmar) {
+
+  Logger.log(medlemmar);
+  let filteredMembers = [];
+
+  let attribut_lista = ['member_no', 'first_name', 'last_name', 'date_of_birth',
+                        'group', 'unit', 'patrol', 'unit_role', 'group_role',
+                        'sex', 'address_co', 'address_1', 'address_2' , 'address_3', 'postcode', 'town',
+                        'country', 'contact_mobile_phone', 'contact_home_phone', 'contact_mothers_name',
+                        'contact_mobile_mum', 'contact_telephone_mum', 'contact_fathers_name', 'contact_mobile_dad',
+                        'contact_telephone_dad', 'avatar_updated', 'avatar_url',
+                        'email', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email', 'extra_emails'];
+
+  for (let i = 0; i<medlemmar.length; i++) {
+    //Logger.log(medlemmar[i]);
+    let member = {};
+
+    for (let k = 0; k<attribut_lista.length; k++) {
+      let nameOfAttribute = attribut_lista[k];
+      member[nameOfAttribute] = medlemmar[i][nameOfAttribute];
+    }
+
+    filteredMembers.push(member);
+  }
+  //Logger.log(filteredMembers);
+  return filteredMembers;
 }
 
 
@@ -180,17 +502,15 @@ function getContactGroupsData(listOfGroupEmails)  {
  * @param {Int} rad_nummer - Radnummer för aktuell grupp i kalkylarket
  * @param {String[]} radInfo - Lista med data för aktuell rad i kalkylarket
  * @param {String[]} grd - Lista med vilka kolumnindex som respektive parameter har
- * @param {Objekt[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
  * 
- * @returns {Objekt[]} - Lista med medlemsobjekt anpassade för de i aktuell kontaktgrupp
+ * @returns {Objekt[]} - Lista med kontaktgruppsinformation och medlemsnummer för de i gruppen
  */
-function getUpdateForContactGroup(selection, rad_nummer, radInfo, grd, allMembers) {
+function getUpdateForContactGroup_(selection, rad_nummer, radInfo, grd) {
 
   let name = radInfo[grd["namn"]];
 
   let scoutnet_list_id = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   let cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
-  let synk_option = radInfo[grd["synk_option"]];
 
   let tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, "");
   
@@ -202,17 +522,7 @@ function getUpdateForContactGroup(selection, rad_nummer, radInfo, grd, allMember
   membersInAList.push(contactGroupInfo);
 
   for (let i = 0; i<tmpMembersInAList.length; i++) {
-    //Leta upp medlemmen i listan övar alla medlemmar
-    let obj = allMembers.find(obj => obj.member_no == tmpMembersInAList[i].member_no);
-
-    let emailList = getEmailListSyncOption(obj, synk_option, true);
-
-    obj.google_contact_group = makeStringForGoogleContactGroup(emailList);
-    membersInAList.push(obj);
-    //Logger.log("obj");
-    //Logger.log(obj);
-    Logger.log("obj.google_contact_group");
-    Logger.log(obj.google_contact_group);
+    membersInAList.push(tmpMembersInAList[i].member_no);
   }
   return membersInAList;
 }
@@ -225,7 +535,7 @@ function getUpdateForContactGroup(selection, rad_nummer, radInfo, grd, allMember
  *
  * @returns {Object[]} - Textsträng för e-postadresser i Google Kontakter
  */
-function makeStringForGoogleContactGroup(emailList)  {
+function makeStringForGoogleContactGroup_(emailList)  {
 
   //Skapa lista med enbart korrekta e-postadresser
   let realEmailList = [];
@@ -247,20 +557,20 @@ function makeStringForGoogleContactGroup(emailList)  {
     if (0 == i) {
       if (realEmailList.length == 1) {
         contactGroupList.push(realEmailList[i]);
-        Logger.log("Första och enda elementet " + realEmailList[i]);
+        //Logger.log("Första och enda elementet " + realEmailList[i]);
       }
       else  {
         contactGroupList.push(realEmailList[i] + ">");
-        Logger.log("Första elementet " + realEmailList[i]);
+        //Logger.log("Första elementet " + realEmailList[i]);
       }      
     }
     else if (realEmailList.length-1 == i) {
       contactGroupList.push("<" + realEmailList[i]);
-      Logger.log("Sista elementet " + realEmailList[i]);
+      //Logger.log("Sista elementet " + realEmailList[i]);
     }
     else {
       contactGroupList.push("<" + realEmailList[i] + ">");
-      Logger.log("Ett element i mitten någonstans " + realEmailList[i]);
+      //Logger.log("Ett element i mitten någonstans " + realEmailList[i]);
     }
   }
   contactGroupList = contactGroupList.toString();
@@ -268,16 +578,141 @@ function makeStringForGoogleContactGroup(emailList)  {
 }
 
 
-//TODO
-/*
-Anropar ett kalkylark
-returnerar memberKey för aktuell medlem
-Använd samma attribut för e-post såsom i medlemslistor synkningen?
-*/
-function checkCredentials(username, password) {
+/**
+ * Kontrollerar om inskickade autentiseringsuppgifter är giltiga
+ * 
+ * @param {String} userEmail - E-postadress för en användare
+ * @param {String} password - Lösenord för en användare för synkning av kontaktgrupper
+ * 
+ * @returns {Boolean} - Gällande om inskickade autentiseringsuppgifter är giltiga
+ */
+function checkCredentials_(userEmail, userPassword) {
   
-  //Test
-  return "123456712345671234567";
+  Logger.log("Kontrollerar om följande uppgifter är giltiga")
+  
+  userEmail = getGmailAdressWithoutDots(userEmail.toLowerCase());
+
+  Logger.log("Inskickad data");
+  Logger.log("userEmail: " + userEmail);
+  Logger.log("userPassword: " + userPassword);
+
+  let sheetDataKontakterAnvandare = getDataFromSheet_("Kontakter-Användare");
+
+  let sheet = sheetDataKontakterAnvandare["sheet"];
+  let selection = sheetDataKontakterAnvandare["selection"];
+  let data = sheetDataKontakterAnvandare["data"];
+
+  let grd = getKontaktGruppAuthnRubrikData_();
+
+  
+  var rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  let start = rowsToSync.start;
+  let slut = rowsToSync.slut;
+
+  Logger.log("Startrad " + start + " slutrad " + slut);
+
+  for (let i = start-1; i < slut; i++) {
+    
+    let email = data[i][grd["e-post"]];
+    let password = data[i][grd["lösenord"]];
+    let last_authn = data[i][grd["senast_använd"]];
+
+    email = getGmailAdressWithoutDots(email.toLowerCase());
+
+    if (email != userEmail) {
+      continue;
+    }
+
+    let rad_nummer = i+1;
+    
+    Logger.log('Rad: ' + rad_nummer + ' E-post: ' + email + ' Lösenord: ' + password + ' Senast använd: ' + last_authn);
+
+    if (password != userPassword) {
+      Logger.log("Felaktigt lösenord angivet " + userPassword);
+      sendEmailWithContactsGroupsPassword_(userEmail, password);
+      return false;
+    }
+    Logger.log("Korrekt angivet lösenord för angiven e-postadress");
+    let cell = selection.getCell(rad_nummer, grd["senast_använd"]+1);
+    let datum = new Date();
+    cell.setValue(datum).setNumberFormat("yyyy-MM-dd hh:mm:ss");
+    Logger.log("Uppdatera datum i kalkylblad för senast använd " + datum);
+    return true;
+  }
+
+  Logger.log("Användaren finns ej i listan och saknar därmed behörighet");
+  return false;
+}
+
+
+/**
+ * Skicka e-brev till angiven e-postadress med information
+ * om korrekt autentiseringsuppgifter för denna användare
+ * 
+ * @param {String} userEmail - E-postadress för en användare
+ * @param {String} password - Lösenord för en användare för synkning av kontaktgrupper
+ */
+function sendEmailWithContactsGroupsPassword_(userEmail, password) {
+
+  let emailOptions = {};
+
+  /***Avsändarnamn***/
+  if (contact_groups_email_sender_name)  {
+    emailOptions["name"] = contact_groups_email_sender_name;
+  }
+  /***Avsändarnamn - Slut***/
+
+  /***Avsändaradress***/
+  if (contact_groups_email_sender_from)  {
+    if (isFromEmailAdressAllowed(contact_groups_email_sender_from)) {
+      emailOptions["from"] = contact_groups_email_sender_from;
+    }
+    else  {
+      Logger.log("Angiven avsändaradress är ej godkänd");
+      Logger.log("Avsändaradressen måste finnas upplagd som alias i din Gmail");
+    }
+  }
+  /***Avsändaradress - Slut***/
+
+  contact_groups_email_plainBody = contact_groups_email_plainBody.replace("{{userEmail}}", userEmail);
+  contact_groups_email_plainBody = contact_groups_email_plainBody.replace("{{password}}", password);
+
+  contact_groups_email_htmlBody = contact_groups_email_htmlBody.replace("{{userEmail}}", userEmail);
+  contact_groups_email_htmlBody = contact_groups_email_htmlBody.replace("{{password}}", password);
+
+  emailOptions["htmlBody"] = contact_groups_email_htmlBody;
+
+  Logger.log("Skickar e-post till " + userEmail);
+  GmailApp.sendEmail(userEmail, contact_groups_email_subject, contact_groups_email_plainBody, emailOptions);
+}
+
+
+/**
+ * En testfunktion för att själv kunna få fram oformaterad brödtext för e-brev
+ * samt html-formaterad brödtext för e-brev.
+ * 
+ * Skapa ett utkast i din Gmail med ämne satt till Kontaktgrupper och kör sen
+ * denna funktion så skrivs brödtexten ut i körningsloggen. 
+ */
+function testGetHtmlEmailBody() {
+  
+  let subject = "Kontaktgrupper";
+
+  let draft = getDraft(subject);
+
+  if (!draft) { //Kolla om ämnesraden är korrekt
+    Logger.log("Finns ej ett utkast i Gmail med korrekt ämnesrad");
+    return;
+  }
+
+  var plainBody = draft.getPlainBody();
+  var body = draft.getBody();
+
+  Logger.log("plainBody");
+  Logger.log(plainBody);
+
+  Logger.log("body");
+  Logger.log(body);
 }
 
 
@@ -288,7 +723,7 @@ function checkCredentials(username, password) {
  *
  * @returns {Object[]} - Lista över grupper som denna person är med i
  */
-function getListOfGroupsForAUser(userKey) {
+function getListOfGroupsForAUser_(userKey) {
   
   Logger.log("Hämtar lista över alla grupper som denna person är med i");
   let listOfGroups = [];
@@ -321,6 +756,7 @@ function getListOfGroupsForAUser(userKey) {
   } while (pageToken);
 
   //Logger.log(listOfGroups);
+  //Logger.log(listOfGroups.length);
   return listOfGroups;
 }
 
@@ -332,7 +768,7 @@ function getListOfGroupsForAUser(userKey) {
  *
  * @returns {String[]} - Lista med e-postadresser för alla angivna grupper
  */
-function getListOfGroupsEmails(groups)  {
+function getListOfGroupsEmails_(groups)  {
 
   let listOfGroupsEmails = [];
 
@@ -346,18 +782,37 @@ function getListOfGroupsEmails(groups)  {
 
 /**
  * Returnerar lista med vilket index som olika rubriker har i kalkylarket
+ * för bladet Kontakter-Användare
  *
  * @returns {Objekt[]} - Objekt med rubrik som attribut och dess rubrikindex som värde
  */
-function getKontaktGruppKonfigRubrikData() {
+function getKontaktGruppAuthnRubrikData_() {
+  
+  //Siffran är vilken kolumn i kalkylarket.
+  let kontaktgruppAuthnRubrikData = {};
+  kontaktgruppAuthnRubrikData["e-post"] = 0;
+  kontaktgruppAuthnRubrikData["lösenord"] = 1;
+
+  kontaktgruppAuthnRubrikData["senast_använd"] = 2;
+
+  return kontaktgruppAuthnRubrikData;
+}
+
+
+/**
+ * Returnerar lista med vilket index som olika rubriker har i kalkylarket
+ * för bladet Kontakter
+ *
+ * @returns {Objekt[]} - Objekt med rubrik som attribut och dess rubrikindex som värde
+ */
+function getKontaktGruppKonfigRubrikData_() {
   
   //Siffran är vilken kolumn i kalkylarket.
   let kontaktgruppKonfigRubrikData = {};
   kontaktgruppKonfigRubrikData["namn"] = 0;
   kontaktgruppKonfigRubrikData["e-post"] = 1;
 
-  kontaktgruppKonfigRubrikData["scoutnet_list_id"] = 2;  
-  kontaktgruppKonfigRubrikData["synk_option"] = 3;
+  kontaktgruppKonfigRubrikData["scoutnet_list_id"] = 2;
 
   return kontaktgruppKonfigRubrikData;
 }
