@@ -369,64 +369,6 @@ function updateListOfConnections() {
 }
 
 
-function checkIfContactWithMemberNumberExistsOld(memberNumber) {
-  //Kom ihåg att förtag är kårnamn/medlemsnummer
-  
-
-  for (let n=0; n<6; n++) {
-    Logger.log("Funktionen checkIfContactWithMemberNumberExists körs " + n);
-    
-    try {
-      //Bör rensa cachen enligt dokumentationen
-      let people = People.People.searchContacts({
-        query: "",
-        readMask: "emailAddresses,externalIds"
-      });
-
-      //Lägg in en vila här enligt dok
-      Logger.log(people);
-      let query = groupName + "/" + memberNumber;
-
-      people = People.People.searchContacts({
-        query: query,
-        readMask: "emailAddresses,externalIds"
-      });
-
-      let results = people.results;
-      Logger.log(results);
-
-      //Kolla igenom alla sökresultat och se om det finns en kontakt redan
-      for (let i = 0; i < results.length; i++) {
-
-        let externalIds = results[i].person.externalIds;
-
-        if (externalIds !== undefined) {
-          for (let k = 0; k < externalIds.length; k++) {
-            if (externalIds[k].value == memberNumber && externalIds[k].type == "Medlemsnummer") {
-              Logger.log("Membernumber to check " + memberNumber);
-              let resourceName = results[i].person.resourceName;
-              
-              Logger.log("ResourceName");
-              Logger.log(resourceName);
-              return resourceName;
-            }
-          }
-        }
-      }
-      Logger.log("Finns ingen kontakt sedan innan med detta medlemsnummer");
-      return false;
-    }
-    catch (e) {
-      Logger.log("Problem med att anropa People.People");
-      if (n == 5) {
-        throw e;
-      } 
-      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
-    }
-  }  
-}
-
-
 /**
  * Ger medlemsnummer för de som ska vara med i en kontaktgrupp
  * 
@@ -738,35 +680,6 @@ function deleteContact(kontakt)  {
 
 
 /*
- * Lägg till en kontakt till en kontaktgrupp
- * 
- * @param {Object} kontaktGrupp - Aktuell kontaktgrupp
- * @param {Object} kontakt - Kontakt att lägga till i kontaktgruppen
- * 
- * @returns {Object} - Objekt av typen ContactGroup för uppdaterad kontaktgrupp
- */
-function addContactToContactGroup(kontaktGrupp, kontakt)  {
-
-  for (let n=0; n<6; n++) {
-    Logger.log("Funktionen addContactToContactGroup körs " + n);
-    
-    try {
-      let contactGroup = kontaktGrupp.addContact(kontakt);
-      Logger.log("Lägga till kontakten i kontaktgruppen");
-      return contactGroup;
-    }
-    catch (e) {
-      Logger.log("Problem med att anropa ContactsApp med funktionen addContact");
-      if (n == 5) {
-        throw e;
-      } 
-      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
-    }
-  }
-}
-
-
-/*
  * Testa om kontakt med angivet e-postfält för Scoutnet finns
  * 
  * @param {String} email - E-postadress
@@ -784,35 +697,6 @@ function checkIfContactWithScoutnetEmailExists(email) {
     }
   }
   return false;
-}
-
-
-/*
- * Ta bort en kontakt från en kontaktgrupp
- * 
- * @param {Object} kontaktGrupp - Aktuell kontaktgrupp
- * @param {Object} kontakt - Kontakt att ta bort från kontaktgruppen
- * 
- * @returns {Object} - Objekt av typen ContactGroup för uppdaterad kontaktgrupp
- */
-function removeContactFromContactGroup(kontaktGrupp, kontakt)  {
-
-  for (let n=0; n<6; n++) {
-    Logger.log("Funktionen removeContactFromContactGroup körs " + n);
-    
-    try {
-      let contactGroup = kontaktGrupp.removeContact(kontakt);
-      Logger.log("Ta bort kontakten från kontaktgruppen");
-      return contactGroup;
-    }
-    catch (e) {
-      Logger.log("Problem med att anropa ContactsApp med funktionen removeContact");
-      if (n == 5) {
-        throw e;
-      } 
-      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
-    }
-  }
 }
 
 
