@@ -110,7 +110,7 @@ function updateContactGroupsAuthnSheetUsers()  {
 
   let listOfEmailsAlreadyAccess = [];
   
-  var rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  let rowsToSync = findWhatRowsToSync(0, data.length, data.length);
   let start = rowsToSync.start;
   let slut = rowsToSync.slut;
   
@@ -200,7 +200,7 @@ function getListOfAllGoogleGroupsShouldHaveAccess_()  {
 
   let data = sheetDataKontakter["data"];
 
-  var rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  let rowsToSync = findWhatRowsToSync(0, data.length, data.length);
   let start = rowsToSync.start;
   let slut = rowsToSync.slut;
 
@@ -323,7 +323,7 @@ function getContactGroupsData_(listOfGroupEmails)  {
   let allMembers = fetchScoutnetMembers();
   allMembers = filterMemberAttributes_(allMembers);
 
-  var rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  let rowsToSync = findWhatRowsToSync(0, data.length, data.length);
   let start = rowsToSync.start;
   let slut = rowsToSync.slut;
 
@@ -740,7 +740,7 @@ function checkCredentials_(userEmail, userPassword) {
   let grd = getKontaktGruppAuthnRubrikData_();
 
   
-  var rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  let rowsToSync = findWhatRowsToSync(0, data.length, data.length);
   let start = rowsToSync.start;
   let slut = rowsToSync.slut;
 
@@ -840,8 +840,8 @@ function testGetHtmlEmailBody() {
     return;
   }
 
-  var plainBody = draft.getPlainBody();
-  var body = draft.getBody();
+  let plainBody = draft.getPlainBody();
+  let body = draft.getBody();
 
   Logger.log("plainBody");
   Logger.log(plainBody);
