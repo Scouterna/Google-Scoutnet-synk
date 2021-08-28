@@ -630,6 +630,9 @@ function createContact(memberData)  {
       "givenName" : memberData.first_name,
       "familyName": memberData.last_name      
     }],
+    "nicknames": [{
+      "value": memberData.nickname
+    }],
     "emailAddresses": [{
         "value": memberData.google_contact_group,
         "type" : customEmailField

@@ -478,7 +478,7 @@ function filterMemberAttributes_(medlemmar) {
   Logger.log(medlemmar);
   let filteredMembers = [];
 
-  let attribut_lista = ['member_no', 'first_name', 'last_name', 'contact_leader_interest', 'date_of_birth',
+  let attribut_lista = ['member_no', 'first_name', 'last_name', 'nickname', 'contact_leader_interest', 'date_of_birth',
                         'confirmed_at', 'group', 'unit', 'group_role',
                         'sex', 'address_1', 'address_2', 'postcode', 'town',
                         'country', 'contact_mobile_phone', 'contact_home_phone', 'contact_mothers_name',
