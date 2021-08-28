@@ -37,6 +37,11 @@ let contact_groups_email_htmlBody = '<div dir="ltr">Hej,<div><br></div><div>Du h
 /***Brödtext Html - Slut***/
 
 
+let noteKeysToReplace = [
+    ["lEdare", "Förälder har ledarintresse"],
+    ["Rabatt", "Rabatter i butiker av intresse"],
+  ];
+
 
 /**
  * Testfunktion för att testa anrop med olika
@@ -62,15 +67,16 @@ function testaDoGet() {
  */
 function doGet(e) {
 
+  Logger.log(e);
   let params = e.parameters;
-  let userEmail = params.username;
-  let userPassword = params.password;
+  let userEmail = params.username[0];
+  let userPassword = params.password[0];
 
   Logger.log("userEmail " + userEmail);
 
   let contactGroupsList;
 
-  if (checkCredentials_(userEmail, userPassword)) {
+  if (userEmail && checkCredentials_(userEmail, userPassword)) {
     //Hämta en lista över alla Google Grupper som denna person är med i
     let groups = getListOfGroupsForAUser_(userEmail);
     let listOfGroupEmails = getListOfGroupsEmails_(groups);
@@ -81,7 +87,8 @@ function doGet(e) {
   Logger.log("Svar");
   Logger.log(contactGroupsList);
 
-  return ContentService.createTextOutput(JSON.stringify(contactGroupsList))
+  let response = JSON.stringify(contactGroupsList);
+  return ContentService.createTextOutput(response)
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -471,27 +478,155 @@ function filterMemberAttributes_(medlemmar) {
   Logger.log(medlemmar);
   let filteredMembers = [];
 
-  let attribut_lista = ['member_no', 'first_name', 'last_name', 'date_of_birth',
-                        'group', 'unit', 'patrol', 'unit_role', 'group_role',
-                        'sex', 'address_co', 'address_1', 'address_2' , 'address_3', 'postcode', 'town',
+  let attribut_lista = ['member_no', 'first_name', 'last_name', 'contact_leader_interest', 'date_of_birth',
+                        'confirmed_at', 'group', 'unit', 'group_role',
+                        'sex', 'address_1', 'address_2', 'postcode', 'town',
                         'country', 'contact_mobile_phone', 'contact_home_phone', 'contact_mothers_name',
                         'contact_mobile_mum', 'contact_telephone_mum', 'contact_fathers_name', 'contact_mobile_dad',
-                        'contact_telephone_dad', 'avatar_updated', 'avatar_url',
-                        'email', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email', 'extra_emails'];
+                        'contact_telephone_dad', 'note', 'avatar_updated', 'avatar_url',
+                        'email', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
 
   for (let i = 0; i<medlemmar.length; i++) {
     //Logger.log(medlemmar[i]);
     let member = {};
 
+    member['biographies'] = "";
+
     for (let k = 0; k<attribut_lista.length; k++) {
       let nameOfAttribute = attribut_lista[k];
-      member[nameOfAttribute] = medlemmar[i][nameOfAttribute];
+
+      if ('group_role' == nameOfAttribute) {
+        if (medlemmar[i]['group_role'] && medlemmar[i]['unit_role']) {
+          member['title'] = medlemmar[i]['group_role'] + ", " + medlemmar[i]['unit_role'];
+        }
+        else if (medlemmar[i]['group_role'])  {
+          member['title'] = medlemmar[i]['group_role'];
+        }
+        else if (medlemmar[i]['unit_role'])  {
+          member['title'] = medlemmar[i]['unit_role'];
+        }
+      }
+      else if ('address_1' == nameOfAttribute)  {
+        if (medlemmar[i]['address_co']) {
+          member['streetAddress'] = "c/o " + medlemmar[i]['address_co'] + ", " + medlemmar[i]['address_1'];
+        }
+        else {
+          member['streetAddress'] = medlemmar[i]['address_1'];
+        }
+      }
+      else if ('address_2' == nameOfAttribute)  {
+        if (medlemmar[i]['address_2'] && medlemmar[i]['address_3']) {
+          member['extendedAddress'] = medlemmar[i]['address_2'] + ", " + medlemmar[i]['address_3'];
+        }
+        else if (medlemmar[i]['address_2']) {
+          member['extendedAddress'] = medlemmar[i]['address_2'];
+        }
+        else if (medlemmar[i]['address_3']) {
+          member['extendedAddress'] = medlemmar[i]['address_3'];
+        }
+      }
+      else if ('unit' == nameOfAttribute)  {
+        if (medlemmar[i]['unit'] && medlemmar[i]['patrol']) {
+          member['department'] = medlemmar[i]['unit'] + "/" + medlemmar[i]['patrol'];
+        }
+        else if (medlemmar[i]['unit']) {
+          member['department'] = medlemmar[i]['unit'];
+        }
+        else if (medlemmar[i]['patrol']) {
+          member['department'] = medlemmar[i]['patrol'];
+        }
+      }
+      else if ('sex' == nameOfAttribute)  {
+         member['sex'] = translateGenderToEnglish(medlemmar[i]['sex']);
+      }
+      else if ('date_of_birth' == nameOfAttribute)  {
+        member['date_of_birth_year'] = medlemmar[i]['date_of_birth'].substr(0, 4);
+        member['date_of_birth_month'] = medlemmar[i]['date_of_birth'].substr(5, 2);
+        member['date_of_birth_day'] = medlemmar[i]['date_of_birth'].substr(8, 2);
+      }
+      else if ('confirmed_at' == nameOfAttribute)  {
+        member['confirmed_at_year'] = medlemmar[i]['confirmed_at'].substr(0, 4);
+        member['confirmed_at_month'] = medlemmar[i]['confirmed_at'].substr(5, 2);
+        member['confirmed_at_day'] = medlemmar[i]['confirmed_at'].substr(8, 2);
+      }
+      else if ('contact_leader_interest' == nameOfAttribute) {
+        member['biographies'] += getTextIfContactLeaderInterest_(medlemmar[i]['contact_leader_interest']);
+      }
+      else if ('note' == nameOfAttribute)  {  
+        member['biographies'] += cleanNote_(medlemmar[i]['note']);
+      }
+      else  {
+        member[nameOfAttribute] = medlemmar[i][nameOfAttribute];
+      }
     }
 
     filteredMembers.push(member);
   }
   //Logger.log(filteredMembers);
   return filteredMembers;
+}
+
+
+
+/**
+ * Ger rensad text för eventuell inlagd anteckning
+ * 
+ * @param {String} note - Anteckning för en medlemsprofil
+ * 
+ * @returns {String} - Sammanfattad info om given anteckning
+ */
+function cleanNote_(note)  {
+  
+  let cleanNoteString = "";
+
+  if ("" == note) {
+    return "";
+  }
+
+  note = note.toLowerCase();
+
+  for (let i = 0; i<noteKeysToReplace.length; i++) {
+    if (note.includes(noteKeysToReplace[i][0].toLowerCase())) {
+      cleanNoteString += noteKeysToReplace[i][1] + ". ";
+    }
+  }
+  return cleanNoteString;
+}
+
+
+/**
+ * Ger text för eventuellt ledarintresse inlagt
+ * 
+ * @param {String} contact_leader_interest - Ja om intresse finns
+ * 
+ * @returns {String} - Mening om att hjälpa till eller ingen text beroende på indata
+ */
+function getTextIfContactLeaderInterest_(contact_leader_interest)  {
+
+  if ("Ja" == contact_leader_interest) {
+    return "Förälder kan hjälpa till i kåren. ";
+  }
+  return "";
+}
+
+
+/**
+ * Översätt kön till motsvarande engelsk term för en kontakt
+ * 
+ * @param {String} gender - Kön för en person
+ * 
+ * @returns {String} - Motsvarande kön på engelska för Googles API
+ */
+function translateGenderToEnglish(gender) {
+
+  switch(gender) {
+    case "Kvinna":
+      return "female";
+    case "Man":
+      return "male";
+    default:
+      return "unspecified";
+  }
 }
 
 
