@@ -65,17 +65,17 @@ function deleteOldContacts(contactsRemovedFromContactGroups)  {
   Logger.log("deleteOldContacts " +  contactsRemovedFromContactGroups.length);
 
   //Kolla om varje kontakt är med i en kontaktgrupp
-  for (var i = 0; i < contactsRemovedFromContactGroups.length; i++) {
-    var contact = contactsRemovedFromContactGroups[i];
+  for (let i = 0; i < contactsRemovedFromContactGroups.length; i++) {
+    let contact = contactsRemovedFromContactGroups[i];
     Logger.log("Kollar kontakten " + contact.getPrimaryEmail());
 
-    var contactGroups = contact.getContactGroups();
+    let contactGroups = contact.getContactGroups();
 
     if (checkIfContactInAnyNonSystemGroup(contactGroups)) {
       Logger.log("Denna kontakt är fortfarande med i en kontaktgrupp " + contactGroups[0].getName());
     }
     else  {
-      var scoutnetEmail = contact.getEmails(customEmailField)[0];
+      let scoutnetEmail = contact.getEmails(customEmailField)[0];
       
       if (scoutnetEmail.isPrimary()) {
         Logger.log("Ska radera kontakten. Var ej med i någon vanlig kontaktgrupp");
@@ -95,7 +95,7 @@ function deleteOldContacts(contactsRemovedFromContactGroups)  {
  */
 function checkIfContactInAnyNonSystemGroup(kontaktGrupper)  {
 
-  for (var i = 0; i < kontaktGrupper.length; i++) {
+  for (let i = 0; i < kontaktGrupper.length; i++) {
 
     if (kontaktGrupper[i].isSystemGroup()) {
       Logger.log("Denna grupp är en  systemgrupp " + kontaktGrupper[i].getName());
@@ -157,11 +157,11 @@ function createAndUpdateContactsPeopleAPI(kontaktGrupper, nyaKontakter)  {
 
     /***Ska var med i kontaktgruppen***/
     //Hämta lista vilka som ska vara med i kontaktgruppen
-    var kontaktGruppInfo = getNewContactGroupInfo(nyaKontakter, kontaktGruppNamn);
+    let kontaktGruppInfo = getNewContactGroupInfo(nyaKontakter, kontaktGruppNamn);
     Logger.log("Hämta lista över vilka som ska vara med i kontaktgruppen");
     Logger.log(kontaktGruppInfo);
 
-    var kontaktGruppMemberNumbersList = getContactGroupMemberNumbers(kontaktGruppInfo);
+    let kontaktGruppMemberNumbersList = getContactGroupMemberNumbers(kontaktGruppInfo);
     Logger.log("kontaktGruppMemberNumbersList");
     Logger.log(kontaktGruppMemberNumbersList);
     /***Ska var med i kontaktgruppen - Slut***/
@@ -259,7 +259,7 @@ function createAndUpdateContactsPeopleAPI(kontaktGrupper, nyaKontakter)  {
 function modifyContactGroupMembers(contactGroupResourceName, resourceNamesToAdd, resourceNamesToRemove)  {
 
   try {
-    var contactGroupModifyResource = People.ContactGroups.Members.modify({
+    let contactGroupModifyResource = People.ContactGroups.Members.modify({
       "resourceNamesToAdd": resourceNamesToAdd,
       "resourceNamesToRemove": resourceNamesToRemove
     }, contactGroupResourceName);
@@ -372,9 +372,8 @@ function updateListOfConnections() {
 function checkIfContactWithMemberNumberExistsOld(memberNumber) {
   //Kom ihåg att förtag är kårnamn/medlemsnummer
   
-  var memberNumber = "12345";
 
-  for (var n=0; n<6; n++) {
+  for (let n=0; n<6; n++) {
     Logger.log("Funktionen checkIfContactWithMemberNumberExists körs " + n);
     
     try {
@@ -519,7 +518,7 @@ function getMembersInfoFromPersonResponses(personResponses) {
  */
 function getContactsByMemberResourceNames(resourceNames)  {
   
-  var group = People.People.getBatchGet({
+  let group = People.People.getBatchGet({
       resourceNames: resourceNames,
       personFields: "emailAddresses,externalIds"
     });
@@ -539,33 +538,33 @@ function getContactsByMemberResourceNames(resourceNames)  {
  */
 function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
 
-  var contactsRemovedFromContactGroups = [];
+  let contactsRemovedFromContactGroups = [];
 
   //Loop och gå igenom varje kontaktgrupp
-  for (var i = 0; i < kontaktGrupper.length; i++) {
+  for (let i = 0; i < kontaktGrupper.length; i++) {
     
     //Namn på aktuell kontaktgrupp
-    var kontaktGruppNamn = kontaktGrupper[i].getName();
+    let kontaktGruppNamn = kontaktGrupper[i].getName();
     Logger.log("Namn på aktuell kontaktgrupp " + kontaktGruppNamn);
 
     //Hämta vilka som är med i kontaktgruppen just nu
-    var kontaktLista = kontaktGrupper[i].getContacts();
+    let kontaktLista = kontaktGrupper[i].getContacts();
 
     Logger.log(nyaKontakter);
     //Hämta lista vilka som ska vara med i kontaktgruppen
-    var kontaktGruppInfo = getNewContactGroupInfo(nyaKontakter, kontaktGruppNamn);
+    let kontaktGruppInfo = getNewContactGroupInfo(nyaKontakter, kontaktGruppNamn);
     Logger.log("Hämta lista över vilka som ska vara med i kontaktgruppen");
     Logger.log(kontaktGruppInfo);
-    var kontaktGruppEmailList = getContactGroupEmails(kontaktGruppInfo);
+    let kontaktGruppEmailList = getContactGroupEmails(kontaktGruppInfo);
     Logger.log(kontaktGruppEmailList);
 
-    var kontaktListaEmailList = [];
+    let kontaktListaEmailList = [];
 
     //Loop - de som är med i kontaktgruppen nu men inte ska. Ska tas bort från gruppen
     Logger.log("Loopa igenom vilka som ska tas bort från kontaktgruppens");
     //Loop och gå igenom varje kontaktlista
-    for (var n = 0; n < kontaktLista.length; n++) {
-      var primaryEmail = kontaktLista[n].getPrimaryEmail();
+    for (let n = 0; n < kontaktLista.length; n++) {
+      let primaryEmail = kontaktLista[n].getPrimaryEmail();
       Logger.log("Primär e-postadress " + primaryEmail);
 
       if (null == primaryEmail || !contains(kontaktGruppEmailList, primaryEmail)) {
@@ -580,11 +579,11 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
 
     //Loop - de som inte är med i kontaktgruppen ska läggas till. Om konto saknas ska det skapas
     Logger.log("Loopa igenom vilka som ska läggas till i kontaktgruppen");
-    for (var n = 0; n < kontaktGruppEmailList.length; n++) {
+    for (let n = 0; n < kontaktGruppEmailList.length; n++) {
 
       if (!contains(kontaktListaEmailList, kontaktGruppEmailList[n])) {
 
-        var contact = checkIfContactWithScoutnetEmailExists(kontaktGruppEmailList[n]);
+        let contact = checkIfContactWithScoutnetEmailExists(kontaktGruppEmailList[n]);
         Logger.log("Contact " + contact);
         if (contact)  {
           Logger.log("Lägg till kontakten " + kontaktGruppEmailList[n] + " i gruppen");
@@ -606,7 +605,7 @@ function createContact(memberData)  {
   //let avatar_updated = "avatar_updated";
   //let avatar_url = "avatar_url";
 
-  var contactResource = {
+  let contactResource = {
     "addresses": [{
       "type": "home",
       "streetAddress": memberData.streetAddress,
@@ -704,7 +703,7 @@ function createContact(memberData)  {
     }]
   };
 
-  var peopleResource = People.People.createContact(contactResource);
+  let peopleResource = People.People.createContact(contactResource);
 
   Logger.log(peopleResource);
 
@@ -719,7 +718,7 @@ function createContact(memberData)  {
  */
 function deleteContact(kontakt)  {
 
-  for (var n=0; n<6; n++) {
+  for (let n=0; n<6; n++) {
     Logger.log("Funktionen deleteContact körs " + n);
     
     try {
@@ -748,11 +747,11 @@ function deleteContact(kontakt)  {
  */
 function addContactToContactGroup(kontaktGrupp, kontakt)  {
 
-  for (var n=0; n<6; n++) {
+  for (let n=0; n<6; n++) {
     Logger.log("Funktionen addContactToContactGroup körs " + n);
     
     try {
-      var contactGroup = kontaktGrupp.addContact(kontakt);
+      let contactGroup = kontaktGrupp.addContact(kontakt);
       Logger.log("Lägga till kontakten i kontaktgruppen");
       return contactGroup;
     }
@@ -776,10 +775,10 @@ function addContactToContactGroup(kontaktGrupp, kontakt)  {
  */
 function checkIfContactWithScoutnetEmailExists(email) {
 
-  var contacts = ContactsApp.getContactsByEmailAddress(email, customEmailField);
-  for (var i = 0; i < contacts.length; i++) {
+  let contacts = ContactsApp.getContactsByEmailAddress(email, customEmailField);
+  for (let i = 0; i < contacts.length; i++) {
     //Logger.log("email " + email);
-    var scoutnetEmail = contacts[i].getEmails(customEmailField)[0];
+    let scoutnetEmail = contacts[i].getEmails(customEmailField)[0];
     if (scoutnetEmail.isPrimary()) {
       return contacts[i];
     }
@@ -798,11 +797,11 @@ function checkIfContactWithScoutnetEmailExists(email) {
  */
 function removeContactFromContactGroup(kontaktGrupp, kontakt)  {
 
-  for (var n=0; n<6; n++) {
+  for (let n=0; n<6; n++) {
     Logger.log("Funktionen removeContactFromContactGroup körs " + n);
     
     try {
-      var contactGroup = kontaktGrupp.removeContact(kontakt);
+      let contactGroup = kontaktGrupp.removeContact(kontakt);
       Logger.log("Ta bort kontakten från kontaktgruppen");
       return contactGroup;
     }
@@ -905,9 +904,9 @@ function createAndDeleteContactGroups(gamlaKontaktGrupper, nyaKontaktGrupper) {
 function getNameOfContactGroups(kontaktgrupper) {
 
   Logger.log("Skapar lista med namn över kontaktgrupper");
-  var nameOfContactGroups = [];
+  let nameOfContactGroups = [];
 
-  for (var i = 0; i < kontaktgrupper.length; i++) {
+  for (let i = 0; i < kontaktgrupper.length; i++) {
     nameOfContactGroups.push(kontaktgrupper[i].name);
     //Logger.log(nameOfContactGroups[i]);
   }
@@ -922,7 +921,7 @@ function getNameOfContactGroups(kontaktgrupper) {
  */
 function deleteContactGroup(contactGroup) {
 
-  for (var n=0; n<6; n++) {
+  for (let n=0; n<6; n++) {
     Logger.log("Funktionen deleteContactGroup körs " + n);
     
     try {
@@ -950,17 +949,17 @@ function deleteContactGroup(contactGroup) {
  */
 function createContactGroup(namn) {
 
-  for (var n=0; n<6; n++) {
+  for (let n=0; n<6; n++) {
     Logger.log("Funktionen createContactGroup körs " + n);
     
     try {
-      var contactGroupResource = {
+      let contactGroupResource = {
         "contactGroup": {
           "name": namn
         }
       };
 
-      var group = People.ContactGroups.create(contactGroupResource);
+      let group = People.ContactGroups.create(contactGroupResource);
       Logger.log("Skapat kontaktgruppen " + namn);
       return group;
     }
@@ -984,11 +983,11 @@ function createContactGroup(namn) {
  */
 function getContactGroup(contactGroup) {
 
-  for (var n=0; n<6; n++) {
+  for (let n=0; n<6; n++) {
     Logger.log("Funktionen getContactGroup körs " + n);
     
     try {
-      var group = People.ContactGroups.get(contactGroup.resourceName,
+      let group = People.ContactGroups.get(contactGroup.resourceName,
         {maxMembers: 999}
         );
       
@@ -1064,7 +1063,7 @@ function getContactGroups() {
  * @returns {Boolean} - True eller false gällande om objektet finns i listan
  */
 function contains(a, obj) {
-  for (var i = 0; i < a.length; i++) {
+  for (let i = 0; i < a.length; i++) {
     if (a[i] === obj) {
       return true;
     }
