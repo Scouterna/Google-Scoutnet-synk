@@ -350,7 +350,8 @@ function updateListOfConnections(contactResourceKeys) {
     page =  People.People.Connections.list('people/me', {
       pageToken: pageToken,
       pageSize: 25,
-      personFields: contactResourceKeysString
+      personFields: contactResourceKeysString,
+      sources: ["READ_SOURCE_TYPE_CONTACT"]
     });
     let connections = page.connections;
     if (connections) {   
