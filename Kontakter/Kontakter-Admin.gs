@@ -479,7 +479,7 @@ function filterMemberAttributes_(medlemmar) {
   let filteredMembers = [];
 
   let attribut_lista = ['member_no', 'first_name', 'last_name', 'nickname', 'contact_leader_interest', 'date_of_birth',
-                        'confirmed_at', 'group', 'unit', 'group_role',
+                        'group', 'unit', 'group_role',
                         'sex', 'address_1', 'address_2', 'postcode', 'town',
                         'country', 'contact_mobile_phone', 'contact_home_phone', 'contact_mothers_name',
                         'contact_mobile_mum', 'contact_telephone_mum', 'contact_fathers_name', 'contact_mobile_dad',
@@ -543,11 +543,6 @@ function filterMemberAttributes_(medlemmar) {
         member['date_of_birth_year'] = medlemmar[i]['date_of_birth'].substr(0, 4);
         member['date_of_birth_month'] = medlemmar[i]['date_of_birth'].substr(5, 2);
         member['date_of_birth_day'] = medlemmar[i]['date_of_birth'].substr(8, 2);
-      }
-      else if ('confirmed_at' == nameOfAttribute)  {
-        member['confirmed_at_year'] = medlemmar[i]['confirmed_at'].substr(0, 4);
-        member['confirmed_at_month'] = medlemmar[i]['confirmed_at'].substr(5, 2);
-        member['confirmed_at_day'] = medlemmar[i]['confirmed_at'].substr(8, 2);
       }
       else if ('contact_leader_interest' == nameOfAttribute) {
         member['biographies'] += getTextIfContactLeaderInterest_(medlemmar[i]['contact_leader_interest']);

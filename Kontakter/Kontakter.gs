@@ -760,9 +760,6 @@ function checkDifferenceOrganizations(connection, memberDataContactResource) {
   for (let i = 0; i < connectionObject.length; i++) {
     let tmpObject = {
       "type": connectionObject[i].type,
-      "startDate_year": connectionObject[i].startDate.year,
-      "startDate_month": connectionObject[i].startDate.month,
-      "startDate_day": connectionObject[i].startDate.day,
       "current": connectionObject[i].current,
       "name": connectionObject[i].name,
       "department": connectionObject[i].department,
@@ -775,9 +772,6 @@ function checkDifferenceOrganizations(connection, memberDataContactResource) {
   for (let i = 0; i < memberData.length; i++) {
     let tmpObject = {
       "type": memberData[i].type,
-      "startDate_year": memberData[i].startDate.year,
-      "startDate_month": memberData[i].startDate.month,
-      "startDate_day": memberData[i].startDate.day,
       "current": memberData[i].current,
       "name": memberData[i].name,
       "department": memberData[i].department,
@@ -1002,11 +996,6 @@ function makeContactResource(memberData)  {
     }],
     "organizations": [{
       "type": "Scoutkår",
-      "startDate": {
-        "year": memberData.confirmed_at_year,
-        "month": memberData.confirmed_at_month,
-        "day": memberData.confirmed_at_day        
-      },
       "current": true,
       "name": memberData.group,
       "department": memberData.department,
