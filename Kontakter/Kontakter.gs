@@ -251,8 +251,8 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
     Logger.log(resourceNamesToRemove);
 
     modifyContactGroupMembers(kontaktGruppResourceName, resourceNamesToAdd, resourceNamesToRemove);
-  }
 
+  }
   Logger.log("Följande resursnamn är redan processade och behöver ej uppdateras senare");
   Logger.log(resourceNamesAlreadyProcessed);
   updateContacts(nyaKontakter, connections, contactResourceKeys, memberNumbersUsedInSomeGroup, resourceNamesAlreadyProcessed);
@@ -551,7 +551,6 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, memberNu
       Logger.log("Skillnad på e-postadresser");
     }
     //Events
-    //Ska tas bort sen då de syns som födelsedagar i Google kalender vilket stör
 
     //Vi kollar ej upp medlemsnummer då det ju är det som säger att kontakten ska synkas
 
@@ -923,7 +922,7 @@ function checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField)  {
     let tmpKeys = Object.keys(tmpObject);
     Logger.log("Nycklar som ska kollas");
     Logger.log(tmpKeys);
-
+    
     for (let n = 0; n < tmpKeys.length; n++) {
       //Logger.log("A " + tmpKeys[n]);
       //Logger.log("B " + tmpObject[tmpKeys[n]]);
@@ -1057,7 +1056,7 @@ function createContact(memberData)  {
 
   let contactResource = makeContactResource(memberData);
   Logger.log("contactResource");
-  Logger.log(contactResource); 
+  Logger.log(contactResource);
 
   let peopleResource = People.People.createContact(contactResource);
 
