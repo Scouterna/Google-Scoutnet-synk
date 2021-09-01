@@ -694,7 +694,6 @@ function checkDifferenceNicknames(connection, memberDataContactResource) {
 }
 
 
-//Gör denna enklare som andra funktioner FIXME
 function checkDifferenceEmailAdresses(connection, memberDataContactResource) {
 
   let nameOfPersonField = "emailAddresses";
@@ -707,16 +706,9 @@ function checkDifferenceEmailAdresses(connection, memberDataContactResource) {
   }
   
   let memberData = tmpObject.memberData;
-
-  let tmpArray = [];
   
-  for (let i = 0; i < connectionObject.length; i++) {
-    let tmpObject = {
-      "value": connectionObject[i].value,
-      "type": connectionObject[i].type
-    };
-    tmpArray.push(tmpObject);
-  }  
+  let keys = ["value", "type"];
+  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys);
   
   return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
 }
@@ -752,44 +744,13 @@ function checkDifferenceOrganizations(connection, memberDataContactResource) {
     Logger.log("status är definerad i objektet som " + tmpObject.status);
     return tmpObject.status;
   }
-
+  
   let memberData = tmpObject.memberData;
-
-  let tmpArray = [];
   
-  for (let i = 0; i < connectionObject.length; i++) {
-    let tmpObject = {
-      "type": connectionObject[i].type,
-      "current": connectionObject[i].current,
-      "name": connectionObject[i].name,
-      "department": connectionObject[i].department,
-      "title": connectionObject[i].title
-    };
-    tmpArray.push(tmpObject);
-  }
-
-  tmpMemberData = [];
-  for (let i = 0; i < memberData.length; i++) {
-    let tmpObject = {
-      "type": memberData[i].type,
-      "current": memberData[i].current,
-      "name": memberData[i].name,
-      "department": memberData[i].department,
-      "title": memberData[i].title
-    };
-    tmpMemberData.push(tmpObject);
-  }
-
-  Logger.log("tmpArray");
-  Logger.log(tmpArray);
-
-  Logger.log("memberData Företag");
-  Logger.log(memberData);
-
-  Logger.log("tmpMemberData Företag");
-  Logger.log(tmpMemberData);
+  let keys = ["type", "current", "name", "department", "title"];
+  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys);
   
-  return checkDifferenceMemberInfo(tmpArray, tmpMemberData, nameOfPersonField);
+  return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
 }
 
 
