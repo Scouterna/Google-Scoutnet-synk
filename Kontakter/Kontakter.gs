@@ -551,7 +551,6 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, memberNu
     if (checkDifferenceEmailAdresses(connection, memberDataContactResource))  {
       Logger.log("Skillnad på e-postadresser");
     }
-    //Events
 
     //Vi kollar ej upp medlemsnummer då det ju är det som säger att kontakten ska synkas
 
@@ -993,14 +992,6 @@ function makeContactResource(memberData)  {
       }, {
         "value": memberData.contact_email_dad,
         "type" : "Anhörig 2 e-post"
-    }],
-    "events": [{
-      "date": {
-        "year": memberData.confirmed_at_year,
-        "month": memberData.confirmed_at_month,
-        "day": memberData.confirmed_at_day        
-      },
-      "type": "Medlem sedan"
     }],
     "externalIds": [{
         "value": memberData.member_no,
