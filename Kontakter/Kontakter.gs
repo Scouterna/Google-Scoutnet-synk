@@ -43,6 +43,7 @@ function Kontakter() {
 
 
   let contactsRemovedFromContactGroups = createAndUpdateContacts(kontaktgrupper, nyaKontaktGrupper);
+  Logger.log("Kontakter som är borttagna från kontaktgrupp");
   Logger.log(contactsRemovedFromContactGroups);
   return;
 
@@ -121,8 +122,7 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
   let connections = updateListOfConnections(contactResourceKeys);
 
   let resourceNamesAlreadyProcessed = [];
-  let memberNumbersUsedInSomeGroup = [];
-
+  
   //Loop och gå igenom varje kontaktgrupp
   for (let i = 0; i < kontaktGrupper.length; i++) {
     
@@ -229,7 +229,7 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
           Logger.log("Skapa kontakten " + kontaktGruppMemberNumbersList[n] + " och lägg till i gruppen");
           let memberData = getMemberdataFromMemberNumber(nyaKontakter, kontaktGruppMemberNumbersList[n]);
 
-          connection = createContact(memberData);
+          connection = createContact_(memberData);
           resourceNamesToAdd.push(connection.resourceName);
           resourceNamesAlreadyProcessed.push(connection.resourceName);
 
@@ -255,14 +255,11 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
   }
   Logger.log("Följande resursnamn är redan processade och behöver ej uppdateras senare");
   Logger.log(resourceNamesAlreadyProcessed);
-  updateContacts(nyaKontakter, connections, contactResourceKeys, memberNumbersUsedInSomeGroup, resourceNamesAlreadyProcessed);
+  updateContacts(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed);
 
-  
-  //Lista över alla kontakter
-  //Uppdatera kontakter
-  //  resourceNamesAlreadyProcessed
 
-  return contactsRemovedFromContactGroups;  //Behövs den?? eller bara ta bort alla som matchar och saknar grupp
+  //Kontakter som är borttagna från en kontaktgrupp och som ska kollas
+  return contactsRemovedFromContactGroups;  //Denna ska kompletteras med att bara ta bort alla som matchar och saknar grupp
 }
 
 
@@ -496,16 +493,13 @@ function getContactsByMemberResourceNames(resourceNames)  {
 }
 
 
-function updateContacts(nyaKontakter, connections, contactResourceKeys, memberNumbersUsedInSomeGroup,resourceNamesAlreadyProcessed) {
+function updateContacts(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed) {
 
-  //Updatera connections så att alla kommer med
+  //Den hinner inte uppdatera alla nya kontakter, så de nya kommer sen kollas för uppdateringar också
   connections = updateListOfConnections(contactResourceKeys);
 
   Logger.log("Connections");
   Logger.log(connections);
-
-  Logger.log("Medlemsnummer som ska finnas totalt");
-  Logger.log(memberNumbersUsedInSomeGroup);
 
   Logger.log("nyaKontakter");
   Logger.log(nyaKontakter);
@@ -513,6 +507,7 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, memberNu
   Logger.log("Alla nycklar som finns");
   Logger.log(contactResourceKeys);
 
+  let personFields = getSimplePersonFields_();
   
 
   for (let i = 0; i < connections.length; i++) {
@@ -520,6 +515,14 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, memberNu
     let connection = connections[i].memberInfo;
     Logger.log("Medlemsinfo som är inlagt nu på kontakten");
     Logger.log(connection);
+
+    Logger.log("Resursnamn för kontakten");
+    Logger.log(connections[i].resourceName);
+
+    if (contains(resourceNamesAlreadyProcessed, connections[i].resourceName)) {
+      Logger.log("Denna kontakt är redan processad och ska ej uppdateras");
+      continue;
+    }
 
     let memberData = getMemberdataFromMemberNumber(nyaKontakter, connections[i].memberNumber);
     //Logger.log("memberData");
@@ -532,50 +535,67 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, memberNu
     Logger.log("Medlemsinfo som ska vara inlagd på kontakten");
     Logger.log(memberDataContactResource);
 
+    for (let k = 0; k < personFields.length; k++) {
+      if (checkDifference(connection, memberDataContactResource, personFields[k]))  {
+        Logger.log("Skillnad på " + personFields[k].svName);
+      }
+    }
 
-    if (checkDifferenceAdresses(connection, memberDataContactResource))  {
-      Logger.log("Skillnad på adresser");
-    }
-    if (checkDifferenceBiographies(connection, memberDataContactResource))  {
-      Logger.log("Skillnad på anteckningar");
-    }
+    //Födelsedag är lite special vid jämförelse mellan objekt
     if (checkDifferenceBirthdays(connection, memberDataContactResource))  {
       Logger.log("Skillnad på födelsedag");
     }
-    if (checkDifferenceNames(connection, memberDataContactResource))  {
-      Logger.log("Skillnad på namn");
-    }
-    if (checkDifferenceNicknames(connection, memberDataContactResource))  {
-      Logger.log("Skillnad på smeknamn");
-    }
-    if (checkDifferenceEmailAdresses(connection, memberDataContactResource))  {
-      Logger.log("Skillnad på e-postadresser");
-    }
-
-    //Vi kollar ej upp medlemsnummer då det ju är det som säger att kontakten ska synkas
-
-    if (checkDifferenceGenders(connection, memberDataContactResource))  {
-      Logger.log("Skillnad på kön");
-    }
-    if (checkDifferenceOrganizations(connection, memberDataContactResource))  {
-      Logger.log("Skillnad på organisation");
-    }
-    if (checkDifferencePhoneNumbers(connection, memberDataContactResource))  {
-      Logger.log("Skillnad på telefonnummer");
-    }
-    if (checkDifferenceRelations(connection, memberDataContactResource))  {
-      Logger.log("Skillnad på relationer");
-    }
+    //Vi kollar ej upp medlemsnummer då det ju är det som säger att kontakten ska synkas 
   }
 }
 
 
-function checkDifferenceAdresses(connection, memberDataContactResource) {
+/**
+ * Ger lista med objekt med information om personkontaktfält
+ * 
+ * @returns {Objekt[]} - Lista med objekt med information om personkontaktfält
+ */
+function getSimplePersonFields_()  {
 
-  let nameOfPersonField = "addresses";
+  let personFields = [];
+  
+  let keys_addresses = ["type", "streetAddress", "extendedAddress", "city", "postalCode", "country"];
+  personFields.push({"apiName": "addresses", "svName": "adresser", "keys": keys_addresses, "removeValueEmpty": false});
+
+  let keys_biographies = ["value", "contentType"];
+  personFields.push({"apiName": "biographies", "svName": "anteckningar", "keys": keys_biographies, "removeValueEmpty": true});
+
+  let keys_names = ["givenName", "familyName"];
+  personFields.push({"apiName": "names", "svName": "namn", "keys": keys_names, "removeValueEmpty": false});
+
+  let keys_nicknames = ["value"];
+  personFields.push({"apiName": "nicknames", "svName": "smeknamn", "keys": keys_nicknames, "removeValueEmpty": true});
+
+  let keys_emailAddresses = ["value", "type"];
+  personFields.push({"apiName": "emailAddresses", "svName": "e-postadresser", "keys": keys_emailAddresses, "removeValueEmpty": true});
+
+  let keys_genders = ["value"];
+  personFields.push({"apiName": "genders", "svName": "kön", "keys": keys_genders, "removeValueEmpty": true});
+
+  let keys_organizations = ["type", "current", "name", "department", "title"];
+  personFields.push({"apiName": "organizations", "svName": "organisation", "keys": keys_organizations, "removeValueEmpty": false});
+
+  let keys_phoneNumbers = ["value", "type"];
+  personFields.push({"apiName": "phoneNumbers", "svName": "telefonnummer", "keys": keys_phoneNumbers, "removeValueEmpty": true});
+
+  let keys_relations = ["person", "type"];
+  personFields.push({"apiName": "relations", "svName": "relationer", "keys": keys_relations, "removeValueEmpty": true});
+
+  return personFields;
+}
+
+
+function checkDifference(connection, memberDataContactResource, personField) {
+
+  let nameOfPersonField = personField.apiName;
 
   let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, false);
+  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, personField.removeValueEmpty);
   if ('status' in tmpObject) {
     Logger.log("status är definerad i objektet som " + tmpObject.status);
     return tmpObject.status;
@@ -583,29 +603,9 @@ function checkDifferenceAdresses(connection, memberDataContactResource) {
 
   let memberData = tmpObject.memberData;
   
-  let keys = ["type", "streetAddress", "extendedAddress", "city", "postalCode", "country"];
+  let keys = personField.keys;
   let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys); 
 
-  return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
-}
-
-
-function checkDifferenceBiographies(connection, memberDataContactResource) {
-
-  let nameOfPersonField = "biographies";
-  
-  let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, true);
-  if ('status' in tmpObject) {
-    Logger.log("status är definerad i objektet som " + tmpObject.status);
-    return tmpObject.status;
-  }
-
-  let memberData = tmpObject.memberData;
-  
-  let keys = ["value", "contentType"];
-  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys);
-  
   return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
 }
 
@@ -643,154 +643,8 @@ function checkDifferenceBirthdays(connection, memberDataContactResource) {
     };
     tmpMemberData.push(tmpObject);
   }
-
-  Logger.log("tmpArray");
-  Logger.log(tmpArray);
-
-  Logger.log("tmpMemberData födelsedag");
-  Logger.log(tmpMemberData);
   
   return checkDifferenceMemberInfo(tmpArray, tmpMemberData, nameOfPersonField);
-}
-
-
-function checkDifferenceNames(connection, memberDataContactResource) {
-
-  let nameOfPersonField = "names";
-  
-  let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, false);
-  if ('status' in tmpObject) {
-    Logger.log("status är definerad i objektet som " + tmpObject.status);
-    return tmpObject.status;
-  }
-  
-  let memberData = tmpObject.memberData;
-  
-  let keys = ["givenName", "familyName"];
-  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys);
-  
-  return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
-}
-
-
-function checkDifferenceNicknames(connection, memberDataContactResource) {
-
-  let nameOfPersonField = "nicknames";
-  
-  let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, true);
-  if ('status' in tmpObject) {
-    Logger.log("status är definerad i objektet som " + tmpObject.status);
-    return tmpObject.status;
-  }
-  
-  let memberData = tmpObject.memberData;
-  
-  let keys = ["value"];
-  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys);
-  
-  return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
-}
-
-
-function checkDifferenceEmailAdresses(connection, memberDataContactResource) {
-
-  let nameOfPersonField = "emailAddresses";
-  
-  let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, true);
-  if ('status' in tmpObject) {
-    Logger.log("status är definerad i objektet som " + tmpObject.status);
-    return tmpObject.status;
-  }
-  
-  let memberData = tmpObject.memberData;
-  
-  let keys = ["value", "type"];
-  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys);
-  
-  return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
-}
-
-
-function checkDifferenceGenders(connection, memberDataContactResource) {
-
-  let nameOfPersonField = "genders";
-  
-  let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, true);
-  if ('status' in tmpObject) {
-    Logger.log("status är definerad i objektet som " + tmpObject.status);
-    return tmpObject.status;
-  }
-  
-  let memberData = tmpObject.memberData;
-  
-  let keys = ["value"];
-  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys);
-  
-  return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
-}
-
-
-function checkDifferenceOrganizations(connection, memberDataContactResource) {
-
-  let nameOfPersonField = "organizations";
-  
-  let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, false);
-  if ('status' in tmpObject) {
-    Logger.log("status är definerad i objektet som " + tmpObject.status);
-    return tmpObject.status;
-  }
-  
-  let memberData = tmpObject.memberData;
-  
-  let keys = ["type", "current", "name", "department", "title"];
-  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys);
-  
-  return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
-}
-
-
-function checkDifferencePhoneNumbers(connection, memberDataContactResource) {
-
-  let nameOfPersonField = "phoneNumbers";
-  
-  let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, true);
-  if ('status' in tmpObject) {
-    Logger.log("status är definerad i objektet som " + tmpObject.status);
-    return tmpObject.status;
-  }
-
-  let memberData = tmpObject.memberData;
-  
-  let keys = ["value", "type"];
-  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys);
-  
-  return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
-}
-
-
-function checkDifferenceRelations(connection, memberDataContactResource) {
-
-  let nameOfPersonField = "relations";
-  
-  let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, true);
-  if ('status' in tmpObject) {
-    Logger.log("status är definerad i objektet som " + tmpObject.status);
-    return tmpObject.status;
-  }
-
-  let memberData = tmpObject.memberData;
-  
-  let keys = ["person", "type"];
-  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys);
-  
-  return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
 }
 
 
@@ -899,7 +753,13 @@ function checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField)  {
 }
 
 
-//gör om memberData till rätt format för en kontaktresurs
+/**
+ * Ger ett objekt för en kontaktresurs givet medlemsdata
+ * 
+ * @param {Objekt} memberData - Persondata för en medlem
+ * 
+ * @returns {Objekt} - Ett objekt av typen Person med kontaktinfo för en person
+ */
 function makeContactResource(memberData)  {
   
   //let avatar_updated = "avatar_updated";
@@ -989,21 +849,39 @@ function makeContactResource(memberData)  {
       "type": "Anhörig 2",
     }]
   };
-
   return contactResource;
 }
 
 
-function createContact(memberData)  {
+/**
+ * Skapar en kontakt givet medlemsdata
+ * 
+ * @param {Objekt} memberData - Persondata för en medlem
+ * 
+ * @returns {Objekt} - Ett objekt av typen Person med kontaktinfo för en person
+ */
+function createContact_(memberData)  {
 
   let contactResource = makeContactResource(memberData);
-  Logger.log("contactResource");
-  Logger.log(contactResource);
+  //Logger.log("contactResource");
+  //Logger.log(contactResource);
 
-  let peopleResource = People.People.createContact(contactResource);
-
-  Logger.log(peopleResource);
-  return peopleResource;
+  for (let n=0; n<6; n++) {
+    Logger.log("Funktionen createContact körs " + n);
+    
+    try {
+      let peopleResource = People.People.createContact(contactResource);
+      Logger.log(peopleResource);
+      return peopleResource;
+    }
+    catch (e) {
+      Logger.log("Problem med att anropa People.People med:" + contactResource);
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
 }
 
 
