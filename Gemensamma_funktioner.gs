@@ -246,7 +246,7 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
     var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
     
     //Dessa attributvärden ska användas som gemener för bättre jämförelser
-    var variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails'];
+    var variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
     
     var member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
     
