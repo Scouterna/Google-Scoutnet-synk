@@ -7,10 +7,6 @@
 var url = 'https://script.google.com/macros/s/1213235654/exec';
 
 
-var username = "info@testkar.se";
-
-var password = "12345";
-
 var version = "1.9.0kdkdkdkk";
 
 var prefixContactgroups = "Scoutnet - ";
@@ -27,6 +23,11 @@ var groupName = "Test Scoutkår";
  * Huvudfunktion för att hantera synkronisering av kontaktgrupper med Scoutnet
  */
 function Kontakter() {
+  
+  Logger.log("Läser data från kalkylbladet");
+  let sdk = getSheetDataKontakter();
+  let username = sdk["username"];
+  let password = sdk["password"];
 
   Logger.log("Gör anrop till API");
 
@@ -52,6 +53,52 @@ function Kontakter() {
   //hämta lista med alla kontaktgrupper som finns
   //Loopa igenom, om medlemsgruppsId matchar något som ej är systemgrupp, ta bort den
   deleteOldContacts(contactsRemovedFromContactGroups);
+}
+
+
+function getSheetDataKontakter()  {
+
+  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
+  if (sheet == null) {
+    Logger.log("Bladet Kontakter finns ej i kalkylarket");
+  }
+  let selection = sheet.getDataRange();
+  let data = selection.getValues();
+  
+  let grd = getKontakterUserInputData();
+
+  //Logger.log(data);
+  //Logger.log(grd);
+
+  let userInputData = {};
+  userInputData["username"] = data[grd["username"][0]][grd["username"][1]];
+  userInputData["password"] = data[grd["password"][0]][grd["password"][1]];
+
+  userInputData["prefixContactgroups"] = data[grd["prefixContactgroups"][0]][grd["prefixContactgroups"][1]];
+  userInputData["groupName"] = data[grd["groupName"][0]][grd["groupName"][1]];
+
+  return userInputData;
+}
+
+
+/**
+ * Returnerar lista med vilket index som olika användarfält har i kalkylarket
+ *
+ * @returns {Number[][]} - Lista med index för rad och kolumn för olika användarfält
+ */
+function getKontakterUserInputData() {
+  
+  //Kolumn och rad i kalkylarket
+  let column = 2;
+
+  let kuid = {};
+  kuid["username"] = [3, column];
+  kuid["password"] = [4, column];
+
+  kuid["prefixContactgroups"] = [8, column];
+  kuid["groupName"] = [9, column];
+
+  return kuid;
 }
 
 
