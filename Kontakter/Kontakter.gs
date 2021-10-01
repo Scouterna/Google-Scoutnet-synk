@@ -231,7 +231,7 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
     for (let n = 0; n < membersInfo.length; n++) {
       
       //Detta medlemsnummer finns ej med i den nya listan
-      if (!contains(kontaktGruppMemberNumbersList, membersInfo[n].memberNumber)) {
+      if (!kontaktGruppMemberNumbersList.includes(membersInfo[n].memberNumber)) {
         Logger.log("Ska ta bort kontakten från kontaktgruppen " + membersInfo[n].memberNumber);
         resourceNamesToRemove.push(membersInfo[n].resourceName);
         contactsRemovedFromContactGroups.push(membersInfo[n].resourceName);
@@ -259,7 +259,7 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
     for (let n = 0; n < kontaktGruppMemberNumbersList.length; n++) {
 
       //Ej med i kontaktgruppen sedan innan
-      if (!contains(memberNumbersStayingInGroup, kontaktGruppMemberNumbersList[n])) {
+      if (!memberNumbersStayingInGroup.includes(kontaktGruppMemberNumbersList[n])) {
 
         Logger.log("Connn ");
         Logger.log(connections);
@@ -566,7 +566,7 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, resource
     Logger.log("Resursnamn för kontakten");
     Logger.log(connections[i].resourceName);
 
-    if (contains(resourceNamesAlreadyProcessed, connections[i].resourceName)) {
+    if (resourceNamesAlreadyProcessed.includes(connections[i].resourceName)) {
       Logger.log("Denna kontakt är redan processad och ska ej uppdateras");
       continue;
     }
@@ -1041,7 +1041,7 @@ function createAndDeleteContactGroups(gamlaKontaktGrupper, nyaKontaktGrupper) {
 
   //Ta bort de kontaktgrupper som ej ska finnas
   for (let i = 0; i < nameOfOldContactGroups.length; i++) {
-    if (!contains(nameOfToBeContactGroups, nameOfOldContactGroups[i])) {
+    if (!nameOfToBeContactGroups.includes(nameOfOldContactGroups[i])) {
       Logger.log("Ta bort denna grupp " + gamlaKontaktGrupper[i].name);
       deleteContactGroup(gamlaKontaktGrupper[i]);
     }
@@ -1049,7 +1049,7 @@ function createAndDeleteContactGroups(gamlaKontaktGrupper, nyaKontaktGrupper) {
 
   //Skapa nya kontaktgrupper som ska finnas
   for (let i = 0; i < nameOfToBeContactGroups.length; i++) {
-    if (!contains(nameOfOldContactGroups, nameOfToBeContactGroups[i])) {
+    if (!nameOfOldContactGroups.includes(nameOfToBeContactGroups[i])) {
       let group = createContactGroup(nameOfToBeContactGroups[i]);
     }
   }
@@ -1203,7 +1203,7 @@ function getContactGroups() {
             listOfContactGroups.push(contactGroup);
           }          
         }        
-      }      
+      }
     }
     else {
       Logger.log('Inga kontaktgrupper hittades.');      
@@ -1214,22 +1214,4 @@ function getContactGroups() {
   Logger.log(listOfContactGroups);
   Logger.log(listOfContactGroups.length);
   return listOfContactGroups;
-}
-
-
-/*
- * Kolla om ett objekt är inkluderat i en lista
- * 
- * @param {String[] | Number[] | Object[]} a - Lista
- * @param {String | Number | Object} obj - Ett objekt
- * 
- * @returns {Boolean} - True eller false gällande om objektet finns i listan
- */
-function contains(a, obj) {
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] === obj) {
-      return true;
-    }
-  }
-  return false;
 }

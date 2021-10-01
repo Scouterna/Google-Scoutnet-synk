@@ -131,7 +131,7 @@ function updateContactGroupsAuthnSheetUsers()  {
     Logger.log('Rad: ' + rad_nummer + ' E-post: ' + email + ' Lösenord: ' + password + ' Senast använd: ' + last_authn);
 
     email = getGmailAdressWithoutDots(email.toLowerCase());
-    if(!contains(listOfEmailsShouldHaveAccess, email))  {
+    if(!listOfEmailsShouldHaveAccess.includes(email))  {
       Logger.log("Användare har ej behörighet längre till en kontaktgrupp " + email);
       Logger.log("Försöker ta bort rad " + rad_nummer);
       delete_rows.push(rad_nummer);
@@ -336,8 +336,8 @@ function getContactGroupsData_(listOfGroupEmails)  {
     let name = data[i][grd["namn"]];
     let email = data[i][grd["e-post"]];
     let scoutnet_list_id = data[i][grd["scoutnet_list_id"]];
-
-    if(!contains(listOfGroupEmails, email))  {
+    
+    if(!listOfGroupEmails.includes(email))  {
       Logger.log("Användare ej med i Google Gruppen " + email);
       continue;
     }
