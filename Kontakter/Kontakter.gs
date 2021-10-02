@@ -7,43 +7,47 @@
 var url = 'https://script.google.com/macros/s/1213235654/exec';
 
 
-var version = "1.9.0kdkdkdkk";
 
-var prefixContactgroups = "Scoutnet - ";
+function synkroniseraKontakterVanlig()  {
+  Kontakter(false);
+}
 
-var customEmailField = "Kontaktgruppsutskick via Gmail webb";
+function synkroniseraKontakterTvingad() {
+  Kontakter(true);
+}
 
-var groupName = "Test Scoutkår";
-
-//Arkiv e-post lägga till i listan, ska vara på adminsidan
-
-
-
-/**
+/*
  * Huvudfunktion för att hantera synkronisering av kontaktgrupper med Scoutnet
  */
-function Kontakter() {
+function Kontakter(forceUpdate) {
   
   Logger.log("Läser data från kalkylbladet");
   let sdk = getSheetDataKontakter();
   let username = sdk["username"];
   let password = sdk["password"];
+  let version = sdk["version"];
+  
+  let prefixContactgroups = sdk["prefixContactgroups"];
+  let customEmailField = sdk["customEmailField"];
+  let groupName = sdk["groupName"];
+  Logger.log("E-postfält för alla e-postadresser för en kontakt " + customEmailField);
+  Logger.log("Kår " + groupName);
 
   Logger.log("Gör anrop till API");
 
-  let userParam = "?username=" + username + "&password=" + password;
+  let userParam = "?username=" + username + "&password=" + password + "&version=" + version + "&forceupdate=" + forceUpdate;
   let response = UrlFetchApp.fetch(url+userParam);
   let nyaKontaktGrupper = JSON.parse(response);
 
   Logger.log(nyaKontaktGrupper);
 
-  let kontaktgrupper = getContactGroups();
-  kontaktgrupper = createAndDeleteContactGroups(kontaktgrupper, nyaKontaktGrupper);
+  let kontaktgrupper = getContactGroups(prefixContactgroups);
+  kontaktgrupper = createAndDeleteContactGroups(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups);
   Logger.log("kontaktgrupper");
   Logger.log(kontaktgrupper);
 
 
-  let contactsRemovedFromContactGroups = createAndUpdateContacts(kontaktgrupper, nyaKontaktGrupper);
+  let contactsRemovedFromContactGroups = createAndUpdateContacts(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField);
   Logger.log("Kontakter som är borttagna från kontaktgrupp");
   Logger.log(contactsRemovedFromContactGroups);
   return;
@@ -52,7 +56,7 @@ function Kontakter() {
   //Hämta lista med alla kontakter
   //hämta lista med alla kontaktgrupper som finns
   //Loopa igenom, om medlemsgruppsId matchar något som ej är systemgrupp, ta bort den
-  deleteOldContacts(contactsRemovedFromContactGroups);
+  deleteOldContacts(contactsRemovedFromContactGroups, customEmailField);
 }
 
 
@@ -75,7 +79,9 @@ function getSheetDataKontakter()  {
   userInputData["password"] = data[grd["password"][0]][grd["password"][1]];
 
   userInputData["prefixContactgroups"] = data[grd["prefixContactgroups"][0]][grd["prefixContactgroups"][1]];
+  userInputData["customEmailField"] = data[grd["customEmailField"][0]][grd["customEmailField"][1]];
   userInputData["groupName"] = data[grd["groupName"][0]][grd["groupName"][1]];
+  userInputData["version"] = data[grd["version"][0]][grd["version"][1]];
 
   return userInputData;
 }
@@ -92,11 +98,13 @@ function getKontakterUserInputData() {
   let column = 2;
 
   let kuid = {};
-  kuid["username"] = [3, column];
-  kuid["password"] = [4, column];
+  kuid["username"] = [4, column];
+  kuid["password"] = [5, column];
 
-  kuid["prefixContactgroups"] = [8, column];
-  kuid["groupName"] = [9, column];
+  kuid["prefixContactgroups"] = [9, column];
+  kuid["customEmailField"] = [10, column];
+  kuid["groupName"] = [11, column];
+  kuid["version"] = [12, column];
 
   return kuid;
 }
@@ -107,8 +115,9 @@ function getKontakterUserInputData() {
  * 
  * @param {Object[]} - Lista av Objekt av typen Contact med de kontakter som tagits bort
  * från någon kontaktgrupp
+ * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
  */
-function deleteOldContacts(contactsRemovedFromContactGroups)  {
+function deleteOldContacts(contactsRemovedFromContactGroups, customEmailField)  {
 
   Logger.log("deleteOldContacts " +  contactsRemovedFromContactGroups.length);
 
@@ -157,11 +166,11 @@ function checkIfContactInAnyNonSystemGroup(kontaktGrupper)  {
 }
 
 
-function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
+function createAndUpdateContacts(kontaktGrupper, nyaKontakter, prefixContactgroups, customEmailField)  {
 
   let contactsRemovedFromContactGroups = [];
 
-  let emptyContactResource = makeContactResource({});
+  let emptyContactResource = makeContactResource({}, customEmailField);
   let contactResourceKeys = Object.keys(emptyContactResource);
   Logger.log("Nycklar som används");
   Logger.log(contactResourceKeys);
@@ -210,7 +219,7 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
 
     /***Ska var med i kontaktgruppen***/
     //Hämta lista vilka som ska vara med i kontaktgruppen
-    let kontaktGruppInfo = getNewContactGroupInfo(nyaKontakter, kontaktGruppNamn);
+    let kontaktGruppInfo = getNewContactGroupInfo(nyaKontakter, kontaktGruppNamn, prefixContactgroups);
     Logger.log("Hämta lista över vilka som ska vara med i kontaktgruppen");
     Logger.log(kontaktGruppInfo);
 
@@ -276,7 +285,7 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
           Logger.log("Skapa kontakten " + kontaktGruppMemberNumbersList[n] + " och lägg till i gruppen");
           let memberData = getMemberdataFromMemberNumber(nyaKontakter, kontaktGruppMemberNumbersList[n]);
 
-          connection = createContact_(memberData);
+          connection = createContact_(memberData, customEmailField);
           resourceNamesToAdd.push(connection.resourceName);
           resourceNamesAlreadyProcessed.push(connection.resourceName);
 
@@ -302,7 +311,7 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter)  {
   }
   Logger.log("Följande resursnamn är redan processade och behöver ej uppdateras senare");
   Logger.log(resourceNamesAlreadyProcessed);
-  updateContacts(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed);
+  updateContacts(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField);
 
 
   //Kontakter som är borttagna från en kontaktgrupp och som ska kollas
@@ -540,7 +549,7 @@ function getContactsByMemberResourceNames(resourceNames)  {
 }
 
 
-function updateContacts(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed) {
+function updateContacts(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField) {
 
   //Den hinner inte uppdatera alla nya kontakter, så de nya kommer sen kollas för uppdateringar också
   connections = updateListOfConnections(contactResourceKeys);
@@ -578,7 +587,7 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, resource
       Logger.log("Denna medlem är ej kvar på listan " + connections[i].memberNumber);
       continue;
     }
-    let memberDataContactResource = makeContactResource(memberData);
+    let memberDataContactResource = makeContactResource(memberData, customEmailField);
     Logger.log("Medlemsinfo som ska vara inlagd på kontakten");
     Logger.log(memberDataContactResource);
 
@@ -804,10 +813,11 @@ function checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField)  {
  * Ger ett objekt för en kontaktresurs givet medlemsdata
  * 
  * @param {Objekt} memberData - Persondata för en medlem
+ * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
  * 
  * @returns {Objekt} - Ett objekt av typen Person med kontaktinfo för en person
  */
-function makeContactResource(memberData)  {
+function makeContactResource(memberData, customEmailField)  {
   
   //let avatar_updated = "avatar_updated";
   //let avatar_url = "avatar_url";
@@ -904,12 +914,13 @@ function makeContactResource(memberData)  {
  * Skapar en kontakt givet medlemsdata
  * 
  * @param {Objekt} memberData - Persondata för en medlem
+ * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
  * 
  * @returns {Objekt} - Ett objekt av typen Person med kontaktinfo för en person
  */
-function createContact_(memberData)  {
+function createContact_(memberData, customEmailField)  {
 
-  let contactResource = makeContactResource(memberData);
+  let contactResource = makeContactResource(memberData, customEmailField);
   //Logger.log("contactResource");
   //Logger.log(contactResource);
 
@@ -998,10 +1009,11 @@ function getContactGroupEmails(kontaktGruppInfo)  {
  * 
  * @param {Objekt[]} nyaKontakter - Lista med info och e-postadresser för kommande kontaktgrupper
  * @param {String} namn - Namn för den kontaktgrupp att söka efter
+ * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
  * 
  * @returns {Objekt[]} - Lista med info och medlemsnummer för aktuell kommande kontaktgrupp
  */
-function getNewContactGroupInfo(nyaKontakter, namn)  {
+function getNewContactGroupInfo(nyaKontakter, namn, prefixContactgroups)  {
 
   for (let i = 0; i < nyaKontakter.length; i++) {
 
@@ -1018,10 +1030,11 @@ function getNewContactGroupInfo(nyaKontakter, namn)  {
  * 
  * @param {Objekt[]} gamlaKontaktGrupper - Lista av Objekt med kontaktgruppsinformation
  * @param {Object[]} nyaKontaktGrupper - Lista av listor med information över de kontaktgrupper som ska finnas
+ * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
  * 
  * @returns {Objekt[]} - Lista av Objekt med kontaktgruppsinformation
  */
-function createAndDeleteContactGroups(gamlaKontaktGrupper, nyaKontaktGrupper) {
+function createAndDeleteContactGroups(gamlaKontaktGrupper, nyaKontaktGrupper, prefixContactgroups) {
 
   Logger.log("Skapar nya kontaktgrupper och tar bort gamla");
 
@@ -1053,7 +1066,7 @@ function createAndDeleteContactGroups(gamlaKontaktGrupper, nyaKontaktGrupper) {
       let group = createContactGroup(nameOfToBeContactGroups[i]);
     }
   }
-  return getContactGroups();
+  return getContactGroups(prefixContactgroups);
 }
 
 
@@ -1171,9 +1184,11 @@ function getContactGroup(contactGroup) {
 /**
  * Ger lista över de kontaktgrupper som redan finns och som ska uppdateras
  * 
+ * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
+ * 
  * @returns {Objekt[]} - Lista av Objekt med kontaktgruppsinformation
  */
-function getContactGroups() {
+function getContactGroups(prefixContactgroups) {
 
   Logger.log("Hämtar lista över alla kontaktgrupper som finns just nu");
 
