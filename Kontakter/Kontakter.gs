@@ -136,7 +136,7 @@ function deleteOldContacts(contactsRemovedFromContactGroups, customEmailField)  
       
       if (scoutnetEmail.isPrimary()) {
         Logger.log("Ska radera kontakten. Var ej med i någon vanlig kontaktgrupp");
-        deleteContact(contact);
+        deleteContactOld(contact);
       }
     }
   }
@@ -949,7 +949,7 @@ function createContact_(memberData, customEmailField)  {
  * 
  * @param {String} kontakt - Objekt av typen Contact att radera 
  */
-function deleteContact(kontakt)  {
+function deleteContactOld(kontakt)  {
 
   for (let n=0; n<6; n++) {
     Logger.log("Funktionen deleteContact körs " + n);
@@ -967,41 +967,6 @@ function deleteContact(kontakt)  {
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
     }
   }
-}
-
-
-/*
- * Testa om kontakt med angivet e-postfält för Scoutnet finns
- * 
- * @param {String} email - E-postadress
- * 
- * @returns {Object | Boolean} - Objekt för en kontakt eller boolean false om ej finnns
- */
-function checkIfContactWithScoutnetEmailExists(email) {
-
-  let contacts = ContactsApp.getContactsByEmailAddress(email, customEmailField);
-  for (let i = 0; i < contacts.length; i++) {
-    //Logger.log("email " + email);
-    let scoutnetEmail = contacts[i].getEmails(customEmailField)[0];
-    if (scoutnetEmail.isPrimary()) {
-      return contacts[i];
-    }
-  }
-  return false;
-}
-
-
-/*
- * Ger lista med e-postadresser för en lista med kontaktGruppInfo
- * 
- * @param {Object[]} - Lista med info och e-postadresser för aktuell kommande kontaktgrupp
- * 
- * @returns {String[]} - Lista med e-postadresser som ska vara med i kontaktgruppen
- */
-function getContactGroupEmails(kontaktGruppInfo)  {
-
-  kontaktGruppInfo.shift();
-  return kontaktGruppInfo;
 }
 
 
