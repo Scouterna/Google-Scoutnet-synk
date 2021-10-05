@@ -652,7 +652,7 @@ function checkDifference(connection, memberDataContactResource, personField) {
   let nameOfPersonField = personField.apiName;
 
   let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, personField.removeValueEmpty);
+  let tmpObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, personField.removeValueEmpty);
   if ('status' in tmpObject) {
     Logger.log("status är definerad i objektet som " + tmpObject.status);
     return tmpObject.status;
@@ -672,7 +672,7 @@ function checkDifferenceBirthdays(connection, memberDataContactResource) {
   let nameOfPersonField = "birthdays";
   
   let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, false);
+  let tmpObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, false);
   if ('status' in tmpObject) {
     Logger.log("status är definerad i objektet som " + tmpObject.status);
     return tmpObject.status;
@@ -722,19 +722,27 @@ function makeArrayOfFilteredConnectionObject(connectionObject, keys) {
 }
 
 
-function checkDifferenceHelpfunction(connectionObject, memberDataContactResource, nameOfPersonField, removeValueEmpty)  {
+/**
+ * @param {Objekt[]} connectionObject - Data för ett kontaktfält för en kontakt som redan finns
+ * @param {Objekt} memberDataContactResource - Ett objekt av typen Person med kontaktinfo för en person
+ * @param {String} nameOfPersonField - Namn på ett kontaktfält
+ * @param {Boolean} removeValueEmpty - Om fältet ska tas bort om det är tomt
+ * 
+ * @returns {Objekt} - Ett objekt med attributet memberData med kontaktinfo för det angivna kontaktfältet
+ */
+function checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, removeValueEmpty)  {
   
   let memberData = memberDataContactResource[nameOfPersonField];
   if (removeValueEmpty) {
-    memberData = removeElementsWithValueOrPersonEmpty(memberData);
+    memberData = removeElementsWithValueOrPersonEmpty_(memberData);
   }
 
   Logger.log("Funktion för jämförelse av " + nameOfPersonField);
   Logger.log(connectionObject);
   Logger.log(memberData);
 
-  if (null == connectionObject) {
-    if (0 == memberData.length) {
+  if (null == connectionObject) { //Inget inlagt på kontakten i Google
+    if (0 == memberData.length) { //Tomt med data för kontaktfältet från Scoutnet
       Logger.log("Ingen data nu heller för detta kontaktfält");
       return {"status": false};
     }
@@ -747,8 +755,17 @@ function checkDifferenceHelpfunction(connectionObject, memberDataContactResource
 }
 
 
-//Tar bort element från en lista om elementet är tomt för att det ju inte kommer komma i anropet från Google och går därmed ej att jämföra
-function removeElementsWithValueOrPersonEmpty(memberData) {
+/**
+ * Tar bort objekt från en lista av objekt för de objekt som inte har
+ * något attribut med värde för antingen attributen value eller person.
+ * Detta görs för att ta bort tomma kontaktfält från svaret som ges vid
+ * anrop mot Google för att kunna jämföra med ny data.
+ * 
+ * @param {Objekt[]} memberData - Lista av objekt för ett kontaktfältstyp för en kontakt
+ * 
+ * @returns {Objekt[]} - Lista av objekt för ett kontaktfältstyp för en kontakt
+ */
+function removeElementsWithValueOrPersonEmpty_(memberData) {
 
   let newMemberData = [];
   for (let i = 0; i < memberData.length; i++) {
