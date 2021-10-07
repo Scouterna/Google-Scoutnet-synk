@@ -22,7 +22,7 @@ function synkroniseraKontakterTvingad() {
 function Kontakter(forceUpdate) {
   
   Logger.log("Läser data från kalkylbladet");
-  let sdk = getSheetDataKontakter();
+  let sdk = getSheetDataKontakter_();
   let username = sdk["username"];
   let password = sdk["password"];
   let version = sdk["version"];
@@ -60,7 +60,12 @@ function Kontakter(forceUpdate) {
 }
 
 
-function getSheetDataKontakter()  {
+/**
+ * Ger datan som användaren har angett i kalkylbladet
+ *
+ * @returns {Objekt} - Ger datan som användaren har angett i kalkylbladet
+ */
+function getSheetDataKontakter_()  {
 
   let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
   if (sheet == null) {
@@ -83,6 +88,7 @@ function getSheetDataKontakter()  {
   userInputData["groupName"] = data[grd["groupName"][0]][grd["groupName"][1]];
   userInputData["version"] = data[grd["version"][0]][grd["version"][1]];
 
+  Logger.log(userInputData);
   return userInputData;
 }
 
@@ -593,13 +599,13 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, resource
     Logger.log(memberDataContactResource);
 
     for (let k = 0; k < personFields.length; k++) {
-      if (checkDifference(connection, memberDataContactResource, personFields[k]))  {
+      if (checkDifference_(connection, memberDataContactResource, personFields[k]))  {
         Logger.log("Skillnad på " + personFields[k].svName);
       }
     }
 
     //Födelsedag är lite special vid jämförelse mellan objekt
-    if (checkDifferenceBirthdays(connection, memberDataContactResource))  {
+    if (checkDifferenceBirthdays_(connection, memberDataContactResource))  {
       Logger.log("Skillnad på födelsedag");
     }
     //Vi kollar ej upp medlemsnummer då det ju är det som säger att kontakten ska synkas 
@@ -647,7 +653,16 @@ function getSimplePersonFields_()  {
 }
 
 
-function checkDifference(connection, memberDataContactResource, personField) {
+/**
+ * Kollar om ett visst kontaktfält skiljer sig mellan nuvarande kontakt och ett kontaktobjekt
+ * 
+ * @param {Objekt} connection - Persondata för en kontakt som redan finns
+ * @param {Objekt} memberDataContactResource - Ett objekt av typen Person med kontaktinfo för en person
+ * @param {Objekt} personField - Objekt med information om ett specifikt kontaktfält
+ * 
+ * @returns {Boolean} - Sant eller falskt om kontaktfältet skiljer sig åt
+ */
+function checkDifference_(connection, memberDataContactResource, personField) {
 
   let nameOfPersonField = personField.apiName;
 
@@ -655,19 +670,28 @@ function checkDifference(connection, memberDataContactResource, personField) {
   let tmpObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, personField.removeValueEmpty);
   if ('status' in tmpObject) {
     Logger.log("status är definerad i objektet som " + tmpObject.status);
+    //En första koll om det är någon förändring true eller false. T.ex nytt attribut
     return tmpObject.status;
   }
 
   let memberData = tmpObject.memberData;
   
   let keys = personField.keys;
-  let tmpArray = makeArrayOfFilteredConnectionObject(connectionObject, keys); 
+  let tmpArray = makeArrayOfFilteredConnectionObject_(connectionObject, keys); 
 
-  return checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField);
+  return checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField);
 }
 
 
-function checkDifferenceBirthdays(connection, memberDataContactResource) {
+/**
+ * Kollar om kontaktfältet för födelsedag skiljer sig mellan nuvarande kontakt och ett kontaktobjekt
+ * 
+ * @param {Objekt} connection - Persondata för en kontakt som redan finns
+ * @param {Objekt} memberDataContactResource - Ett objekt av typen Person med kontaktinfo för en person
+ * 
+ * @returns {Boolean} - Sant eller falskt om födelsedagarna skiljer sig åt
+ */
+function checkDifferenceBirthdays_(connection, memberDataContactResource) {
 
   let nameOfPersonField = "birthdays";
   
@@ -675,6 +699,7 @@ function checkDifferenceBirthdays(connection, memberDataContactResource) {
   let tmpObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, false);
   if ('status' in tmpObject) {
     Logger.log("status är definerad i objektet som " + tmpObject.status);
+    //En första koll om det är någon förändring true eller false. T.ex nytt attribut
     return tmpObject.status;
   }
 
@@ -701,13 +726,20 @@ function checkDifferenceBirthdays(connection, memberDataContactResource) {
     tmpMemberData.push(tmpObject);
   }
   
-  return checkDifferenceMemberInfo(tmpArray, tmpMemberData, nameOfPersonField);
+  return checkDifferenceMemberInfo_(tmpArray, tmpMemberData, nameOfPersonField);
 }
 
 
-//Lista med vilka nycklar/element som ska användas
-function makeArrayOfFilteredConnectionObject(connectionObject, keys) {
-
+/**
+ * Skapar lista av objekt för en typ av kontaktfält för en kontakt
+ *
+ * @param {Objekt[]} connectionObject - Data för ett kontaktfält för en kontakt som redan finns
+ * @param {String[]} keys - Namn på attribut för ett visst kontaktfält
+ * 
+ * @returns {Objekt[]} - Lista av objekt för en typ av kontaktfält för en kontakt
+ */
+function makeArrayOfFilteredConnectionObject_(connectionObject, keys) {
+  
   let tmpArray = [];
   Logger.log("MakeArray Nycklar " + keys);
   for (let i = 0; i < connectionObject.length; i++) {
@@ -761,7 +793,7 @@ function checkDifferenceHelpfunction_(connectionObject, memberDataContactResourc
  * Detta görs för att ta bort tomma kontaktfält från svaret som ges vid
  * anrop mot Google för att kunna jämföra med ny data.
  * 
- * @param {Objekt[]} memberData - Lista av objekt för ett kontaktfältstyp för en kontakt
+ * @param {Objekt[]} memberData - Lista av objekt för en kontaktfältstyp för en kontakt
  * 
  * @returns {Objekt[]} - Lista av objekt för ett kontaktfältstyp för en kontakt
  */
@@ -777,9 +809,17 @@ function removeElementsWithValueOrPersonEmpty_(memberData) {
 }
 
 
-//true == skillnad
-//false == ingen skillnad
-function checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField)  {
+/**
+ * Jämför listor av objekt bestående av kontaktfältsattribut och deras värden och
+ * kollar om de är olika.
+ * 
+ * @param {Objekt[]} tmpArray - Lista av objekt för en typ av kontaktfält för en kontakt
+ * @param {Objekt[]} memberData - Lista av objekt med medlemsdata för en typ av kontaktfält för en medlem
+ * @param {String} nameOfPersonField - Namn på ett specifikt kontaktfält
+ * 
+ * @returns {Boolean} - Sant eller falskt om det är skillnad på nuvarande kontaktdata och den som ska vara
+ */
+function checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField)  {
 
   Logger.log(nameOfPersonField);
 
@@ -807,9 +847,6 @@ function checkDifferenceMemberInfo(tmpArray, memberData, nameOfPersonField)  {
     Logger.log(tmpKeys);
     
     for (let n = 0; n < tmpKeys.length; n++) {
-      //Logger.log("A " + tmpKeys[n]);
-      //Logger.log("B " + tmpObject[tmpKeys[n]]);
-      //Logger.log("C " + tmpMemberData[tmpKeys[n]]);
 
       if (tmpObject[tmpKeys[n]] == tmpMemberData[tmpKeys[n]]) {
         Logger.log("Samma data " + tmpKeys[n] + " = " + tmpObject[tmpKeys[n]]);
