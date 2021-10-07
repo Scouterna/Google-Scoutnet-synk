@@ -16,7 +16,7 @@ function Anvandare() {
     var allMembers = fetchScoutnetMembers(); //Alla medlemmar med alla attribut som finns i APIt för konton
     Logger.log("AllMembers.length by fetchScoutnetMembers = " + allMembers.length);
     Logger.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-    Logger.log("Antal medlemmar i scoutnet = % " , allMembers.length);
+    Logger.log("Antal medlemmar i scoutnet = %s " , allMembers.length);
   }
   
   var useraccounts = getGoogleAccounts(defaultOrgUnitPath);
