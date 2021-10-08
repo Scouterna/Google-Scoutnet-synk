@@ -431,6 +431,7 @@ function updateListOfConnections_(contactResourceKeys) {
 
                 let connection = {
                   resourceName: connections[i].resourceName,
+                  etag: connections[i].etag,
                   memberNumber: externalId.value,
                   memberInfo: connections[i]
                 };          
@@ -556,6 +557,16 @@ function getContactsByMemberResourceNames(resourceNames)  {
 }
 
 
+/**
+ * Kollar igenom alla kontakter som synkroniseras med Scoutnet vilka kontakter
+ * som ska uppdateras och uppdaterar sen dem vid behov.
+ * 
+ * @param {Objekt[]} nyaKontakter - Lista av listor med information över de kontaktgrupper som ska finnas
+ * @param {Objekt[]} connections - Lista med objekt för kontakter
+ * @param {String[]} contactResourceKeys - Attribut för en kontakt
+ * @param {String[]} resourceNamesAlreadyProcessed - Resursnamn för kontakter som ej behöver uppdateras
+ * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
+ */
 function updateContacts(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField) {
 
   //Den hinner inte uppdatera alla nya kontakter, så de nya kommer sen kollas för uppdateringar också
@@ -572,6 +583,9 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, resource
 
   let personFields = getSimplePersonFields_();
   
+  let personFieldsToUpdate = [];
+  let contactsToUpdate = {};
+  let numbersOfContactsToUpdate = 0;
 
   for (let i = 0; i < connections.length; i++) {
     Logger.log("--------------------------------------");
@@ -582,6 +596,9 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, resource
     Logger.log("Resursnamn för kontakten");
     Logger.log(connections[i].resourceName);
 
+    Logger.log("Etag för kontakten");
+    Logger.log(connections[i].etag);
+
     if (resourceNamesAlreadyProcessed.includes(connections[i].resourceName)) {
       Logger.log("Denna kontakt är redan processad och ska ej uppdateras");
       continue;
@@ -591,24 +608,87 @@ function updateContacts(nyaKontakter, connections, contactResourceKeys, resource
     //Logger.log("memberData");
     //Logger.log(memberData);
     if (!memberData)  {
-      Logger.log("Denna medlem är ej kvar på listan " + connections[i].memberNumber);
+      Logger.log("Denna kontakt ska ej vara kvar längre " + connections[i].memberNumber);
       continue;
     }
     let memberDataContactResource = makeContactResource_(memberData, customEmailField);
     Logger.log("Medlemsinfo som ska vara inlagd på kontakten");
     Logger.log(memberDataContactResource);
 
+    let contactShouldBeUpdated = false;
+
     for (let k = 0; k < personFields.length; k++) {
       if (checkDifference_(connection, memberDataContactResource, personFields[k]))  {
         Logger.log("Skillnad på " + personFields[k].svName);
+        personFieldsToUpdate.push(personFields[k].apiName);
+        contactShouldBeUpdated = true;
       }
     }
 
     //Födelsedag är lite special vid jämförelse mellan objekt
     if (checkDifferenceBirthdays_(connection, memberDataContactResource))  {
       Logger.log("Skillnad på födelsedag");
+      personFieldsToUpdate.push("birthdays");
+      contactShouldBeUpdated = true;
     }
-    //Vi kollar ej upp medlemsnummer då det ju är det som säger att kontakten ska synkas 
+    //Vi kollar ej upp medlemsnummer då det ju är det som säger att kontakten ska synkas
+
+    //Denna kontakt ska uppdateras
+    if (contactShouldBeUpdated)  {
+      numbersOfContactsToUpdate++;
+      Logger.log("Antal kontakter att uppdatera " + numbersOfContactsToUpdate);
+      if (numbersOfContactsToUpdate>200)  { //Max uppdatera 200 stycken i taget
+        Logger.log("För många kontakter att uppdatera på en gång. Tar resten vid nästa körning");
+        continue;
+      }
+
+      //Lägger till attributet etag
+      memberDataContactResource.etag = connections[i].etag;
+      contactsToUpdate[connections[i].resourceName] = memberDataContactResource;
+    }
+  }
+
+  personFieldsToUpdate = removeDublicates_(personFieldsToUpdate).toString();
+  Logger.log("personFieldsToUpdate");
+  Logger.log(personFieldsToUpdate);
+
+  Logger.log("contactsToUpdate");
+  Logger.log(contactsToUpdate);
+
+  Logger.log("Antal kontakter att uppdatera " + numbersOfContactsToUpdate);
+  if (0 != numbersOfContactsToUpdate) {
+    batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate);
+  }
+}
+
+
+/**
+ * Uppdaterar flera kontakters specificerade kontaktfält samtidigt
+ * 
+ * @param {Objekt} contactsToUpdate - Objekt med vilka kontakter som ska uppdateras och med ny data
+ * @param {String} personFieldsToUpdate - Vilka kontaktfält som ska uppdateras
+ */
+function batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate)  {
+
+  for (let n=0; n<6; n++) {
+    Logger.log("Funktionen batchUpdateContacts körs " + n);
+    
+    try {
+      People.People.batchUpdateContacts({
+        "contacts": contactsToUpdate,
+        "updateMask": personFieldsToUpdate,
+        "sources": ["READ_SOURCE_TYPE_CONTACT"]
+      });
+      Logger.log("Uppdaterat kontakterna " + Object.keys(contactsToUpdate));
+      return;
+    }
+    catch (e) {
+      Logger.log("Problem med att anropa People.People");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
   }
 }
 
@@ -1249,4 +1329,24 @@ function getContactGroups_(prefixContactgroups) {
   Logger.log(listOfContactGroups);
   Logger.log(listOfContactGroups.length);
   return listOfContactGroups;
+}
+
+/**
+ * Ta bort dubletter från en lista
+ * @param {string[] | number[] | Object[]} - lista
+ * @returns {string[] | number[] | Object[]} - lista
+ */
+function removeDublicates_(list) {
+  let tmp_array = []
+  Logger.log("Försöker radera dubletter");
+    for(let i = 0;i < list.length; i++){
+      if(tmp_array.indexOf(list[i]) == -1){
+        tmp_array.push(list[i])
+        //Logger.log("Denna är ny " + list[i]);
+      }
+      else {
+        //Logger.log("Hittade dublett av " + list[i]);
+      }
+    }
+  return tmp_array;
 }
