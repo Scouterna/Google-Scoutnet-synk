@@ -47,7 +47,7 @@ function Kontakter(forceUpdate) {
   Logger.log(kontaktgrupper);
 
 
-  let contactsRemovedFromContactGroups = createAndUpdateContacts(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField);
+  let contactsRemovedFromContactGroups = createAndUpdateContacts_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField);
   Logger.log("Kontakter som är borttagna från kontaktgrupp");
   Logger.log(contactsRemovedFromContactGroups);
   return;
@@ -172,115 +172,105 @@ function checkIfContactInAnyNonSystemGroup(kontaktGrupper)  {
 }
 
 
-function createAndUpdateContacts(kontaktGrupper, nyaKontakter, prefixContactgroups, customEmailField)  {
-
-  let contactsRemovedFromContactGroups = [];
-
+/**
+ * Uppdaterar kontakter och skapar nya vid behov.
+ * Returnerar resursnamn för de kontakter som tagits bort från någon kontaktgrupp
+ * 
+ * @param {Objekt[]} kontaktGrupper - Lista av Objekt med kontaktgruppsinformation
+ * @param {Objekt[]} nyaKontakter - Lista av listor med information över de kontaktgrupper som ska finnas
+ * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
+ * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
+ * 
+ * @returns {String[]} - Lista med resursnamn för de kontakter som har tagits bort från någon kontaktgrupp
+ */
+function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgroups, customEmailField)  {
+  
   let emptyContactResource = makeContactResource_({}, customEmailField);
   let contactResourceKeys = Object.keys(emptyContactResource);
   Logger.log("Nycklar som används");
   Logger.log(contactResourceKeys);
 
+  //Alla kontakter som tidigare har synkats
   let connections = updateListOfConnections_(contactResourceKeys);
 
+  let contactsRemovedFromContactGroups = [];
   let resourceNamesAlreadyProcessed = [];
   
   //Loop och gå igenom varje kontaktgrupp
   for (let i = 0; i < kontaktGrupper.length; i++) {
     
-    Logger.log(kontaktGrupper[i]);
-    //Namn på aktuell kontaktgrupp
+    //Logger.log(kontaktGrupper[i]);
+
     let kontaktGruppNamn = kontaktGrupper[i].name;
     Logger.log("Namn på aktuell kontaktgrupp " + kontaktGruppNamn);
-    //Resursnamn för aktuell kontaktgrupp
+
     let kontaktGruppResourceName = kontaktGrupper[i].resourceName;
     Logger.log("Resursnamn för aktuell kontaktgrupp " + kontaktGruppResourceName);
 
-
     //Hämta vilka som är med i kontaktgruppen just nu
+    /***Är med i kontaktgruppen just nu***/
     let kontaktGrupp = getContactGroup_(kontaktGrupper[i]);
     let memberResourceNames = kontaktGrupp.memberResourceNames;
     let kontaktLista = getContactsByMemberResourceNames(memberResourceNames);
     let membersInfo = getMembersInfoFromPersonResponses_(kontaktLista);
-    let memberNumbers = getMemberNumbersFromMembersInfo_(membersInfo);
+  
+    //Logger.log("kontaktGrupp");
+    //Logger.log(kontaktGrupp);
 
+    //Logger.log("memberResourceNames");
+    //Logger.log(memberResourceNames);
 
-    Logger.log("kontaktGrupp");
-    Logger.log(kontaktGrupp);
+    //Logger.log("kontaktLista");
+    //Logger.log(kontaktLista);
 
-    Logger.log("memberResourceNames");
-    Logger.log(memberResourceNames);
-
-    Logger.log("kontaktLista");
-    Logger.log(kontaktLista);
-
-    Logger.log("membersInfo");
+    Logger.log("Hämta lista över vilka som just nu är med i kontaktgruppen");
     Logger.log(membersInfo);
+    /***Är med i kontaktgruppen just nu - Slut***/
 
-    Logger.log("memberNumbers");
-    Logger.log(memberNumbers);
-
-    Logger.log("nyaKontakter");
-    Logger.log(nyaKontakter);
+    //Logger.log("nyaKontakter");
+    //Logger.log(nyaKontakter);
 
     /***Ska var med i kontaktgruppen***/
-    //Hämta lista vilka som ska vara med i kontaktgruppen
-    let kontaktGruppInfo = getNewContactGroupInfo_(nyaKontakter, kontaktGruppNamn, prefixContactgroups);
-    Logger.log("Hämta lista över vilka som ska vara med i kontaktgruppen");
-    Logger.log(kontaktGruppInfo);
-
-    let kontaktGruppMemberNumbersList = getContactGroupMemberNumbers_(kontaktGruppInfo);
-    Logger.log("kontaktGruppMemberNumbersList");
-    Logger.log(kontaktGruppMemberNumbersList);
+    let memberNumbersShouldBeInContactGroup = getMemberNumbersShouldBeInContactGroup_(nyaKontakter, kontaktGruppNamn, prefixContactgroups);
     /***Ska var med i kontaktgruppen - Slut***/
-
 
     let membersInfoStayingInGroup = [];
 
     let resourceNamesToAdd = [];
     let resourceNamesToRemove = [];
-    
-    //Loop - de som är med i kontaktgruppen nu men inte ska. Ska tas bort från gruppen
+  
     Logger.log("Loopa igenom vilka som ska tas bort från kontaktgruppen");
     //Loop och gå igenom varje kontakt som är med i gruppen just nu
     for (let n = 0; n < membersInfo.length; n++) {
       
       //Detta medlemsnummer finns ej med i den nya listan
-      if (!kontaktGruppMemberNumbersList.includes(membersInfo[n].memberNumber)) {
+      if (!memberNumbersShouldBeInContactGroup.includes(membersInfo[n].memberNumber)) {
         Logger.log("Ska ta bort kontakten från kontaktgruppen " + membersInfo[n].memberNumber);
         resourceNamesToRemove.push(membersInfo[n].resourceName);
         contactsRemovedFromContactGroups.push(membersInfo[n].resourceName);
       }
       else  {
-        Logger.log("Ska fortsätta stanna i gruppen " + membersInfo[n]);
         membersInfoStayingInGroup.push(membersInfo[n]);
       }
     }
 
-    let memberNumbersStayingInGroup = getMemberNumbersFromMembersInfo_(membersInfoStayingInGroup);
-    
-    Logger.log("resourceNamesToRemove");
-    Logger.log(resourceNamesToRemove);
-
-    Logger.log("membersInfoStayingInGroup");
+    Logger.log("Ska fortsätta stanna i gruppen");
     Logger.log(membersInfoStayingInGroup);
 
-    Logger.log("memberNumbersStayingInGroup");
-    Logger.log(memberNumbersStayingInGroup);
+    let memberNumbersStayingInGroup = getMemberNumbersFromMembersInfo_(membersInfoStayingInGroup);
+    //Logger.log("memberNumbersStayingInGroup");
+    //Logger.log(memberNumbersStayingInGroup);
 
     
     //Loop - de som inte är med i kontaktgruppen ska läggas till. Om konto saknas ska det skapas
-    Logger.log("Loopa igenom vilka som ska läggas till i kontaktgruppen");
-    for (let n = 0; n < kontaktGruppMemberNumbersList.length; n++) {
+    Logger.log("Loopa igenom vilka som ska läggas till i kontaktgruppen och eventuellt skapas");
+    for (let n = 0; n < memberNumbersShouldBeInContactGroup.length; n++) {
 
       //Ej med i kontaktgruppen sedan innan
-      if (!memberNumbersStayingInGroup.includes(kontaktGruppMemberNumbersList[n])) {
+      if (!memberNumbersStayingInGroup.includes(memberNumbersShouldBeInContactGroup[n])) {
 
-        Logger.log("Connn ");
-        Logger.log(connections);
-        let connection = getConnectionByMemberNumber_(connections, kontaktGruppMemberNumbersList[n])
-
-        Logger.log("Connection " + connection);
+        //Hämta kontakten med ett givet medlemsnummer
+        let connection = getConnectionByMemberNumber_(connections, memberNumbersShouldBeInContactGroup[n]);
 
         if (connection)  {
           //Kontakten finns sedan innan
@@ -288,8 +278,8 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter, prefixContactgrou
           resourceNamesToAdd.push(connection.resourceName);
         }
         else {          
-          Logger.log("Skapa kontakten " + kontaktGruppMemberNumbersList[n] + " och lägg till i gruppen");
-          let memberData = getMemberdataFromMemberNumber_(nyaKontakter, kontaktGruppMemberNumbersList[n]);
+          Logger.log("Skapa kontakten " + memberNumbersShouldBeInContactGroup[n] + " och lägg till i gruppen");
+          let memberData = getMemberdataFromMemberNumber_(nyaKontakter, memberNumbersShouldBeInContactGroup[n]);
 
           connection = createContact_(memberData, customEmailField);
           resourceNamesToAdd.push(connection.resourceName);
@@ -298,30 +288,43 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter, prefixContactgrou
           //Sparar anrop i stället för att uppdatera hela tiden.
           connections.push({
             resourceName: connection.resourceName,
-            memberNumber: kontaktGruppMemberNumbersList[n]
+            memberNumber: memberNumbersShouldBeInContactGroup[n]
           });
-          
-        }        
+        }
       }
     }
-    Logger.log("Följande ska läggas till i gruppen");
-    Logger.log("resourceNamesToAdd");
-    Logger.log(resourceNamesToAdd);
-
-
-    Logger.log("Följande ska tas bort från gruppen");
-    Logger.log(resourceNamesToRemove);
-
     modifyContactGroupMembers_(kontaktGruppResourceName, resourceNamesToAdd, resourceNamesToRemove);
-
   }
+
   Logger.log("Följande resursnamn är redan processade och behöver ej uppdateras senare");
   Logger.log(resourceNamesAlreadyProcessed);
-  updateContacts(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField);
+  updateContacts_(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField);
+
+  return contactsRemovedFromContactGroups; 
+}
 
 
-  //Kontakter som är borttagna från en kontaktgrupp och som ska kollas
-  return contactsRemovedFromContactGroups;  //Denna ska kompletteras med att bara ta bort alla som matchar och saknar grupp
+/**
+ * Ger medlemsnummer för de medlemmar som ska vara med i en kontaktgrupp
+ * 
+ * @param {Objekt[]} nyaKontakter - Lista med info och e-postadresser för kommande kontaktgrupper
+ * @param {String} namn - Namn för den kontaktgrupp att söka efter
+ * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
+ * 
+ * @returns {String[]} - Lista med medlemsnummer för aktuell kommande kontaktgrupp
+ */
+function getMemberNumbersShouldBeInContactGroup_(nyaKontakter, namn, prefixContactgroups) {
+
+  //Hämta lista vilka som ska vara med i kontaktgruppen
+  let kontaktGruppInfo = getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups);
+  Logger.log("Hämta lista över vilka som ska vara med i kontaktgruppen");
+  Logger.log(kontaktGruppInfo);
+
+  let kontaktGruppMemberNumbersList = getContactGroupMemberNumbers_(kontaktGruppInfo);
+  //Logger.log("kontaktGruppMemberNumbersList");
+  //Logger.log(kontaktGruppMemberNumbersList);
+
+  return kontaktGruppMemberNumbersList;
 }
 
 
@@ -335,6 +338,12 @@ function createAndUpdateContacts(kontaktGrupper, nyaKontakter, prefixContactgrou
  * @returns {Objekt} - Lista av resursnamn för kontakter som inte gick att hitta eller ta bort
  */
 function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd, resourceNamesToRemove)  {
+
+  Logger.log("Följande ska läggas till i gruppen");
+  Logger.log(resourceNamesToAdd);
+
+  Logger.log("Följande ska tas bort från gruppen");
+  Logger.log(resourceNamesToRemove);
 
   try {
     let contactGroupModifyResource = People.ContactGroups.Members.modify({
@@ -567,7 +576,7 @@ function getContactsByMemberResourceNames(resourceNames)  {
  * @param {String[]} resourceNamesAlreadyProcessed - Resursnamn för kontakter som ej behöver uppdateras
  * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
  */
-function updateContacts(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField) {
+function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField) {
 
   //Den hinner inte uppdatera alla nya kontakter, så de nya kommer sen kollas för uppdateringar också
   connections = updateListOfConnections_(contactResourceKeys);
