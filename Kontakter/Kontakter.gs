@@ -672,12 +672,24 @@ function getContactsByMemberResourceNames_(resourceNames)  {
     return [];
   }
 
-  let group = People.People.getBatchGet({
-      resourceNames: resourceNames,
-      personFields: "emailAddresses,externalIds,memberships"
-    });
-
-  return group.responses;
+  for (let n=0; n<6; n++) {
+    Logger.log("Funktionen getContactsByMemberResourceNames körs " + n);
+    
+    try {
+      let group = People.People.getBatchGet({
+        resourceNames: resourceNames,
+        personFields: "emailAddresses,externalIds,memberships"
+      });
+      return group.responses;
+    }
+    catch (e) {
+      Logger.log("Problem med att anropa People.People");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
 }
 
 
@@ -804,6 +816,39 @@ function batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate)  {
         "sources": ["READ_SOURCE_TYPE_CONTACT"]
       });
       Logger.log("Uppdaterat kontakterna " + Object.keys(contactsToUpdate));
+      return;
+    }
+    catch (e) {
+      Logger.log("Problem med att anropa People.People");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
+}
+
+
+/**
+ * Raderar flera kontakter samtidigt
+ * 
+ * @param {String[]} resourceNames - Lista över resursnamn för kontakter som ska tas bort
+ */
+function batchDeleteContacts(resourceNames) {
+
+  //Max 500 stycken kan tas bort samtidigt. Resten får tas vid nästa körning
+  if (resourceNames && 500 < resourceNames.length) {
+    resourceNames = resourceNames.slice(0, 500);
+  }
+
+  for (let n=0; n<6; n++) {
+    Logger.log("Funktionen batchDeleteContacts körs " + n);
+    
+    try {
+      People.People.batchDeleteContacts({
+        "resourceNames": resourceNames
+      });
+      Logger.log("Raderat kontakterna " + resourceNames);
       return;
     }
     catch (e) {
@@ -1193,32 +1238,6 @@ function createContact_(memberData, customEmailField)  {
     }
     catch (e) {
       Logger.log("Problem med att anropa People.People med:" + contactResource);
-      if (n == 5) {
-        throw e;
-      } 
-      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
-    }
-  }
-}
-
-
-/*
- * Radera en kontakt
- * 
- * @param {String} kontakt - Objekt av typen Contact att radera 
- */
-function deleteContactOld(kontakt)  {
-
-  for (let n=0; n<6; n++) {
-    Logger.log("Funktionen deleteContact körs " + n);
-    
-    try {
-      ContactsApp.deleteContact(kontakt);
-      Logger.log("Radera kontakten");
-      return;
-    }
-    catch (e) {
-      Logger.log("Problem med att anropa ContactsApp med funktionen deleteContact");
       if (n == 5) {
         throw e;
       } 
