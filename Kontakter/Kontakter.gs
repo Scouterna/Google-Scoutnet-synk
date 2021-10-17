@@ -122,41 +122,7 @@ function getKontakterUserInputData_() {
 
 
 /*
- * Tar bort inaktuella kontakter som tidigare har synkroniserats
- * 
- * @param {Object[]} - Lista av Objekt av typen Contact med de kontakter som tagits bort
- * från någon kontaktgrupp
- * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
- */
-function deleteOldContacts(contactsRemovedFromContactGroups, customEmailField)  {
-
-  Logger.log("deleteOldContacts " +  contactsRemovedFromContactGroups.length);
-
-  //Kolla om varje kontakt är med i en kontaktgrupp
-  for (let i = 0; i < contactsRemovedFromContactGroups.length; i++) {
-    let contact = contactsRemovedFromContactGroups[i];
-    Logger.log("Kollar kontakten " + contact.getPrimaryEmail());
-
-    let contactGroups = contact.getContactGroups();
-
-    if (checkIfContactInAnyNonSystemGroup(contactGroups)) {
-      Logger.log("Denna kontakt är fortfarande med i en kontaktgrupp " + contactGroups[0].getName());
-    }
-    else  {
-      let scoutnetEmail = contact.getEmails(customEmailField)[0];
-      
-      if (scoutnetEmail.isPrimary()) {
-        Logger.log("Ska radera kontakten. Var ej med i någon vanlig kontaktgrupp");
-        deleteContactOld(contact);
-      }
-    }
-  }
-}
-
-
-/*
 contactsRemovedFromContactGroups - kontakter som har tagits bort från någon lista
-
 */
 function deleteContacts(resourceNamesRemovedFromContactGroups, contactResourceKeys) {
 //contactsRemovedFromContactGroups - denna kollar för att ta bort kontakter som manuellt har lagts till på något sätt eller typ tagit bort medlemsnummer från en medlem och att kontakten sen ska tas bort
@@ -321,29 +287,6 @@ function checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, 
     }
   }
   //Logger.log("Denna kontakt är inte längre med i en kontaktgrupp");
-  return false;
-}
-
-
-/*
- * Kollar om någon av angivna kontaktgrupper inte är en systemgrupp
- * 
- * @param {Object[]} kontaktgrupper - Lista av Objekt av typen ContactGroup
- * 
- * @returns {Boolean} - Sant eller falskt om en av grupperna inte är en systemgrupp
- */
-function oldcheckIfContactInAnyNonSystemGroup(kontaktGrupper)  {
-
-  for (let i = 0; i < kontaktGrupper.length; i++) {
-
-    if (kontaktGrupper[i].isSystemGroup()) {
-      Logger.log("Denna grupp är en  systemgrupp " + kontaktGrupper[i].getName());
-    }
-    else  {
-      Logger.log("Denna kontakt är med i en vanlig grupp");
-      return true;
-    }
-  }
   return false;
 }
 
