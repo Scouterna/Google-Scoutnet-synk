@@ -149,7 +149,7 @@ function deleteContacts(resourceNamesRemovedFromContactGroups, contactResourceKe
 
 
   /***Hämta lista över vilka kontaktgruppers resursnamn som inte är systemgrupper***/
-  let kontaktgrupperResourceNames = getContactGroupsResourceNames();
+  let kontaktgrupperResourceNames = getContactGroupsResourceNames_();
   /***SLUT - Hämta lista över vilka kontaktgrupper som inte är systemgrupper***/
 
 
@@ -174,11 +174,11 @@ function deleteContacts(resourceNamesRemovedFromContactGroups, contactResourceKe
 
 
   /***Hitta vilka synkbara kontakter som inte är med i en kontaktgrupp***/
-  let resourceNamesToDeleteSyncable = getResourceNamesToDeleteFromConnections(connections, kontaktgrupperResourceNames);
+  let resourceNamesToDeleteSyncable = getResourceNamesToDeleteFromConnections_(connections, kontaktgrupperResourceNames);
   
 
   /***SLUT - Hitta vilka synkbara kontakter som inte är med i en kontaktgrupp***/
-  
+
   //Ta bort alla kontakter som ska tas bort
 }
 
@@ -188,7 +188,7 @@ function deleteContacts(resourceNamesRemovedFromContactGroups, contactResourceKe
  * 
  * @returns {String[]} - Lista med resursnamn för alla användarskapade kontaktgrupper
  */
-function getContactGroupsResourceNames()  {
+function getContactGroupsResourceNames_()  {
 
   let kontaktgrupper = getContactGroups_("");
 
@@ -246,7 +246,7 @@ function getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgr
  * 
  * @returns {String[]} - Lista över resursnamn för kontakter som är synkbara som ska tas bort
  */
-function getResourceNamesToDeleteFromConnections(connections, kontaktgrupperResourceNames)  {
+function getResourceNamesToDeleteFromConnections_(connections, kontaktgrupperResourceNames)  {
 
   let resourceNamesToDelete = [];
 
