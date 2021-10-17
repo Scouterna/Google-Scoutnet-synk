@@ -46,10 +46,15 @@ function Kontakter(forceUpdate) {
   Logger.log("kontaktgrupper");
   Logger.log(kontaktgrupper);
 
+  let emptyContactResource = makeContactResource_({}, customEmailField);
+  let contactResourceKeys = Object.keys(emptyContactResource);
+  Logger.log("Nycklar som används");
+  Logger.log(contactResourceKeys);
 
-  let contactsRemovedFromContactGroups = createAndUpdateContacts_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField);
+  let contactsRemovedFromContactGroups = createAndUpdateContacts_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField, contactResourceKeys);
   Logger.log("Kontakter som är borttagna från kontaktgrupp");
   Logger.log(contactsRemovedFromContactGroups);
+  deleteContacts(contactsRemovedFromContactGroups, contactResourceKeys);
   return;
 
 
@@ -150,13 +155,184 @@ function deleteOldContacts(contactsRemovedFromContactGroups, customEmailField)  
 
 
 /*
+contactsRemovedFromContactGroups - kontakter som har tagits bort från någon lista
+
+*/
+function deleteContacts(resourceNamesRemovedFromContactGroups, contactResourceKeys) {
+//contactsRemovedFromContactGroups - denna kollar för att ta bort kontakter som manuellt har lagts till på något sätt eller typ tagit bort medlemsnummer från en medlem och att kontakten sen ska tas bort
+
+  /***De som har tagits bort från någon kontaktgrupp***/
+  Logger.log("Resurser som tagits bort från någon kontaktgrupp");
+  //Rensar bort dubletter bland de som tagits bort från flera kontaktgrupper
+  resourceNamesRemovedFromContactGroups = removeDublicates_(resourceNamesRemovedFromContactGroups);
+  Logger.log(resourceNamesRemovedFromContactGroups);
+  /***SLUT - De som har tagits bort från någon kontaktgrupp***/
+
+  /***Hitta alla kontakter som är synkbara***/
+  let connections = updateListOfConnections_([...contactResourceKeys, 'memberships']);
+  Logger.log("Alla kontakter som är synkbara");
+  Logger.log(connections);
+
+  let connectionsResourceNames = [];
+  for (let i = 0; i < connections.length; i++) {
+    connectionsResourceNames.push(connections[i].resourceName);
+  }
+  Logger.log("connectionsResourceNames");
+  Logger.log(connectionsResourceNames);
+  /***SLUT - Hitta alla kontakter som är synkbara***/
+
+
+  /***Hämta lista över vilka kontaktgruppers resursnamn som inte är systemgrupper***/
+  let kontaktgrupperResourceNames = getContactGroupsResourceNames();
+  /***SLUT - Hämta lista över vilka kontaktgrupper som inte är systemgrupper***/
+
+
+  /***Hitta vilka kontakter som tagits bort som inte är synkbara***/
+  let resourceNamesToCheck = [];
+
+  for (let i = 0; i < resourceNamesRemovedFromContactGroups.length; i++) {
+
+    if (!connectionsResourceNames.includes(resourceNamesRemovedFromContactGroups[i])) {
+      Logger.log("Denna kontakt var konstig");
+      resourceNamesToCheck.push(resourceNamesRemovedFromContactGroups[i]);
+    }
+  }
+
+  Logger.log("Dessa kontakter är icke synkbara kontakter som tagits bort från en kontaktgrupp");
+  Logger.log(resourceNamesToCheck);
+
+
+  let personResponses = getContactsByMemberResourceNames_(resourceNamesToCheck);
+  let resourceNamesToDeleteNonSyncable = getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgrupperResourceNames);
+  /***SLUT - Hitta vilka kontakter som tagits bort som inte är synkbara***/
+
+
+  /***Hitta vilka synkbara kontakter som inte är med i en kontaktgrupp***/
+  let resourceNamesToDeleteSyncable = getResourceNamesToDeleteFromConnections(connections, kontaktgrupperResourceNames);
+  
+
+  /***SLUT - Hitta vilka synkbara kontakter som inte är med i en kontaktgrupp***/
+  
+  //Ta bort alla kontakter som ska tas bort
+}
+
+
+/**
+ * Ger en lista med resursnamn för alla användarskapade kontaktgrupper som finns
+ * 
+ * @returns {String[]} - Lista med resursnamn för alla användarskapade kontaktgrupper
+ */
+function getContactGroupsResourceNames()  {
+
+  let kontaktgrupper = getContactGroups_("");
+
+  let resourceNames = [];
+
+  for (let i = 0; i < kontaktgrupper.length; i++) {
+    resourceNames.push(kontaktgrupper[i].resourceName);
+  }
+  Logger.log("Resursnamn för alla användarskapade kontaktgrupper");
+  Logger.log(resourceNames);
+  return resourceNames;
+}
+
+
+/**
+ * Ger lista över resursnamn för de kontakter som har tagits bort från en kontaktgrupp och som inte
+ * är synkbara och inte heller är med i någon annan kontaktgrupp som inte är en systemgrupp.
+ * 
+ * @param {Objekt[]} personResponses - Lista av Objekt av typen PersonResponse för kontaker som tagits bort
+ * från en kontaktgrupp och som inte är synkbara.
+ * @param {String[]} kontaktgrupperResourceNames - Lista av resursnamn för kontaktgrupper som inte är systemgrupper
+ * 
+ * @returns {String[]} - Lista över resursnamn för kontakter som inte är synkbara som ska tas bort
+ */
+function getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgrupperResourceNames)  {
+
+  //Logger.log("personResponses");
+  //Logger.log(personResponses);
+
+  let resourceNamesToDelete = [];
+
+  for (let i = 0; i < personResponses.length; i++) {
+    let person = personResponses[i].person;
+    let memberships = person.memberships;
+    //Logger.log("memberships");
+    //Logger.log(memberships);
+    
+    if (!checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, memberships)) {
+      resourceNamesToDelete.push(person.resourceName);
+    }
+  }
+  Logger.log("Dessa kontakter som inte är synkbara ska raderas");
+  Logger.log(resourceNamesToDelete);
+  return resourceNamesToDelete;
+}
+
+
+/**
+ * Ger lista över resursnamn för de kontakter som har tagits bort från en kontaktgrupp och som
+ * är synkbara och inte heller är med i någon annan kontaktgrupp som inte är en systemgrupp.
+ * 
+ *  @param {Objekt[]} connections - Lista med objekt för kontakter
+ * från en kontaktgrupp och som inte är synkbara.
+ * @param {String[]} kontaktgrupperResourceNames - Lista av resursnamn för kontaktgrupper som inte är systemgrupper
+ * 
+ * @returns {String[]} - Lista över resursnamn för kontakter som är synkbara som ska tas bort
+ */
+function getResourceNamesToDeleteFromConnections(connections, kontaktgrupperResourceNames)  {
+
+  let resourceNamesToDelete = [];
+
+  for (let i = 0; i < connections.length; i++) {
+    let connection = connections[i];
+    let memberships = connection.memberInfo.memberships;
+    let resourceName = connection.resourceName;
+
+    //Logger.log(resourceName);
+    //Logger.log(memberships);
+
+    if (!checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, memberships)) {
+      resourceNamesToDelete.push(resourceName);
+    }
+  }
+  Logger.log("Dessa kontakter som är synkbara ska raderas");
+  Logger.log(resourceNamesToDelete);
+  return resourceNamesToDelete;
+}
+
+
+/**
+ * Kollar om en kontakt är med i en kontaktgrupp som inte är en systemgrupp
+ * 
+ * @param {String[]} kontaktgrupperResourceNames - Lista av resursnamn för kontaktgrupper som inte är systemgrupper
+ * @param {Objekt[]} memberships - Lista av objeket med kontaktgruppsmedlemskap för en kontakt
+ * 
+ * @returns {Boolean} - Sant eller falskt om denna kontakt är med i en kontaktgrupp som inte är en systemgrupp
+ */
+function checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, memberships)  {
+
+  for (let i = 0; i < memberships.length; i++) {
+    let resourceName = memberships[i].contactGroupMembership.contactGroupResourceName;
+    
+    if (kontaktgrupperResourceNames.includes(resourceName)) {
+      //Logger.log("Denna kontakt är fortfarande med i en kontaktgrupp " + resourceName);
+      return true;
+    }
+  }
+  //Logger.log("Denna kontakt är inte längre med i en kontaktgrupp");
+  return false;
+}
+
+
+/*
  * Kollar om någon av angivna kontaktgrupper inte är en systemgrupp
  * 
  * @param {Object[]} kontaktgrupper - Lista av Objekt av typen ContactGroup
  * 
  * @returns {Boolean} - Sant eller falskt om en av grupperna inte är en systemgrupp
  */
-function checkIfContactInAnyNonSystemGroup(kontaktGrupper)  {
+function oldcheckIfContactInAnyNonSystemGroup(kontaktGrupper)  {
 
   for (let i = 0; i < kontaktGrupper.length; i++) {
 
@@ -180,15 +356,11 @@ function checkIfContactInAnyNonSystemGroup(kontaktGrupper)  {
  * @param {Objekt[]} nyaKontakter - Lista av listor med information över de kontaktgrupper som ska finnas
  * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
  * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
+ * @param {String[]} contactResourceKeys - Attribut för en kontakt
  * 
  * @returns {String[]} - Lista med resursnamn för de kontakter som har tagits bort från någon kontaktgrupp
  */
-function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgroups, customEmailField)  {
-  
-  let emptyContactResource = makeContactResource_({}, customEmailField);
-  let contactResourceKeys = Object.keys(emptyContactResource);
-  Logger.log("Nycklar som används");
-  Logger.log(contactResourceKeys);
+function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgroups, customEmailField, contactResourceKeys)  {
 
   //Alla kontakter som tidigare har synkats
   let connections = updateListOfConnections_(contactResourceKeys);
@@ -211,7 +383,7 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
     /***Är med i kontaktgruppen just nu***/
     let kontaktGrupp = getContactGroup_(kontaktGrupper[i]);
     let memberResourceNames = kontaktGrupp.memberResourceNames;
-    let kontaktLista = getContactsByMemberResourceNames(memberResourceNames);
+    let kontaktLista = getContactsByMemberResourceNames_(memberResourceNames);
     let membersInfo = getMembersInfoFromPersonResponses_(kontaktLista);
   
     //Logger.log("kontaktGrupp");
@@ -457,8 +629,8 @@ function updateListOfConnections_(contactResourceKeys) {
     pageToken = page.nextPageToken;
   } while (pageToken);
 
-  Logger.log("listOfConnections");
-  Logger.log(listOfConnections);
+  //Logger.log("listOfConnections");
+  //Logger.log(listOfConnections);
   return listOfConnections;
 }
 
@@ -551,15 +723,15 @@ function getMembersInfoFromPersonResponses_(personResponses) {
  * 
  * @returns {Objekt[]} - Lista av Objekt av typen PersonRespone för angivna kontakter
  */
-function getContactsByMemberResourceNames(resourceNames)  {
+function getContactsByMemberResourceNames_(resourceNames)  {
 
-  if (!resourceNames) {
+  if (!resourceNames || 0 == resourceNames.length) {
     return [];
   }
 
   let group = People.People.getBatchGet({
       resourceNames: resourceNames,
-      personFields: "emailAddresses,externalIds"
+      personFields: "emailAddresses,externalIds,memberships"
     });
 
   return group.responses;
