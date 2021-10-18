@@ -51,17 +51,13 @@ function Kontakter(forceUpdate) {
   Logger.log("Nycklar som används");
   Logger.log(contactResourceKeys);
 
-  let contactsRemovedFromContactGroups = createAndUpdateContacts_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField, contactResourceKeys);
-  Logger.log("Kontakter som är borttagna från kontaktgrupp");
-  Logger.log(contactsRemovedFromContactGroups);
-  deleteContacts(contactsRemovedFromContactGroups, contactResourceKeys);
+  let resourceNamesRemovedFromContactGroups = createAndUpdateContacts_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField, contactResourceKeys);
+  
+  Logger.log("Kontakter som är borttagna från kontaktgrupper");
+  Logger.log(resourceNamesRemovedFromContactGroups);
+  deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceKeys);
+  
   return;
-
-
-  //Hämta lista med alla kontakter
-  //hämta lista med alla kontaktgrupper som finns
-  //Loopa igenom, om medlemsgruppsId matchar något som ej är systemgrupp, ta bort den
-  deleteOldContacts(contactsRemovedFromContactGroups, customEmailField);
 }
 
 
@@ -121,11 +117,16 @@ function getKontakterUserInputData_() {
 }
 
 
-/*
-contactsRemovedFromContactGroups - kontakter som har tagits bort från någon lista
-*/
-function deleteContacts(resourceNamesRemovedFromContactGroups, contactResourceKeys) {
-//contactsRemovedFromContactGroups - denna kollar för att ta bort kontakter som manuellt har lagts till på något sätt eller typ tagit bort medlemsnummer från en medlem och att kontakten sen ska tas bort
+/**
+ * Raderar kontakter som har tagits bort från någon kontaktgrupp och som inte uppfyller
+ * kriterierna för att kunna synkroniseras och kollar också igenom alla kontakter som
+ * uppfyller kriterierna för att kunna synkroniseras men som inte är med i någon kontaktgrupp
+ * 
+ * @param {String[]} resourceNamesRemovedFromContactGroups - Lista med resursnamn för de kontakter
+ * som har tagits bort från någon kontaktgrupp
+ * @param {String[]} contactResourceKeys - Attribut för en kontakt
+ */
+function deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceKeys) {
 
   /***De som har tagits bort från någon kontaktgrupp***/
   Logger.log("Resurser som tagits bort från någon kontaktgrupp");
@@ -136,8 +137,8 @@ function deleteContacts(resourceNamesRemovedFromContactGroups, contactResourceKe
 
   /***Hitta alla kontakter som är synkbara***/
   let connections = updateListOfConnections_([...contactResourceKeys, 'memberships']);
-  Logger.log("Alla kontakter som är synkbara");
-  Logger.log(connections);
+  //Logger.log("Alla kontakter som är synkbara");
+  //Logger.log(connections);
 
   let connectionsResourceNames = [];
   for (let i = 0; i < connections.length; i++) {
@@ -157,16 +158,12 @@ function deleteContacts(resourceNamesRemovedFromContactGroups, contactResourceKe
   let resourceNamesToCheck = [];
 
   for (let i = 0; i < resourceNamesRemovedFromContactGroups.length; i++) {
-
     if (!connectionsResourceNames.includes(resourceNamesRemovedFromContactGroups[i])) {
-      Logger.log("Denna kontakt var konstig");
       resourceNamesToCheck.push(resourceNamesRemovedFromContactGroups[i]);
     }
   }
-
   Logger.log("Dessa kontakter är icke synkbara kontakter som tagits bort från en kontaktgrupp");
   Logger.log(resourceNamesToCheck);
-
 
   let personResponses = getContactsByMemberResourceNames_(resourceNamesToCheck);
   let resourceNamesToDeleteNonSyncable = getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgrupperResourceNames);
@@ -175,11 +172,11 @@ function deleteContacts(resourceNamesRemovedFromContactGroups, contactResourceKe
 
   /***Hitta vilka synkbara kontakter som inte är med i en kontaktgrupp***/
   let resourceNamesToDeleteSyncable = getResourceNamesToDeleteFromConnections_(connections, kontaktgrupperResourceNames);
-  
-
   /***SLUT - Hitta vilka synkbara kontakter som inte är med i en kontaktgrupp***/
 
-  //Ta bort alla kontakter som ska tas bort
+  //Raderar kontakterna
+  batchDeleteContacts_(resourceNamesToDeleteNonSyncable);
+  batchDeleteContacts_(resourceNamesToDeleteSyncable);
 }
 
 
@@ -834,10 +831,14 @@ function batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate)  {
  * 
  * @param {String[]} resourceNames - Lista över resursnamn för kontakter som ska tas bort
  */
-function batchDeleteContacts(resourceNames) {
+function batchDeleteContacts_(resourceNames) {
+
+  if (!resourceNames || 0 == resourceNames.length) {
+    return;
+  }
 
   //Max 500 stycken kan tas bort samtidigt. Resten får tas vid nästa körning
-  if (resourceNames && 500 < resourceNames.length) {
+  if (500 < resourceNames.length) {
     resourceNames = resourceNames.slice(0, 500);
   }
 
@@ -1473,6 +1474,7 @@ function getContactGroups_(prefixContactgroups) {
   Logger.log(listOfContactGroups.length);
   return listOfContactGroups;
 }
+
 
 /**
  * Ta bort dubletter från en lista
