@@ -13,8 +13,10 @@ function synkroniseraKontakterVanlig()  {
 }
 
 function synkroniseraKontakterTvingad() {
+  createTriggerIfNeeded();
   Kontakter(true);
 }
+
 
 /*
  * Huvudfunktion för att hantera synkronisering av kontaktgrupper med Scoutnet
@@ -58,6 +60,34 @@ function Kontakter(forceUpdate) {
   deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceKeys);
   
   return;
+}
+
+
+/**
+ * Skapar tidsinställd utlösare för skriptet vid behov
+ */
+function createTriggerIfNeeded()  {
+
+  let triggers = ScriptApp.getProjectTriggers();
+
+  Logger.log("Antal utlösare som finns " + triggers.length);
+
+  if (0 < triggers.length)  {
+    Logger.log("Utlösare finns redan och ska ej skapas");
+    return;
+  }  
+
+  let trigger = ScriptApp.newTrigger('synkroniseraKontakterVanlig')
+    .timeBased()
+    .atHour(1)
+    .everyDays(1)
+    .inTimezone("Europe/Stockholm")
+    .create();
+
+  Logger.log("Nedanstående utlösare är nu skapad")
+  Logger.log("Typ av utlösare " + trigger.getEventType());
+  Logger.log("Funktion som ska köras " + trigger.getHandlerFunction());
+  Logger.log("Unikt id för utlösare " + trigger.getUniqueId());
 }
 
 
