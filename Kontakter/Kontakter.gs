@@ -39,7 +39,18 @@ function Kontakter(forceUpdate) {
 
   let userParam = "?username=" + username + "&password=" + password + "&version=" + version + "&forceupdate=" + forceUpdate;
   let response = UrlFetchApp.fetch(url+userParam);
+
   let nyaKontaktGrupper = JSON.parse(response);
+  Logger.log(typeof nyaKontaktGrupper);
+
+  if (typeof nyaKontaktGrupper === 'string') {
+    Logger.log("Felmeddelande från kårens backend");
+    Logger.log(nyaKontaktGrupper);
+    nyaKontaktGrupper = [[]];
+  }
+  else  {
+    Logger.log("Riktig data från backend har hämtats");
+  }
 
   Logger.log(nyaKontaktGrupper);
 
@@ -1288,8 +1299,8 @@ function createContact_(memberData, customEmailField)  {
  * @returns {Objekt[]} - Lista med info och medlemsnummer för aktuell kommande kontaktgrupp
  */
 function getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups)  {
-
-  for (let i = 0; i < nyaKontakter.length; i++) {
+  
+  for (let i = 1; i < nyaKontakter.length; i++) {
 
     let tmpNamn = prefixContactgroups + nyaKontakter[i][0].name;
     if (tmpNamn == namn)  {

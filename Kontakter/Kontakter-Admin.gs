@@ -83,6 +83,11 @@ function doGet(e) {
 
     contactGroupsList = getContactGroupsData_(listOfGroupEmails);
   }
+  else  {
+    contactGroupsList = "Du har angivet en felaktig kombination av e-postadress & lösenord. " +
+                        "Om e-postadressen finns registrerad kommer det strax ett e-brev till " +
+                        "dig med ditt lösenord";
+  }
 
   Logger.log("Svar");
   Logger.log(contactGroupsList);
@@ -157,7 +162,7 @@ function updateContactGroupsAuthnSheetUsers()  {
   for (let i = 0; i < listOfEmailsShouldHaveAccess.length; i++) {
     
     let email = listOfEmailsShouldHaveAccess[i];
-    if(!contains(listOfEmailsAlreadyAccess, email))  {
+    if(!listOfEmailsAlreadyAccess.includes(email))  {
       
       Logger.log(email);
       let password = createRandomPasswordForContactGroupsUser_();
