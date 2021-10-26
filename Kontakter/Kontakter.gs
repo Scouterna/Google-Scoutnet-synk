@@ -7,6 +7,18 @@
 var url = 'https://script.google.com/macros/s/1213235654/exec';
 
 
+/**
+ * Funktion för att skapa menyn i kalkylarket
+ */
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('Scoutnet')
+    .addItem('Synkronisera kontakter', 'synkroniseraKontakterVanlig')
+    .addItem('Synkronisera kontakter - Tvinga uppdatering om möjligt', 'synkroniseraKontakterTvingad')
+    .addItem('Radera alla synkbara kontakter', 'raderaKontakter')
+    .addToUi();
+}
+
 
 function synkroniseraKontakterVanlig()  {
   Kontakter(false, false);
@@ -52,7 +64,7 @@ function Kontakter(forceUpdate, deleteContacts) {
 
     nyaKontaktGrupper = JSON.parse(response);
     Logger.log(typeof nyaKontaktGrupper);
-  } 
+  }
 
   if ((typeof nyaKontaktGrupper === 'string') || deleteContacts) {
     Logger.log("Felmeddelande från kårens backend");
