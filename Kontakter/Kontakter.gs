@@ -9,19 +9,23 @@ var url = 'https://script.google.com/macros/s/1213235654/exec';
 
 
 function synkroniseraKontakterVanlig()  {
-  Kontakter(false);
+  Kontakter(false, false);
 }
 
 function synkroniseraKontakterTvingad() {
   createTriggerIfNeeded();
-  Kontakter(true);
+  Kontakter(true, false);
+}
+
+function raderaKontakter()  {
+  Kontakter(false, true);
 }
 
 
 /*
  * Huvudfunktion för att hantera synkronisering av kontaktgrupper med Scoutnet
  */
-function Kontakter(forceUpdate) {
+function Kontakter(forceUpdate, deleteContacts) {
   
   Logger.log("Läser data från kalkylbladet");
   let sdk = getSheetDataKontakter_();
@@ -38,12 +42,19 @@ function Kontakter(forceUpdate) {
   Logger.log("Gör anrop till API");
 
   let userParam = "?username=" + username + "&password=" + password + "&version=" + version + "&forceupdate=" + forceUpdate;
-  let response = UrlFetchApp.fetch(url+userParam);
+  let response;
+  let nyaKontaktGrupper;
 
-  let nyaKontaktGrupper = JSON.parse(response);
-  Logger.log(typeof nyaKontaktGrupper);
 
-  if (typeof nyaKontaktGrupper === 'string') {
+  if (!deleteContacts) {
+    response = UrlFetchApp.fetch(url+userParam);
+    Logger.log(response);
+
+    nyaKontaktGrupper = JSON.parse(response);
+    Logger.log(typeof nyaKontaktGrupper);
+  } 
+
+  if ((typeof nyaKontaktGrupper === 'string') || deleteContacts) {
     Logger.log("Felmeddelande från kårens backend");
     Logger.log(nyaKontaktGrupper);
     nyaKontaktGrupper = [[]];
@@ -524,6 +535,10 @@ function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd
 function getMemberdataFromMemberNumber_(nyaKontakter, memberNumber)  {
 
   let allMembers = nyaKontakter[0];
+
+  if (null == allMembers) {
+    return null;
+  }
 
   for (let i = 0; i < allMembers.length; i++) {
 
