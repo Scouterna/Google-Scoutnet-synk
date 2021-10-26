@@ -21,23 +21,26 @@ function onOpen() {
 
 
 function synkroniseraKontakterVanlig()  {
-  Kontakter(false, false);
+  synkroniseraKontakter_(false, false);
 }
 
 function synkroniseraKontakterTvingad() {
   createTriggerIfNeeded();
-  Kontakter(true, false);
+  synkroniseraKontakter_(true, false);
 }
 
 function raderaKontakter()  {
-  Kontakter(false, true);
+  synkroniseraKontakter_(false, true);
 }
 
 
-/*
- * Huvudfunktion för att hantera synkronisering av kontaktgrupper med Scoutnet
+/**
+ * Huvudfunktion för att hantera synkronisering av kontakter och kontaktgrupper med Scoutnet
+ * 
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av kontakter om det går. Ej undansparad data.
+ * @param {Boolean[]} deleteContacts - Om alla synkbara kontakter ska raderas eller ej
  */
-function Kontakter(forceUpdate, deleteContacts) {
+function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   
   Logger.log("Läser data från kalkylbladet");
   let sdk = getSheetDataKontakter_();
@@ -54,6 +57,8 @@ function Kontakter(forceUpdate, deleteContacts) {
   Logger.log("Gör anrop till API");
 
   let userParam = "?username=" + username + "&password=" + password + "&version=" + version + "&forceupdate=" + forceUpdate;
+  Logger.log(userParam);
+  
   let response;
   let nyaKontaktGrupper;
 
@@ -92,8 +97,6 @@ function Kontakter(forceUpdate, deleteContacts) {
   Logger.log("Kontakter som är borttagna från kontaktgrupper");
   Logger.log(resourceNamesRemovedFromContactGroups);
   deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceKeys);
-  
-  return;
 }
 
 
