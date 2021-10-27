@@ -42,7 +42,7 @@ function raderaKontakter()  {
  */
 function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   
-  Logger.log("Läser data från kalkylbladet");
+  console.info("Läser data från kalkylbladet");
   let sdk = getSheetDataKontakter_();
   let username = sdk["username"];
   let password = sdk["password"];
@@ -51,13 +51,13 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   let prefixContactgroups = sdk["prefixContactgroups"];
   let customEmailField = sdk["customEmailField"];
   let groupName = sdk["groupName"];
-  Logger.log("E-postfält för alla e-postadresser för en kontakt " + customEmailField);
-  Logger.log("Kår " + groupName);
+  console.log("E-postfält för alla e-postadresser för en kontakt " + customEmailField);
+  console.log("Kår " + groupName);
 
-  Logger.log("Gör anrop till API");
+  console.info("Gör anrop till API");
 
   let userParam = "?username=" + username + "&password=" + password + "&version=" + version + "&forceupdate=" + forceUpdate;
-  Logger.log(userParam);
+  console.log(userParam);
   
   let response;
   let nyaKontaktGrupper;
@@ -65,37 +65,37 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
 
   if (!deleteContacts) {
     response = UrlFetchApp.fetch(url+userParam);
-    Logger.log(response);
+    console.log(response);
 
     nyaKontaktGrupper = JSON.parse(response);
-    Logger.log(typeof nyaKontaktGrupper);
-  }
+    console.log(typeof nyaKontaktGrupper);
+  }  
 
   if ((typeof nyaKontaktGrupper === 'string') || deleteContacts) {
-    Logger.log("Felmeddelande från kårens backend");
-    Logger.log(nyaKontaktGrupper);
+    console.info("Felmeddelande från kårens backend");
+    console.log(nyaKontaktGrupper);
     nyaKontaktGrupper = [[]];
   }
   else  {
-    Logger.log("Riktig data från backend har hämtats");
+    console.info("Riktig data från backend har hämtats");
   }
 
-  Logger.log(nyaKontaktGrupper);
+  console.log(nyaKontaktGrupper);
 
   let kontaktgrupper = getContactGroups_(prefixContactgroups);
   kontaktgrupper = createAndDeleteContactGroups_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups);
-  Logger.log("kontaktgrupper");
-  Logger.log(kontaktgrupper);
+  console.log("kontaktgrupper");
+  console.log(kontaktgrupper);
 
   let emptyContactResource = makeContactResource_({}, customEmailField);
   let contactResourceKeys = Object.keys(emptyContactResource);
-  Logger.log("Nycklar som används");
-  Logger.log(contactResourceKeys);
+  console.log("Nycklar som används");
+  console.log(contactResourceKeys);
 
   let resourceNamesRemovedFromContactGroups = createAndUpdateContacts_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField, contactResourceKeys);
   
-  Logger.log("Kontakter som är borttagna från kontaktgrupper");
-  Logger.log(resourceNamesRemovedFromContactGroups);
+  console.info("Kontakter som är borttagna från kontaktgrupper");
+  console.info(resourceNamesRemovedFromContactGroups);
   deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceKeys);
 }
 
@@ -107,10 +107,10 @@ function createTriggerIfNeeded()  {
 
   let triggers = ScriptApp.getProjectTriggers();
 
-  Logger.log("Antal utlösare som finns " + triggers.length);
+  console.info("Antal utlösare som finns " + triggers.length);
 
   if (0 < triggers.length)  {
-    Logger.log("Utlösare finns redan och ska ej skapas");
+    console.info("Utlösare finns redan och ska ej skapas");
     return;
   }  
 
@@ -121,10 +121,10 @@ function createTriggerIfNeeded()  {
     .inTimezone("Europe/Stockholm")
     .create();
 
-  Logger.log("Nedanstående utlösare är nu skapad")
-  Logger.log("Typ av utlösare " + trigger.getEventType());
-  Logger.log("Funktion som ska köras " + trigger.getHandlerFunction());
-  Logger.log("Unikt id för utlösare " + trigger.getUniqueId());
+  console.info("Nedanstående utlösare är nu skapad")
+  console.info("Typ av utlösare " + trigger.getEventType());
+  console.info("Funktion som ska köras " + trigger.getHandlerFunction());
+  console.log("Unikt id för utlösare " + trigger.getUniqueId());
 }
 
 
@@ -137,15 +137,15 @@ function getSheetDataKontakter_()  {
 
   let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
   if (sheet == null) {
-    Logger.log("Bladet Kontakter finns ej i kalkylarket");
+    console.error("Bladet Kontakter finns ej i kalkylarket");
   }
   let selection = sheet.getDataRange();
   let data = selection.getValues();
   
   let grd = getKontakterUserInputData_();
 
-  //Logger.log(data);
-  //Logger.log(grd);
+  //console.log(data);
+  //console.log(grd);
 
   let userInputData = {};
   userInputData["username"] = data[grd["username"][0]][grd["username"][1]];
@@ -156,7 +156,7 @@ function getSheetDataKontakter_()  {
   userInputData["groupName"] = data[grd["groupName"][0]][grd["groupName"][1]];
   userInputData["version"] = data[grd["version"][0]][grd["version"][1]];
 
-  Logger.log(userInputData);
+  console.info(userInputData);
   return userInputData;
 }
 
@@ -196,23 +196,23 @@ function getKontakterUserInputData_() {
 function deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceKeys) {
 
   /***De som har tagits bort från någon kontaktgrupp***/
-  Logger.log("Resurser som tagits bort från någon kontaktgrupp");
+  console.info("Resurser som tagits bort från någon kontaktgrupp");
   //Rensar bort dubletter bland de som tagits bort från flera kontaktgrupper
   resourceNamesRemovedFromContactGroups = removeDublicates_(resourceNamesRemovedFromContactGroups);
-  Logger.log(resourceNamesRemovedFromContactGroups);
+  console.info(resourceNamesRemovedFromContactGroups);
   /***SLUT - De som har tagits bort från någon kontaktgrupp***/
 
   /***Hitta alla kontakter som är synkbara***/
   let connections = updateListOfConnections_([...contactResourceKeys, 'memberships']);
-  //Logger.log("Alla kontakter som är synkbara");
-  //Logger.log(connections);
+  //console.log("Alla kontakter som är synkbara");
+  //console.log(connections);
 
   let connectionsResourceNames = [];
   for (let i = 0; i < connections.length; i++) {
     connectionsResourceNames.push(connections[i].resourceName);
   }
-  Logger.log("connectionsResourceNames");
-  Logger.log(connectionsResourceNames);
+  console.log("connectionsResourceNames");
+  console.log(connectionsResourceNames);
   /***SLUT - Hitta alla kontakter som är synkbara***/
 
 
@@ -229,8 +229,8 @@ function deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceK
       resourceNamesToCheck.push(resourceNamesRemovedFromContactGroups[i]);
     }
   }
-  Logger.log("Dessa kontakter är icke synkbara kontakter som tagits bort från en kontaktgrupp");
-  Logger.log(resourceNamesToCheck);
+  console.log("Dessa kontakter är icke synkbara kontakter som tagits bort från en kontaktgrupp");
+  console.log(resourceNamesToCheck);
 
   let personResponses = getContactsByMemberResourceNames_(resourceNamesToCheck);
   let resourceNamesToDeleteNonSyncable = getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgrupperResourceNames);
@@ -261,8 +261,8 @@ function getContactGroupsResourceNames_()  {
   for (let i = 0; i < kontaktgrupper.length; i++) {
     resourceNames.push(kontaktgrupper[i].resourceName);
   }
-  Logger.log("Resursnamn för alla användarskapade kontaktgrupper");
-  Logger.log(resourceNames);
+  console.log("Resursnamn för alla användarskapade kontaktgrupper");
+  console.log(resourceNames);
   return resourceNames;
 }
 
@@ -279,23 +279,23 @@ function getContactGroupsResourceNames_()  {
  */
 function getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgrupperResourceNames)  {
 
-  //Logger.log("personResponses");
-  //Logger.log(personResponses);
+  //console.log("personResponses");
+  //console.log(personResponses);
 
   let resourceNamesToDelete = [];
 
   for (let i = 0; i < personResponses.length; i++) {
     let person = personResponses[i].person;
     let memberships = person.memberships;
-    //Logger.log("memberships");
-    //Logger.log(memberships);
+    //console.log("memberships");
+    //console.log(memberships);
     
     if (!checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, memberships)) {
       resourceNamesToDelete.push(person.resourceName);
     }
   }
-  Logger.log("Dessa kontakter som inte är synkbara ska raderas");
-  Logger.log(resourceNamesToDelete);
+  console.warn("Dessa kontakter som inte är synkbara ska raderas");
+  console.warn(resourceNamesToDelete);
   return resourceNamesToDelete;
 }
 
@@ -319,15 +319,15 @@ function getResourceNamesToDeleteFromConnections_(connections, kontaktgrupperRes
     let memberships = connection.memberInfo.memberships;
     let resourceName = connection.resourceName;
 
-    //Logger.log(resourceName);
-    //Logger.log(memberships);
+    //console.log(resourceName);
+    //console.log(memberships);
 
     if (!checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, memberships)) {
       resourceNamesToDelete.push(resourceName);
     }
   }
-  Logger.log("Dessa kontakter som är synkbara ska raderas");
-  Logger.log(resourceNamesToDelete);
+  console.warn("Dessa kontakter som är synkbara ska raderas");
+  console.warn(resourceNamesToDelete);
   return resourceNamesToDelete;
 }
 
@@ -346,11 +346,11 @@ function checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, 
     let resourceName = memberships[i].contactGroupMembership.contactGroupResourceName;
     
     if (kontaktgrupperResourceNames.includes(resourceName)) {
-      //Logger.log("Denna kontakt är fortfarande med i en kontaktgrupp " + resourceName);
+      //console.log("Denna kontakt är fortfarande med i en kontaktgrupp " + resourceName);
       return true;
     }
   }
-  //Logger.log("Denna kontakt är inte längre med i en kontaktgrupp");
+  //console.log("Denna kontakt är inte längre med i en kontaktgrupp");
   return false;
 }
 
@@ -378,13 +378,13 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
   //Loop och gå igenom varje kontaktgrupp
   for (let i = 0; i < kontaktGrupper.length; i++) {
     
-    //Logger.log(kontaktGrupper[i]);
+    //console.log(kontaktGrupper[i]);
 
     let kontaktGruppNamn = kontaktGrupper[i].name;
-    Logger.log("Namn på aktuell kontaktgrupp " + kontaktGruppNamn);
+    console.info("Namn på aktuell kontaktgrupp " + kontaktGruppNamn);
 
     let kontaktGruppResourceName = kontaktGrupper[i].resourceName;
-    Logger.log("Resursnamn för aktuell kontaktgrupp " + kontaktGruppResourceName);
+    console.log("Resursnamn för aktuell kontaktgrupp " + kontaktGruppResourceName);
 
     //Hämta vilka som är med i kontaktgruppen just nu
     /***Är med i kontaktgruppen just nu***/
@@ -393,21 +393,21 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
     let kontaktLista = getContactsByMemberResourceNames_(memberResourceNames);
     let membersInfo = getMembersInfoFromPersonResponses_(kontaktLista);
   
-    //Logger.log("kontaktGrupp");
-    //Logger.log(kontaktGrupp);
+    //console.log("kontaktGrupp");
+    //console.log(kontaktGrupp);
 
-    //Logger.log("memberResourceNames");
-    //Logger.log(memberResourceNames);
+    //console.log("memberResourceNames");
+    //console.log(memberResourceNames);
 
-    //Logger.log("kontaktLista");
-    //Logger.log(kontaktLista);
+    //console.log("kontaktLista");
+    //console.log(kontaktLista);
 
-    Logger.log("Hämta lista över vilka som just nu är med i kontaktgruppen");
-    Logger.log(membersInfo);
+    console.log("Hämta lista över vilka som just nu är med i kontaktgruppen");
+    console.log(membersInfo);
     /***Är med i kontaktgruppen just nu - Slut***/
 
-    //Logger.log("nyaKontakter");
-    //Logger.log(nyaKontakter);
+    //console.log("nyaKontakter");
+    //console.log(nyaKontakter);
 
     /***Ska var med i kontaktgruppen***/
     let memberNumbersShouldBeInContactGroup = getMemberNumbersShouldBeInContactGroup_(nyaKontakter, kontaktGruppNamn, prefixContactgroups);
@@ -418,13 +418,13 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
     let resourceNamesToAdd = [];
     let resourceNamesToRemove = [];
   
-    Logger.log("Loopa igenom vilka som ska tas bort från kontaktgruppen");
+    console.log("Loopa igenom vilka som ska tas bort från kontaktgruppen");
     //Loop och gå igenom varje kontakt som är med i gruppen just nu
     for (let n = 0; n < membersInfo.length; n++) {
       
       //Detta medlemsnummer finns ej med i den nya listan
       if (!memberNumbersShouldBeInContactGroup.includes(membersInfo[n].memberNumber)) {
-        Logger.log("Ska ta bort kontakten från kontaktgruppen " + membersInfo[n].memberNumber);
+        console.log("Ska ta bort kontakten från kontaktgruppen " + membersInfo[n].memberNumber);
         resourceNamesToRemove.push(membersInfo[n].resourceName);
         contactsRemovedFromContactGroups.push(membersInfo[n].resourceName);
       }
@@ -433,16 +433,16 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
       }
     }
 
-    Logger.log("Ska fortsätta stanna i gruppen");
-    Logger.log(membersInfoStayingInGroup);
+    console.log("Ska fortsätta stanna i gruppen");
+    console.log(membersInfoStayingInGroup);
 
     let memberNumbersStayingInGroup = getMemberNumbersFromMembersInfo_(membersInfoStayingInGroup);
-    //Logger.log("memberNumbersStayingInGroup");
-    //Logger.log(memberNumbersStayingInGroup);
+    //console.log("memberNumbersStayingInGroup");
+    //console.log(memberNumbersStayingInGroup);
 
     
     //Loop - de som inte är med i kontaktgruppen ska läggas till. Om konto saknas ska det skapas
-    Logger.log("Loopa igenom vilka som ska läggas till i kontaktgruppen och eventuellt skapas");
+    console.log("Loopa igenom vilka som ska läggas till i kontaktgruppen och eventuellt skapas");
     for (let n = 0; n < memberNumbersShouldBeInContactGroup.length; n++) {
 
       //Ej med i kontaktgruppen sedan innan
@@ -453,11 +453,11 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
 
         if (connection)  {
           //Kontakten finns sedan innan
-          Logger.log("Lägg till kontakten " + connection.memberNumber + " i gruppen");
+          console.log("Lägg till kontakten " + connection.memberNumber + " i gruppen");
           resourceNamesToAdd.push(connection.resourceName);
         }
         else {          
-          Logger.log("Skapa kontakten " + memberNumbersShouldBeInContactGroup[n] + " och lägg till i gruppen");
+          console.log("Skapa kontakten " + memberNumbersShouldBeInContactGroup[n] + " och lägg till i gruppen");
           let memberData = getMemberdataFromMemberNumber_(nyaKontakter, memberNumbersShouldBeInContactGroup[n]);
 
           connection = createContact_(memberData, customEmailField);
@@ -475,8 +475,8 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
     modifyContactGroupMembers_(kontaktGruppResourceName, resourceNamesToAdd, resourceNamesToRemove);
   }
 
-  Logger.log("Följande resursnamn är redan processade och behöver ej uppdateras senare");
-  Logger.log(resourceNamesAlreadyProcessed);
+  console.log("Följande resursnamn är redan processade och behöver ej uppdateras senare");
+  console.log(resourceNamesAlreadyProcessed);
   updateContacts_(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField);
 
   return contactsRemovedFromContactGroups; 
@@ -496,12 +496,12 @@ function getMemberNumbersShouldBeInContactGroup_(nyaKontakter, namn, prefixConta
 
   //Hämta lista vilka som ska vara med i kontaktgruppen
   let kontaktGruppInfo = getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups);
-  Logger.log("Hämta lista över vilka som ska vara med i kontaktgruppen");
-  Logger.log(kontaktGruppInfo);
+  console.info("Hämta lista över vilka som ska vara med i kontaktgruppen");
+  console.info(kontaktGruppInfo);
 
   let kontaktGruppMemberNumbersList = getContactGroupMemberNumbers_(kontaktGruppInfo);
-  //Logger.log("kontaktGruppMemberNumbersList");
-  //Logger.log(kontaktGruppMemberNumbersList);
+  //console.log("kontaktGruppMemberNumbersList");
+  //console.log(kontaktGruppMemberNumbersList);
 
   return kontaktGruppMemberNumbersList;
 }
@@ -518,11 +518,11 @@ function getMemberNumbersShouldBeInContactGroup_(nyaKontakter, namn, prefixConta
  */
 function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd, resourceNamesToRemove)  {
 
-  Logger.log("Följande ska läggas till i gruppen");
-  Logger.log(resourceNamesToAdd);
+  console.log("Följande ska läggas till i gruppen");
+  console.log(resourceNamesToAdd);
 
-  Logger.log("Följande ska tas bort från gruppen");
-  Logger.log(resourceNamesToRemove);
+  console.log("Följande ska tas bort från gruppen");
+  console.log(resourceNamesToRemove);
 
   try {
     let contactGroupModifyResource = People.ContactGroups.Members.modify({
@@ -530,11 +530,11 @@ function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd
       "resourceNamesToRemove": resourceNamesToRemove
     }, contactGroupResourceName);
 
-    Logger.log(contactGroupModifyResource);
+    console.log(contactGroupModifyResource);
     return contactGroupModifyResource;
   }
   catch (e) {
-      Logger.log("Problem med att anropa Members.modify i People.ContactGroups");
+      console.error("Problem med att anropa Members.modify i People.ContactGroups");
   }  
 }
 
@@ -558,8 +558,8 @@ function getMemberdataFromMemberNumber_(nyaKontakter, memberNumber)  {
   for (let i = 0; i < allMembers.length; i++) {
 
     if (allMembers[i].member_no == memberNumber)  {
-      //Logger.log("medlemsdata");
-      //Logger.log(allMembers[i]);
+      //console.log("medlemsdata");
+      //console.log(allMembers[i]);
       return allMembers[i];
     }
   }
@@ -635,13 +635,13 @@ function updateListOfConnections_(contactResourceKeys) {
       }      
     }
     else {
-      Logger.log('Inga kontakter hittades.');      
+      console.warn('Inga kontakter hittades.');      
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
 
-  //Logger.log("listOfConnections");
-  //Logger.log(listOfConnections);
+  //console.log("listOfConnections");
+  //console.log(listOfConnections);
   return listOfConnections;
 }
 
@@ -691,7 +691,7 @@ function getMemberNumbersFromMembersInfo_(membersInfoList) {
  */
 function getMembersInfoFromPersonResponses_(personResponses) {
 
-  Logger.log("getMembersInfoFromPersonResponses");
+  console.log("getMembersInfoFromPersonResponses");
   let membersInfoList = [];
 
   for (let i = 0; i < personResponses.length; i++) {
@@ -715,7 +715,7 @@ function getMembersInfoFromPersonResponses_(personResponses) {
     }
 
     if (!foundMatch)  {
-      Logger.log("Denna kontakt är manuellt tillagd eller något");
+      console.log("Denna kontakt är manuellt tillagd eller något");
       let memberInfo = {
         memberNumber: "",
         resourceName	: personResponses[i].requestedResourceName
@@ -741,7 +741,7 @@ function getContactsByMemberResourceNames_(resourceNames)  {
   }
 
   for (let n=0; n<6; n++) {
-    Logger.log("Funktionen getContactsByMemberResourceNames körs " + n);
+    console.log("Funktionen getContactsByMemberResourceNames körs " + n);
     
     try {
       let group = People.People.getBatchGet({
@@ -751,7 +751,7 @@ function getContactsByMemberResourceNames_(resourceNames)  {
       return group.responses;
     }
     catch (e) {
-      Logger.log("Problem med att anropa People.People");
+      console.error("Problem med att anropa People.People");
       if (n == 5) {
         throw e;
       } 
@@ -776,14 +776,14 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
   //Den hinner inte uppdatera alla nya kontakter, så de nya kommer sen kollas för uppdateringar också
   connections = updateListOfConnections_(contactResourceKeys);
 
-  Logger.log("Connections");
-  Logger.log(connections);
+  console.log("Connections");
+  console.log(connections);
 
-  Logger.log("nyaKontakter");
-  Logger.log(nyaKontakter);
+  console.log("nyaKontakter");
+  console.log(nyaKontakter);
 
-  Logger.log("Alla nycklar som finns");
-  Logger.log(contactResourceKeys);
+  console.log("Alla nycklar som finns");
+  console.log(contactResourceKeys);
 
   let personFields = getSimplePersonFields_();
   
@@ -792,38 +792,38 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
   let numbersOfContactsToUpdate = 0;
 
   for (let i = 0; i < connections.length; i++) {
-    Logger.log("--------------------------------------");
+    console.info("--------------------------------------");
     let connection = connections[i].memberInfo;
-    Logger.log("Medlemsinfo som är inlagt nu på kontakten");
-    Logger.log(connection);
+    console.log("Medlemsinfo som är inlagt nu på kontakten");
+    console.log(connection);
 
-    Logger.log("Resursnamn för kontakten");
-    Logger.log(connections[i].resourceName);
+    console.log("Resursnamn för kontakten");
+    console.log(connections[i].resourceName);
 
-    Logger.log("Etag för kontakten");
-    Logger.log(connections[i].etag);
+    console.log("Etag för kontakten");
+    console.log(connections[i].etag);
 
     if (resourceNamesAlreadyProcessed.includes(connections[i].resourceName)) {
-      Logger.log("Denna kontakt är redan processad och ska ej uppdateras");
+      console.log("Denna kontakt är redan processad och ska ej uppdateras");
       continue;
     }
 
     let memberData = getMemberdataFromMemberNumber_(nyaKontakter, connections[i].memberNumber);
-    //Logger.log("memberData");
-    //Logger.log(memberData);
+    //console.log("memberData");
+    //console.log(memberData);
     if (!memberData)  {
-      Logger.log("Denna kontakt ska ej vara kvar längre " + connections[i].memberNumber);
+      console.log("Denna kontakt ska ej vara kvar längre " + connections[i].memberNumber);
       continue;
     }
     let memberDataContactResource = makeContactResource_(memberData, customEmailField);
-    Logger.log("Medlemsinfo som ska vara inlagd på kontakten");
-    Logger.log(memberDataContactResource);
+    console.log("Medlemsinfo som ska vara inlagd på kontakten");
+    console.log(memberDataContactResource);
 
     let contactShouldBeUpdated = false;
 
     for (let k = 0; k < personFields.length; k++) {
       if (checkDifference_(connection, memberDataContactResource, personFields[k]))  {
-        Logger.log("Skillnad på " + personFields[k].svName);
+        console.log("Skillnad på " + personFields[k].svName);
         personFieldsToUpdate.push(personFields[k].apiName);
         contactShouldBeUpdated = true;
       }
@@ -831,7 +831,7 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
 
     //Födelsedag är lite special vid jämförelse mellan objekt
     if (checkDifferenceBirthdays_(connection, memberDataContactResource))  {
-      Logger.log("Skillnad på födelsedag");
+      console.log("Skillnad på födelsedag");
       personFieldsToUpdate.push("birthdays");
       contactShouldBeUpdated = true;
     }
@@ -840,9 +840,9 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
     //Denna kontakt ska uppdateras
     if (contactShouldBeUpdated)  {
       numbersOfContactsToUpdate++;
-      Logger.log("Antal kontakter att uppdatera " + numbersOfContactsToUpdate);
+      console.info("Antal kontakter att uppdatera " + numbersOfContactsToUpdate);
       if (numbersOfContactsToUpdate>200)  { //Max uppdatera 200 stycken i taget
-        Logger.log("För många kontakter att uppdatera på en gång. Tar resten vid nästa körning");
+        console.warn("För många kontakter att uppdatera på en gång. Tar resten vid nästa körning");
         continue;
       }
 
@@ -853,13 +853,13 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
   }
 
   personFieldsToUpdate = removeDublicates_(personFieldsToUpdate).toString();
-  Logger.log("personFieldsToUpdate");
-  Logger.log(personFieldsToUpdate);
+  console.log("personFieldsToUpdate");
+  console.log(personFieldsToUpdate);
 
-  Logger.log("contactsToUpdate");
-  Logger.log(contactsToUpdate);
+  console.info("contactsToUpdate");
+  console.info(contactsToUpdate);
 
-  Logger.log("Antal kontakter att uppdatera " + numbersOfContactsToUpdate);
+  console.info("Antal kontakter att uppdatera " + numbersOfContactsToUpdate);
   if (0 != numbersOfContactsToUpdate) {
     batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate);
   }
@@ -875,7 +875,7 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
 function batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate)  {
 
   for (let n=0; n<6; n++) {
-    Logger.log("Funktionen batchUpdateContacts körs " + n);
+    console.log("Funktionen batchUpdateContacts körs " + n);
     
     try {
       People.People.batchUpdateContacts({
@@ -883,11 +883,11 @@ function batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate)  {
         "updateMask": personFieldsToUpdate,
         "sources": ["READ_SOURCE_TYPE_CONTACT"]
       });
-      Logger.log("Uppdaterat kontakterna " + Object.keys(contactsToUpdate));
+      console.log("Uppdaterat kontakterna " + Object.keys(contactsToUpdate));
       return;
     }
     catch (e) {
-      Logger.log("Problem med att anropa People.People");
+      console.error("Problem med att anropa People.People");
       if (n == 5) {
         throw e;
       } 
@@ -914,17 +914,17 @@ function batchDeleteContacts_(resourceNames) {
   }
 
   for (let n=0; n<6; n++) {
-    Logger.log("Funktionen batchDeleteContacts körs " + n);
+    console.log("Funktionen batchDeleteContacts körs " + n);
     
     try {
       People.People.batchDeleteContacts({
         "resourceNames": resourceNames
       });
-      Logger.log("Raderat kontakterna " + resourceNames);
+      console.log("Raderat kontakterna " + resourceNames);
       return;
     }
     catch (e) {
-      Logger.log("Problem med att anropa People.People");
+      console.error("Problem med att anropa People.People");
       if (n == 5) {
         throw e;
       } 
@@ -990,7 +990,7 @@ function checkDifference_(connection, memberDataContactResource, personField) {
   let connectionObject = connection[nameOfPersonField];
   let tmpObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, personField.removeValueEmpty);
   if ('status' in tmpObject) {
-    Logger.log("status är definerad i objektet som " + tmpObject.status);
+    console.log("status är definerad i objektet som " + tmpObject.status);
     //En första koll om det är någon förändring true eller false. T.ex nytt attribut
     return tmpObject.status;
   }
@@ -1019,7 +1019,7 @@ function checkDifferenceBirthdays_(connection, memberDataContactResource) {
   let connectionObject = connection[nameOfPersonField];
   let tmpObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, false);
   if ('status' in tmpObject) {
-    Logger.log("status är definerad i objektet som " + tmpObject.status);
+    console.log("status är definerad i objektet som " + tmpObject.status);
     //En första koll om det är någon förändring true eller false. T.ex nytt attribut
     return tmpObject.status;
   }
@@ -1062,7 +1062,7 @@ function checkDifferenceBirthdays_(connection, memberDataContactResource) {
 function makeArrayOfFilteredConnectionObject_(connectionObject, keys) {
   
   let tmpArray = [];
-  Logger.log("MakeArray Nycklar " + keys);
+  console.log("MakeArray Nycklar " + keys);
   for (let i = 0; i < connectionObject.length; i++) {
     let tmpObject = {};
 
@@ -1090,16 +1090,16 @@ function checkDifferenceHelpfunction_(connectionObject, memberDataContactResourc
     memberData = removeElementsWithValueOrPersonEmpty_(memberData);
   }
 
-  Logger.log("Funktion för jämförelse av " + nameOfPersonField);
-  Logger.log(connectionObject);
-  Logger.log(memberData);
+  console.log("Funktion för jämförelse av " + nameOfPersonField);
+  console.log(connectionObject);
+  console.log(memberData);
 
   if (null == connectionObject) { //Inget inlagt på kontakten i Google
     if (0 == memberData.length) { //Tomt med data för kontaktfältet från Scoutnet
-      Logger.log("Ingen data nu heller för detta kontaktfält");
+      console.log("Ingen data nu heller för detta kontaktfält");
       return {"status": false};
     }
-    Logger.log("Det finns nu ett till kontaktfält");
+    console.log("Det finns nu ett till kontaktfält");
     return {"status": true};
   }
   return {
@@ -1142,14 +1142,14 @@ function removeElementsWithValueOrPersonEmpty_(memberData) {
  */
 function checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField)  {
 
-  Logger.log(nameOfPersonField);
+  console.log(nameOfPersonField);
 
-  Logger.log("checkDifferenceMemberInfo");
-  Logger.log(tmpArray);
-  Logger.log(memberData);
+  console.log("checkDifferenceMemberInfo");
+  console.log(tmpArray);
+  console.log(memberData);
 
   if (tmpArray.length != memberData.length) {
-    Logger.log("Olika många fält för detta kontaktattribut. Någon ändring har skett");
+    console.log("Olika många fält för detta kontaktattribut. Någon ändring har skett");
     return true;
   }
 
@@ -1157,30 +1157,30 @@ function checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField)  {
     let tmpObject = tmpArray[i];
     let tmpMemberData = memberData[i];
 
-    Logger.log("Datan som finns");
-    Logger.log(tmpObject);
+    console.log("Datan som finns");
+    console.log(tmpObject);
 
-    Logger.log("Datan som ska finnas");
-    Logger.log(tmpMemberData);
+    console.log("Datan som ska finnas");
+    console.log(tmpMemberData);
 
     let tmpKeys = Object.keys(tmpObject);
-    Logger.log("Nycklar som ska kollas");
-    Logger.log(tmpKeys);
+    console.log("Nycklar som ska kollas");
+    console.log(tmpKeys);
     
     for (let n = 0; n < tmpKeys.length; n++) {
 
       if (tmpObject[tmpKeys[n]] == tmpMemberData[tmpKeys[n]]) {
-        Logger.log("Samma data " + tmpKeys[n] + " = " + tmpObject[tmpKeys[n]]);
+        console.log("Samma data " + tmpKeys[n] + " = " + tmpObject[tmpKeys[n]]);
       }
       else  {
-        Logger.log("Data är ej lika");
-        Logger.log("Gammal data " + tmpKeys[n] + " = " + tmpObject[tmpKeys[n]]);
-        Logger.log("Ny data " + tmpKeys[n] + " = " + tmpMemberData[tmpKeys[n]]);
+        console.log("Data är ej lika");
+        console.log("Gammal data " + tmpKeys[n] + " = " + tmpObject[tmpKeys[n]]);
+        console.log("Ny data " + tmpKeys[n] + " = " + tmpMemberData[tmpKeys[n]]);
         return true; 
       }
     }
   }
-  Logger.log("INGEN förändring alls för detta attrbut");
+  console.log("INGEN förändring alls för detta attrbut");
   return false;
 }
 
@@ -1297,19 +1297,19 @@ function makeContactResource_(memberData, customEmailField)  {
 function createContact_(memberData, customEmailField)  {
 
   let contactResource = makeContactResource_(memberData, customEmailField);
-  //Logger.log("contactResource");
-  //Logger.log(contactResource);
+  //console.log("contactResource");
+  //console.log(contactResource);
 
   for (let n=0; n<6; n++) {
-    Logger.log("Funktionen createContact körs " + n);
+    console.log("Funktionen createContact körs " + n);
     
     try {
       let peopleResource = People.People.createContact(contactResource);
-      Logger.log(peopleResource);
+      console.log(peopleResource);
       return peopleResource;
     }
     catch (e) {
-      Logger.log("Problem med att anropa People.People med:" + contactResource);
+      console.error("Problem med att anropa People.People med:" + contactResource);
       if (n == 5) {
         throw e;
       } 
@@ -1351,26 +1351,26 @@ function getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups)  {
  */
 function createAndDeleteContactGroups_(gamlaKontaktGrupper, nyaKontaktGrupper, prefixContactgroups) {
 
-  Logger.log("Skapar nya kontaktgrupper och tar bort gamla");
+  console.info("Skapar nya kontaktgrupper och tar bort gamla");
 
   let nameOfOldContactGroups = getNameOfContactGroups_(gamlaKontaktGrupper);
 
   let nameOfToBeContactGroups = [];
 
-  Logger.log(nyaKontaktGrupper);
+  console.log(nyaKontaktGrupper);
   for (let i = 1; i < nyaKontaktGrupper.length; i++) {
     nameOfToBeContactGroups.push(prefixContactgroups + nyaKontaktGrupper[i][0].name);
   }
-  Logger.log("Namn på de kontaktgrupper som redan finns");
-  Logger.log(nameOfOldContactGroups);
+  console.info("Namn på de kontaktgrupper som redan finns");
+  console.info(nameOfOldContactGroups);
 
-  Logger.log("Namn på kontaktgrupper som ska finnas");
-  Logger.log(nameOfToBeContactGroups);
+  console.info("Namn på kontaktgrupper som ska finnas");
+  console.info(nameOfToBeContactGroups);
 
   //Ta bort de kontaktgrupper som ej ska finnas
   for (let i = 0; i < nameOfOldContactGroups.length; i++) {
     if (!nameOfToBeContactGroups.includes(nameOfOldContactGroups[i])) {
-      Logger.log("Ta bort denna grupp " + gamlaKontaktGrupper[i].name);
+      console.log("Ta bort denna grupp " + gamlaKontaktGrupper[i].name);
       deleteContactGroup_(gamlaKontaktGrupper[i]);
     }
   }
@@ -1394,12 +1394,12 @@ function createAndDeleteContactGroups_(gamlaKontaktGrupper, nyaKontaktGrupper, p
  */
 function getNameOfContactGroups_(kontaktgrupper) {
 
-  Logger.log("Skapar lista med namn över kontaktgrupper");
+  console.log("Skapar lista med namn över kontaktgrupper");
   let nameOfContactGroups = [];
 
   for (let i = 0; i < kontaktgrupper.length; i++) {
     nameOfContactGroups.push(kontaktgrupper[i].name);
-    //Logger.log(nameOfContactGroups[i]);
+    //console.log(nameOfContactGroups[i]);
   }
   return nameOfContactGroups;
 }
@@ -1413,15 +1413,15 @@ function getNameOfContactGroups_(kontaktgrupper) {
 function deleteContactGroup_(contactGroup) {
 
   for (let n=0; n<6; n++) {
-    Logger.log("Funktionen deleteContactGroup körs " + n);
+    console.log("Funktionen deleteContactGroup körs " + n);
     
     try {
       People.ContactGroups.remove(contactGroup.resourceName);
-      Logger.log("Tagit bort bort kontaktgruppen " + contactGroup.name);
+      console.log("Tagit bort bort kontaktgruppen " + contactGroup.name);
       return;
     }
     catch (e) {
-      Logger.log("Problem med att anropa People.ContactGroups med:" + contactGroup.name);
+      console.error("Problem med att anropa People.ContactGroups med:" + contactGroup.name);
       if (n == 5) {
         throw e;
       } 
@@ -1441,7 +1441,7 @@ function deleteContactGroup_(contactGroup) {
 function createContactGroup_(namn) {
 
   for (let n=0; n<6; n++) {
-    Logger.log("Funktionen createContactGroup körs " + n);
+    console.log("Funktionen createContactGroup körs " + n);
     
     try {
       let contactGroupResource = {
@@ -1451,11 +1451,11 @@ function createContactGroup_(namn) {
       };
 
       let group = People.ContactGroups.create(contactGroupResource);
-      Logger.log("Skapat kontaktgruppen " + namn);
+      console.log("Skapat kontaktgruppen " + namn);
       return group;
     }
     catch (e) {
-      Logger.log("Problem med att anropa People.ContactGroups med:" + namn);
+      console.error("Problem med att anropa People.ContactGroups med:" + namn);
       if (n == 5) {
         throw e;
       } 
@@ -1475,18 +1475,18 @@ function createContactGroup_(namn) {
 function getContactGroup_(contactGroup) {
 
   for (let n=0; n<6; n++) {
-    Logger.log("Funktionen getContactGroup körs " + n);
+    console.log("Funktionen getContactGroup körs " + n);
     
     try {
       let group = People.ContactGroups.get(contactGroup.resourceName,
         {maxMembers: 999}
         );
       
-      Logger.log("Hämtat kontaktgruppen " + contactGroup.name);
+      console.log("Hämtat kontaktgruppen " + contactGroup.name);
       return group;
     }
     catch (e) {
-      Logger.log("Problem med att anropa People.ContactGroups med:" + contactGroup.name);
+      console.error("Problem med att anropa People.ContactGroups med:" + contactGroup.name);
       if (n == 5) {
         throw e;
       } 
@@ -1505,7 +1505,7 @@ function getContactGroup_(contactGroup) {
  */
 function getContactGroups_(prefixContactgroups) {
 
-  Logger.log("Hämtar lista över alla kontaktgrupper som finns just nu");
+  console.info("Hämtar lista över alla kontaktgrupper som finns just nu");
 
   let listOfContactGroups = [];
 
@@ -1528,21 +1528,21 @@ function getContactGroups_(prefixContactgroups) {
         
         if (contactGroup.groupType == "USER_CONTACT_GROUP") {
           if (contactGroup.name.startsWith(prefixContactgroups)) {
-            Logger.log(contactGroups[i]);
-            Logger.log(contactGroup);
+            console.log(contactGroups[i]);
+            console.log(contactGroup);
             listOfContactGroups.push(contactGroup);
           }          
         }        
       }
     }
     else {
-      Logger.log('Inga kontaktgrupper hittades.');      
+      console.log('Inga kontaktgrupper hittades.');      
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
 
-  Logger.log(listOfContactGroups);
-  Logger.log(listOfContactGroups.length);
+  console.log(listOfContactGroups);
+  console.log(listOfContactGroups.length);
   return listOfContactGroups;
 }
 
@@ -1554,14 +1554,14 @@ function getContactGroups_(prefixContactgroups) {
  */
 function removeDublicates_(list) {
   let tmp_array = []
-  Logger.log("Försöker radera dubletter");
+  console.log("Försöker radera dubletter");
     for(let i = 0;i < list.length; i++){
       if(tmp_array.indexOf(list[i]) == -1){
         tmp_array.push(list[i])
-        //Logger.log("Denna är ny " + list[i]);
+        //console.log("Denna är ny " + list[i]);
       }
       else {
-        //Logger.log("Hittade dublett av " + list[i]);
+        //console.log("Hittade dublett av " + list[i]);
       }
     }
   return tmp_array;
