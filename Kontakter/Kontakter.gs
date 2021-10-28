@@ -1512,43 +1512,56 @@ function getContactGroups_(prefixContactgroups) {
 
   console.info("Hämtar lista över alla kontaktgrupper som finns just nu");
 
-  let listOfContactGroups = [];
+  for (let n=0; n<6; n++) {
+    Logger.log("Funktionen getContactGroups körs " + n);
 
-  let pageToken, page;
-  do {
-    page = People.ContactGroups.list({
-      pageToken: pageToken,
-      pageSize: 25
-    });
-    let contactGroups = page.contactGroups;
-    if (contactGroups) {   
-      for (let i = 0; i < contactGroups.length; i++) {
-        
-        let contactGroup = {
-          resourceName: contactGroups[i].resourceName,
-          groupType	: contactGroups[i].groupType,
-          name: contactGroups[i].name,
-          memberCount: contactGroups[i].memberCount
-        };
-        
-        if (contactGroup.groupType == "USER_CONTACT_GROUP") {
-          if (contactGroup.name.startsWith(prefixContactgroups)) {
-            console.log(contactGroups[i]);
-            console.log(contactGroup);
-            listOfContactGroups.push(contactGroup);
-          }          
-        }        
-      }
-    }
-    else {
-      console.log('Inga kontaktgrupper hittades.');      
-    }
-    pageToken = page.nextPageToken;
-  } while (pageToken);
+    try {
+      let listOfContactGroups = [];
 
-  console.log(listOfContactGroups);
-  console.log(listOfContactGroups.length);
-  return listOfContactGroups;
+      let pageToken, page;
+      do {
+        page = People.ContactGroups.list({
+          pageToken: pageToken,
+          pageSize: 25
+        });
+        let contactGroups = page.contactGroups;
+        if (contactGroups) {   
+          for (let i = 0; i < contactGroups.length; i++) {
+            
+            let contactGroup = {
+              resourceName: contactGroups[i].resourceName,
+              groupType	: contactGroups[i].groupType,
+              name: contactGroups[i].name,
+              memberCount: contactGroups[i].memberCount
+            };
+            
+            if (contactGroup.groupType == "USER_CONTACT_GROUP") {
+              if (contactGroup.name.startsWith(prefixContactgroups)) {
+                console.log(contactGroups[i]);
+                console.log(contactGroup);
+                listOfContactGroups.push(contactGroup);
+              }          
+            }        
+          }
+        }
+        else {
+          console.log('Inga kontaktgrupper hittades.');      
+        }
+        pageToken = page.nextPageToken;
+      } while (pageToken);
+
+      console.log(listOfContactGroups);
+      console.log(listOfContactGroups.length);
+      return listOfContactGroups;
+
+    } catch(e) {
+      console.error("Problem med att anropa GoogleTjänst People.ContactGroups i funktionen getContactGroups");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }  
 }
 
 
