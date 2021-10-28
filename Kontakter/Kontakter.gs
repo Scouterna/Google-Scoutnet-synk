@@ -524,6 +524,10 @@ function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd
   console.log("Följande ska tas bort från gruppen");
   console.log(resourceNamesToRemove);
 
+  if (0 == resourceNamesToAdd.length && 0 == resourceNamesToRemove.length)  {
+    return;
+  }
+
   try {
     let contactGroupModifyResource = People.ContactGroups.Members.modify({
       "resourceNamesToAdd": resourceNamesToAdd,
