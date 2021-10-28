@@ -529,18 +529,26 @@ function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd
     return;
   }
 
-  try {
-    let contactGroupModifyResource = People.ContactGroups.Members.modify({
-      "resourceNamesToAdd": resourceNamesToAdd,
-      "resourceNamesToRemove": resourceNamesToRemove
-    }, contactGroupResourceName);
+  for (let n=0; n<6; n++) {
+    console.log("Funktionen modifyContactGroupMembers körs " + n);
 
-    console.log(contactGroupModifyResource);
-    return contactGroupModifyResource;
-  }
-  catch (e) {
+    try {
+      let contactGroupModifyResource = People.ContactGroups.Members.modify({
+        "resourceNamesToAdd": resourceNamesToAdd,
+        "resourceNamesToRemove": resourceNamesToRemove
+      }, contactGroupResourceName);
+
+      console.log(contactGroupModifyResource);
+      return contactGroupModifyResource;
+    }
+    catch (e) {
       console.error("Problem med att anropa Members.modify i People.ContactGroups");
-  }  
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
 }
 
 
