@@ -609,53 +609,66 @@ function updateListOfConnections_(contactResourceKeys) {
 
   let contactResourceKeysString = contactResourceKeys.toString();
 
-  let listOfConnections = [];
+  for (let n=0; n<6; n++) {
+    Logger.log("Funktionen updateListOfConnections körs " + n);
 
-  let pageToken, page;
-  do {
-    page =  People.People.Connections.list('people/me', {
-      pageToken: pageToken,
-      pageSize: 25,
-      personFields: contactResourceKeysString,
-      sources: ["READ_SOURCE_TYPE_CONTACT"]
-    });
-    let connections = page.connections;
-    if (connections) {   
-      for (let i = 0; i < connections.length; i++) {
+    try {
+      let listOfConnections = [];
 
-        let externalIds = connections[i].externalIds;
+      let pageToken, page;
+      do {
+        page =  People.People.Connections.list('people/me', {
+          pageToken: pageToken,
+          pageSize: 25,
+          personFields: contactResourceKeysString,
+          sources: ["READ_SOURCE_TYPE_CONTACT"]
+        });
+        let connections = page.connections;
+        if (connections) {   
+          for (let i = 0; i < connections.length; i++) {
 
-        if (externalIds)  {
+            let externalIds = connections[i].externalIds;
 
-          for (let k = 0; k < externalIds.length; k++) {
-            let externalId = externalIds[k];
-            
-            if ("Medlemsnummer" == externalIds[k].type) {
+            if (externalIds)  {
 
-              if ("CONTACT" == externalId.metadata.source.type) {
+              for (let k = 0; k < externalIds.length; k++) {
+                let externalId = externalIds[k];
+                
+                if ("Medlemsnummer" == externalIds[k].type) {
 
-                let connection = {
-                  resourceName: connections[i].resourceName,
-                  etag: connections[i].etag,
-                  memberNumber: externalId.value,
-                  memberInfo: connections[i]
-                };          
-                listOfConnections.push(connection);                
-              }              
+                  if ("CONTACT" == externalId.metadata.source.type) {
+
+                    let connection = {
+                      resourceName: connections[i].resourceName,
+                      etag: connections[i].etag,
+                      memberNumber: externalId.value,
+                      memberInfo: connections[i]
+                    };          
+                    listOfConnections.push(connection);                
+                  }              
+                }
+              }          
             }
-          }          
+          }      
         }
-      }      
-    }
-    else {
-      console.warn('Inga kontakter hittades.');      
-    }
-    pageToken = page.nextPageToken;
-  } while (pageToken);
+        else {
+          console.warn('Inga kontakter hittades.');      
+        }
+        pageToken = page.nextPageToken;
+      } while (pageToken);
 
-  //console.log("listOfConnections");
-  //console.log(listOfConnections);
-  return listOfConnections;
+      //console.log("listOfConnections");
+      //console.log(listOfConnections);
+      return listOfConnections;
+
+    } catch(e) {
+      console.error("Problem med att anropa GoogleTjänst People.People.Connectionss i funktionen updateListOfConnections");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  } 
 }
 
 
