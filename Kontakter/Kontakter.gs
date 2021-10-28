@@ -3,9 +3,6 @@
  * @website https://github.com/Scouterna
  */
 
-//Sen borde det kanske egentligen vara implementeringsid som står här
-var url = 'https://script.google.com/macros/s/1213235654/exec';
-
 
 /**
  * Funktion för att skapa menyn i kalkylarket
@@ -47,10 +44,12 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   let username = sdk["username"];
   let password = sdk["password"];
   let version = sdk["version"];
+  let webappUrl = sdk["webappUrl"];
   
   let prefixContactgroups = sdk["prefixContactgroups"];
   let customEmailField = sdk["customEmailField"];
   let groupName = sdk["groupName"];
+
   console.log("E-postfält för alla e-postadresser för en kontakt " + customEmailField);
   console.log("Kår " + groupName);
 
@@ -64,7 +63,7 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
 
 
   if (!deleteContacts) {
-    response = UrlFetchApp.fetch(url+userParam);
+    response = UrlFetchApp.fetch(webappUrl+userParam);
     console.log(response);
 
     nyaKontaktGrupper = JSON.parse(response);
@@ -154,6 +153,7 @@ function getSheetDataKontakter_()  {
   userInputData["prefixContactgroups"] = data[grd["prefixContactgroups"][0]][grd["prefixContactgroups"][1]];
   userInputData["customEmailField"] = data[grd["customEmailField"][0]][grd["customEmailField"][1]];
   userInputData["groupName"] = data[grd["groupName"][0]][grd["groupName"][1]];
+  userInputData["webappUrl"] = data[grd["webappUrl"][0]][grd["webappUrl"][1]];
   userInputData["version"] = data[grd["version"][0]][grd["version"][1]];
 
   console.info(userInputData);
@@ -178,7 +178,8 @@ function getKontakterUserInputData_() {
   kuid["prefixContactgroups"] = [9, column];
   kuid["customEmailField"] = [10, column];
   kuid["groupName"] = [11, column];
-  kuid["version"] = [12, column];
+  kuid["webappUrl"] = [12, column];
+  kuid["version"] = [13, column];
 
   return kuid;
 }
