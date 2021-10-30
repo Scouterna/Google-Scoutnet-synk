@@ -73,18 +73,12 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
 
   let userParam = "?username=" + username + "&password=" + password + "&version=" + version + "&forceupdate=" + forceUpdate;
   console.log(userParam);
-  
-  let response;
+
   let nyaKontaktGrupper;
 
-
   if (!deleteContacts) {
-    response = UrlFetchApp.fetch(webappUrl+userParam);
-    console.log(response);
-
-    nyaKontaktGrupper = JSON.parse(response);
-    console.log(typeof nyaKontaktGrupper);
-  }  
+    nyaKontaktGrupper = fetchUrl_(webappUrl+userParam);
+  }
 
   if ((typeof nyaKontaktGrupper === 'string') || deleteContacts) {
     console.info("Felmeddelande från kårens backend");
@@ -174,6 +168,35 @@ function getSheetDataKontakter_()  {
 
   console.info(userInputData);
   return userInputData;
+}
+
+
+/**
+ * Gör ett get-anrop mot en url och ger JSON-tolkad data tillbaka
+ * 
+ * @param {String} url - Url att hämta data från
+ */
+function fetchUrl_(url) {
+
+  for (let n=0; n<6; n++) {
+    console.log("Funktionen fetchUrl körs " + n);
+
+    try {
+      let response = UrlFetchApp.fetch(url);
+      console.log(response);
+
+      let parsedResponse = JSON.parse(response);
+      console.log(typeof parsedResponse);
+      return parsedResponse;
+    }
+    catch (e) {
+      console.error("Problem med att anropa UrlFetchApp.fetch");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
 }
 
 
