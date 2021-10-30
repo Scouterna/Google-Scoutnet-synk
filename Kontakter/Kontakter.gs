@@ -102,7 +102,7 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
 /**
  * Skapar tidsinställd utlösare för skriptet vid behov
  */
-function createTriggerIfNeeded()  {
+function createTriggerIfNeeded_()  {
 
   let triggers = ScriptApp.getProjectTriggers();
 
