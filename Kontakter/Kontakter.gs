@@ -17,15 +17,31 @@ function onOpen() {
 }
 
 
+/**
+ * Funktion för att synkronisera kontakter och kontaktgrupper
+ */
 function synkroniseraKontakterVanlig()  {
   synkroniseraKontakter_(false, false);
 }
 
+
+/**
+ * Funktion för att synkronisera kontakter och kontaktgrupper
+ * och tvinga kårens backend att skicka en uppdaterad och ej lagrad
+ * kopia på datan om möjligt.
+ * Skapar vid behov tidsinställd utlösare för att köra skriptet för
+ * vanlig synkronisering.
+ */
 function synkroniseraKontakterTvingad() {
   createTriggerIfNeeded_();
   synkroniseraKontakter_(true, false);
 }
 
+
+/**
+ * Funktion för att radera alla kontakter och kontaktgrupper som
+ * är synkroniseringsbara
+ */
 function raderaKontakter()  {
   synkroniseraKontakter_(false, true);
 }
