@@ -22,7 +22,7 @@ function synkroniseraKontakterVanlig()  {
 }
 
 function synkroniseraKontakterTvingad() {
-  createTriggerIfNeeded();
+  createTriggerIfNeeded_();
   synkroniseraKontakter_(true, false);
 }
 
