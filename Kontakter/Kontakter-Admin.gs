@@ -69,6 +69,13 @@ function doGet(e) {
 
   Logger.log(e);
   let params = e.parameters;
+
+  if (Object.keys(params).length == 0)  {
+    Logger.log("Inga parametrar angivna");
+    return ContentService.createTextOutput("Inga parametrar angivna")
+    .setMimeType(ContentService.MimeType.TEXT);
+  }
+  
   let userEmail = params.username[0];
   let userPassword = params.password[0];
 
