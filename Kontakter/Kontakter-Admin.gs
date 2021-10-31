@@ -315,7 +315,7 @@ function getDataFromSheet_(nameOfSheet)  {
  *
  * @param {String[]} listOfGroupEmails - Lista över e-postadresser för Google Grupper
  * 
- * @returns {Objekt[[]]} - Lista med medlemsobjekt för aktuella kontaktgrupper
+ * @returns {Objekt[][]} - Lista med medlemsobjekt för aktuella kontaktgrupper
  */
 function getContactGroupsData_(listOfGroupEmails)  {
 
@@ -453,7 +453,7 @@ function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers) {
 /**
  * Ger lista med unika medlemsnummer för de som är med i någon kontaktgrupp
  *
- * @param {Objekt[[]]} contactGroupsList - Lista av listor med kontaktgruppsinformation och medlemsnummer för de i respektive grupp
+ * @param {Objekt[][]} contactGroupsList - Lista av listor med kontaktgruppsinformation och medlemsnummer för de i respektive grupp
  *  
  * @returns {Number[]} - Lista med unika medlemsnummer för de som är med i någon kontaktgrupp
  */
