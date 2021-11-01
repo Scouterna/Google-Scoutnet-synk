@@ -175,6 +175,8 @@ function getSheetDataKontakter_()  {
  * Gör ett get-anrop mot en url och ger JSON-tolkad data tillbaka
  * 
  * @param {String} url - Url att hämta data från
+ * 
+ * @returns {Objekt[][]} - JSON-tolkad data från angiven url
  */
 function fetchUrl_(url) {
 
