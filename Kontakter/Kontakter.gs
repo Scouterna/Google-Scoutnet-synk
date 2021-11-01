@@ -57,6 +57,8 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   
   console.info("Läser data från kalkylbladet");
   let sdk = getSheetDataKontakter_();
+  let cells = sdk["cells"];
+
   let username = sdk["username"];
   let password = sdk["password"];
   let version = sdk["version"];
@@ -68,6 +70,15 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
 
   console.log("E-postfält för alla e-postadresser för en kontakt " + customEmailField);
   console.log("Kår " + groupName);
+
+  //Kolla här användarfälten är tomma
+  colourCellIfEmpty(cells.username, username, "red");
+  colourCellIfEmpty(cells.password, password, "yellow");
+  colourCellIfEmpty(cells.version, version, "red");
+  colourCellIfEmpty(cells.webappUrl, webappUrl, "red");
+  colourCellIfEmpty(cells.prefixContactgroups, prefixContactgroups, "red");
+  colourCellIfEmpty(cells.customEmailField, customEmailField, "red");
+  colourCellIfEmpty(cells.groupName, groupName, "red");
 
   console.info("Gör anrop till API");
 
@@ -106,6 +117,34 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   console.info("Kontakter som är borttagna från kontaktgrupper");
   console.info(resourceNamesRemovedFromContactGroups);
   deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceKeys);
+}
+
+
+/**
+ * Ändrar bakgrundsfärg på en cell beroende på om den
+ * innehåller någon data eller ej.
+ * 
+ * @param {Objekt} cell - En cell i ett kalkylblad
+ * @param {String} cellData - data i en cell i ett kalkylblad
+ * @param {String} colour - Namn på färg eller rgb hexadecimalt värde för en färg
+ * 
+ * @returns {Boolean} - Ger falskt om bakgrundsfärgen sätts till röd.
+ * Annars ger den sant.
+ */
+function colourCellIfEmpty(cell, cellData, colour)  {
+
+  if (cellData=="") { //Kolla om cellen är tom
+    cell.setBackground(colour);
+    if ("red" == colour)  {
+      return false;
+    }
+  }
+  else {
+    if ("#d3d3d3" != cell.getBackground()) {
+      cell.setBackground("LightGrey");
+    }
+  }
+  return true;
 }
 
 
@@ -165,6 +204,16 @@ function getSheetDataKontakter_()  {
   userInputData["groupName"] = data[grd["groupName"][0]][grd["groupName"][1]];
   userInputData["webappUrl"] = data[grd["webappUrl"][0]][grd["webappUrl"][1]];
   userInputData["version"] = data[grd["version"][0]][grd["version"][1]];
+
+  userInputData["cells"] = {
+    username: selection.getCell(grd["username"][0]+1, grd["username"][1]+1),
+    password: selection.getCell(grd["password"][0]+1, grd["password"][1]+1),
+    prefixContactgroups: selection.getCell(grd["prefixContactgroups"][0]+1, grd["prefixContactgroups"][1]+1),
+    customEmailField: selection.getCell(grd["customEmailField"][0]+1, grd["customEmailField"][1]+1),
+    groupName: selection.getCell(grd["groupName"][0]+1, grd["groupName"][1]+1),
+    webappUrl: selection.getCell(grd["webappUrl"][0]+1, grd["webappUrl"][1]+1),
+    version: selection.getCell(grd["version"][0]+1, grd["version"][1]+1)
+  };
 
   console.info(userInputData);
   return userInputData;
