@@ -138,14 +138,13 @@ function colourCellsIfEmpty_(cells, sdk) {
   let colourCellWebappUrl = colourCellIfEmpty_(cells.webappUrl, sdk["webappUrl"], "red");
   let colourCellPrefixContactgroups = colourCellIfEmpty_(cells.prefixContactgroups, sdk["prefixContactgroups"], "red");
   let colourCellCustomEmailField = colourCellIfEmpty_(cells.customEmailField, sdk["customEmailField"], "red");
-  let colourCellGroupName = colourCellIfEmpty_(cells.groupName, sdk["groupName"], "red");
+  colourCellIfEmpty_(cells.groupName, sdk["groupName"], "yellow");
 
   if (colourCellUsername &&
       colourCellVersion &&
       colourCellWebappUrl &&
       colourCellPrefixContactgroups &&
-      colourCellCustomEmailField &&
-      colourCellGroupName) {
+      colourCellCustomEmailField) {
 
     return true;    
   }
