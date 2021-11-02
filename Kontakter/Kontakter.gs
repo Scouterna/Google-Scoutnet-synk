@@ -87,7 +87,7 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   let nyaKontaktGrupper;
 
   if (!deleteContacts) {
-    nyaKontaktGrupper = fetchUrl_(webappUrl+userParam);
+    nyaKontaktGrupper = fetchUrl_(webappUrl+userParam, cells.webappUrl);
   }
 
   if ((typeof nyaKontaktGrupper === 'string') || deleteContacts) {
@@ -256,10 +256,11 @@ function getSheetDataKontakter_()  {
  * Gör ett get-anrop mot en url och ger JSON-tolkad data tillbaka
  * 
  * @param {String} url - Url att hämta data från
+ * @param {Objekt} cell - Cell i kalkylbladet för webappUrl
  * 
  * @returns {Objekt[][]} - JSON-tolkad data från angiven url
  */
-function fetchUrl_(url) {
+function fetchUrl_(url, cellWebappUrl) {
 
   for (let n=0; n<6; n++) {
     console.log("Funktionen fetchUrl körs " + n);
@@ -270,11 +271,18 @@ function fetchUrl_(url) {
 
       let parsedResponse = JSON.parse(response);
       console.log(typeof parsedResponse);
+      
+      if ("#d3d3d3" != cellWebappUrl.getBackground()) {
+        cellWebappUrl.setBackground("LightGrey");
+      }
       return parsedResponse;
     }
     catch (e) {
       console.error("Problem med att anropa UrlFetchApp.fetch");
       if (n == 5) {
+        if ("#ff0000" != cellWebappUrl.getBackground()) {
+          cellWebappUrl.setBackground("red");
+        }
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
