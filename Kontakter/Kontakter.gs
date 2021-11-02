@@ -71,14 +71,13 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   console.log("E-postfält för alla e-postadresser för en kontakt " + customEmailField);
   console.log("Kår " + groupName);
 
-  //Kolla här användarfälten är tomma
-  colourCellIfEmpty(cells.username, username, "red");
-  colourCellIfEmpty(cells.password, password, "yellow");
-  colourCellIfEmpty(cells.version, version, "red");
-  colourCellIfEmpty(cells.webappUrl, webappUrl, "red");
-  colourCellIfEmpty(cells.prefixContactgroups, prefixContactgroups, "red");
-  colourCellIfEmpty(cells.customEmailField, customEmailField, "red");
-  colourCellIfEmpty(cells.groupName, groupName, "red");
+  //Kolla om användarfälten är tomma
+  let boolIfCellsNonEmpty = colourCellsIfEmpty_(cells, sdk);
+
+  if (!boolIfCellsNonEmpty) {
+    console.error("I ett eller flera användarfält måste anges data och som nu är tomma");
+    return;
+  }
 
   console.info("Gör anrop till API");
 
@@ -121,6 +120,40 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
 
 
 /**
+ * Kollar om något användarfält saknar data och färgmarkerar dem vid behov.
+ * Om något fält saknar data som måste ha data returneras falskt och annars sant.
+ * 
+ * @param {Objekt} cell - Objekt för flera celler i ett kalkylblad
+ * @param {String} sdk -  Datan som användaren har angett i kalkylbladet
+ * 
+ * @returns {Boolean} - Ger falskt om bakgrundsfärgen sätts till röd för något användarfält.
+ * Annars ger den sant.
+ */
+function colourCellsIfEmpty_(cells, sdk) {
+
+  //Kolla här om användarfälten är tomma
+  let colourCellUsername = colourCellIfEmpty_(cells.username, sdk["username"], "red");
+  colourCellIfEmpty_(cells.password, sdk["password"], "yellow");
+  let colourCellVersion = colourCellIfEmpty_(cells.version, sdk["version"], "red");
+  let colourCellWebappUrl = colourCellIfEmpty_(cells.webappUrl, sdk["webappUrl"], "red");
+  let colourCellPrefixContactgroups = colourCellIfEmpty_(cells.prefixContactgroups, sdk["prefixContactgroups"], "red");
+  let colourCellCustomEmailField = colourCellIfEmpty_(cells.customEmailField, sdk["customEmailField"], "red");
+  let colourCellGroupName = colourCellIfEmpty_(cells.groupName, sdk["groupName"], "red");
+
+  if (colourCellUsername &&
+      colourCellVersion &&
+      colourCellWebappUrl &&
+      colourCellPrefixContactgroups &&
+      colourCellCustomEmailField &&
+      colourCellGroupName) {
+
+    return true;    
+  }
+  return false;
+}
+
+
+/**
  * Ändrar bakgrundsfärg på en cell beroende på om den
  * innehåller någon data eller ej.
  * 
@@ -131,7 +164,7 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
  * @returns {Boolean} - Ger falskt om bakgrundsfärgen sätts till röd.
  * Annars ger den sant.
  */
-function colourCellIfEmpty(cell, cellData, colour)  {
+function colourCellIfEmpty_(cell, cellData, colour)  {
 
   if (cellData=="") { //Kolla om cellen är tom
     cell.setBackground(colour);
