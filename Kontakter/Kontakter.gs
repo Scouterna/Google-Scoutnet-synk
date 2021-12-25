@@ -1712,7 +1712,7 @@ function getContactGroups_(prefixContactgroups) {
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
     }
-  }  
+  }
 }
 
 

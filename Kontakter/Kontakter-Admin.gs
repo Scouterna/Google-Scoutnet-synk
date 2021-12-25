@@ -868,38 +868,50 @@ function testGetHtmlEmailBody() {
 function getListOfGroupsForAUser_(userKey) {
   
   Logger.log("Hämtar lista över alla grupper som denna person är med i");
-  let listOfGroups = [];
+  
+  for (let n=0; n<6; n++) {
+    try {
+      let listOfGroups = [];
 
-  let pageToken, page;
-  do {
-    page = AdminDirectory.Groups.list({
-      domain: domain,
-      maxResults: 150,
-      pageToken: pageToken,
-      userKey: userKey
-    });
-    let groups = page.groups;
-    if (groups) {   
-      for (let i = 0; i < groups.length; i++) {
+      let pageToken, page;
+      do {
+        page = AdminDirectory.Groups.list({
+          domain: domain,
+          maxResults: 150,
+          pageToken: pageToken,
+          userKey: userKey
+        });
+        let groups = page.groups;
+        if (groups) {   
+          for (let i = 0; i < groups.length; i++) {
 
-        let group = {
-          email: groups[i].email,
-          id: groups[i].id,
-          name: groups[i].name
-        };
-        //Logger.log(group);
-        listOfGroups.push(group);
-      }      
+            let group = {
+              email: groups[i].email,
+              id: groups[i].id,
+              name: groups[i].name
+            };
+            //Logger.log(group);
+            listOfGroups.push(group);
+          }      
+        }
+        else {
+          Logger.log('Inga grupper hittades.');      
+        }
+        pageToken = page.nextPageToken;
+      } while (pageToken);
+
+      //Logger.log(listOfGroups);
+      //Logger.log(listOfGroups.length);
+      return listOfGroups;
+
+    } catch(e) {
+      console.error("Problem med att anropa GoogleTjänst AdminDirectory.Groups i funktionen getListOfGroupsForAUser");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
     }
-    else {
-      Logger.log('Inga grupper hittades.');      
-    }
-    pageToken = page.nextPageToken;
-  } while (pageToken);
-
-  //Logger.log(listOfGroups);
-  //Logger.log(listOfGroups.length);
-  return listOfGroups;
+  }
 }
 
 
