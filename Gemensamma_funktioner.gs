@@ -288,7 +288,7 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
     var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
     
     //Dessa attributvärden ska användas som gemener för bättre jämförelser
-    var variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails'];
+    var variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
     
     var member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
     
@@ -654,7 +654,7 @@ function checkIfGroupExists(email) {
   var tmpList = getListOfGroups();
   //Logger.log(tmpList);
 
-  if(contains(tmpList, email))  {
+  if(tmpList.includes(email))  {
     return true;
   }
   return false;
@@ -713,7 +713,7 @@ function updateListOfGroups() {
  * @returns {boolean} - om avsändaradressen är tillåten
  */
 function isFromEmailAdressAllowed(email) {  
-  return contains(getAllowedFromEmailAdresses(), email);
+  return getAllowedFromEmailAdresses().includes(email);
 }
 
 
@@ -836,23 +836,6 @@ function deleteRowsFromSpreadsheet(sheet, delete_rows) {
     Logger.log("Remove row " + tmp_row);
     sheet.deleteRow(tmp_row);
   }  
-}
-
-
-/*
- * Kolla om ett objekt är inkluderat i en lista
- * param, lista, objekt
- * @param {string[] | number[] | Object[]} a - Lista
- * @param {string | number | Object} obj - Ett objekt
- * @returns {boolean} - True eller false gällande om objektet finns i listan
- */
-function contains(a, obj) {
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] === obj) {
-      return true;
-    }
-  }
-  return false;
 }
 
 

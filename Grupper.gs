@@ -452,7 +452,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   //Om finns i googlegrupp men inte i vår lista
   for (var i = 0; i < group_members.length; i++) {    
       
-    if (!contains(allMembers_email, group_members[i].email)) {  
+    if (!allMembers_email.includes(group_members[i].email)) {  
       Logger.log(group_members[i].email + " Borde tas bort från " + groupId  + "Google e-postlista");
       deleteGroupMember(groupId, group_members[i].memberId, group_members[i].email);
     }
@@ -464,26 +464,26 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
     //och för att Google i bland ändrar e-postadress för en användare.
     
     //Denna e-post finns ej med, så vi lägger till personen
-    if (!contains(group_members_email, allMembers_email[i])) { //Lägg till person till e-postlista
+    if (!group_members_email.includes(allMembers_email[i])) { //Lägg till person till e-postlista
       
-      if (contains(allMembers_both_email, allMembers_email[i])) { //Lägg till så att både kan skicka och ta emot
+      if (allMembers_both_email.includes(allMembers_email[i])) { //Lägg till så att både kan skicka och ta emot
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Skicka och ta emot");
         addGroupMember(groupId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
       }
-      else if (contains(allMembers_send_email, allMembers_email[i])) { //Lägg till så att bara kan skicka
+      else if (allMembers_send_email.includes(allMembers_email[i])) { //Lägg till så att bara kan skicka
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Bara skicka");
         addGroupMember(groupId, allMembers_email[i], 'MANAGER', 'NONE');
       }
-      else if (contains(allMembers_receive_email, allMembers_email[i])){ //Lägg till så att bara kan ta emot
+      else if (allMembers_receive_email.includes(allMembers_email[i])){ //Lägg till så att bara kan ta emot
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Bara ta emot");
         addGroupMember(groupId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
       }
       
-      else if (contains(allMembers_both_email_admin, allMembers_email[i])){ //Lägg till admin så att både kan skicka och ta emot
+      else if (allMembers_both_email_admin.includes(allMembers_email[i])){ //Lägg till admin så att både kan skicka och ta emot
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Admin Skicka och ta emot");
         addGroupMember(groupId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
       }
-      else if (contains(allMembers_send_email_admin, allMembers_email[i])){ //Lägg till admin så att bara kan skicka
+      else if (allMembers_send_email_admin.includes(allMembers_email[i])){ //Lägg till admin så att bara kan skicka
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Admin Bara skicka");
         addGroupMember(groupId, allMembers_email[i], 'OWNER', 'DISABLED');
       }
@@ -497,21 +497,21 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
       
       //Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
       
-      if (contains(allMembers_both_email, allMembers_email[i])) { //Ska kunna skicka och ta emot        
+      if (allMembers_both_email.includes(allMembers_email[i])) { //Ska kunna skicka och ta emot        
         if (memberTypeOld!="Both") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen skicka och ta emot");
         }
       }
-      else if (contains(allMembers_send_email, allMembers_email[i])) { //Ska bara kunna skicka        
+      else if (allMembers_send_email.includes(allMembers_email[i])) { //Ska bara kunna skicka        
         if (memberTypeOld!="Send") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'MANAGER', 'NONE');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara skicka");
         }
       }
-      else if (contains(allMembers_receive_email, allMembers_email[i])) { //Ska bara kunna ta emot        
+      else if (allMembers_receive_email.includes(allMembers_email[i])) { //Ska bara kunna ta emot        
         if (memberTypeOld!="Receive") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
@@ -519,14 +519,14 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
         }
       }
       
-      else if (contains(allMembers_both_email_admin, allMembers_email[i])) { //Ska kunna skicka och ta emot ADMIN        
+      else if (allMembers_both_email_admin.includes(allMembers_email[i])) { //Ska kunna skicka och ta emot ADMIN        
         if (memberTypeOld!="OWNER_Both") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara ta emot ADMIN");
         }
       }
-      else if (contains(allMembers_send_email_admin, allMembers_email[i])) { //Ska bara kunna skicka ADMIN      
+      else if (allMembers_send_email_admin.includes(allMembers_email[i])) { //Ska bara kunna skicka ADMIN      
         if (memberTypeOld!="OWNER_Send") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'OWNER', 'DISABLED');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
@@ -698,7 +698,7 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   
   //Om e-post finns i "skicka" och "ta emot" ska de läggas till i "båda"
   for (var i = 0; i < allMembers_send_email.length; i++) {
-    if (contains(allMembers_receive_email, allMembers_send_email[i])) {
+    if (allMembers_receive_email.includes(allMembers_send_email[i])) {
         allMembers_both_email.push(allMembers_send_email[i]);
     }
   }
@@ -716,10 +716,10 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   //Om e-post finns i "emailAdressesToSendSpamNotification" och i någon annan lista ska de läggas till i motsvarande adminlistan
   for (var i = 0; i < emailAdressesToSendSpamNotification.length; i++) {
     
-    if (contains(allMembers_both_email, emailAdressesToSendSpamNotification[i])) {
+    if (allMembers_both_email.includes(emailAdressesToSendSpamNotification[i])) {
       allMembers_both_email_admin.push(emailAdressesToSendSpamNotification[i]);
     }
-    else if (contains(allMembers_receive_email, emailAdressesToSendSpamNotification[i])) {
+    else if (allMembers_receive_email.includes(emailAdressesToSendSpamNotification[i])) {
       allMembers_both_email_admin.push(emailAdressesToSendSpamNotification[i]);
     }
     else {
@@ -806,7 +806,7 @@ function getListsWithUniqueElements(mainList, secondList) {
   var tmp_email_list = [];
   
   for (var i = 0; i < secondList.length; i++) {
-    if (!contains(mainList, secondList[i])) {
+    if (!mainList.includes(secondList[i])) {
         tmp_email_list.push(secondList[i]);
     }
   }
