@@ -210,8 +210,15 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
   
   Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
   var email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
-  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?id=' + groupId + '&key='+ api_key_mailinglists + '&list_id=' + scoutnet_list_id + email_fields;
-  var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
+  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=' + scoutnet_list_id + email_fields;
+  var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
+  var response = UrlFetchApp.fetch(
+    url, 
+    {
+      'muteHttpExceptions': true,
+      'headers': { 'Authorization': authHeader}
+    }
+  );
   //Logger.log(response); 
   
   var json = response.getContentText();  
@@ -472,8 +479,15 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
  */
 function fetchScoutnetMembers() {  
   
-  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist?id=' + groupId + '&key=' + api_key_list_all + '&pretty=1';
-  var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
+  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist?pretty=1';
+  var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
+  var response = UrlFetchApp.fetch(
+    url, 
+    {
+      'muteHttpExceptions': true,
+      'headers': { 'Authorization': authHeader}
+    }
+  );
   //Logger.log(response); 
   
   var json = response.getContentText();
