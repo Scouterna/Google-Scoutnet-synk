@@ -293,20 +293,31 @@ function getListOfEmailsFromListOfGroupMembers_(groupMembers)  {
 function getDataFromSheet_(nameOfSheet)  {
   let spreadsheetUrl_Kontakter = 'https://docs.google.com/spreadsheets/d/kjdskdjf32332/edit';
 
-  let sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Kontakter).getSheetByName(nameOfSheet);
-  if (sheet == null) {
-    Logger.log("Bladet " + nameOfSheet + " finns ej i kalkylarket");
+  for (let n=0; n<6; n++) {
+    try {
+      let sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Kontakter).getSheetByName(nameOfSheet);
+      if (sheet == null) {
+        Logger.log("Bladet " + nameOfSheet + " finns ej i kalkylarket");
+      }
+      let selection = sheet.getDataRange();
+      let data = selection.getValues();
+
+      let sheetData = {};
+      sheetData["sheet"] = sheet;
+      sheetData["selection"] = selection;
+      sheetData["data"] = data;
+
+      Logger.log(sheetData["data"]);
+      return sheetData;
+
+    } catch(e) {
+      console.error("Problem med att anropa GoogleTjänst SpreadsheetApp");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
   }
-  let selection = sheet.getDataRange();
-  let data = selection.getValues();
-
-  let sheetData = {};
-  sheetData["sheet"] = sheet;
-  sheetData["selection"] = selection;
-  sheetData["data"] = data;
-
-  Logger.log(sheetData["data"]);
-  return sheetData;
 }
 
 
