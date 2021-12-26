@@ -81,16 +81,16 @@ function doGet(e) {
   
   let userEmail = params.username[0];
   let userPassword = params.password[0];
-  let version = params.version[0];
+  let userVersion = params.version[0];
 
   Logger.log("userEmail " + userEmail);
 
   let contactGroupsList;
 
-  if (!checkIfVersionOk_(version)) {
+  if (!checkIfVersionOk_(userVersion)) {
     contactGroupsList = "Du använder en version av skriptet som inte stöds längre.";
   }
-  else if (userEmail && checkCredentials_(userEmail, userPassword)) {
+  else if (userEmail && checkCredentials_(userEmail, userPassword, userVersion)) {
     //Hämta en lista över alla Google Grupper som denna person är med i
     let groups = getListOfGroupsForAUser_(userEmail);
     let listOfGroupEmails = getListOfGroupsEmails_(groups);
@@ -787,11 +787,12 @@ function makeStringForGoogleContactGroup_(emailList)  {
  * Kontrollerar om inskickade autentiseringsuppgifter är giltiga
  * 
  * @param {String} userEmail - E-postadress för en användare
- * @param {String} password - Lösenord för en användare för synkning av kontaktgrupper
+ * @param {String} userPassword - Lösenord för en användare för synkning av kontaktgrupper
+ * @param {String} userVersion - Version av skript för en användare
  * 
  * @returns {Boolean} - Gällande om inskickade autentiseringsuppgifter är giltiga
  */
-function checkCredentials_(userEmail, userPassword) {
+function checkCredentials_(userEmail, userPassword, userVersion) {
   
   Logger.log("Kontrollerar om följande uppgifter är giltiga")
   
@@ -821,6 +822,7 @@ function checkCredentials_(userEmail, userPassword) {
     let email = data[i][grd["e-post"]];
     let password = data[i][grd["lösenord"]];
     let last_authn = data[i][grd["senast_använd"]];
+    let version = data[i][grd["version"]];
 
     email = getGmailAdressWithoutDots(email.toLowerCase());
 
@@ -842,6 +844,13 @@ function checkCredentials_(userEmail, userPassword) {
     let datum = new Date();
     cell.setValue(datum).setNumberFormat("yyyy-MM-dd hh:mm:ss");
     Logger.log("Uppdatera datum i kalkylblad för senast använd " + datum);
+
+    if (version != userVersion) {
+      Logger.log("Ny version för denna användare " + userVersion);
+      let cell = selection.getCell(rad_nummer, grd["version"]+1);
+      cell.setValue(userVersion);
+    }
+
     return true;
   }
 
@@ -1011,6 +1020,7 @@ function getKontaktGruppAuthnRubrikData_() {
   kontaktgruppAuthnRubrikData["lösenord"] = 1;
 
   kontaktgruppAuthnRubrikData["senast_använd"] = 2;
+  kontaktgruppAuthnRubrikData["version"] = 3;
 
   return kontaktgruppAuthnRubrikData;
 }
