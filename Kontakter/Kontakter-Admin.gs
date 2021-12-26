@@ -36,6 +36,8 @@ let contact_groups_email_plainBody = "Hej, Du har nyss försökt autentisera dig
 let contact_groups_email_htmlBody = '<div dir="ltr">Hej,<div><br></div><div>Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper.</div><div><br></div><div>Vänligen använd följande uppgifter i stället:</div><div><br></div><div>E-postadress: {{userEmail}}</div><div>Lösenord: {{password}}</div><div><br></div><div>Mvh</div></div>';
 /***Brödtext Html - Slut***/
 
+//Du på kåren kan ändra denna om du vill tvinga dina egna användare att uppdatera sina skript
+let version_oldest_ok = "2.0.0";
 
 let noteKeysToReplace = [
     ["lEdare", "Förälder har ledarintresse"],
@@ -51,7 +53,8 @@ function testaDoGet() {
   let e = {
     parameters : {
       username: "en e-postadress",
-      password: "lösenord"
+      password: "lösenord",
+      version: ["2.0.0"]
     }
   }
   doGet(e);
@@ -78,12 +81,16 @@ function doGet(e) {
   
   let userEmail = params.username[0];
   let userPassword = params.password[0];
+  let version = params.version[0];
 
   Logger.log("userEmail " + userEmail);
 
   let contactGroupsList;
 
-  if (userEmail && checkCredentials_(userEmail, userPassword)) {
+  if (!checkIfVersionOk_(version)) {
+    contactGroupsList = "Du använder en version av skriptet som inte stöds längre.";
+  }
+  else if (userEmail && checkCredentials_(userEmail, userPassword)) {
     //Hämta en lista över alla Google Grupper som denna person är med i
     let groups = getListOfGroupsForAUser_(userEmail);
     let listOfGroupEmails = getListOfGroupsEmails_(groups);
@@ -93,7 +100,7 @@ function doGet(e) {
   else  {
     contactGroupsList = "Du har angivet en felaktig kombination av e-postadress & lösenord. " +
                         "Om e-postadressen finns registrerad kommer det strax ett e-brev till " +
-                        "dig med ditt lösenord";
+                        "dig med ditt lösenord.";
   }
 
   Logger.log("Svar");
@@ -102,6 +109,51 @@ function doGet(e) {
   let response = JSON.stringify(contactGroupsList);
   return ContentService.createTextOutput(response)
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+
+/**
+ * Kontrollerar om användaren använder en ok version
+ * 
+ * @param {String} version_running - Användarens version av skript
+ * 
+ * @returns {Boolean} - Gällande om versionen av användarens skript är ok eller ej
+ */
+function checkIfVersionOk_(version_running)  {
+
+  if (!version_running) {
+    Logger.log("Ej angiven version");
+    return false;
+  }
+
+  Logger.log("Version som används av kåren " + version_running);
+  Logger.log("Äldsta tillåtna version " + version_oldest_ok);
+
+  let version_running_split_list = version_running.split(".");
+
+  let version_oldest_ok_split_list = version_oldest_ok.split(".");
+
+  //Gå igenom varje nivå av underversion
+  for (let i = 0; i < version_running_split_list.length; i++) {
+
+    if (!version_oldest_ok_split_list[i]) {
+      Logger.log("Denna nivå av underversion finns ej sedan tidigare");
+      return false;
+    }
+    if (version_running_split_list[i].length > version_oldest_ok_split_list[i].length)  {
+      Logger.log("Fler siffror i aktuell underversion än i äldsta tillåtna");
+      return true;
+    }    
+    if (version_running_split_list[i] > version_oldest_ok_split_list[i]) {
+      Logger.log("Nyare underversion än äldsta tillåtna");
+      return true;
+    }
+    if (version_running_split_list[i] < version_oldest_ok_split_list[i]) {
+      Logger.log("Äldre underversion än äldsta tillåtna");
+      return false;
+    }
+  }
+  return true;
 }
 
 
