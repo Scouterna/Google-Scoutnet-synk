@@ -93,10 +93,33 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   if ((typeof nyaKontaktGrupper === 'string') || deleteContacts) {
     console.info("Felmeddelande från kårens backend");
     console.log(nyaKontaktGrupper);
+
+    //Fel version
+    if (nyaKontaktGrupper.includes("version"))  {
+      if ("#ff0000" != cells.version.getBackground()) {
+        cells.version.setBackground("red");
+      }
+    }
+    else  { //Fel e-postadress eller lösenord
+      if ("#ff0000" != cells.username.getBackground() || "#ff0000" != cells.password.getBackground()) {
+        cells.username.setBackground("red");
+        cells.password.setBackground("red");
+      }
+    }
     nyaKontaktGrupper = [[]];
   }
   else  {
     console.info("Riktig data från backend har hämtats");
+
+    if ("#d3d3d3" != cells.version.getBackground()) {
+      cells.version.setBackground("LightGrey");
+    }
+    if ("#d3d3d3" != cells.username.getBackground()) {
+      cells.username.setBackground("LightGrey");
+    }
+    if ("#d3d3d3" != cells.username.getBackground()) {
+      cells.username.setBackground("LightGrey");
+    }
   }
 
   console.log(nyaKontaktGrupper);
