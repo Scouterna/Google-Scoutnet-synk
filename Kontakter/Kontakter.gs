@@ -785,7 +785,7 @@ function updateListOfConnections_(contactResourceKeys) {
   let contactResourceKeysString = contactResourceKeys.toString();
 
   for (let n=0; n<6; n++) {
-    Logger.log("Funktionen updateListOfConnections körs " + n);
+    console.log("Funktionen updateListOfConnections körs " + n);
 
     try {
       let listOfConnections = [];
@@ -1709,7 +1709,7 @@ function getContactGroups_(prefixContactgroups) {
   console.info("Hämtar lista över alla kontaktgrupper som finns just nu");
 
   for (let n=0; n<6; n++) {
-    Logger.log("Funktionen getContactGroups körs " + n);
+    console.log("Funktionen getContactGroups körs " + n);
 
     try {
       let listOfContactGroups = [];
