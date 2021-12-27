@@ -270,7 +270,7 @@ function getSheetDataKontakter_()  {
     version: selection.getCell(grd["version"][0]+1, grd["version"][1]+1)
   };
 
-  console.info(userInputData);
+  //console.log(userInputData);
   return userInputData;
 }
 
