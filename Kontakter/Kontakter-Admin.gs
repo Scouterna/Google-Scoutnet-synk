@@ -39,9 +39,10 @@ let contact_groups_email_htmlBody = '<div dir="ltr">Hej,<div><br></div><div>Du h
 //Du på kåren kan ändra denna om du vill tvinga dina egna användare att uppdatera sina skript
 let version_oldest_ok = "2.0.0";
 
+//Ord som står i en medlems anteckningar som ska med i synkning men bytas ut mot något annat
 let noteKeysToReplace = [
     ["lEdare", "Förälder har ledarintresse"],
-    ["Rabatt", "Rabatter i butiker av intresse"],
+    ["Rabatt", "Rabatter i butiker av intresse"]
   ];
 
 
@@ -52,9 +53,10 @@ let noteKeysToReplace = [
 function testaDoGet() {
   let e = {
     parameters : {
-      username: "en e-postadress",
-      password: "lösenord",
-      version: ["2.0.0"]
+      username: ["en e-postadress"],
+      password: ["lösenord"],
+      version: ["2.0.0"],
+      forceupdate: ["true"]
     }
   }
   doGet(e);
@@ -82,6 +84,11 @@ function doGet(e) {
   let userEmail = params.username[0];
   let userPassword = params.password[0];
   let userVersion = params.version[0];
+  let forceUpdate = params.forceupdate[0];
+
+  if ("true" == forceUpdate) {
+    Logger.log("Detta var en tvingad uppdatering");
+  }
 
   Logger.log("userEmail " + userEmail);
 

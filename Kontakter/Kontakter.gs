@@ -256,12 +256,13 @@ function getSheetDataKontakter_()  {
  * Gör ett get-anrop mot en url och ger JSON-tolkad data tillbaka
  * 
  * @param {String} url - Url att hämta data från
- * @param {Objekt} cell - Cell i kalkylbladet för webappUrl
+ * @param {Objekt} cellWebappUrl - Cell i kalkylbladet för webappUrl
  * 
  * @returns {Objekt[][]} - JSON-tolkad data från angiven url
  */
 function fetchUrl_(url, cellWebappUrl) {
 
+  console.log("Anropar url " + url);
   for (let n=0; n<6; n++) {
     console.log("Funktionen fetchUrl körs " + n);
 
