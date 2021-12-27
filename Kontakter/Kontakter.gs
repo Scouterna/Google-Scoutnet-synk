@@ -120,8 +120,8 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
     if ("#d3d3d3" != cells.username.getBackground()) {
       cells.username.setBackground("LightGrey");
     }
-    if ("#d3d3d3" != cells.username.getBackground()) {
-      cells.username.setBackground("LightGrey");
+    if ("#d3d3d3" != cells.password.getBackground()) {
+      cells.password.setBackground("LightGrey");
     }
   }
 
