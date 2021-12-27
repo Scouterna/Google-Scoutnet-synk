@@ -34,6 +34,7 @@ function synkroniseraKontakterVanlig()  {
  */
 function synkroniseraKontakterTvingad() {
   createTriggerIfNeeded_();
+  protectSheet_();
   synkroniseraKontakter_(true, false);
 }
 
@@ -55,6 +56,8 @@ function raderaKontakter()  {
  */
 function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   
+  forceUpdate = forceUpdate.toString();
+
   console.info("Läser data från kalkylbladet");
   let sdk = getSheetDataKontakter_();
   let cells = sdk["cells"];
@@ -139,6 +142,24 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   console.info("Kontakter som är borttagna från kontaktgrupper");
   console.info(resourceNamesRemovedFromContactGroups);
   deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceKeys);
+}
+
+
+/**
+ * Låser de celler i kalkylbladet som inte ska röras av användaren
+ */
+function protectSheet_() {
+
+  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
+  if (sheet == null) {
+    console.error("Bladet Kontakter finns ej i kalkylarket");
+  }
+
+  let protection = sheet.protect().setWarningOnly(true);
+  
+  let unprotected = sheet.getRangeList(["C5:C6", "C9:C13"]).getRanges();
+  protection.setUnprotectedRanges(unprotected);
+  console.info("Låst de celler i kalkylbladet som ska vara låsta");
 }
 
 
