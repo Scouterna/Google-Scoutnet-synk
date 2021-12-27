@@ -329,11 +329,11 @@ function getKontakterUserInputData_() {
   kuid["username"] = [4, column];
   kuid["password"] = [5, column];
 
-  kuid["prefixContactgroups"] = [9, column];
-  kuid["customEmailField"] = [10, column];
-  kuid["groupName"] = [11, column];
-  kuid["webappUrl"] = [12, column];
-  kuid["version"] = [13, column];
+  kuid["prefixContactgroups"] = [8, column];
+  kuid["customEmailField"] = [9, column];
+  kuid["groupName"] = [10, column];
+  kuid["webappUrl"] = [11, column];
+  kuid["version"] = [12, column];
 
   return kuid;
 }
