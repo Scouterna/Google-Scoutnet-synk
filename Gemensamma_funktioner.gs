@@ -686,6 +686,43 @@ function checkIfGroupExists(email) {
 }
 
 
+/**
+ * Hämta data från ett kalkylblad som skriptet är kopplat till
+ *
+ * @param {String} nameOfSheet - Namn på kalkylbladet
+ * 
+ * @returns {Objekt} - Objekt bestående av data från aktuellt kalkylblad
+ */
+function getDataFromActiveSheet_(nameOfSheet)  {
+
+  for (let n=0; n<6; n++) {
+    try {
+      let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nameOfSheet);
+      if (sheet == null) {
+        Logger.log("Bladet " + nameOfSheet + " finns ej i kalkylarket");
+      }
+      let selection = sheet.getDataRange();
+      let data = selection.getValues();
+
+      let sheetData = {};
+      sheetData["sheet"] = sheet;
+      sheetData["selection"] = selection;
+      sheetData["data"] = data;
+
+      Logger.log(sheetData["data"]);
+      return sheetData;
+
+    } catch(e) {
+      console.error("Problem med att anropa GoogleTjänst SpreadsheetApp");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
+}
+
+
 var listOfGroups = [];
 /**
  * Ger listan över e-postadresser för grupper

@@ -41,13 +41,11 @@ function GrupperRubrikData() {
  */
 function Grupper(start, slut) {
   
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
-  if (sheet == null) {
-    Logger.log("Bladet Grupper finns ej i kalkylarket");
-  }
+  let sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
-  var selection = sheet.getDataRange();
-  var data = selection.getValues();
+  let sheet = sheetDataGrupper["sheet"];
+  let selection = sheetDataGrupper["selection"];
+  let data = sheetDataGrupper["data"];
   
   var grd = GrupperRubrikData();
   
@@ -956,10 +954,11 @@ function changeGroupPermissions(email, postPermission, customFooterText, isArchi
  */
 function createHeaders_Grupper() {
   
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
-  if (sheet == null) {
-    Logger.log("Bladet Grupper finns ej i kalkylarket");
-  }
+  let sheetDataGrupper = getDataFromActiveSheet_("Grupper");
+
+  let sheet = sheetDataGrupper["sheet"];
+  let selection = sheetDataGrupper["selection"];
+  let data = sheetDataGrupper["data"];
   
   var grd = GrupperRubrikData();
   
@@ -1225,11 +1224,12 @@ function patchAdminDirectoryGroup(newName, groupId) {
  * Visar kolumner som styr avancerade inställningar
  */
 function avanceradLayout() {
-  
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
-  if (sheet == null) {
-    Logger.log("Bladet Grupper finns ej i kalkylarket");
-  }
+
+  let sheetDataGrupper = getDataFromActiveSheet_("Grupper");
+
+  let sheet = sheetDataGrupper["sheet"];
+  let selection = sheetDataGrupper["selection"];
+  let data = sheetDataGrupper["data"];
   
   var grd = GrupperRubrikData();
   
@@ -1243,10 +1243,11 @@ function avanceradLayout() {
  */
 function enkelLayout() {
   
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
-  if (sheet == null) {
-    Logger.log("Bladet Grupper finns ej i kalkylarket");
-  }
+  let sheetDataGrupper = getDataFromActiveSheet_("Grupper");
+
+  let sheet = sheetDataGrupper["sheet"];
+  let selection = sheetDataGrupper["selection"];
+  let data = sheetDataGrupper["data"];
   
   var grd = GrupperRubrikData();
   
@@ -1331,11 +1332,12 @@ function TestListAllGroups() {
  */
 function TestReadSpreadSheet() {
   
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Grupper");
-  if (sheet == null) {
-    Logger.log("Bladet Grupper finns ej i kalkylarket");
-  }
-  var data = sheet.getDataRange().getValues();
+  let sheetDataGrupper = getDataFromActiveSheet_("Grupper");
+
+  let sheet = sheetDataGrupper["sheet"];
+  let selection = sheetDataGrupper["selection"];
+  let data = sheetDataGrupper["data"];
+
   var grd = GrupperRubrikData();
   
   for (var i = 1; i < data.length; i++) {
