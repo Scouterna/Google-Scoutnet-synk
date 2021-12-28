@@ -532,8 +532,8 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
  */
 function fetchScoutnetMembers() {  
   
-  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist?pretty=1';
-  var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
+  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist';
+  var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_list_all);
   var response = UrlFetchApp.fetch(
     url, 
     {
