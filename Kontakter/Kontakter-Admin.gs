@@ -19,7 +19,8 @@ let organisationType = 'group'; //Ska enbart ändras om du kör programmet för 
 //Adressen till Scoutnet. Ska ej ändras
 let scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
 
-
+//Scoutkårens namn
+let groupName = "Testmall Scoutkår";
 
 let contact_groups_email_subject = "Användaruppgifter - Google kontaktgrupper synkning";
 
@@ -29,11 +30,11 @@ let contact_groups_email_sender_from = "";
 
 //Skapa din egen med hjälp av funktionen testGetHtmlEmailBody
 /***Brödtext enkel***/
-let contact_groups_email_plainBody = "Hej, Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper. Vänligen använd följande uppgifter i stället: E-postadress: {{userEmail}} Lösenord: {{password}} Mvh";
+let contact_groups_email_plainBody = "Hej, Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper. Vänligen använd följande uppgifter i stället: E-postadress: {{userEmail}} Lösenord: {{password}} Mvh " + groupName;
 /***Brödtext enkel - Slut***/
 
 /***Brödtext Html***/
-let contact_groups_email_htmlBody = '<div dir="ltr">Hej,<div><br></div><div>Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper.</div><div><br></div><div>Vänligen använd följande uppgifter i stället:</div><div><br></div><div>E-postadress: {{userEmail}}</div><div>Lösenord: {{password}}</div><div><br></div><div>Mvh</div></div>';
+let contact_groups_email_htmlBody = '<div dir="ltr">Hej,<div><br></div><div>Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper.</div><div><br></div><div>Vänligen använd följande uppgifter i stället:</div><div><br></div><div>E-postadress: {{userEmail}}</div><div>Lösenord: {{password}}</div><div><br></div><div>Mvh</div><div>' + groupName + '</div></div>';
 /***Brödtext Html - Slut***/
 
 //Du på kåren kan ändra denna om du vill tvinga dina egna användare att uppdatera sina skript
@@ -116,6 +117,35 @@ function doGet(e) {
   let response = JSON.stringify(contactGroupsList);
   return ContentService.createTextOutput(response)
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+
+/**
+ * En testfunktion för att själv kunna få fram oformaterad brödtext för e-brev
+ * samt html-formaterad brödtext för e-brev.
+ * 
+ * Skapa ett utkast i din Gmail med ämne satt till Kontaktgrupper och kör sen
+ * denna funktion så skrivs brödtexten ut i körningsloggen. 
+ */
+function testGetHtmlEmailBody() {
+  
+  let subject = "Kontaktgrupper";
+
+  let draft = getDraft(subject);
+
+  if (!draft) { //Kolla om ämnesraden är korrekt
+    Logger.log("Finns ej ett utkast i Gmail med korrekt ämnesrad");
+    return;
+  }
+
+  let plainBody = draft.getPlainBody();
+  let body = draft.getBody();
+
+  Logger.log("plainBody");
+  Logger.log(plainBody);
+
+  Logger.log("body");
+  Logger.log(body);
 }
 
 
@@ -905,35 +935,6 @@ function sendEmailWithContactsGroupsPassword_(userEmail, password) {
 
   Logger.log("Skickar e-post till " + userEmail);
   GmailApp.sendEmail(userEmail, contact_groups_email_subject, contact_groups_email_plainBody, emailOptions);
-}
-
-
-/**
- * En testfunktion för att själv kunna få fram oformaterad brödtext för e-brev
- * samt html-formaterad brödtext för e-brev.
- * 
- * Skapa ett utkast i din Gmail med ämne satt till Kontaktgrupper och kör sen
- * denna funktion så skrivs brödtexten ut i körningsloggen. 
- */
-function testGetHtmlEmailBody() {
-  
-  let subject = "Kontaktgrupper";
-
-  let draft = getDraft(subject);
-
-  if (!draft) { //Kolla om ämnesraden är korrekt
-    Logger.log("Finns ej ett utkast i Gmail med korrekt ämnesrad");
-    return;
-  }
-
-  let plainBody = draft.getPlainBody();
-  let body = draft.getBody();
-
-  Logger.log("plainBody");
-  Logger.log(plainBody);
-
-  Logger.log("body");
-  Logger.log(body);
 }
 
 
