@@ -59,35 +59,46 @@ function getGmailAdressWithoutDots(email) {
  */
 function getGroupMembers(groupId) {
   
-  var group = [];
-  
-  var pageToken, page;
-  do {
-    page = AdminDirectory.Members.list(groupId,{
-      domainName: domain,
-      maxResults: 150,  //Öka denna??, kanske på fler ställen också??
-      pageToken: pageToken,
-    });
-    var members = page.members
-    if (members)
-    {
-      for (var i = 0; i < members.length; i++)
-      {
-        var member = members[i];
-        
-        var tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
-        var member = {
-          email: tmpEmail,
-          role: member.role,
-          memberId: member.id
-        };
-        group.push(member);
-      }
-    }
-    pageToken = page.nextPageToken;
-  } while (pageToken);
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen getGroupMembers körs " + n);
+    
+    try {
+      var group = [];
       
-  return group;
+      var pageToken, page;
+      do {
+        page = AdminDirectory.Members.list(groupId,{
+          domainName: domain,
+          maxResults: 150,  //Öka denna??, kanske på fler ställen också??
+          pageToken: pageToken,
+        });
+        var members = page.members
+        if (members)  {
+          for (var i = 0; i < members.length; i++)  {
+            var member = members[i];
+            
+            var tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
+            var member = {
+              email: tmpEmail,
+              role: member.role,
+              memberId: member.id
+            };
+            group.push(member);
+          }
+        }
+        pageToken = page.nextPageToken;
+      } while (pageToken);
+          
+      return group;
+    
+    } catch (e) {
+      Logger.log("Problem med att anropa AdminDirectory.Members.list i getGroupMembers med:" + groupId);
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
 }
 
 
@@ -676,31 +687,45 @@ function getListOfGroups()  {
  * Uppdaterar listan över e-postadresser för grupper
  */
 function updateListOfGroups() {
-  listOfGroups = [];
-
+  
   Logger.log("Uppdaterar listan över e-postadresser för grupper");
 
-  var pageToken, page;
-  do {
-    page = AdminDirectory.Groups.list({
-      domain: domain,
-      maxResults: 150,
-      pageToken: pageToken
-    });
-    var groups = page.groups;
-    if (groups) {      
-      for (var i = 0; i < groups.length; i++) {
-        listOfGroups.push(groups[i].email);        
-      }      
-    }
-    else {
-      Logger.log('Inga grupper hittades.');      
-    }
-    pageToken = page.nextPageToken;
-  } while (pageToken);
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen updateListOfGroups körs " + n);
+    
+    try {
+      listOfGroups = [];
 
-  Logger.log(listOfGroups);
-  return listOfGroups;
+      var pageToken, page;
+      do {
+        page = AdminDirectory.Groups.list({
+          domain: domain,
+          maxResults: 150,
+          pageToken: pageToken
+        });
+        var groups = page.groups;
+        if (groups) {      
+          for (var i = 0; i < groups.length; i++) {
+            listOfGroups.push(groups[i].email);        
+          }      
+        }
+        else {
+          Logger.log('Inga grupper hittades.');      
+        }
+        pageToken = page.nextPageToken;
+      } while (pageToken);
+
+      Logger.log(listOfGroups);
+      return listOfGroups;
+    
+    } catch (e) {
+      Logger.log("Problem med att anropa AdminDirectory.Groups.list i updateListOfGroups");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
 }
 
 

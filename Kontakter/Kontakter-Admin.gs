@@ -569,7 +569,7 @@ function getMemberNumbersFromContactGroupsList_(contactGroupsList)  {
     }
   }
 
-  //Ta bort dubletter
+  //Ta bort dubbletter
   memberNumbers = removeDublicates(memberNumbers);
 
   Logger.log("memberNumbers");
