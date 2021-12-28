@@ -45,12 +45,11 @@ function MedlemslistorEnRad(radNummer, shouldUpdate, shouldSend) {
  */
 function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
   
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Medlemslistor");
-  if (sheet == null) {
-    Logger.log("Bladet Medlemslistor finns ej i kalkylarket");
-  }
-  var selection = sheet.getDataRange();
-  var data = selection.getValues();
+  let sheetDataMedlemslistor = getDataFromActiveSheet_("Medlemslistor");
+
+  let sheet = sheetDataMedlemslistor["sheet"];
+  let selection = sheetDataMedlemslistor["selection"];
+  let data = sheetDataMedlemslistor["data"];
   
   var grd = getMedlemslistorKonfigRubrikData();
   
@@ -669,10 +668,11 @@ function getVerkligaRubriker(sheet) {
  */
 function skapaRubrikerML() {
 
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Medlemslistor");
-  if (sheet == null) {
-    Logger.log("Bladet Medlemslistor finns ej i kalkylarket");
-  }
+  let sheetDataMedlemslistor = getDataFromActiveSheet_("Medlemslistor");
+
+  let sheet = sheetDataMedlemslistor["sheet"];
+  let selection = sheetDataMedlemslistor["selection"];
+  let data = sheetDataMedlemslistor["data"];
 
   var mlkrd = getMedlemslistorKonfigRubrikData();
 
