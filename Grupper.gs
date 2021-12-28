@@ -364,98 +364,6 @@ function getGroupMember(groupId, memberkey) {
 
 
 /*
- * Returnera gruppmedlemmar för en specifik grupp
- *
- * @param {string} groupId - Googles id för en grupp
- *
- * @returns {Object[]} members - Lista av medlemsobjekt med attributen email, role, memberId för medlemmar i en grupp
- */
-function getGroupMembers(groupId) {
-  
-  var group = [];
-  
-  var pageToken, page;
-  do {
-    page = AdminDirectory.Members.list(groupId,{
-      domainName: domain,
-      maxResults: 150,
-      pageToken: pageToken,
-    });
-    var members = page.members
-    if (members)
-    {
-      for (var i = 0; i < members.length; i++)
-      {
-        var member = members[i];
-        
-        var tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
-        var member = {
-          email: tmpEmail,
-          role: member.role,
-          memberId: member.id
-        };
-        group.push(member);
-      }
-    }
-    pageToken = page.nextPageToken;
-  } while (pageToken);
-      
-  return group;
-}
-
-
-/*
- * Om en medlem (dennes member_no) har ett Googlekonto
- * så returnerar vi dennes e-postadress. Annars bara en tom sträng
- *
- * @param {string} member_no - Medlemsnummer för en medlem
- *
- * @returns {string} - E-postadress för medlem om finns, annars tom sträng
- */
-function getGoogleAccount(member_no) {
-  
-  var users;
-  
-  var qry = "externalId='"+ member_no +"'";
-  
-  for (var n=0; n<6; n++) {
-    Logger.log("Funktionen getGoogleAcount körs " + n);
-    try {
-      
-      var pageToken, page;
-      do {
-        page = AdminDirectory.Users.list({
-          domain: domain,
-          query: qry,
-          orderBy: 'givenName',
-          maxResults: 150,
-          pageToken: pageToken
-        });
-        users = page.users;
-        if (users) {
-          
-          //Logger.log('%s (%s)', users[0].name.fullName, users[0].primaryEmail);
-          return users[0].primaryEmail;
-          
-        } else {
-          //Logger.log('Inga användare hittades.');
-          return "";
-        }
-        pageToken = page.nextPageToken;
-      } while (pageToken);    
-      
-    } catch(e) {
-      Logger.log("Problem med att anropa GoogleTjänst Users.list i funktionen getGoogleAccount");
-      if (n == 5) {
-        throw e;
-      } 
-      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
-    }    
-  }  
-}
-
-
-/*
  * Uppdatera medlemmar för en grupp
  *
  * @param {Objekt} selection - Hela området på kalkylarket som används
@@ -544,7 +452,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   //Om finns i googlegrupp men inte i vår lista
   for (var i = 0; i < group_members.length; i++) {    
       
-    if (!contains(allMembers_email, group_members[i].email)) {  
+    if (!allMembers_email.includes(group_members[i].email)) {  
       Logger.log(group_members[i].email + " Borde tas bort från " + groupId  + "Google e-postlista");
       deleteGroupMember(groupId, group_members[i].memberId, group_members[i].email);
     }
@@ -556,26 +464,26 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
     //och för att Google i bland ändrar e-postadress för en användare.
     
     //Denna e-post finns ej med, så vi lägger till personen
-    if (!contains(group_members_email, allMembers_email[i])) { //Lägg till person till e-postlista
+    if (!group_members_email.includes(allMembers_email[i])) { //Lägg till person till e-postlista
       
-      if (contains(allMembers_both_email, allMembers_email[i])) { //Lägg till så att både kan skicka och ta emot
+      if (allMembers_both_email.includes(allMembers_email[i])) { //Lägg till så att både kan skicka och ta emot
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Skicka och ta emot");
         addGroupMember(groupId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
       }
-      else if (contains(allMembers_send_email, allMembers_email[i])) { //Lägg till så att bara kan skicka
+      else if (allMembers_send_email.includes(allMembers_email[i])) { //Lägg till så att bara kan skicka
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Bara skicka");
         addGroupMember(groupId, allMembers_email[i], 'MANAGER', 'NONE');
       }
-      else if (contains(allMembers_receive_email, allMembers_email[i])){ //Lägg till så att bara kan ta emot
+      else if (allMembers_receive_email.includes(allMembers_email[i])){ //Lägg till så att bara kan ta emot
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Bara ta emot");
         addGroupMember(groupId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
       }
       
-      else if (contains(allMembers_both_email_admin, allMembers_email[i])){ //Lägg till admin så att både kan skicka och ta emot
+      else if (allMembers_both_email_admin.includes(allMembers_email[i])){ //Lägg till admin så att både kan skicka och ta emot
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Admin Skicka och ta emot");
         addGroupMember(groupId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
       }
-      else if (contains(allMembers_send_email_admin, allMembers_email[i])){ //Lägg till admin så att bara kan skicka
+      else if (allMembers_send_email_admin.includes(allMembers_email[i])){ //Lägg till admin så att bara kan skicka
         Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Admin Bara skicka");
         addGroupMember(groupId, allMembers_email[i], 'OWNER', 'DISABLED');
       }
@@ -589,21 +497,21 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
       
       //Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
       
-      if (contains(allMembers_both_email, allMembers_email[i])) { //Ska kunna skicka och ta emot        
+      if (allMembers_both_email.includes(allMembers_email[i])) { //Ska kunna skicka och ta emot        
         if (memberTypeOld!="Both") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen skicka och ta emot");
         }
       }
-      else if (contains(allMembers_send_email, allMembers_email[i])) { //Ska bara kunna skicka        
+      else if (allMembers_send_email.includes(allMembers_email[i])) { //Ska bara kunna skicka        
         if (memberTypeOld!="Send") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'MANAGER', 'NONE');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara skicka");
         }
       }
-      else if (contains(allMembers_receive_email, allMembers_email[i])) { //Ska bara kunna ta emot        
+      else if (allMembers_receive_email.includes(allMembers_email[i])) { //Ska bara kunna ta emot        
         if (memberTypeOld!="Receive") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
@@ -611,14 +519,14 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
         }
       }
       
-      else if (contains(allMembers_both_email_admin, allMembers_email[i])) { //Ska kunna skicka och ta emot ADMIN        
+      else if (allMembers_both_email_admin.includes(allMembers_email[i])) { //Ska kunna skicka och ta emot ADMIN        
         if (memberTypeOld!="OWNER_Both") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara ta emot ADMIN");
         }
       }
-      else if (contains(allMembers_send_email_admin, allMembers_email[i])) { //Ska bara kunna skicka ADMIN      
+      else if (allMembers_send_email_admin.includes(allMembers_email[i])) { //Ska bara kunna skicka ADMIN      
         if (memberTypeOld!="OWNER_Send") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'OWNER', 'DISABLED');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
@@ -790,7 +698,7 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   
   //Om e-post finns i "skicka" och "ta emot" ska de läggas till i "båda"
   for (var i = 0; i < allMembers_send_email.length; i++) {
-    if (contains(allMembers_receive_email, allMembers_send_email[i])) {
+    if (allMembers_receive_email.includes(allMembers_send_email[i])) {
         allMembers_both_email.push(allMembers_send_email[i]);
     }
   }
@@ -808,10 +716,10 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   //Om e-post finns i "emailAdressesToSendSpamNotification" och i någon annan lista ska de läggas till i motsvarande adminlistan
   for (var i = 0; i < emailAdressesToSendSpamNotification.length; i++) {
     
-    if (contains(allMembers_both_email, emailAdressesToSendSpamNotification[i])) {
+    if (allMembers_both_email.includes(emailAdressesToSendSpamNotification[i])) {
       allMembers_both_email_admin.push(emailAdressesToSendSpamNotification[i]);
     }
-    else if (contains(allMembers_receive_email, emailAdressesToSendSpamNotification[i])) {
+    else if (allMembers_receive_email.includes(emailAdressesToSendSpamNotification[i])) {
       allMembers_both_email_admin.push(emailAdressesToSendSpamNotification[i]);
     }
     else {
@@ -898,7 +806,7 @@ function getListsWithUniqueElements(mainList, secondList) {
   var tmp_email_list = [];
   
   for (var i = 0; i < secondList.length; i++) {
-    if (!contains(mainList, secondList[i])) {
+    if (!mainList.includes(secondList[i])) {
         tmp_email_list.push(secondList[i]);
     }
   }
@@ -1370,26 +1278,6 @@ function getA1RangeOfColumns(sheet, columnIndex, numColumns) {
  
 
 /*
- * Kontrollerar att formatet på en e-postadress är godkänt
- * genom att se om den innehåller @ och om domännamnet är godkänt
- *
- * @param {string} email - En e-postadress
- *
- * @returns {boolean} - Om e-postadressen är skriven på rätt format
- */
-function checkEmailFormat(email) {
-  
-  var arr = email.split("@");
-  var tmp_domain = arr[1];
-  
-  if (tmp_domain==domain) {
-       return true;
-  }
-  return false;  
-}
-
-
-/*
  * Returnerar en lista med e-postadresser som tillhör googlegrupper
  *
  * @param {string[]} emails - Lista med e-postadresser
@@ -1410,85 +1298,6 @@ function getEmailsSortedAsGroupOrNot(emails) {
     }
   }
   return [groupEmails, notGroupEmails];
-}
-
-
-/*
- * Returnerar true eller false om en e-post är en googlegrupp
- *
- * @param {string} email - E-postadress
- *
- * @returns {boolean} - Om e-postadressen är en googlegrupp
- */
-function checkIfEmailIsAGroup(email) {
-  
-  if (!checkEmailFormat(email)) {
-    Logger.log("Ogiltigt format på e-postadress");
-    return false;
-  }
-  return checkIfGroupExists(email);  
-}
-
-
-/*
- * Returnerar true eller false om en googlegrupp finns
- *
- * @param {string} email - E-postadress för en googlegrupp
- *
- * @returns {boolean} - Om gruppen finns eller ej
- */
-function checkIfGroupExists(email) {
-
-  var tmpList = getListOfGroups();
-  Logger.log(tmpList);
-
-  if(contains(tmpList, email))  {
-    return true;
-  }
-  return false;
-}
-
-
-var listOfGroups = [];
-/**
- * Ger listan över e-postadresser för grupper
- *
- * @returns {string[]} - Lista över e-postadresser för grupper
- */
-function getListOfGroups()  {
-  return listOfGroups;
-}
-
-
-/**
- * Uppdaterar listan över e-postadresser för grupper
- */
-function updateListOfGroups() {
-  listOfGroups = [];
-
-  Logger.log("Uppdaterar listan över e-postadresser för grupper");
-
-  var pageToken, page;
-  do {
-    page = AdminDirectory.Groups.list({
-      domain: domain,
-      maxResults: 150,
-      pageToken: pageToken
-    });
-    var groups = page.groups;
-    if (groups) {      
-      for (var i = 0; i < groups.length; i++) {
-        listOfGroups.push(groups[i].email);        
-      }      
-    }
-    else {
-      Logger.log('Inga grupper hittades.');      
-    }
-    pageToken = page.nextPageToken;
-  } while (pageToken);
-
-  Logger.log(listOfGroups);
-  return listOfGroups;
 }
 
 

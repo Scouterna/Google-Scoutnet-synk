@@ -34,12 +34,12 @@ function onOpen() {
 }
 
 
-/*
+/**
  * Tar bort punkter före @ om det är en gmailadress
  *
- * @param {string} email - E-postadress
+ * @param {String} email - E-postadress
  *
- * @returns {string}
+ * @returns {String} - E-postadress utan punkter före @ om gmailadress
  */
 function getGmailAdressWithoutDots(email) {
   
@@ -47,6 +47,58 @@ function getGmailAdressWithoutDots(email) {
   
   email = email.replace(regexGmailDots, "");
   return email;  
+}
+
+
+/*
+ * Returnera gruppmedlemmar för en specifik grupp
+ *
+ * @param {string} groupId - Googles id för en grupp
+ *
+ * @returns {Object[]} members - Lista av medlemsobjekt med attributen email, role, memberId för medlemmar i en grupp
+ */
+function getGroupMembers(groupId) {
+  
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen getGroupMembers körs " + n);
+    
+    try {
+      var group = [];
+      
+      var pageToken, page;
+      do {
+        page = AdminDirectory.Members.list(groupId,{
+          domainName: domain,
+          maxResults: 150,  //Öka denna??, kanske på fler ställen också??
+          pageToken: pageToken,
+        });
+        var members = page.members
+        if (members)  {
+          for (var i = 0; i < members.length; i++)  {
+            var member = members[i];
+            
+            var tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
+            var member = {
+              email: tmpEmail,
+              role: member.role,
+              memberId: member.id
+            };
+            group.push(member);
+          }
+        }
+        pageToken = page.nextPageToken;
+      } while (pageToken);
+          
+      return group;
+    
+    } catch (e) {
+      Logger.log("Problem med att anropa AdminDirectory.Members.list i getGroupMembers med:" + groupId);
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
 }
 
 
@@ -81,8 +133,9 @@ function fetchScoutnetMemberFieldAsString(medlem, fieldName, lowerCase) {
 /*
  * Hämtar lista med personer som är med i någon av de e-postlistor eller e-postadresser som specificeras
  *
- * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en s-postlista i Scoutnet
+ * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en e-postlista i Scoutnet
  * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
+ * @param {String[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistorna
  */
@@ -527,6 +580,242 @@ function fetchScoutnetMembers() {
 
 
 /*
+ * Om en medlem (dennes member_no) har ett Googlekonto
+ * så returnerar vi dennes e-postadress. Annars bara en tom sträng
+ *
+ * @param {string} member_no - Medlemsnummer för en medlem
+ *
+ * @returns {string} - E-postadress för medlem om finns, annars tom sträng
+ */
+function getGoogleAccount(member_no) {
+  
+  var users;
+  
+  var qry = "externalId='"+ member_no +"'";
+  
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen getGoogleAcount körs " + n);
+    try {
+      
+      var pageToken, page;
+      do {
+        page = AdminDirectory.Users.list({
+          domain: domain,
+          query: qry,
+          orderBy: 'givenName',
+          maxResults: 150,
+          pageToken: pageToken
+        });
+        users = page.users;
+        if (users) {
+          
+          //Logger.log('%s (%s)', users[0].name.fullName, users[0].primaryEmail);
+          return users[0].primaryEmail;
+          
+        } else {
+          //Logger.log('Inga användare hittades.');
+          return "";
+        }
+        pageToken = page.nextPageToken;
+      } while (pageToken);    
+      
+    } catch(e) {
+      Logger.log("Problem med att anropa GoogleTjänst Users.list i funktionen getGoogleAccount");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }    
+  }  
+}
+
+
+/*
+ * Returnerar true eller false om en e-post är en googlegrupp
+ *
+ * @param {string} email - E-postadress
+ *
+ * @returns {boolean} - Om e-postadressen är en googlegrupp
+ */
+function checkIfEmailIsAGroup(email) {
+  
+  if (!checkEmailFormat(email)) {
+    Logger.log("Ogiltigt format på e-postadress");
+    return false;
+  }
+  return checkIfGroupExists(email); 
+}
+
+
+/*
+ * Kontrollerar att formatet på en e-postadress är godkänt
+ * genom att se om den innehåller @ och om domännamnet är godkänt
+ *
+ * @param {string} email - En e-postadress
+ *
+ * @returns {boolean} - Om e-postadressen är skriven på rätt format
+ */
+function checkEmailFormat(email) {
+  
+  var arr = email.split("@");
+  var tmp_domain = arr[1];
+  
+  if (tmp_domain==domain) {
+       return true;
+  }
+  return false;  
+}
+
+
+/*
+ * Returnerar true eller false om en googlegrupp finns
+ *
+ * @param {string} email - E-postadress för en googlegrupp
+ *
+ * @returns {boolean} - Om gruppen finns eller ej
+ */
+function checkIfGroupExists(email) {
+
+  var tmpList = getListOfGroups();
+  //Logger.log(tmpList);
+
+  if(tmpList.includes(email))  {
+    return true;
+  }
+  return false;
+}
+
+
+var listOfGroups = [];
+/**
+ * Ger listan över e-postadresser för grupper
+ *
+ * @returns {string[]} - Lista över e-postadresser för grupper
+ */
+function getListOfGroups()  {
+  return listOfGroups;
+}
+
+
+/**
+ * Uppdaterar listan över e-postadresser för grupper
+ */
+function updateListOfGroups() {
+  
+  Logger.log("Uppdaterar listan över e-postadresser för grupper");
+
+  for (var n=0; n<6; n++) {
+    Logger.log("Funktionen updateListOfGroups körs " + n);
+    
+    try {
+      listOfGroups = [];
+
+      var pageToken, page;
+      do {
+        page = AdminDirectory.Groups.list({
+          domain: domain,
+          maxResults: 150,
+          pageToken: pageToken
+        });
+        var groups = page.groups;
+        if (groups) {      
+          for (var i = 0; i < groups.length; i++) {
+            listOfGroups.push(groups[i].email);        
+          }      
+        }
+        else {
+          Logger.log('Inga grupper hittades.');      
+        }
+        pageToken = page.nextPageToken;
+      } while (pageToken);
+
+      Logger.log(listOfGroups);
+      return listOfGroups;
+    
+    } catch (e) {
+      Logger.log("Problem med att anropa AdminDirectory.Groups.list i updateListOfGroups");
+      if (n == 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }
+}
+
+
+/**
+ * Ger sant eller falskt om angiven e-postadress är tillåten
+ * som avsändareadress
+ * 
+ * @param {string} email - en e-postadress
+ *
+ * @returns {boolean} - om avsändaradressen är tillåten
+ */
+function isFromEmailAdressAllowed(email) {  
+  return getAllowedFromEmailAdresses().includes(email);
+}
+
+
+/**
+ * Ger vilka e-postadresser som det går att ange som avsändare
+ *
+ * @returns {string[]} - en lista med e-postadresser
+ */
+function getAllowedFromEmailAdresses() {
+  
+  var aliases = GmailApp.getAliases();
+  var min_adress = Session.getEffectiveUser().getEmail();
+  
+  aliases.push(min_adress);
+  //Logger.log(aliases);
+  return aliases;
+}
+
+
+/**
+ * Ger ett e-postutkast om det finns givet ämnesraden på det
+ * 
+ * @param {string} subject - ämnesrad på e-postutkast
+ *
+ * @returns {Object} - ett e-postutkast av typen GmailMessage
+ */
+function getDraft(subject)  {
+
+  subject = getComparableString(subject);
+
+  var drafts = GmailApp.getDraftMessages();
+  for (var i = 0; i<drafts.length; i++) {
+
+    var draftSubject = drafts[i].getSubject();
+    draftSubject = getComparableString(draftSubject);
+
+    if (draftSubject == subject)  {
+      Logger.log(draftSubject);
+      return drafts[i];
+    }
+  }
+  return false;
+}
+
+
+/**
+ * Gör om en textsträng till gemener och tar bort tomrum
+ * 
+ * @param {string} text - textsträng
+ *
+ * @returns {string} - textsträng som är enklare att jämföra
+ */
+function getComparableString(text)  {
+
+  //Ta bort tomma mellanrum vid start och slut och konvertera till gemener
+  text = text.toLowerCase().trim();
+  //Ta bort alla tomma mellanrum
+  text = text.replace(/([\s])+/g, '');
+  return text;
+}
+
+
+/*
  * Tar reda på vilka rader i kalkylarket som ska synkroniseras
  *
  * @param {string} start - önskad startrad att synkronisera från
@@ -586,23 +875,6 @@ function deleteRowsFromSpreadsheet(sheet, delete_rows) {
     Logger.log("Remove row " + tmp_row);
     sheet.deleteRow(tmp_row);
   }  
-}
-
-
-/*
- * Kolla om ett objekt är inkluderat i en lista
- * param, lista, objekt
- * @param {string[] | number[] | Object[]} a - Lista
- * @param {string | number | Object} obj - Ett objekt
- * @returns {boolean} - True eller false gällande om objektet finns i listan
- */
-function contains(a, obj) {
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] === obj) {
-      return true;
-    }
-  }
-  return false;
 }
 
 

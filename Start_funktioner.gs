@@ -94,6 +94,7 @@ function MedlemslistorVissaRaderSkickaEnbart1() {
   Medlemslistor(0, 10, false, true);
 }
 
+
 /**
  * Ställer in egna attribut och de funktioner som körs för att räkna ut
  * värdet på attributet för respektive person.
