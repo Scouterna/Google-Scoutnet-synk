@@ -76,8 +76,8 @@ function doGet(e) {
   let params = e.parameters;
 
   if (Object.keys(params).length == 0)  {
-    Logger.log("Inga parametrar angivna");
-    return ContentService.createTextOutput("Inga parametrar angivna")
+    Logger.log("Inga parametrar angivna. MVH " + groupName);
+    return ContentService.createTextOutput("Inga parametrar angivna. MVH " + groupName)
     .setMimeType(ContentService.MimeType.TEXT);
   }
   
