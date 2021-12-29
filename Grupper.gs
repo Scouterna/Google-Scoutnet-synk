@@ -113,11 +113,12 @@ function Grupper(start, slut) {
           
         }
         else { //Om gruppens e-postadress redan finns
-          
-          var cell=selection.getCell(rad_nummer, grd["e-post"]+1);
-          cell.setBackground("red");
-        }        
-      }           
+          var group = getAdminDirectoryGroup(email);
+          groupId = group.id;
+          var cell = selection.getCell(rad_nummer, grd["groupId"]+1);
+          cell.setValue(groupId);
+        }
+      }
     }
     
     
