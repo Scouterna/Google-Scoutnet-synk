@@ -1224,7 +1224,7 @@ function patchAdminDirectoryGroup(newName, groupId) {
 /*
  * Visar kolumner som styr avancerade inställningar
  */
-function avanceradLayout() {
+function avanceradLayoutGrupper() {
 
   let sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
@@ -1242,7 +1242,7 @@ function avanceradLayout() {
 /*
  * Döljer kolumner som styr avancerade inställningar
  */
-function enkelLayout() {
+function enkelLayoutGrupper() {
   
   let sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
@@ -1252,7 +1252,7 @@ function enkelLayout() {
   
   var grd = GrupperRubrikData();
   
-  sheet.hideColumns(grd["scoutnet_list_id_send"]+1, 5);  
+  sheet.hideColumns(grd["scoutnet_list_id_send"]+1, 6);  
   sheet.hideColumns(grd["isArchived"]+1, 2);
 }
 

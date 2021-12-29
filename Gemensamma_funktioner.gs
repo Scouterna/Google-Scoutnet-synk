@@ -27,7 +27,9 @@ function onOpen() {
       .addItem('Synkronisera alla grupper', 'Grupper')
       .addItem('Synkronisera GrupperVissaRader1', 'GrupperVissaRader1')
       .addItem('Synkronisera GrupperVissaRader2', 'GrupperVissaRader2')
-      .addItem('Synkronisera GrupperVissaRader3', 'GrupperVissaRader3'))
+      .addItem('Synkronisera GrupperVissaRader3', 'GrupperVissaRader3')
+      .addItem('Visa enkel layout', 'enkelLayoutGrupper')
+      .addItem('Visa avancerad layout', 'avanceradLayoutGrupper'))
     .addSubMenu(ui.createMenu('Medlemslistor')
       .addItem('Uppdatera alla', 'MedlemslistorUppdateraEnbart'))
     .addToUi();
