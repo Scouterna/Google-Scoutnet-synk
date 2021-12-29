@@ -84,11 +84,15 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
         cell.setBackground("white");
       }
     }
-
+    
     if (spreadsheetUrl=="") { //Inget kalkylark är angivet      
       if (name=="" && scoutnet_list_id=="") { //Ta bort raden
         Logger.log("Försöker ta bort rad " + rad_nummer);        
         delete_rows.push(rad_nummer);        
+      }
+      else  {
+        //Kalkylark är ej angivet
+        continue;
       }
       update_group = "no";          
     }
@@ -795,13 +799,6 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
   range_allt.clearContent();
   /*********************************************/
 
-  /****Storlek på den nya datan som ska in*****/
-  var range_medlemmar = sheet.getRange(2, 1, membersInAList.length, numAttrMembers);
-  var memberMatrix = createMemberlistMatrix(membersInAList, mlrd);
-  Logger.log(memberMatrix);
-  range_medlemmar.setValues(memberMatrix);  
-  /********************************************/
-
   /****Storlek på den nya rubriken som ska in**/
   var range_rad1 = sheet.getRange(1, 1, 1, numAttrMembers);
   range_rad1.setFontWeight("bold");
@@ -811,7 +808,16 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
   range_rad1.setValues([memberRubrikMatrix]);
   /********************************************/
 
-  setCustomColumns(sheet, numAttrMembers+1, membersInAList.length);
+  if (membersInAList.length > 0)  {
+    /****Storlek på den nya datan som ska in*****/
+    var range_medlemmar = sheet.getRange(2, 1, membersInAList.length, numAttrMembers);
+    var memberMatrix = createMemberlistMatrix(membersInAList, mlrd);
+    Logger.log(memberMatrix);
+    range_medlemmar.setValues(memberMatrix);  
+    /********************************************/
+
+    setCustomColumns(sheet, numAttrMembers+1, membersInAList.length);
+  }
 }
 
 
