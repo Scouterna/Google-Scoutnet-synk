@@ -421,7 +421,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
       || useraccount.suspended 
       || useraccount.orgUnitPath != orgUnitPath  
       || ((useraccount.recoveryEmail != member.email) && (!(!useraccount.recoveryEmail && member.email==="")))
-      || ((useraccount.recoveryPhone != phnum_recovery) && (member.contact_mobile_phone) && (typeof useraccount.recoveryPhone !=='undefined')) 
+      || ((useraccount.recoveryPhone != phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery===""))) 
       || ((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone))
       || (accountKeywordAvatarUpdated != shouldBeKeywordAvatarUpdated))  {
     // Något behöver uppdateras
@@ -454,6 +454,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
     //Logger.log("useraccount.recoveryEmail typeof " + typeof useraccount.recoveryEmail);
     //Logger.log("member.email " + member.email);
     //Logger.log("member.email typeof " + typeof member.email);
+    //Om de inte är lika && de inte är tomma båda två
     if((useraccount.recoveryEmail != member.email) && (!(!useraccount.recoveryEmail && member.email==="")))  {
      
       Logger.log("Ny återställningse-post: %s",member.email);
@@ -465,13 +466,13 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
     //Logger.log("phnum_recovery " + phnum_recovery);
     //Logger.log("phnum " + phnum);
     //Logger.log("member.contact_mobile_phone " + member.contact_mobile_phone);
-    if((useraccount.recoveryPhone != phnum_recovery) && (member.contact_mobile_phone)) {
+    if  ((useraccount.recoveryPhone != phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery===""))) {
         Logger.log("Nytt återställningsnummer: %s", phnum_recovery);
         user.recoveryPhone = phnum_recovery;
         update = true;
     }
     
-    if (typeof syncUserContactInfo !=='undefined' && syncUserContactInfo) {
+    if  (typeof syncUserContactInfo !=='undefined' && syncUserContactInfo) {
       if((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone)) {  
         if(phnum) {
           Logger.log("Nytt mobilnummer: %s", phnum);        
