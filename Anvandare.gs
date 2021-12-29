@@ -73,9 +73,9 @@ function Anvandare() {
 
         if (obj == null) {
           Logger.log("Användaren  " + membersInAList[i].first_name + " " + membersInAList[i].last_name + " finns inte i Scoutnet eller så saknas det behörighet för att se användare. Kontrollera medlemslistan.");
-          Logger.log("Hoppar över användaren.")
+          Logger.log("Hoppar över användaren.");
           // membersInAList-loop
-          continue
+          continue;
         }
 
         var GoUser = useraccounts.find(u => u.externalIds !== undefined && u.externalIds.some(extid => extid.type === "organization" && extid.value === obj.member_no)); // leta upp befintligt Googlekonto som representerar rätt objekt
