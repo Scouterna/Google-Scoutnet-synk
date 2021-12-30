@@ -387,26 +387,39 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
   }
   
   var accountKeywordAvatarUpdated = "";
+  //user.keywords=innehåller bla i användarens konto keywordAvatarUpdatedToUpdate
   if (typeof useraccount.keywords !== 'undefined' && useraccount.keywords) {
+    //Om det finns lagrad data på användarens konto
     if (-1 != useraccount.keywords.findIndex(keyword => keyword.type === "custom" && keyword.customType === "avatar_updated")) {
+      //Sätta det värde till accountKeywordAvatarUpdated
       accountKeywordAvatarUpdated = useraccount.keywords.find(keyword => keyword.type === "custom" && keyword.customType === "avatar_updated").value;
     }
   }
   
+  //Om inställningen är att inte synkronisera profilbilder
   if (typeof syncUserAvatar === 'undefined' || !syncUserAvatar) {
     Logger.log("Ska ej synkronisera profilbild");
     member.avatar_updated = "";
+    member.avatar_url = "";
   }
   
   var shouldBeKeywordAvatarUpdated = member.avatar_updated;
+  // Om ingen bild finns i Scoutnet eller att bild ej ska synkas
   if (!shouldBeKeywordAvatarUpdated)  {
 
-    //Finns en länk till en standardbild att använda
+    //Ett genererat id för standardbilden
     if (typeof defaultUserAvatar !=='undefined' && defaultUserAvatar) {
       shouldBeKeywordAvatarUpdated = defaultUserAvatarId;
+      Logger.log("Ska sätta standardbild på denna person");
     }
   }
+  else  {
+    Logger.log("Personen har en egen profilbild i Scoutnet som ska användas");
+  }
 
+  //Om finns profilbild på kontot sedan innan
+  //Om standardbild => defaultUserAvatarId + useraccount.thumbnailPhotoEtag
+  //Om egen profilbild => member.avatar_updated + useraccount.thumbnailPhotoEtag
   if (typeof useraccount.thumbnailPhotoEtag !=='undefined') {
     shouldBeKeywordAvatarUpdated += useraccount.thumbnailPhotoEtag;
   }
@@ -415,6 +428,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
   Logger.log("accountKeywordAvatarUpdated  " + accountKeywordAvatarUpdated);
   //Logger.log("Avatar updated " + member.avatar_updated);
   Logger.log("Avatar url " + member.avatar_url);
+
   
   if ( useraccount.name.givenName != member.first_name 
       || useraccount.name.familyName != member.last_name 
@@ -508,20 +522,8 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
       var userPhoto;
       var keywordAvatarUpdatedToUpdate = "";
       
-      if (!shouldBeKeywordAvatarUpdated) {  //Ingen tillgänglig bild samt har ej någon bild i Google Workspace
-        Logger.log("Ingen profilbild från Scoutnet eller standardbild är tillgänglig" + shouldBeKeywordAvatarUpdated);
-
-        try {
-          userPhoto = AdminDirectory.Users.Photos.remove(useraccount.primaryEmail);
-          Logger.log("Tagit bort profilbild");
-        }
-        catch(err)  {
-          Logger.log("--------------------------");
-          Logger.log("Error: %s",err.message);
-          Logger.log("--------------------------");
-        }
-      }
-      else { //Om tillgänglig bild, uppdatera bild i Google Workspace
+      //Om tillgänglig Scoutnet- eller standardbild; uppdatera bild i Google Workspace
+      if (shouldBeKeywordAvatarUpdated) {
         Logger.log("Finns ny profilbild. Antingen i Scoutnet eller ny standardbild");        
         
         try {
@@ -559,8 +561,9 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
       user.keywords = keywordArray;
       update = true;
     }
+
     if (useraccount.suspended) {
-      Logger.log("Aktiverad.");
+      Logger.log("Aktiverat kontot igen.");
       user.suspended = false;
     }
 
