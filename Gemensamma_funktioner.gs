@@ -138,10 +138,11 @@ function fetchScoutnetMemberFieldAsString(medlem, fieldName, lowerCase) {
  * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en e-postlista i Scoutnet
  * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
  * @param {String[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistorna
  */
-function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, listOfEmailAdressesOfActiveAccounts) {
+function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, listOfEmailAdressesOfActiveAccounts, forceUpdate) {
   
   Logger.log("FetchScoutnetMembersMultipleMailinglists " + scoutnet_list_id);
   Logger.log(typeof scoutnet_list_id);
@@ -183,7 +184,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
       }      
     }
     else { //Om e-postlista från Scoutnet angiven
-      allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist(tmp_id[i], cell_scoutnet_list_id));
+      allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist(tmp_id[i], cell_scoutnet_list_id, forceUpdate));
     }
   }
   
@@ -258,37 +259,67 @@ function checkIfEmail(email) {
  *
  * @param {string} scoutnet_list_id - List-id för en e-postlista i Scoutnet
  * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistan
  */
-function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list_id) {
+function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list_id, forceUpdate) {
   
-  Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
-  var email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
-  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=' + scoutnet_list_id + email_fields;
-  var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
-  var response = UrlFetchApp.fetch(
-    url, 
-    {
-      'muteHttpExceptions': true,
-      'headers': { 'Authorization': authHeader}
+  var cacheExpirationInSeconds = 21600; //6 timmar
+  console.time(scoutnet_list_id);
+  
+  let cache = CacheService.getScriptCache();
+  
+  let kaka;
+  var json;
+
+  if (forceUpdate || !(kaka = cache.get(scoutnet_list_id))) {
+
+    Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
+    var email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
+    var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=' + scoutnet_list_id + email_fields;
+    var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
+    var response = UrlFetchApp.fetch(
+      url,
+      {
+        'muteHttpExceptions': true,
+        'headers': { 'Authorization': authHeader}
+      }
+    );
+    Logger.log(response); 
+    json = response.getContentText();
+
+    Logger.log("Json.length " + json.length);
+
+    //Kolla så att inte större än 100kb per kaka och sätt i så fall cache; om ej skippa det.
+    //https://developers.google.com/apps-script/reference/cache/cache#put(String,String)
+    //100KB ~ 102400 tecken från variabeln json
+    //En medlem ~ 310 tecken. 100000/310 ~ max 320 medlemmar
+    if (json.length < 100000) {
+      cache.put(scoutnet_list_id, json, cacheExpirationInSeconds);
+      console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
     }
-  );
-  //Logger.log(response); 
-  
-  var json = response.getContentText();  
+    else  {
+      console.log("För stor mängd data för att skapa en kaka");
+    }
+  }
+  else  {
+    console.log("Kakan fanns redan");
+    json = kaka;
+  }
   
   var data;
   var allMembers = [];
   
   try {
-    data= JSON.parse(json);
+    data = JSON.parse(json);
   }
   catch (e) { //Om fel
     Logger.log("EROOOR");
     if (cell_scoutnet_list_id) {
       cell_scoutnet_list_id.setBackground("red");
     }
+    console.timeEnd(scoutnet_list_id);
     return allMembers;
   }
   
@@ -313,7 +344,8 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
     var member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
     
     allMembers.push(member);
-  } 
+  }
+  console.timeEnd(scoutnet_list_id);
   return allMembers;  
 }
 
@@ -529,23 +561,55 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
 
 /*
  * Hämta lista över alla medlemmar
+ * 
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
  */
-function fetchScoutnetMembers() {  
+function fetchScoutnetMembers(forceUpdate) {
+
+  var cacheExpirationInSeconds = 21600; //6 timmar
+  console.time("fetchScoutnetMembers");
   
-  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist';
-  var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_list_all);
-  var response = UrlFetchApp.fetch(
-    url, 
-    {
-      'muteHttpExceptions': true,
-      'headers': { 'Authorization': authHeader}
+  let cache = CacheService.getScriptCache();
+  
+  let kaka;
+  var json;
+
+  //kaka sätts här för att spara ca 70ms då anropet inte behövs vid forceUpdate
+  if (forceUpdate || !(kaka = cache.get("fetchScoutnetMembers"))) {
+
+    var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist';
+    var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_list_all);
+    var response = UrlFetchApp.fetch(
+      url, 
+      {
+        'muteHttpExceptions': true,
+        'headers': { 'Authorization': authHeader}
+      }
+    );
+    //Logger.log(response); 
+    json = response.getContentText();
+
+    Logger.log("Json.length " + json.length);
+
+    //Kolla så att inte större än 100kb per kaka och sätt i så fall cache; om ej skippa det.
+    //https://developers.google.com/apps-script/reference/cache/cache#put(String,String)
+    //100KB ~ 102400 tecken från variabeln json
+    //Motsvarar ca 78 medlemmar
+    if (json.length < 100000) {
+      cache.put("fetchScoutnetMembers", json, cacheExpirationInSeconds);
+      console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
     }
-  );
-  //Logger.log(response); 
+    else  {
+      console.log("För stor mängd data för att skapa en kaka");
+    }
+  }
+  else  {
+    console.log("Kakan fanns redan");
+    json = kaka;
+  }
   
-  var json = response.getContentText();
   var data = JSON.parse(json);
   
   var medlemmar = data.data;
@@ -577,6 +641,7 @@ function fetchScoutnetMembers() {
     
   } 
   //Logger.log("FETCH MEMBERS print object " + allMembers);
+  console.timeEnd("fetchScoutnetMembers");
   return allMembers;  
 }
 

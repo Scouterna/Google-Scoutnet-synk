@@ -306,6 +306,8 @@ function getSheetDataKontakter_()  {
  */
 function fetchUrl_(url, cellWebappUrl) {
 
+  console.time("Anropa url");
+
   console.log("Anropar url " + url);
   for (let n=0; n<6; n++) {
     console.log("Funktionen fetchUrl körs " + n);
@@ -320,6 +322,7 @@ function fetchUrl_(url, cellWebappUrl) {
       if ("#d3d3d3" != cellWebappUrl.getBackground()) {
         cellWebappUrl.setBackground("LightGrey");
       }
+      console.timeEnd("Anropa url");
       return parsedResponse;
     }
     catch (e) {
@@ -328,6 +331,7 @@ function fetchUrl_(url, cellWebappUrl) {
         if ("#ff0000" != cellWebappUrl.getBackground()) {
           cellWebappUrl.setBackground("red");
         }
+        console.timeEnd("Anropa url");
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
