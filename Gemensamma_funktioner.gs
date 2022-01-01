@@ -529,23 +529,56 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
 
 /*
  * Hämta lista över alla medlemmar
+ * 
+ * @param {Boolean} forceUpdate - Tvinga uppdatering eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
  */
-function fetchScoutnetMembers() {  
+function fetchScoutnetMembers(forceUpdate) {
+
+  var cacheExpirationInSeconds = 21600; //6 timmar
+  console.time("fetchScoutnetMembers");
   
-  var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist';
-  var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_list_all);
-  var response = UrlFetchApp.fetch(
-    url, 
-    {
-      'muteHttpExceptions': true,
-      'headers': { 'Authorization': authHeader}
+  let cache = CacheService.getScriptCache();
+  console.timeEnd("fetchScoutnetMembers");
+  let kaka;
+  var json;
+
+  //Om livslängden för kakan ska sättas till 0 sekunder tvingar vi en uppdatering också
+  //kaka sätts här för att spara ca 70ms då anropet inte behövs vid forceUpdate
+  if (forceUpdate || !(kaka = cache.get("fetchScoutnetMembers"))) {
+
+    var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist';
+    var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_list_all);
+    var response = UrlFetchApp.fetch(
+      url, 
+      {
+        'muteHttpExceptions': true,
+        'headers': { 'Authorization': authHeader}
+      }
+    );
+    //Logger.log(response); 
+    json = response.getContentText();
+
+    Logger.log("Json.length " + json.length);
+
+    //Kolla så att inte större än 100kb per kaka och sätt i så fall cache; om ej skippa det.
+    //https://developers.google.com/apps-script/reference/cache/cache#put(String,String)
+    //100KB ~ 102400 tecken från variabeln json
+    //Motsvarar ca 78 medlemmar
+    if (json.length < 100000) {
+      cache.put("fetchScoutnetMembers", json, cacheExpirationInSeconds);
+      console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
     }
-  );
-  //Logger.log(response); 
+    else  {
+      console.log("För stor mängd data för att skapa en kaka");
+    }
+  }
+  else  {
+    console.log("Kakan fanns redan");
+    json = kaka;
+  }
   
-  var json = response.getContentText();
   var data = JSON.parse(json);
   
   var medlemmar = data.data;
@@ -577,6 +610,7 @@ function fetchScoutnetMembers() {
     
   } 
   //Logger.log("FETCH MEMBERS print object " + allMembers);
+  console.timeEnd("fetchScoutnetMembers");
   return allMembers;  
 }
 

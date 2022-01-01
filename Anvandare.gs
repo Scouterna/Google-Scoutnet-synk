@@ -13,7 +13,7 @@ function Anvandare() {
   var suspendedOrgUnitPath = defaultOrgUnitPath + "/" + "Avstängda";
   
   if ("group" == organisationType) {
-    var allMembers = fetchScoutnetMembers(); //Alla medlemmar med alla attribut som finns i APIt för konton
+    var allMembers = fetchScoutnetMembers(true); //Alla medlemmar med alla attribut som finns i APIt för konton
     Logger.log("AllMembers.length by fetchScoutnetMembers = " + allMembers.length);
     Logger.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     Logger.log("Antal medlemmar i scoutnet = %s " , allMembers.length);

@@ -56,7 +56,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
   var delete_rows = [];
   
   //Hämta lista med alla medlemmar i kåren och alla deras attribut
-  var allMembers = fetchScoutnetMembers();
+  var allMembers = fetchScoutnetMembers(true);
   
   var rowsToSync = findWhatRowsToSync(start, slut, data.length);
   start = rowsToSync.start;
