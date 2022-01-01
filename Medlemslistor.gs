@@ -45,6 +45,8 @@ function MedlemslistorEnRad(radNummer, shouldUpdate, shouldSend) {
  */
 function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
   
+  let forceUpdate = true;
+
   let sheetDataMedlemslistor = getDataFromActiveSheet_("Medlemslistor");
 
   let sheet = sheetDataMedlemslistor["sheet"];
@@ -116,7 +118,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
 
       if (null == shouldUpdate || shouldUpdate) {
         //Uppdatera aktuell medlemslista
-        updateMemberlist(selection, rad_nummer, data[i], grd, allMembers, rowSpreadsheet);
+        updateMemberlist(selection, rad_nummer, data[i], grd, allMembers, rowSpreadsheet, forceUpdate);
       }
       if (null == shouldSend || shouldSend) {
         //skicka ut e-brev till de i medlemslistan
@@ -751,14 +753,15 @@ function skapaRubrikerML() {
  * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
  * @param {Object[]} allMembers - lista med medlemsobjekt
  * @param {Object[]} spreadsheet - ett googleobjekt av typen Spreadsheet där listan finns
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  */
-function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, spreadsheet) {
+function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, spreadsheet, forceUpdate) {
 
   /************************/
   var scoutnet_list_id = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   var cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
   Logger.log(".......Synkronisering - hämta data............");
-  var tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, "");
+  var tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
   Logger.log(".......Slut Synkronisering - hämta data.......");
   /***********************/ 
 

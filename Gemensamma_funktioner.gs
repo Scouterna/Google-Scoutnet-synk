@@ -138,10 +138,11 @@ function fetchScoutnetMemberFieldAsString(medlem, fieldName, lowerCase) {
  * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en e-postlista i Scoutnet
  * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
  * @param {String[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistorna
  */
-function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, listOfEmailAdressesOfActiveAccounts) {
+function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, listOfEmailAdressesOfActiveAccounts, forceUpdate) {
   
   Logger.log("FetchScoutnetMembersMultipleMailinglists " + scoutnet_list_id);
   Logger.log(typeof scoutnet_list_id);
@@ -183,7 +184,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
       }      
     }
     else { //Om e-postlista från Scoutnet angiven
-      allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist(tmp_id[i], cell_scoutnet_list_id));
+      allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist(tmp_id[i], cell_scoutnet_list_id, forceUpdate));
     }
   }
   
@@ -258,10 +259,11 @@ function checkIfEmail(email) {
  *
  * @param {string} scoutnet_list_id - List-id för en e-postlista i Scoutnet
  * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistan
  */
-function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list_id) {
+function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list_id, forceUpdate) {
   
   Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
   var email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
@@ -530,7 +532,7 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
 /*
  * Hämta lista över alla medlemmar
  * 
- * @param {Boolean} forceUpdate - Tvinga uppdatering eller ej från Scoutnet
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
  */

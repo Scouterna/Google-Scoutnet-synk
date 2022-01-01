@@ -420,7 +420,7 @@ function getDataFromSheet_(nameOfSheet)  {
  * Hämta data över alla kontaktgrupper aktuella för angivna Google Grupper
  *
  * @param {String[]} listOfGroupEmails - Lista över e-postadresser för Google Grupper
- * @param {Boolean} forceUpdate - Tvinga uppdatering eller ej från Scoutnet
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  * 
  * @returns {Objekt[][]} - Lista med medlemsobjekt för aktuella kontaktgrupper
  */
@@ -505,7 +505,7 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
 
     if (updateContactGroup) {
       //Hämta uppdatering av kontaktgruppsinfo
-      let memberNumbersInAList = getUpdateForContactGroup_(selection, rad_nummer, data[i], grd);
+      let memberNumbersInAList = getUpdateForContactGroup_(selection, rad_nummer, data[i], grd, forceUpdate);
       Logger.log("memberNumbersInAList");
       Logger.log(memberNumbersInAList);
 
@@ -751,17 +751,18 @@ function translateGenderToEnglish(gender) {
  * @param {Int} rad_nummer - Radnummer för aktuell grupp i kalkylarket
  * @param {String[]} radInfo - Lista med data för aktuell rad i kalkylarket
  * @param {String[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  * 
  * @returns {Objekt[]} - Lista med kontaktgruppsinformation och medlemsnummer för de i gruppen
  */
-function getUpdateForContactGroup_(selection, rad_nummer, radInfo, grd) {
+function getUpdateForContactGroup_(selection, rad_nummer, radInfo, grd, forceUpdate) {
 
   let name = radInfo[grd["namn"]];
 
   let scoutnet_list_id = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   let cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
 
-  let tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, "");
+  let tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
   
   let contactGroupInfo = {
     name: name

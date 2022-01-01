@@ -40,7 +40,8 @@ function GrupperRubrikData() {
  * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
  */
 function Grupper(start, slut) {
-  
+  let forceUpdate = false;
+
   let sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
   let sheet = sheetDataGrupper["sheet"];
@@ -213,7 +214,7 @@ function Grupper(start, slut) {
     
     if (update_group == "yes") {
       //Uppdatera medlemmar av en grupp
-      updateGroup(selection, rad_nummer, groupId, email, data[i], grd, listOfEmailAdressesOfActiveAccounts);
+      updateGroup(selection, rad_nummer, groupId, email, data[i], grd, listOfEmailAdressesOfActiveAccounts, forceUpdate);
     }
   }
   deleteRowsFromSpreadsheet(sheet, delete_rows);
@@ -372,15 +373,16 @@ function getGroupMember(groupId, memberkey) {
  * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
  * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
  * @param {string[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  */
-function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOfEmailAdressesOfActiveAccounts) {
+function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOfEmailAdressesOfActiveAccounts, forceUpdate) {
     
   /*****Skicka och ta emot*/
   var scoutnet_list_id_both = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   var cell_scoutnet_list_id_both = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
   var synk_option_both = radInfo[grd["synk_option"]];
   Logger.log("..........1Båda....................");
-  var allMembers_both = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_both, cell_scoutnet_list_id_both, listOfEmailAdressesOfActiveAccounts);
+  var allMembers_both = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_both, cell_scoutnet_list_id_both, listOfEmailAdressesOfActiveAccounts, forceUpdate);
   var allMembers_both_email = getMemberlistsMemberEmail(allMembers_both, synk_option_both);
   Logger.log("..........1Slut Båda....................");
   /***********************/
@@ -390,7 +392,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   var cell_scoutnet_list_id_send = selection.getCell(rad_nummer, grd["scoutnet_list_id_send"]+1); //Range
   var synk_option_send = radInfo[grd["synk_option_send"]];
   Logger.log("..........1Bara skicka....................");
-  var allMembers_send = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_send, cell_scoutnet_list_id_send, listOfEmailAdressesOfActiveAccounts);
+  var allMembers_send = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_send, cell_scoutnet_list_id_send, listOfEmailAdressesOfActiveAccounts, forceUpdate);
   var allMembers_send_email = getMemberlistsMemberEmail(allMembers_send, synk_option_send);
   Logger.log("..........1Slut bara skicka....................");
   /***********************/
@@ -400,7 +402,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   var cell_scoutnet_list_id_receive = selection.getCell(rad_nummer, grd["scoutnet_list_id_receive"]+1); //Range
   var synk_option_receive = radInfo[grd["synk_option_receive"]];
   Logger.log("..........1Bara ta emot....................");
-  var allMembers_receive = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_receive, cell_scoutnet_list_id_receive, listOfEmailAdressesOfActiveAccounts);
+  var allMembers_receive = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_receive, cell_scoutnet_list_id_receive, listOfEmailAdressesOfActiveAccounts, forceUpdate);
   var allMembers_receive_email = getMemberlistsMemberEmail(allMembers_receive, synk_option_receive);
   Logger.log("..........1Slut bara ta emot....................");
   /***********************/
@@ -408,7 +410,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   /*****Till vilka som ska bli informerade om misstänkt spam*****/
   var group_moderate_content_email = radInfo[grd["group_moderate_content_email"]]; //Själva datan
   var cell_group_moderate_content_email = selection.getCell(rad_nummer, grd["group_moderate_content_email"]+1); //Range
-  var emailAdressesToSendSpamNotification = getEmailadressesToSendSpamNotification(group_moderate_content_email, cell_group_moderate_content_email);
+  var emailAdressesToSendSpamNotification = getEmailadressesToSendSpamNotification(group_moderate_content_email, cell_group_moderate_content_email, forceUpdate);
   /**************************************************************/
   
   /*****Vi ska flytta runt e-postadresserna mellan listorna om de finns i flera*****/
@@ -1057,21 +1059,23 @@ function createHeaders_Grupper() {
 
 /*
  * Ger e-postadresser till vart information beträffande misstänkt skräppost ska skickas
+ * 
+ * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {string[]} - Lista med e-postadresser
  */
-function getEmailadressesToSendSpamNotification(group_moderate_content_email, cell_group_moderate_content_email) {
+function getEmailadressesToSendSpamNotification(group_moderate_content_email, cell_group_moderate_content_email, forceUpdate) {
   
   var emailAdresses = [];
   var boolModerateGroupEmail = false;
   
-  emailAdresses = fetchScoutnetMembersMultipleMailinglists(group_moderate_content_email, cell_group_moderate_content_email, "")
+  emailAdresses = fetchScoutnetMembersMultipleMailinglists(group_moderate_content_email, cell_group_moderate_content_email, "", forceUpdate)
   if (0 != emailAdresses.length) {
     Logger.log("E-post för skräppostmoderator är angiven");
     boolModerateGroupEmail = true;
   }
   else if (typeof moderateContentEmail !=='undefined' && moderateContentEmail) {
-    emailAdresses = fetchScoutnetMembersMultipleMailinglists(moderateContentEmail, "", "");
+    emailAdresses = fetchScoutnetMembersMultipleMailinglists(moderateContentEmail, "", "", forceUpdate);
   }
   else { //Om man ej anger listId för en e-postlista ska användaren som kör detta program bli notifierad
     var tmp_member = {

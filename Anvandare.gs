@@ -47,7 +47,7 @@ function Anvandare() {
     
     var membersInAList;
     if (scoutnetListId) {
-      membersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnetListId, "", "");
+      membersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnetListId, "", "", true);
     }
     else if ("group" == organisationType) { //Om man ej anger listId för en e-postlista; endast för kårer, ej distrikt
       membersInAList = getScoutleaders(allMembers);
