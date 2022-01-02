@@ -28,6 +28,8 @@ function onOpen() {
       .addItem('Synkronisera GrupperVissaRader1', 'GrupperVissaRader1')
       .addItem('Synkronisera GrupperVissaRader2', 'GrupperVissaRader2')
       .addItem('Synkronisera GrupperVissaRader3', 'GrupperVissaRader3')
+      .addItem('Synkronisera GrupperVissaRaderOchEtikett1', 'GrupperVissaRaderOchEtikett1')
+      .addItem('Synkronisera GrupperVissEtikett1', 'GrupperVissEtikett1')
       .addItem('Visa enkel layout', 'enkelLayoutGrupper')
       .addItem('Visa avancerad layout', 'avanceradLayoutGrupper'))
     .addSubMenu(ui.createMenu('Medlemslistor')
@@ -290,8 +292,6 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
           'headers': { 'Authorization': authHeader}
         }
       );
-      Logger.log(response); 
-    Logger.log(response); 
       Logger.log(response); 
       json = response.getContentText();
 
