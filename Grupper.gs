@@ -39,8 +39,12 @@ function GrupperRubrikData() {
 
 /*
  * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
+ * Anropas antingen med (startrad, slutrad)
+ * (startrad, slutrad, etikett)
+ * (etikett)
  */
-function Grupper(start, slut) {
+function Grupper(...args) {
+
   let forceUpdate = false;
 
   console.time("Grupper");
@@ -56,25 +60,44 @@ function Grupper(start, slut) {
   
   var delete_rows = [];
   
+  var start;
+  var slut;
+  if (1 == args.length) {
+    start = 0;
+    slut = 999;
+  }
+  else  {
+    start = args[0];
+    slut = args[1];
+  }
+
   var rowsToSync = findWhatRowsToSync(start, slut, data.length);
   start = rowsToSync.start;
-  slut = rowsToSync.slut;
-  var arraysOfRows = getArrayOfRows(start, slut);
+  slut = rowsToSync.slut;  
   
   updateListOfGroups();
 
+  var arrayOfRows;
+  if (2 == args.length) {
+    arrayOfRows = getArrayOfRows(start, slut);
+  }
+  else  {
+    arrayOfRows = getArrayOfRowsWithTag(data, grd, start, slut, args[args.length-1]);
+  }
+
   tmpRows = [];
-  for (var i = 0; i < arraysOfRows.length; i++) {
-    tmpRows.push(arraysOfRows[i]+1);
+  for (var i = 0; i < arrayOfRows.length; i++) {
+    tmpRows.push(arrayOfRows[i]+1);
   }
   Logger.log("Rader att synkronisera");
   Logger.log(tmpRows);
   
-  for (var i = 0; i < arraysOfRows.length; i++) {
-    var rowIndex = arraysOfRows[i];
+  for (var i = 0; i < arrayOfRows.length; i++) {
+    var rowIndex = arrayOfRows[i];
     
     var name = data[rowIndex][grd["namn"]];
     var email = data[rowIndex][grd["e-post"]];
+    var etikett = data[rowIndex][grd["etikett"]];
     var scoutnet_list_id = data[rowIndex][grd["scoutnet_list_id"]];
     var synk_option = data[rowIndex][grd["synk_option"]];
     var groupId = data[rowIndex][grd["groupId"]];
@@ -232,12 +255,40 @@ function Grupper(start, slut) {
 
 
 /**
+ * Ger en lista av alla rader som ska synkroniseras givet rader att kolla och en etikett
+ * 
+ * @param {Objekt[][]} data - Lista av listor med datan som finns i kalkylbladet
+ * @param {String[]} grd - lista med vilka kolumnindex som respektive parameter har
+ * @param {Number} start - rad att börja synkronisera på
+ * @param {Number} slut - rad att sluta synkronisera på
+ * @param {String} etikett - Etikett att hålla utkik efter
+ * 
+ * @returns {Number[]} arrayOfRows - Lista av radera som ska synkroniseras
+ */
+function getArrayOfRowsWithTag(data, grd, start, slut, etikett) {
+
+  var arrayOfRows = [];
+
+  etikett = etikett.toLowerCase();
+
+  for (var i = start-1; i < slut; i++)  {
+
+    var tmp_etikett = data[i][grd["etikett"]].toLowerCase();
+    if (tmp_etikett == etikett)  {
+      arrayOfRows.push(i);
+    }
+  }
+  return arrayOfRows;
+}
+
+
+/**
  * Ger en lista av alla rader som ska synkroniseras givet start- och slutrad
  * 
  * @param {Number} start - rad att börja synkronisera på
  * @param {Number} slut - rad att sluta synkronisera på
  * 
- * @returns {Objekt[]} arrayOfRows - Lista av radera som ska synkroniseras
+ * @returns {Number[]} arrayOfRows - Lista av radera som ska synkroniseras
  */
 function getArrayOfRows(start, slut)  {
 
