@@ -270,81 +270,85 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
   
   let cache = CacheService.getScriptCache();
   
-  let kaka;
-  var json;
+  var allMembers = [];
 
-  if (forceUpdate || !(kaka = cache.get(scoutnet_list_id))) {
+  if (scoutnet_list_id) {
+    let kaka;
+    var json;
+    var data;
 
-    Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
-    var email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
-    var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=' + scoutnet_list_id + email_fields;
-    var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
-    var response = UrlFetchApp.fetch(
-      url,
-      {
-        'muteHttpExceptions': true,
-        'headers': { 'Authorization': authHeader}
-      }
-    );
+    if (forceUpdate || !(kaka = cache.get(scoutnet_list_id))) {
+
+      Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
+      var email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
+      var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=' + scoutnet_list_id + email_fields;
+      var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
+      var response = UrlFetchApp.fetch(
+        url,
+        {
+          'muteHttpExceptions': true,
+          'headers': { 'Authorization': authHeader}
+        }
+      );
+      Logger.log(response); 
     Logger.log(response); 
-    json = response.getContentText();
+      Logger.log(response); 
+      json = response.getContentText();
 
-    Logger.log("Json.length " + json.length);
+      Logger.log("Json.length " + json.length);
 
-    //Kolla så att inte större än 100kb per kaka och sätt i så fall cache; om ej skippa det.
-    //https://developers.google.com/apps-script/reference/cache/cache#put(String,String)
-    //100KB ~ 102400 tecken från variabeln json
-    //En medlem ~ 310 tecken. 100000/310 ~ max 320 medlemmar
-    if (json.length < 100000) {
-      cache.put(scoutnet_list_id, json, cacheExpirationInSeconds);
-      console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
+      //Kolla så att inte större än 100kb per kaka och sätt i så fall cache; om ej skippa det.
+      //https://developers.google.com/apps-script/reference/cache/cache#put(String,String)
+      //100KB ~ 102400 tecken från variabeln json
+      //En medlem ~ 310 tecken. 100000/310 ~ max 320 medlemmar
+      if (json.length < 100000) {
+        Logger.log(scoutnet_list_id);
+        Logger.log(json);
+        cache.put(scoutnet_list_id, json, cacheExpirationInSeconds);
+        console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
+      }
+      else  {
+        console.log("För stor mängd data för att skapa en kaka");
+      }
     }
     else  {
-      console.log("För stor mängd data för att skapa en kaka");
+      console.log("Kakan fanns redan");
+      json = kaka;
+    }
+    
+    try {
+      data = JSON.parse(json);
+    }
+    catch (e) { //Om fel
+      Logger.log("EROOOR");
+      if (cell_scoutnet_list_id) {
+        cell_scoutnet_list_id.setBackground("red");
+      }
+      console.timeEnd(scoutnet_list_id);
+      return allMembers;
+    }
+    cell_scoutnet_list_id.setBackground("white");
+
+    var medlemmar = data.data;
+    //Logger.log(medlemmar);
+    
+    for (x in medlemmar) {
+      var medlem = medlemmar[x];
+      
+      var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
+      
+      //Dessa attributvärden ska användas som gemener för bättre jämförelser
+      var variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
+      
+      var member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
+      
+      allMembers.push(member);
     }
   }
   else  {
-    console.log("Kakan fanns redan");
-    json = kaka;
+    cell_scoutnet_list_id.setBackground("yellow");
   }
   
-  var data;
-  var allMembers = [];
-  
-  try {
-    data = JSON.parse(json);
-  }
-  catch (e) { //Om fel
-    Logger.log("EROOOR");
-    if (cell_scoutnet_list_id) {
-      cell_scoutnet_list_id.setBackground("red");
-    }
-    console.timeEnd(scoutnet_list_id);
-    return allMembers;
-  }
-  
-  if (cell_scoutnet_list_id) {    
-    cell_scoutnet_list_id.setBackground("white");  
-    if (scoutnet_list_id=="") {
-      cell_scoutnet_list_id.setBackground("yellow");
-    }
-  }
-  
-  var medlemmar = data.data;
-  //Logger.log(medlemmar);
-  
-  for (x in medlemmar) {
-    var medlem = medlemmar[x];
-    
-    var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
-    
-    //Dessa attributvärden ska användas som gemener för bättre jämförelser
-    var variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
-    
-    var member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
-    
-    allMembers.push(member);
-  }
   console.timeEnd(scoutnet_list_id);
   return allMembers;  
 }
