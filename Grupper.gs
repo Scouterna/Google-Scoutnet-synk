@@ -42,6 +42,7 @@ function GrupperRubrikData() {
 function Grupper(start, slut) {
   let forceUpdate = false;
 
+  console.time("Grupper");
   let sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
   let sheet = sheetDataGrupper["sheet"];
@@ -218,6 +219,7 @@ function Grupper(start, slut) {
     }
   }
   deleteRowsFromSpreadsheet(sheet, delete_rows);
+  console.timeEnd("Grupper");
 }
 
 
