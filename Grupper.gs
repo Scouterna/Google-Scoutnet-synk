@@ -15,22 +15,23 @@ function GrupperRubrikData() {
   var gruppRubrikData = {};
   gruppRubrikData["namn"] = 0;
   gruppRubrikData["e-post"] = 1;
+  gruppRubrikData["etikett"] = 2;
   
-  gruppRubrikData["scoutnet_list_id"] = 2;
-  gruppRubrikData["synk_option"] = 3;
-  gruppRubrikData["scoutnet_list_id_send"] = 4;
-  gruppRubrikData["synk_option_send"] = 5;
-  gruppRubrikData["scoutnet_list_id_receive"] = 6;
-  gruppRubrikData["synk_option_receive"] = 7;
-  gruppRubrikData["customFooterText"] = 8;
+  gruppRubrikData["scoutnet_list_id"] = 3;
+  gruppRubrikData["synk_option"] = 4;
+  gruppRubrikData["scoutnet_list_id_send"] = 5;
+  gruppRubrikData["synk_option_send"] = 6;
+  gruppRubrikData["scoutnet_list_id_receive"] = 7;
+  gruppRubrikData["synk_option_receive"] = 8;
+  gruppRubrikData["customFooterText"] = 9;
   
-  gruppRubrikData["groupId"] = 9;
-  gruppRubrikData["cell_url"] = 10;
+  gruppRubrikData["groupId"] = 10;
+  gruppRubrikData["cell_url"] = 11;
   
-  gruppRubrikData["isArchived"] = 11;
-  gruppRubrikData["group_moderate_content_email"] = 12;
+  gruppRubrikData["isArchived"] = 12;
+  gruppRubrikData["group_moderate_content_email"] = 13;
   
-  gruppRubrikData["felmeddelande"] = 13;
+  gruppRubrikData["felmeddelande"] = 14;
                   
   return gruppRubrikData;
 }
@@ -38,8 +39,12 @@ function GrupperRubrikData() {
 
 /*
  * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
+ * Anropas antingen med (startrad, slutrad)
+ * (startrad, slutrad, etikett)
+ * (etikett)
  */
-function Grupper(start, slut) {
+function Grupper(...args) {
+
   let forceUpdate = false;
 
   console.time("Grupper");
@@ -55,26 +60,52 @@ function Grupper(start, slut) {
   
   var delete_rows = [];
   
+  var start;
+  var slut;
+  if (1 == args.length) {
+    start = 0;
+    slut = 999;
+  }
+  else  {
+    start = args[0];
+    slut = args[1];
+  }
+
   var rowsToSync = findWhatRowsToSync(start, slut, data.length);
   start = rowsToSync.start;
-  slut = rowsToSync.slut;
+  slut = rowsToSync.slut;  
   
   updateListOfGroups();
 
-  Logger.log("Startrad " + start + " slutrad " + slut);
+  var arrayOfRows;
+  if (2 == args.length) {
+    arrayOfRows = getArrayOfRows(start, slut);
+  }
+  else  {
+    arrayOfRows = getArrayOfRowsWithTag(data, grd, start, slut, args[args.length-1]);
+  }
+
+  tmpRows = [];
+  for (var i = 0; i < arrayOfRows.length; i++) {
+    tmpRows.push(arrayOfRows[i]+1);
+  }
+  Logger.log("Rader att synkronisera");
+  Logger.log(tmpRows);
   
-  for (var i = start-1; i < slut; i++) {
+  for (var i = 0; i < arrayOfRows.length; i++) {
+    var rowIndex = arrayOfRows[i];
     
-    var name = data[i][grd["namn"]];
-    var email = data[i][grd["e-post"]];
-    var scoutnet_list_id = data[i][grd["scoutnet_list_id"]];
-    var synk_option = data[i][grd["synk_option"]];
-    var groupId = data[i][grd["groupId"]];
-    var customFooterText = data[i][grd["customFooterText"]];
-    var isArchived = data[i][grd["isArchived"]];
-    var group_moderate_content_email = data[i][grd["group_moderate_content_email"]];
+    var name = data[rowIndex][grd["namn"]];
+    var email = data[rowIndex][grd["e-post"]];
+    var etikett = data[rowIndex][grd["etikett"]];
+    var scoutnet_list_id = data[rowIndex][grd["scoutnet_list_id"]];
+    var synk_option = data[rowIndex][grd["synk_option"]];
+    var groupId = data[rowIndex][grd["groupId"]];
+    var customFooterText = data[rowIndex][grd["customFooterText"]];
+    var isArchived = data[rowIndex][grd["isArchived"]];
+    var group_moderate_content_email = data[rowIndex][grd["group_moderate_content_email"]];
     
-    var rad_nummer = i+1;
+    var rad_nummer = rowIndex+1;
     
     Logger.log('Rad: ' + rad_nummer + ' Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id + ' Grupp-ID: ' + groupId);
     
@@ -215,11 +246,58 @@ function Grupper(start, slut) {
     
     if (update_group == "yes") {
       //Uppdatera medlemmar av en grupp
-      updateGroup(selection, rad_nummer, groupId, email, data[i], grd, listOfEmailAdressesOfActiveAccounts, forceUpdate);
+      updateGroup(selection, rad_nummer, groupId, email, data[rowIndex], grd, listOfEmailAdressesOfActiveAccounts, forceUpdate);
     }
   }
   deleteRowsFromSpreadsheet(sheet, delete_rows);
   console.timeEnd("Grupper");
+}
+
+
+/**
+ * Ger en lista av alla rader som ska synkroniseras givet rader att kolla och en etikett
+ * 
+ * @param {Objekt[][]} data - Lista av listor med datan som finns i kalkylbladet
+ * @param {String[]} grd - lista med vilka kolumnindex som respektive parameter har
+ * @param {Number} start - rad att börja synkronisera på
+ * @param {Number} slut - rad att sluta synkronisera på
+ * @param {String} etikett - Etikett att hålla utkik efter
+ * 
+ * @returns {Number[]} arrayOfRows - Lista av radera som ska synkroniseras
+ */
+function getArrayOfRowsWithTag(data, grd, start, slut, etikett) {
+
+  var arrayOfRows = [];
+
+  etikett = etikett.toLowerCase();
+
+  for (var i = start-1; i < slut; i++)  {
+
+    var tmp_etikett = data[i][grd["etikett"]].toLowerCase();
+    if (tmp_etikett == etikett)  {
+      arrayOfRows.push(i);
+    }
+  }
+  return arrayOfRows;
+}
+
+
+/**
+ * Ger en lista av alla rader som ska synkroniseras givet start- och slutrad
+ * 
+ * @param {Number} start - rad att börja synkronisera på
+ * @param {Number} slut - rad att sluta synkronisera på
+ * 
+ * @returns {Number[]} arrayOfRows - Lista av radera som ska synkroniseras
+ */
+function getArrayOfRows(start, slut)  {
+
+  var arrayOfRows = [];
+
+  for (var i = start-1; i < slut; i++)  {
+    arrayOfRows.push(i);
+  }
+  return arrayOfRows;
 }
 
 
@@ -1009,7 +1087,7 @@ function createHeaders_Grupper() {
   /*******Rad 2********************/
   // Våra värden vi vill ha som rubriker för de olika kolumnerna på rad 2
   var values_rad2 = [
-    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Sidfot", "Grupp-ID hos Google (RÖR EJ)", "Länk", "Arkivera e-post", "E-post skräppostmoderator", "Felmeddelande"]
+    ["Namn", "E-post", "Etikett för synkronisering", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Sidfot", "Grupp-ID hos Google (RÖR EJ)", "Länk", "Arkivera e-post", "E-post skräppostmoderator", "Felmeddelande"]
   ];
   
   // Sätter området för cellerna på rad 2 som vi ska ändra

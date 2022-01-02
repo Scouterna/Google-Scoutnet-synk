@@ -31,10 +31,13 @@ function GrupperAllaRader() {
 }
 
 /**
- * Funktioner för att ange att enbart vissa radintervall i kalkylarket
- * ska synkroniseras
+ * Funktioner för att ange att enbart vissa radintervall och
+ * eller etiketter i kalkylbladet ska synkroniseras
  *
  * Exempelvis rad 0 till 10. Helt fritt att ändra själv
+ * Går att komplettera med en etikett för t.ex bara de inom
+ * radintervallet med en viss etikett ska synkas.
+ * Går att ange enbart etikett om så önskas.
  */
 function GrupperVissaRader1() {
   Grupper(0, 10);
@@ -46,6 +49,14 @@ function GrupperVissaRader2() {
 
 function GrupperVissaRader3() {
   Grupper(21, 30);
+}
+
+function GrupperVissaRaderOchEtikett1() {
+  Grupper(0, 10, "Avdelningar");
+}
+
+function GrupperVissEtikett1() {
+  Grupper("Avdelningar");
 }
 /***Grupper - Slut***/
 
