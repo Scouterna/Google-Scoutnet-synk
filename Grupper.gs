@@ -15,22 +15,23 @@ function GrupperRubrikData() {
   var gruppRubrikData = {};
   gruppRubrikData["namn"] = 0;
   gruppRubrikData["e-post"] = 1;
+  gruppRubrikData["etikett"] = 2;
   
-  gruppRubrikData["scoutnet_list_id"] = 2;
-  gruppRubrikData["synk_option"] = 3;
-  gruppRubrikData["scoutnet_list_id_send"] = 4;
-  gruppRubrikData["synk_option_send"] = 5;
-  gruppRubrikData["scoutnet_list_id_receive"] = 6;
-  gruppRubrikData["synk_option_receive"] = 7;
-  gruppRubrikData["customFooterText"] = 8;
+  gruppRubrikData["scoutnet_list_id"] = 3;
+  gruppRubrikData["synk_option"] = 4;
+  gruppRubrikData["scoutnet_list_id_send"] = 5;
+  gruppRubrikData["synk_option_send"] = 6;
+  gruppRubrikData["scoutnet_list_id_receive"] = 7;
+  gruppRubrikData["synk_option_receive"] = 8;
+  gruppRubrikData["customFooterText"] = 9;
   
-  gruppRubrikData["groupId"] = 9;
-  gruppRubrikData["cell_url"] = 10;
+  gruppRubrikData["groupId"] = 10;
+  gruppRubrikData["cell_url"] = 11;
   
-  gruppRubrikData["isArchived"] = 11;
-  gruppRubrikData["group_moderate_content_email"] = 12;
+  gruppRubrikData["isArchived"] = 12;
+  gruppRubrikData["group_moderate_content_email"] = 13;
   
-  gruppRubrikData["felmeddelande"] = 13;
+  gruppRubrikData["felmeddelande"] = 14;
                   
   return gruppRubrikData;
 }
@@ -220,6 +221,26 @@ function Grupper(start, slut) {
   }
   deleteRowsFromSpreadsheet(sheet, delete_rows);
   console.timeEnd("Grupper");
+}
+
+
+/**
+ * Ger en lista av alla rader som ska synkroniseras givet start- och slutrad
+ * 
+ * @param {Number} start - rad att börja synkronisera på
+ * @param {Number} slut - rad att sluta synkronisera på
+ * 
+ * @returns {Objekt[]} arrayOfRows - Lista av radera som ska synkroniseras
+ */
+function getArrayOfRows(start, slut)  {
+
+  var arrayOfRows = [];
+
+  for (var i = start-1; i < slut; i++)  {
+    arrayOfRows.push(i);
+  }
+  Logger.log(arrayOfRows);
+  return arrayOfRows;
 }
 
 
@@ -1009,7 +1030,7 @@ function createHeaders_Grupper() {
   /*******Rad 2********************/
   // Våra värden vi vill ha som rubriker för de olika kolumnerna på rad 2
   var values_rad2 = [
-    ["Namn", "E-post", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Sidfot", "Grupp-ID hos Google (RÖR EJ)", "Länk", "Arkivera e-post", "E-post skräppostmoderator", "Felmeddelande"]
+    ["Namn", "E-post", "Etikett för synkronisering", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Scoutnet-id", "Synkinställning", "Sidfot", "Grupp-ID hos Google (RÖR EJ)", "Länk", "Arkivera e-post", "E-post skräppostmoderator", "Felmeddelande"]
   ];
   
   // Sätter området för cellerna på rad 2 som vi ska ändra
