@@ -59,23 +59,30 @@ function Grupper(start, slut) {
   var rowsToSync = findWhatRowsToSync(start, slut, data.length);
   start = rowsToSync.start;
   slut = rowsToSync.slut;
+  var arraysOfRows = getArrayOfRows(start, slut);
   
   updateListOfGroups();
 
-  Logger.log("Startrad " + start + " slutrad " + slut);
+  tmpRows = [];
+  for (var i = 0; i < arraysOfRows.length; i++) {
+    tmpRows.push(arraysOfRows[i]+1);
+  }
+  Logger.log("Rader att synkronisera");
+  Logger.log(tmpRows);
   
-  for (var i = start-1; i < slut; i++) {
+  for (var i = 0; i < arraysOfRows.length; i++) {
+    var rowIndex = arraysOfRows[i];
     
-    var name = data[i][grd["namn"]];
-    var email = data[i][grd["e-post"]];
-    var scoutnet_list_id = data[i][grd["scoutnet_list_id"]];
-    var synk_option = data[i][grd["synk_option"]];
-    var groupId = data[i][grd["groupId"]];
-    var customFooterText = data[i][grd["customFooterText"]];
-    var isArchived = data[i][grd["isArchived"]];
-    var group_moderate_content_email = data[i][grd["group_moderate_content_email"]];
+    var name = data[rowIndex][grd["namn"]];
+    var email = data[rowIndex][grd["e-post"]];
+    var scoutnet_list_id = data[rowIndex][grd["scoutnet_list_id"]];
+    var synk_option = data[rowIndex][grd["synk_option"]];
+    var groupId = data[rowIndex][grd["groupId"]];
+    var customFooterText = data[rowIndex][grd["customFooterText"]];
+    var isArchived = data[rowIndex][grd["isArchived"]];
+    var group_moderate_content_email = data[rowIndex][grd["group_moderate_content_email"]];
     
-    var rad_nummer = i+1;
+    var rad_nummer = rowIndex+1;
     
     Logger.log('Rad: ' + rad_nummer + ' Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id + ' Grupp-ID: ' + groupId);
     
@@ -216,7 +223,7 @@ function Grupper(start, slut) {
     
     if (update_group == "yes") {
       //Uppdatera medlemmar av en grupp
-      updateGroup(selection, rad_nummer, groupId, email, data[i], grd, listOfEmailAdressesOfActiveAccounts, forceUpdate);
+      updateGroup(selection, rad_nummer, groupId, email, data[rowIndex], grd, listOfEmailAdressesOfActiveAccounts, forceUpdate);
     }
   }
   deleteRowsFromSpreadsheet(sheet, delete_rows);
@@ -239,7 +246,6 @@ function getArrayOfRows(start, slut)  {
   for (var i = start-1; i < slut; i++)  {
     arrayOfRows.push(i);
   }
-  Logger.log(arrayOfRows);
   return arrayOfRows;
 }
 
