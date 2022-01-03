@@ -955,6 +955,7 @@ function getMedlemslistorRubrikData()  {
     {"apiName": "member_no", "svName": "Medlemsnr."},
     {"apiName": "first_name", "svName": "Förnamn"},
     {"apiName": "last_name", "svName": "Efternamn"},
+    {"apiName": "nickname", "svName": "Smeknamn"},
     {"apiName": "ssno", "svName": "Personnummer"},
     {"apiName": "note", "svName": "Noteringar"},
     {"apiName": "date_of_birth", "svName": "Födelsedatum"},

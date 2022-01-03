@@ -623,7 +623,8 @@ function fetchScoutnetMembers(forceUpdate) {
   for (x in medlemmar) {
     var medlem = medlemmar[x];
     
-    var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'ssno', 'note', 'date_of_birth', 'status',
+    var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'nickname', 'ssno',
+                                        'note', 'date_of_birth', 'status',
                                         'created_at', 'confirmed_at', 'group', 'unit', 'patrol', 'unit_role', 'group_role',
                                         'sex', 'address_co', 'address_1', 'address_2' , 'address_3', 'postcode', 'town',
                                         'country', 'contact_mobile_phone', 'contact_home_phone', 'contact_mothers_name',
