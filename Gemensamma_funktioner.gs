@@ -327,7 +327,9 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
       console.timeEnd(scoutnet_list_id);
       return allMembers;
     }
-    cell_scoutnet_list_id.setBackground("white");
+    if (cell_scoutnet_list_id)  {
+      cell_scoutnet_list_id.setBackground("white");
+    }
 
     var medlemmar = data.data;
     //Logger.log(medlemmar);
