@@ -9,27 +9,28 @@
  */
 function Anvandare() {
   
-  var defaultOrgUnitPath = "/Scoutnet";
-  var suspendedOrgUnitPath = defaultOrgUnitPath + "/" + "Avstängda";
+  const defaultOrgUnitPath = "/Scoutnet";
+  const suspendedOrgUnitPath = defaultOrgUnitPath + "/" + "Avstängda";
   
+  let allMembers;
   if ("group" == organisationType) {
-    var allMembers = fetchScoutnetMembers(true); //Alla medlemmar med alla attribut som finns i APIt för konton
+    allMembers = fetchScoutnetMembers(true); //Alla medlemmar med alla attribut som finns i APIt för konton
     Logger.log("AllMembers.length by fetchScoutnetMembers = " + allMembers.length);
     Logger.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     Logger.log("Antal medlemmar i scoutnet = %s " , allMembers.length);
   }
   
-  var useraccounts = getGoogleAccounts(defaultOrgUnitPath);
+  let useraccounts = getGoogleAccounts(defaultOrgUnitPath);
 
-  var defaultUserAvatar = getByteArrayOfDefaultImage();
-  var defaultUserAvatarId = getAvatarId(defaultUserAvatar);
+  const defaultUserAvatar = getByteArrayOfDefaultImage();
+  const defaultUserAvatarId = getAvatarId(defaultUserAvatar);
   
-  var MembersProcessed = [];
+  let MembersProcessed = [];
   
-  for (var p = 0; p < userAccountConfig.length; p++) { //Gå igenom Listorna som är definierade i Konfiguration.gs, avsnitt "userAccountConfig"
+  for (let p = 0; p < userAccountConfig.length; p++) { //Gå igenom Listorna som är definierade i Konfiguration.gs, avsnitt "userAccountConfig"
     
-    var scoutnetListId = userAccountConfig[p].scoutnetListId;
-    var orgUnitPath = defaultOrgUnitPath;
+    let scoutnetListId = userAccountConfig[p].scoutnetListId;
+    let orgUnitPath = defaultOrgUnitPath;
     var membersincluded = [];
     var membersexcluded = [];
     
@@ -45,7 +46,7 @@ function Anvandare() {
     
     createSuborganisationIfNeeded(orgUnitPath);
     
-    var membersInAList;
+    let membersInAList;
     if (scoutnetListId) {
       membersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnetListId, "", "", true);
     }
@@ -54,7 +55,7 @@ function Anvandare() {
     }
     Logger.log("MembersInAlist antal personer= " + membersInAList.length);
 
-    for (var i = 0; i < membersInAList.length; i++) {  //Här Processas alla medlemmar
+    for (let i = 0; i < membersInAList.length; i++) {  //Här Processas alla medlemmar
       Logger.log("**************");
       if(MembersProcessed.find(o => o == membersInAList[i].member_no)) {// Leta efter kontot i listan över redan processade konton
         Logger.log("Användaren är redan processad: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
@@ -63,12 +64,13 @@ function Anvandare() {
       {
         Logger.log("Användaren ska processas: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
         MembersProcessed.push(membersInAList[i].member_no); //Lägg till kontot i listan över processade konton
+        let obj = null;
         if ("group" == organisationType) { //Alla attribut endast för kårer, ej distrikt
-          var obj = allMembers.find(obj => obj.member_no == membersInAList[i].member_no); //Leta upp kontot i listan övar alla konton
+          obj = allMembers.find(obj => obj.member_no == membersInAList[i].member_no); //Leta upp kontot i listan övar alla konton
           //anledningen till att inte använda objektet från epostlistan är att det finns bara begränsad information i det objektet
         }
         else { //För distrikt
-          var obj = membersInAList[i];
+          obj = membersInAList[i];
         }
 
         if (obj == null) {
@@ -78,12 +80,12 @@ function Anvandare() {
           continue;
         }
 
-        var GoUser = useraccounts.find(u => u.externalIds !== undefined && u.externalIds.some(extid => extid.type === "organization" && extid.value === obj.member_no)); // leta upp befintligt Googlekonto som representerar rätt objekt
+        let GoUser = useraccounts.find(u => u.externalIds !== undefined && u.externalIds.some(extid => extid.type === "organization" && extid.value === obj.member_no)); // leta upp befintligt Googlekonto som representerar rätt objekt
         if(GoUser) {
         // Användaren fanns i listan
           const ia = useraccounts.length
           const indx = useraccounts.findIndex(v => v.id === GoUser.id);
-          useraccounts.splice(indx, indx >= 0 ? 1 : 0); // radera kontot ut listan med alla googlekonto, när updtateringen av alla konto är klar skall resterande konto i denna lista avaktiveras.
+          useraccounts.splice(indx, indx >= 0 ? 1 : 0); // radera kontot ut listan med alla googlekonto, när updateringen av alla konto är klar skall resterande konto i denna lista avaktiveras.
           const ib = useraccounts.length
           Logger.log("Hittade Googleanvändaren %s, id=%s ",GoUser.name.fullName,GoUser.id);
           //Logger.log("Antal innan: %s, efter: %s",ia,ib );
@@ -98,7 +100,7 @@ function Anvandare() {
   }
   Logger.log("Googlekonton som är kvar: %s",  useraccounts.length);
 
-  for (var goacc in  useraccounts) {
+  for (let goacc in  useraccounts) {
     Logger.log("Stänger av konto, id: %s, %s",useraccounts[goacc].id, useraccounts[goacc].name.fullName);
     suspendAccount(useraccounts[goacc], suspendedOrgUnitPath)
   }
@@ -116,9 +118,9 @@ function Anvandare() {
  */
 function createSuborganisationIfNeeded(orgUnitPath) { 
   
-  var index = orgUnitPath.lastIndexOf("/");
-  var parentOrgUnitPath = orgUnitPath.substring(0, index);
-  var name = orgUnitPath.substring(index+1, orgUnitPath.length);
+  const index = orgUnitPath.lastIndexOf("/");
+  const parentOrgUnitPath = orgUnitPath.substring(0, index);
+  const name = orgUnitPath.substring(index+1, orgUnitPath.length);
   
   Logger.log("parentOrgUnitPath " + parentOrgUnitPath);
   Logger.log("Orgname " + name);
@@ -128,10 +130,10 @@ function createSuborganisationIfNeeded(orgUnitPath) {
     createSuborganisationIfNeeded(parentOrgUnitPath);
   }
   
-  var boolOrgUnitExists = checkIfOrgUnitExists(orgUnitPath);
+  let boolOrgUnitExists = checkIfOrgUnitExists(orgUnitPath);
   if (!boolOrgUnitExists) {
     
-    var orgUnit = {      
+    let orgUnit = {      
       name: name,
       parentOrgUnitPath: parentOrgUnitPath
     };
@@ -158,7 +160,7 @@ function createSuborganisationIfNeeded(orgUnitPath) {
 function checkIfOrgUnitExists(orgUnitPath) { 
   
   try {
-    var page = AdminDirectory.Orgunits.list('my_customer', {
+    const page = AdminDirectory.Orgunits.list('my_customer', {
       orgUnitPath: orgUnitPath,
     });
     Logger.log("OrgUnit " + orgUnitPath + " finns");
@@ -181,7 +183,7 @@ function checkIfOrgUnitExists(orgUnitPath) {
  */
 function makeNameReadyForEmailAdress(name) {
   
-  var nameEmail = name.toLowerCase().trim(); //Ta bort tomma mellanrum vid start och slut och konvertera till gemener
+  let nameEmail = name.toLowerCase().trim(); //Ta bort tomma mellanrum vid start och slut och konvertera till gemener
   nameEmail = nameEmail.replace(/([\s])+/g, '.'); //Ersätt alla tommas mellanrum med en punkt (.)
   nameEmail = nameEmail.replace(/[.][\-]/g, '-').replace(/[\-][.]/g, '-'); //Om punkt följd av bindestreck eller tvärt om. Bara bindestreck i så fall.
   nameEmail = removeDiacritics (nameEmail);
@@ -198,17 +200,17 @@ function makeNameReadyForEmailAdress(name) {
  */
 function createAccount(member, orgUnitPath) {
   
-  var first_name = member.first_name;
-  var first_name_email = makeNameReadyForEmailAdress(first_name);
+  const first_name = member.first_name;
+  const first_name_email = makeNameReadyForEmailAdress(first_name);
   
-  var last_name = member.last_name;
-  var last_name_email = makeNameReadyForEmailAdress(last_name);
+  const last_name = member.last_name;
+  const last_name_email = makeNameReadyForEmailAdress(last_name);
   
-  var email = first_name_email + "." + last_name_email + "@" + domain; 
+  let email = first_name_email + "." + last_name_email + "@" + domain; 
  
   if (checkIfEmailExists(email)) {
     
-     for (var t = 1; t < 5; t++) { //Ska inte vara fler personer med samma namn. Programmet kraschar då med mening då något antagligen gått fel
+     for (let t = 1; t < 5; t++) { //Ska inte vara fler personer med samma namn. Programmet kraschar då med mening då något antagligen gått fel
        
         email = first_name_email + "." + last_name_email + t + "@" + domain;
        
@@ -218,7 +220,7 @@ function createAccount(member, orgUnitPath) {
      }    
   }  
    
-  var user = {
+  let user = {
     primaryEmail: email,
     name: {
       givenName: first_name,
@@ -247,7 +249,7 @@ function createAccount(member, orgUnitPath) {
  */
 function checkIfEmailExists(email) {  
   
-  var pageToken, page;
+  let pageToken, page;
   do {
     page = AdminDirectory.Users.list({
       domain: domain,
@@ -288,7 +290,7 @@ function getByteArrayOfDefaultImage() {
  * @returns {string} - Ett id som en sträng
  */
 function getAvatarId(avatar) {
-  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, avatar);
+  const digest = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, avatar);
   return digest.toString();
 }
 
@@ -303,8 +305,8 @@ function getAvatarId(avatar) {
  */
 function getByteArrayOfAnImage(url) {
   try {
-    var blob = UrlFetchApp.fetch(url).getBlob();
-    var data = Utilities.base64EncodeWebSafe(blob.getBytes());
+    const blob = UrlFetchApp.fetch(url).getBlob();
+    const data = Utilities.base64EncodeWebSafe(blob.getBytes());
     return data;
   }
   catch(err)  {
@@ -368,10 +370,10 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
     member.contact_mobile_phone = member.mobile_phone;
   }
  
-  var phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
-  var update = false;
+  const phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
+  let update = false;
   
-  var phnum_recovery = "";
+  let phnum_recovery = "";
   if (validatePhonenumberForE164(phnum)) {
     phnum_recovery = phnum;
   }
@@ -379,14 +381,14 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
     phnum_recovery = "";
   }
   
-  var accountPrimaryPhoneNumber = "";
+  let accountPrimaryPhoneNumber = "";
   if (typeof useraccount.phones !=='undefined' && useraccount.phones) {
     if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.type === "mobile" && phoneNumber.primary === true)) {
       accountPrimaryPhoneNumber = useraccount.phones.find(phoneNumber => phoneNumber.type === "mobile" && phoneNumber.primary === true).value;
     }
   }
   
-  var accountKeywordAvatarUpdated = "";
+  let accountKeywordAvatarUpdated = "";
   //user.keywords=innehåller bla i användarens konto keywordAvatarUpdatedToUpdate
   if (typeof useraccount.keywords !== 'undefined' && useraccount.keywords) {
     //Om det finns lagrad data på användarens konto
@@ -403,7 +405,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
     member.avatar_url = "";
   }
   
-  var shouldBeKeywordAvatarUpdated = member.avatar_updated;
+  let shouldBeKeywordAvatarUpdated = member.avatar_updated;
   // Om ingen bild finns i Scoutnet eller att bild ej ska synkas
   if (!shouldBeKeywordAvatarUpdated)  {
 
@@ -442,7 +444,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
     
     Logger.log('Användare %s %s uppdateras', useraccount.name.givenName, useraccount.name.familyName);  
 
-    var user = {} // skapa kontoobjekt med det som skall ändras
+    let user = {} // skapa kontoobjekt med det som skall ändras
     
     if(useraccount.name.givenName!=member.first_name) {
       if (!user.name)
@@ -491,14 +493,14 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
         if(phnum) {
           Logger.log("Nytt mobilnummer: %s", phnum);        
           
-          var accountPhoneNumbersNotPrimaryOrTheSame = [];
+          let accountPhoneNumbersNotPrimaryOrTheSame = [];
           if (typeof useraccount.phones !=='undefined' && useraccount.phones) {
             if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.primary !== true)) {
               accountPhoneNumbersNotPrimaryOrTheSame = useraccount.phones.filter(phoneNumber => phoneNumber.primary !== true && phoneNumber.value !== phnum);
             }
           }
           
-          var newPrimaryPhoneNumber = {
+          const newPrimaryPhoneNumber = {
             "value": phnum,
             "primary": true,
             "type": "mobile"
@@ -519,15 +521,15 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
       Logger.log("accountKeywordAvatarUpdated " + accountKeywordAvatarUpdated);
       Logger.log("shouldBeKeywordAvatarUpdated " + shouldBeKeywordAvatarUpdated);
       
-      var userPhoto;
-      var keywordAvatarUpdatedToUpdate = "";
+      let userPhoto;
+      let keywordAvatarUpdatedToUpdate = "";
       
       //Om tillgänglig Scoutnet- eller standardbild; uppdatera bild i Google Workspace
       if (shouldBeKeywordAvatarUpdated) {
         Logger.log("Finns ny profilbild. Antingen i Scoutnet eller ny standardbild");        
         
         try {
-          var data = getByteArrayImageToUse(member.avatar_url, defaultUserAvatar);
+          const data = getByteArrayImageToUse(member.avatar_url, defaultUserAvatar);
           userPhoto = AdminDirectory.Users.Photos.update({photoData: data}, useraccount.primaryEmail);
         }
         catch(err)  {
@@ -538,7 +540,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
         
         try {
           userPhoto = AdminDirectory.Users.get(useraccount.primaryEmail);          
-          var avatarId = getAvatarIdImageToUse(member.avatar_updated, defaultUserAvatarId);
+          const avatarId = getAvatarIdImageToUse(member.avatar_updated, defaultUserAvatarId);
 
           keywordAvatarUpdatedToUpdate = avatarId + userPhoto.thumbnailPhotoEtag;
           Logger.log("Uppdaterat profilbild");
@@ -551,8 +553,8 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
       }
       //Uppdatera sen Userfältet med avatar_updated och bildens etag
       Logger.log("Den nya avatarUpdated " + keywordAvatarUpdatedToUpdate);
-      var keywordArray = [];
-      var tmp_avatarUpdated = {
+      let keywordArray = [];
+      const tmp_avatarUpdated = {
         "value": keywordAvatarUpdatedToUpdate,
         "type": "custom",
         "customType": "avatar_updated"
@@ -589,15 +591,15 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
  */
 function suspendAccount(userAccount, suspendedOrgUnitPath) {
   
-  var email = userAccount.primaryEmail;
-  var suspended = userAccount.suspended;
-  var orgUnitPath = userAccount.orgUnitPath;
+  const email = userAccount.primaryEmail;
+  const suspended = userAccount.suspended;
+  const orgUnitPath = userAccount.orgUnitPath;
   
   createSuborganisationIfNeeded(suspendedOrgUnitPath);
   
   if (!suspended || (orgUnitPath!=suspendedOrgUnitPath)) {
   
-    var user = {
+    const user = {
       suspended: true,
       "orgUnitPath": suspendedOrgUnitPath
     };
@@ -620,8 +622,8 @@ function suspendAccount(userAccount, suspendedOrgUnitPath) {
  */
 function getGoogleAccounts(defaultOrgUnitPath) {
   
-  var users;
-  var pageToken, page;
+  let users;
+  let pageToken, page;
   do {
     page = AdminDirectory.Users.list({
       domain: domain,
@@ -632,13 +634,13 @@ function getGoogleAccounts(defaultOrgUnitPath) {
     });
     users = page.users;
     if (users) {
-      for (var i = 0; i < users.length; i++) {
-        var user = users[i];
+      for (let i = 0; i < users.length; i++) {
+        let user = users[i];
         //Logger.log('%s (%s)', user.name.fullName, user.primaryEmail);                
       }
     } else {
       Logger.log('Ingen användare hittades.');
-      var empty = [];
+      const empty = [];
       return empty;
     }
     pageToken = page.nextPageToken;
@@ -658,12 +660,12 @@ function getGoogleAccounts(defaultOrgUnitPath) {
  */
 function getScoutleaders(allMembers) {
   
-  var leaders = [];
+  let leaders = [];
   
-  for (var i = 0; i < allMembers.length; i++) {
+  for (let i = 0; i < allMembers.length; i++) {
     
-    var group_role = allMembers[i].group_role;
-    var unit_role = allMembers[i].unit_role;
+    const group_role = allMembers[i].group_role;
+    const unit_role = allMembers[i].unit_role;
     
     if (group_role.length!=0 || unit_role.length!=0) {
      leaders.push(allMembers[i]);
@@ -678,7 +680,7 @@ function getScoutleaders(allMembers) {
  * Max 200 stycken
  */
 function listAllUsers() {
-  var pageToken, page;
+  let pageToken, page;
   do {
     page = AdminDirectory.Users.list({
       domain: domain,
@@ -687,10 +689,10 @@ function listAllUsers() {
       maxResults: 200,
       pageToken: pageToken
     });
-    var users = page.users;
+    const users = page.users;
     if (users) {
-      for (var i = 0; i < users.length; i++) {
-        var user = users[i];
+      for (let i = 0; i < users.length; i++) {
+        const user = users[i];
         Logger.log('%s (%s)', user.name.fullName, user.primaryEmail);
         //Logger.log('%s (%s) %s', user.name.fullName, user.primaryEmail, externalIds[0].value);
       }
