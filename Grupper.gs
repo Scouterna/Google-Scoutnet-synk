@@ -78,7 +78,7 @@ function Grupper(...args) {
   updateListOfGroups();
 
   var arrayOfRows;
-  if (2 == args.length) {
+  if (0 == args.length || 2 == args.length) {
     arrayOfRows = getArrayOfRows(start, slut);
   }
   else  {
