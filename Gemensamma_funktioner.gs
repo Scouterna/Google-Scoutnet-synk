@@ -67,7 +67,7 @@ function getGroupMembers(groupId) {
     Logger.log("Funktionen getGroupMembers körs " + n);
     
     try {
-      let group = [];
+      const group = [];
       
       let pageToken, page;
       do {
@@ -149,7 +149,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   Logger.log("FetchScoutnetMembersMultipleMailinglists " + scoutnet_list_id);
   Logger.log(typeof scoutnet_list_id);
   
-  let allMembers = [];
+  const allMembers = [];
 
   scoutnet_list_id = getCleanString(scoutnet_list_id);
   
@@ -161,7 +161,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   Logger.log("tmp_id[0] = " + tmp_id[0]);
   Logger.log("tmp_id[1] = " + tmp_id[1]);
 
-  let manuellEpostadress = [];
+  const manuellEpostadress = [];
   
   for (let i = 0; i < tmp_id.length; i++) {
   
@@ -193,7 +193,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   const memberNumbers = getMemberNumbers(allMembers); //Medlemmar med dessa medlemsnummer ska användas
 //  Logger.log(memberNumbers);
   Logger.log("Fetch - getMemberNumbers klar");
-  let members = getMembersByMemberNumbers(allMembers, memberNumbers);  
+  const members = getMembersByMemberNumbers(allMembers, memberNumbers);  
   Logger.log("Fetch - getMembersByMemberNumbers klar");
   Logger.log("Hämta medlemmar från flera e-postlistor");
  
@@ -270,9 +270,9 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
   const cacheExpirationInSeconds = 21600; //6 timmar
   console.time(scoutnet_list_id);
   
-  let cache = CacheService.getScriptCache();
+  const cache = CacheService.getScriptCache();
   
-  let allMembers = [];
+  const allMembers = [];
 
   if (scoutnet_list_id) {
     let kaka;
@@ -394,7 +394,7 @@ function setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lo
  */ 
 function getMembersByMemberNumbers(members, memberNumbers) {
   Logger.log("Kör metoden getMembersByMemberNumbers");
-  let memberList = [];
+  const memberList = [];
   
   Loop1:
   for (let i = 0; i < memberNumbers.length; i++) {
@@ -426,7 +426,7 @@ function getMembersByMemberNumbers(members, memberNumbers) {
  */
 function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
   
-  let member_emails = [];
+  const member_emails = [];
   
   const email = member.email;
   const member_no = member.member_no;
@@ -577,7 +577,7 @@ function fetchScoutnetMembers(forceUpdate) {
   const cacheExpirationInSeconds = 21600; //6 timmar
   console.time("fetchScoutnetMembers");
   
-  let cache = CacheService.getScriptCache();
+  const cache = CacheService.getScriptCache();
   
   let kaka;
   let json;
@@ -619,7 +619,7 @@ function fetchScoutnetMembers(forceUpdate) {
   const data = JSON.parse(json);
   
   const medlemmar = data.data;
-  let allMembers = [];
+  const allMembers = [];
   
   //Logger.log(medlemmar);
   for (x in medlemmar) {
@@ -771,14 +771,14 @@ function getDataFromActiveSheet_(nameOfSheet)  {
 
   for (let n=0; n<6; n++) {
     try {
-      let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nameOfSheet);
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nameOfSheet);
       if (sheet == null) {
         Logger.log("Bladet " + nameOfSheet + " finns ej i kalkylarket");
       }
-      let selection = sheet.getDataRange();
-      let data = selection.getValues();
+      const selection = sheet.getDataRange();
+      const data = selection.getValues();
 
-      let sheetData = {};
+      const sheetData = {};
       sheetData["sheet"] = sheet;
       sheetData["selection"] = selection;
       sheetData["data"] = data;
@@ -797,7 +797,7 @@ function getDataFromActiveSheet_(nameOfSheet)  {
 }
 
 
-var listOfGroups = [];
+let listOfGroups = [];
 /**
  * Ger listan över e-postadresser för grupper
  *
@@ -894,7 +894,7 @@ function getDraft(subject)  {
 
   subject = getComparableString(subject);
 
-  var drafts = GmailApp.getDraftMessages();
+  const drafts = GmailApp.getDraftMessages();
   for (let i = 0; i<drafts.length; i++) {
 
     let draftSubject = drafts[i].getSubject();
@@ -995,7 +995,7 @@ function deleteRowsFromSpreadsheet(sheet, delete_rows) {
  * @returns {string[] | number[] | Object[]} - lista
  */
 function removeDublicates(list) {
-  let tmp_array = []
+  const tmp_array = []
   Logger.log("Försöker radera dubletter");
     for(let i = 0;i < list.length; i++){
       if(tmp_array.indexOf(list[i]) == -1){
@@ -1021,7 +1021,7 @@ function intphonenumber(phnum) {
     let ccok = false;
     Logger.log('Match');  
  
-    let ccodes =[];
+    const ccodes =[];
     ccodes.push("43"); //
     ccodes.push("44"); //
     ccodes.push("45"); //Danmark

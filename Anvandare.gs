@@ -25,14 +25,12 @@ function Anvandare() {
   const defaultUserAvatar = getByteArrayOfDefaultImage();
   const defaultUserAvatarId = getAvatarId(defaultUserAvatar);
   
-  let MembersProcessed = [];
+  const membersProcessed = [];
   
   for (let p = 0; p < userAccountConfig.length; p++) { //Gå igenom Listorna som är definierade i Konfiguration.gs, avsnitt "userAccountConfig"
     
     let scoutnetListId = userAccountConfig[p].scoutnetListId;
     let orgUnitPath = defaultOrgUnitPath;
-    var membersincluded = [];
-    var membersexcluded = [];
     
     if (userAccountConfig[p].orgUnitPath) {
       //Bara om man anger någon suborg så anger vi den, annars blir det knas med
@@ -57,13 +55,13 @@ function Anvandare() {
 
     for (let i = 0; i < membersInAList.length; i++) {  //Här Processas alla medlemmar
       Logger.log("**************");
-      if(MembersProcessed.find(o => o == membersInAList[i].member_no)) {// Leta efter kontot i listan över redan processade konton
+      if(membersProcessed.find(o => o == membersInAList[i].member_no)) {// Leta efter kontot i listan över redan processade konton
         Logger.log("Användaren är redan processad: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
       }
       else
       {
         Logger.log("Användaren ska processas: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
-        MembersProcessed.push(membersInAList[i].member_no); //Lägg till kontot i listan över processade konton
+        membersProcessed.push(membersInAList[i].member_no); //Lägg till kontot i listan över processade konton
         let obj = null;
         if ("group" == organisationType) { //Alla attribut endast för kårer, ej distrikt
           obj = allMembers.find(obj => obj.member_no == membersInAList[i].member_no); //Leta upp kontot i listan övar alla konton
@@ -130,10 +128,10 @@ function createSuborganisationIfNeeded(orgUnitPath) {
     createSuborganisationIfNeeded(parentOrgUnitPath);
   }
   
-  let boolOrgUnitExists = checkIfOrgUnitExists(orgUnitPath);
+  const boolOrgUnitExists = checkIfOrgUnitExists(orgUnitPath);
   if (!boolOrgUnitExists) {
     
-    let orgUnit = {      
+    const orgUnit = {      
       name: name,
       parentOrgUnitPath: parentOrgUnitPath
     };
@@ -444,7 +442,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
     
     Logger.log('Användare %s %s uppdateras', useraccount.name.givenName, useraccount.name.familyName);  
 
-    let user = {} // skapa kontoobjekt med det som skall ändras
+    const user = {} // skapa kontoobjekt med det som skall ändras
     
     if(useraccount.name.givenName!=member.first_name) {
       if (!user.name)
@@ -553,7 +551,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
       }
       //Uppdatera sen Userfältet med avatar_updated och bildens etag
       Logger.log("Den nya avatarUpdated " + keywordAvatarUpdatedToUpdate);
-      let keywordArray = [];
+      const keywordArray = [];
       const tmp_avatarUpdated = {
         "value": keywordAvatarUpdatedToUpdate,
         "type": "custom",
@@ -635,7 +633,7 @@ function getGoogleAccounts(defaultOrgUnitPath) {
     users = page.users;
     if (users) {
       for (let i = 0; i < users.length; i++) {
-        let user = users[i];
+        const user = users[i];
         //Logger.log('%s (%s)', user.name.fullName, user.primaryEmail);                
       }
     } else {
@@ -660,7 +658,7 @@ function getGoogleAccounts(defaultOrgUnitPath) {
  */
 function getScoutleaders(allMembers) {
   
-  let leaders = [];
+  const leaders = [];
   
   for (let i = 0; i < allMembers.length; i++) {
     
