@@ -8,7 +8,7 @@
  * Funktion för att skapa menyn i kalkylarket
  */
 function onOpen() {
-  var ui = SpreadsheetApp.getUi();
+  const ui = SpreadsheetApp.getUi();
   ui.createMenu('Scoutnet')
     .addItem('Synkronisera kontakter', 'synkroniseraKontakterVanlig')
     .addItem('Synkronisera kontakter - Tvinga uppdatering om möjligt', 'synkroniseraKontakterTvingad')
@@ -59,23 +59,23 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   forceUpdate = forceUpdate.toString();
 
   console.info("Läser data från kalkylbladet");
-  let sdk = getSheetDataKontakter_();
-  let cells = sdk["cells"];
+  const sdk = getSheetDataKontakter_();
+  const cells = sdk["cells"];
 
-  let username = sdk["username"];
-  let password = sdk["password"];
-  let version = sdk["version"];
-  let webappUrl = sdk["webappUrl"];
+  const username = sdk["username"];
+  const password = sdk["password"];
+  const version = sdk["version"];
+  const webappUrl = sdk["webappUrl"];
   
-  let prefixContactgroups = sdk["prefixContactgroups"];
-  let customEmailField = sdk["customEmailField"];
-  let groupName = sdk["groupName"];
+  const prefixContactgroups = sdk["prefixContactgroups"];
+  const customEmailField = sdk["customEmailField"];
+  const groupName = sdk["groupName"];
 
   console.log("E-postfält för alla e-postadresser för en kontakt " + customEmailField);
   console.log("Kår " + groupName);
 
   //Kolla om användarfälten är tomma
-  let boolIfCellsNonEmpty = colourCellsIfEmpty_(cells, sdk);
+  const boolIfCellsNonEmpty = colourCellsIfEmpty_(cells, sdk);
 
   if (!boolIfCellsNonEmpty) {
     console.error("I ett eller flera användarfält måste anges data och som nu är tomma");
@@ -84,7 +84,7 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
 
   console.info("Gör anrop till API");
 
-  let userParam = "?username=" + username + "&password=" + password + "&version=" + version + "&forceupdate=" + forceUpdate;
+  const userParam = "?username=" + username + "&password=" + password + "&version=" + version + "&forceupdate=" + forceUpdate;
   console.log(userParam);
 
   let nyaKontaktGrupper;
@@ -132,12 +132,12 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   console.log("kontaktgrupper");
   console.log(kontaktgrupper);
 
-  let emptyContactResource = makeContactResource_({}, customEmailField);
-  let contactResourceKeys = Object.keys(emptyContactResource);
+  const emptyContactResource = makeContactResource_({}, customEmailField);
+  const contactResourceKeys = Object.keys(emptyContactResource);
   console.log("Nycklar som används");
   console.log(contactResourceKeys);
 
-  let resourceNamesRemovedFromContactGroups = createAndUpdateContacts_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField, contactResourceKeys);
+  const resourceNamesRemovedFromContactGroups = createAndUpdateContacts_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField, contactResourceKeys);
   
   console.info("Kontakter som är borttagna från kontaktgrupper");
   console.info(resourceNamesRemovedFromContactGroups);
@@ -150,14 +150,14 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
  */
 function protectSheet_() {
 
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
   if (sheet == null) {
     console.error("Bladet Kontakter finns ej i kalkylarket");
   }
 
-  let protection = sheet.protect().setWarningOnly(true);
+  const protection = sheet.protect().setWarningOnly(true);
   
-  let unprotected = sheet.getRangeList(["C5:C6", "C9:C13"]).getRanges();
+  const unprotected = sheet.getRangeList(["C5:C6", "C9:C13"]).getRanges();
   protection.setUnprotectedRanges(unprotected);
   console.info("Låst de celler i kalkylbladet som ska vara låsta");
 }
@@ -176,12 +176,12 @@ function protectSheet_() {
 function colourCellsIfEmpty_(cells, sdk) {
 
   //Kolla här om användarfälten är tomma
-  let colourCellUsername = colourCellIfEmpty_(cells.username, sdk["username"], "red");
+  const colourCellUsername = colourCellIfEmpty_(cells.username, sdk["username"], "red");
   colourCellIfEmpty_(cells.password, sdk["password"], "yellow");
-  let colourCellVersion = colourCellIfEmpty_(cells.version, sdk["version"], "red");
-  let colourCellWebappUrl = colourCellIfEmpty_(cells.webappUrl, sdk["webappUrl"], "red");
-  let colourCellPrefixContactgroups = colourCellIfEmpty_(cells.prefixContactgroups, sdk["prefixContactgroups"], "red");
-  let colourCellCustomEmailField = colourCellIfEmpty_(cells.customEmailField, sdk["customEmailField"], "red");
+  const colourCellVersion = colourCellIfEmpty_(cells.version, sdk["version"], "red");
+  const colourCellWebappUrl = colourCellIfEmpty_(cells.webappUrl, sdk["webappUrl"], "red");
+  const colourCellPrefixContactgroups = colourCellIfEmpty_(cells.prefixContactgroups, sdk["prefixContactgroups"], "red");
+  const colourCellCustomEmailField = colourCellIfEmpty_(cells.customEmailField, sdk["customEmailField"], "red");
   colourCellIfEmpty_(cells.groupName, sdk["groupName"], "yellow");
 
   if (colourCellUsername &&
@@ -229,7 +229,7 @@ function colourCellIfEmpty_(cell, cellData, colour)  {
  */
 function createTriggerIfNeeded_()  {
 
-  let triggers = ScriptApp.getProjectTriggers();
+  const triggers = ScriptApp.getProjectTriggers();
 
   console.info("Antal utlösare som finns " + triggers.length);
 
@@ -238,7 +238,7 @@ function createTriggerIfNeeded_()  {
     return;
   }  
 
-  let trigger = ScriptApp.newTrigger('synkroniseraKontakterVanlig')
+  const trigger = ScriptApp.newTrigger('synkroniseraKontakterVanlig')
     .timeBased()
     .atHour(1)
     .everyDays(1)
@@ -259,19 +259,19 @@ function createTriggerIfNeeded_()  {
  */
 function getSheetDataKontakter_()  {
 
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
   if (sheet == null) {
     console.error("Bladet Kontakter finns ej i kalkylarket");
   }
-  let selection = sheet.getDataRange();
-  let data = selection.getValues();
+  const selection = sheet.getDataRange();
+  const data = selection.getValues();
   
-  let grd = getKontakterUserInputData_();
+  const grd = getKontakterUserInputData_();
 
   //console.log(data);
   //console.log(grd);
 
-  let userInputData = {};
+  const userInputData = {};
   userInputData["username"] = data[grd["username"][0]][grd["username"][1]];
   userInputData["password"] = data[grd["password"][0]][grd["password"][1]];
 
@@ -313,10 +313,10 @@ function fetchUrl_(url, cellWebappUrl) {
     console.log("Funktionen fetchUrl körs " + n);
 
     try {
-      let response = UrlFetchApp.fetch(url);
+      const response = UrlFetchApp.fetch(url);
       console.log(response);
 
-      let parsedResponse = JSON.parse(response);
+      const parsedResponse = JSON.parse(response);
       console.log(typeof parsedResponse);
       
       if ("#d3d3d3" != cellWebappUrl.getBackground()) {
@@ -348,9 +348,9 @@ function fetchUrl_(url, cellWebappUrl) {
 function getKontakterUserInputData_() {
   
   //Kolumn och rad i kalkylarket
-  let column = 2;
+  const column = 2;
 
-  let kuid = {};
+  const kuid = {};
   kuid["username"] = [4, column];
   kuid["password"] = [5, column];
 
@@ -383,11 +383,11 @@ function deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceK
   /***SLUT - De som har tagits bort från någon kontaktgrupp***/
 
   /***Hitta alla kontakter som är synkbara***/
-  let connections = updateListOfConnections_([...contactResourceKeys, 'memberships']);
+  const connections = updateListOfConnections_([...contactResourceKeys, 'memberships']);
   //console.log("Alla kontakter som är synkbara");
   //console.log(connections);
 
-  let connectionsResourceNames = [];
+  const connectionsResourceNames = [];
   for (let i = 0; i < connections.length; i++) {
     connectionsResourceNames.push(connections[i].resourceName);
   }
@@ -397,12 +397,12 @@ function deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceK
 
 
   /***Hämta lista över vilka kontaktgruppers resursnamn som inte är systemgrupper***/
-  let kontaktgrupperResourceNames = getContactGroupsResourceNames_();
+  const kontaktgrupperResourceNames = getContactGroupsResourceNames_();
   /***SLUT - Hämta lista över vilka kontaktgrupper som inte är systemgrupper***/
 
 
   /***Hitta vilka kontakter som tagits bort som inte är synkbara***/
-  let resourceNamesToCheck = [];
+  const resourceNamesToCheck = [];
 
   for (let i = 0; i < resourceNamesRemovedFromContactGroups.length; i++) {
     if (!connectionsResourceNames.includes(resourceNamesRemovedFromContactGroups[i])) {
@@ -412,13 +412,13 @@ function deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceK
   console.log("Dessa kontakter är icke synkbara kontakter som tagits bort från en kontaktgrupp");
   console.log(resourceNamesToCheck);
 
-  let personResponses = getContactsByMemberResourceNames_(resourceNamesToCheck);
-  let resourceNamesToDeleteNonSyncable = getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgrupperResourceNames);
+  const personResponses = getContactsByMemberResourceNames_(resourceNamesToCheck);
+  const resourceNamesToDeleteNonSyncable = getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgrupperResourceNames);
   /***SLUT - Hitta vilka kontakter som tagits bort som inte är synkbara***/
 
 
   /***Hitta vilka synkbara kontakter som inte är med i en kontaktgrupp***/
-  let resourceNamesToDeleteSyncable = getResourceNamesToDeleteFromConnections_(connections, kontaktgrupperResourceNames);
+  const resourceNamesToDeleteSyncable = getResourceNamesToDeleteFromConnections_(connections, kontaktgrupperResourceNames);
   /***SLUT - Hitta vilka synkbara kontakter som inte är med i en kontaktgrupp***/
 
   //Raderar kontakterna
@@ -434,9 +434,9 @@ function deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceK
  */
 function getContactGroupsResourceNames_()  {
 
-  let kontaktgrupper = getContactGroups_("");
+  const kontaktgrupper = getContactGroups_("");
 
-  let resourceNames = [];
+  const resourceNames = [];
 
   for (let i = 0; i < kontaktgrupper.length; i++) {
     resourceNames.push(kontaktgrupper[i].resourceName);
@@ -462,11 +462,11 @@ function getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgr
   //console.log("personResponses");
   //console.log(personResponses);
 
-  let resourceNamesToDelete = [];
+  const resourceNamesToDelete = [];
 
   for (let i = 0; i < personResponses.length; i++) {
-    let person = personResponses[i].person;
-    let memberships = person.memberships;
+    const person = personResponses[i].person;
+    const memberships = person.memberships;
     //console.log("memberships");
     //console.log(memberships);
     
@@ -492,12 +492,12 @@ function getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgr
  */
 function getResourceNamesToDeleteFromConnections_(connections, kontaktgrupperResourceNames)  {
 
-  let resourceNamesToDelete = [];
+  const resourceNamesToDelete = [];
 
   for (let i = 0; i < connections.length; i++) {
-    let connection = connections[i];
-    let memberships = connection.memberInfo.memberships;
-    let resourceName = connection.resourceName;
+    const connection = connections[i];
+    const memberships = connection.memberInfo.memberships;
+    const resourceName = connection.resourceName;
 
     //console.log(resourceName);
     //console.log(memberships);
@@ -523,7 +523,7 @@ function getResourceNamesToDeleteFromConnections_(connections, kontaktgrupperRes
 function checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, memberships)  {
 
   for (let i = 0; i < memberships.length; i++) {
-    let resourceName = memberships[i].contactGroupMembership.contactGroupResourceName;
+    const resourceName = memberships[i].contactGroupMembership.contactGroupResourceName;
     
     if (kontaktgrupperResourceNames.includes(resourceName)) {
       //console.log("Denna kontakt är fortfarande med i en kontaktgrupp " + resourceName);
@@ -550,28 +550,28 @@ function checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, 
 function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgroups, customEmailField, contactResourceKeys)  {
 
   //Alla kontakter som tidigare har synkats
-  let connections = updateListOfConnections_(contactResourceKeys);
+  const connections = updateListOfConnections_(contactResourceKeys);
 
-  let contactsRemovedFromContactGroups = [];
-  let resourceNamesAlreadyProcessed = [];
+  const contactsRemovedFromContactGroups = [];
+  const resourceNamesAlreadyProcessed = [];
   
   //Loop och gå igenom varje kontaktgrupp
   for (let i = 0; i < kontaktGrupper.length; i++) {
     
     //console.log(kontaktGrupper[i]);
 
-    let kontaktGruppNamn = kontaktGrupper[i].name;
+    const kontaktGruppNamn = kontaktGrupper[i].name;
     console.info("Namn på aktuell kontaktgrupp " + kontaktGruppNamn);
 
-    let kontaktGruppResourceName = kontaktGrupper[i].resourceName;
+    const kontaktGruppResourceName = kontaktGrupper[i].resourceName;
     console.log("Resursnamn för aktuell kontaktgrupp " + kontaktGruppResourceName);
 
     //Hämta vilka som är med i kontaktgruppen just nu
     /***Är med i kontaktgruppen just nu***/
-    let kontaktGrupp = getContactGroup_(kontaktGrupper[i]);
-    let memberResourceNames = kontaktGrupp.memberResourceNames;
-    let kontaktLista = getContactsByMemberResourceNames_(memberResourceNames);
-    let membersInfo = getMembersInfoFromPersonResponses_(kontaktLista);
+    const kontaktGrupp = getContactGroup_(kontaktGrupper[i]);
+    const memberResourceNames = kontaktGrupp.memberResourceNames;
+    const kontaktLista = getContactsByMemberResourceNames_(memberResourceNames);
+    const membersInfo = getMembersInfoFromPersonResponses_(kontaktLista);
   
     //console.log("kontaktGrupp");
     //console.log(kontaktGrupp);
@@ -590,13 +590,13 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
     //console.log(nyaKontakter);
 
     /***Ska var med i kontaktgruppen***/
-    let memberNumbersShouldBeInContactGroup = getMemberNumbersShouldBeInContactGroup_(nyaKontakter, kontaktGruppNamn, prefixContactgroups);
+    const memberNumbersShouldBeInContactGroup = getMemberNumbersShouldBeInContactGroup_(nyaKontakter, kontaktGruppNamn, prefixContactgroups);
     /***Ska var med i kontaktgruppen - Slut***/
 
-    let membersInfoStayingInGroup = [];
+    const membersInfoStayingInGroup = [];
 
-    let resourceNamesToAdd = [];
-    let resourceNamesToRemove = [];
+    const resourceNamesToAdd = [];
+    const resourceNamesToRemove = [];
   
     console.log("Loopa igenom vilka som ska tas bort från kontaktgruppen");
     //Loop och gå igenom varje kontakt som är med i gruppen just nu
@@ -616,7 +616,7 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
     console.log("Ska fortsätta stanna i gruppen");
     console.log(membersInfoStayingInGroup);
 
-    let memberNumbersStayingInGroup = getMemberNumbersFromMembersInfo_(membersInfoStayingInGroup);
+    const memberNumbersStayingInGroup = getMemberNumbersFromMembersInfo_(membersInfoStayingInGroup);
     //console.log("memberNumbersStayingInGroup");
     //console.log(memberNumbersStayingInGroup);
 
@@ -638,7 +638,7 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
         }
         else {          
           console.log("Skapa kontakten " + memberNumbersShouldBeInContactGroup[n] + " och lägg till i gruppen");
-          let memberData = getMemberdataFromMemberNumber_(nyaKontakter, memberNumbersShouldBeInContactGroup[n]);
+          const memberData = getMemberdataFromMemberNumber_(nyaKontakter, memberNumbersShouldBeInContactGroup[n]);
 
           connection = createContact_(memberData, customEmailField);
           resourceNamesToAdd.push(connection.resourceName);
@@ -675,11 +675,11 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
 function getMemberNumbersShouldBeInContactGroup_(nyaKontakter, namn, prefixContactgroups) {
 
   //Hämta lista vilka som ska vara med i kontaktgruppen
-  let kontaktGruppInfo = getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups);
+  const kontaktGruppInfo = getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups);
   console.info("Hämta lista över vilka som ska vara med i kontaktgruppen");
   console.info(kontaktGruppInfo);
 
-  let kontaktGruppMemberNumbersList = getContactGroupMemberNumbers_(kontaktGruppInfo);
+  const kontaktGruppMemberNumbersList = getContactGroupMemberNumbers_(kontaktGruppInfo);
   //console.log("kontaktGruppMemberNumbersList");
   //console.log(kontaktGruppMemberNumbersList);
 
@@ -712,7 +712,7 @@ function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd
     console.log("Funktionen modifyContactGroupMembers körs " + n);
 
     try {
-      let contactGroupModifyResource = People.ContactGroups.Members.modify({
+      const contactGroupModifyResource = People.ContactGroups.Members.modify({
         "resourceNamesToAdd": resourceNamesToAdd,
         "resourceNamesToRemove": resourceNamesToRemove
       }, contactGroupResourceName);
@@ -741,7 +741,7 @@ function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd
  */
 function getMemberdataFromMemberNumber_(nyaKontakter, memberNumber)  {
 
-  let allMembers = nyaKontakter[0];
+  const allMembers = nyaKontakter[0];
 
   if (null == allMembers) {
     return null;
@@ -786,13 +786,13 @@ function getConnectionByMemberNumber_(connections, memberNumber)  {
  */
 function updateListOfConnections_(contactResourceKeys) {
 
-  let contactResourceKeysString = contactResourceKeys.toString();
+  const contactResourceKeysString = contactResourceKeys.toString();
 
   for (let n=0; n<6; n++) {
     console.log("Funktionen updateListOfConnections körs " + n);
 
     try {
-      let listOfConnections = [];
+      const listOfConnections = [];
 
       let pageToken, page;
       do {
@@ -802,22 +802,22 @@ function updateListOfConnections_(contactResourceKeys) {
           personFields: contactResourceKeysString,
           sources: ["READ_SOURCE_TYPE_CONTACT"]
         });
-        let connections = page.connections;
+        const connections = page.connections;
         if (connections) {   
           for (let i = 0; i < connections.length; i++) {
 
-            let externalIds = connections[i].externalIds;
+            const externalIds = connections[i].externalIds;
 
             if (externalIds)  {
 
               for (let k = 0; k < externalIds.length; k++) {
-                let externalId = externalIds[k];
+                const externalId = externalIds[k];
                 
                 if ("Medlemsnummer" == externalIds[k].type) {
 
                   if ("CONTACT" == externalId.metadata.source.type) {
 
-                    let connection = {
+                    const connection = {
                       resourceName: connections[i].resourceName,
                       etag: connections[i].etag,
                       memberNumber: externalId.value,
@@ -860,7 +860,7 @@ function updateListOfConnections_(contactResourceKeys) {
  */
 function getContactGroupMemberNumbers_(kontaktGruppInfo)  {
 
-  let memberNumbers = [];
+  const memberNumbers = [];
 
   for (let i = 1; i < kontaktGruppInfo.length; i++) {
     memberNumbers.push(kontaktGruppInfo[i]);
@@ -878,7 +878,7 @@ function getContactGroupMemberNumbers_(kontaktGruppInfo)  {
  */
 function getMemberNumbersFromMembersInfo_(membersInfoList) {
 
-  let memberNumbers = [];
+  const memberNumbers = [];
 
   for (let i = 0; i < membersInfoList.length; i++) {
     memberNumbers.push(membersInfoList[i].memberNumber);
@@ -897,11 +897,11 @@ function getMemberNumbersFromMembersInfo_(membersInfoList) {
 function getMembersInfoFromPersonResponses_(personResponses) {
 
   console.log("getMembersInfoFromPersonResponses");
-  let membersInfoList = [];
+  const membersInfoList = [];
 
   for (let i = 0; i < personResponses.length; i++) {
 
-    let externalIds = personResponses[i].person.externalIds;
+    const externalIds = personResponses[i].person.externalIds;
 
     let foundMatch = false;
 
@@ -909,7 +909,7 @@ function getMembersInfoFromPersonResponses_(personResponses) {
       for (let k = 0; k < externalIds.length; k++) {
         if (externalIds[k].type == "Medlemsnummer") {
           
-          let memberInfo = {
+          const memberInfo = {
             memberNumber: externalIds[k].value,
             resourceName	: personResponses[i].requestedResourceName
           };
@@ -921,7 +921,7 @@ function getMembersInfoFromPersonResponses_(personResponses) {
 
     if (!foundMatch)  {
       console.log("Denna kontakt är manuellt tillagd eller något");
-      let memberInfo = {
+      const memberInfo = {
         memberNumber: "",
         resourceName	: personResponses[i].requestedResourceName
       };
@@ -949,7 +949,7 @@ function getContactsByMemberResourceNames_(resourceNames)  {
     console.log("Funktionen getContactsByMemberResourceNames körs " + n);
     
     try {
-      let group = People.People.getBatchGet({
+      const group = People.People.getBatchGet({
         resourceNames: resourceNames,
         personFields: "emailAddresses,externalIds,memberships"
       });
@@ -990,15 +990,15 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
   console.log("Alla nycklar som finns");
   console.log(contactResourceKeys);
 
-  let personFields = getSimplePersonFields_();
+  const personFields = getSimplePersonFields_();
   
   let personFieldsToUpdate = [];
-  let contactsToUpdate = {};
+  const contactsToUpdate = {};
   let numbersOfContactsToUpdate = 0;
 
   for (let i = 0; i < connections.length; i++) {
     console.info("--------------------------------------");
-    let connection = connections[i].memberInfo;
+    const connection = connections[i].memberInfo;
     console.log("Medlemsinfo som är inlagt nu på kontakten");
     console.log(connection);
 
@@ -1013,14 +1013,14 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
       continue;
     }
 
-    let memberData = getMemberdataFromMemberNumber_(nyaKontakter, connections[i].memberNumber);
+    const memberData = getMemberdataFromMemberNumber_(nyaKontakter, connections[i].memberNumber);
     //console.log("memberData");
     //console.log(memberData);
     if (!memberData)  {
       console.log("Denna kontakt ska ej vara kvar längre " + connections[i].memberNumber);
       continue;
     }
-    let memberDataContactResource = makeContactResource_(memberData, customEmailField);
+    const memberDataContactResource = makeContactResource_(memberData, customEmailField);
     console.log("Medlemsinfo som ska vara inlagd på kontakten");
     console.log(memberDataContactResource);
 
@@ -1146,33 +1146,33 @@ function batchDeleteContacts_(resourceNames) {
  */
 function getSimplePersonFields_()  {
 
-  let personFields = [];
+  const personFields = [];
   
-  let keys_addresses = ["type", "streetAddress", "extendedAddress", "city", "postalCode", "country"];
+  const keys_addresses = ["type", "streetAddress", "extendedAddress", "city", "postalCode", "country"];
   personFields.push({"apiName": "addresses", "svName": "adresser", "keys": keys_addresses, "removeValueEmpty": false});
 
-  let keys_biographies = ["value", "contentType"];
+  const keys_biographies = ["value", "contentType"];
   personFields.push({"apiName": "biographies", "svName": "anteckningar", "keys": keys_biographies, "removeValueEmpty": true});
 
-  let keys_names = ["givenName", "familyName"];
+  const keys_names = ["givenName", "familyName"];
   personFields.push({"apiName": "names", "svName": "namn", "keys": keys_names, "removeValueEmpty": false});
 
-  let keys_nicknames = ["value"];
+  const keys_nicknames = ["value"];
   personFields.push({"apiName": "nicknames", "svName": "smeknamn", "keys": keys_nicknames, "removeValueEmpty": true});
 
-  let keys_emailAddresses = ["value", "type"];
+  const keys_emailAddresses = ["value", "type"];
   personFields.push({"apiName": "emailAddresses", "svName": "e-postadresser", "keys": keys_emailAddresses, "removeValueEmpty": true});
 
-  let keys_genders = ["value"];
+  const keys_genders = ["value"];
   personFields.push({"apiName": "genders", "svName": "kön", "keys": keys_genders, "removeValueEmpty": true});
 
-  let keys_organizations = ["type", "current", "name", "department", "title"];
+  const keys_organizations = ["type", "current", "name", "department", "title"];
   personFields.push({"apiName": "organizations", "svName": "organisation", "keys": keys_organizations, "removeValueEmpty": false});
 
-  let keys_phoneNumbers = ["value", "type"];
+  const keys_phoneNumbers = ["value", "type"];
   personFields.push({"apiName": "phoneNumbers", "svName": "telefonnummer", "keys": keys_phoneNumbers, "removeValueEmpty": true});
 
-  let keys_relations = ["person", "type"];
+  const keys_relations = ["person", "type"];
   personFields.push({"apiName": "relations", "svName": "relationer", "keys": keys_relations, "removeValueEmpty": true});
 
   return personFields;
@@ -1190,20 +1190,20 @@ function getSimplePersonFields_()  {
  */
 function checkDifference_(connection, memberDataContactResource, personField) {
 
-  let nameOfPersonField = personField.apiName;
+  const nameOfPersonField = personField.apiName;
 
-  let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, personField.removeValueEmpty);
+  const connectionObject = connection[nameOfPersonField];
+  const tmpObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, personField.removeValueEmpty);
   if ('status' in tmpObject) {
     console.log("status är definerad i objektet som " + tmpObject.status);
     //En första koll om det är någon förändring true eller false. T.ex nytt attribut
     return tmpObject.status;
   }
 
-  let memberData = tmpObject.memberData;
+  const memberData = tmpObject.memberData;
   
-  let keys = personField.keys;
-  let tmpArray = makeArrayOfFilteredConnectionObject_(connectionObject, keys); 
+  const keys = personField.keys;
+  const tmpArray = makeArrayOfFilteredConnectionObject_(connectionObject, keys); 
 
   return checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField);
 }
@@ -1219,22 +1219,22 @@ function checkDifference_(connection, memberDataContactResource, personField) {
  */
 function checkDifferenceBirthdays_(connection, memberDataContactResource) {
 
-  let nameOfPersonField = "birthdays";
+  const nameOfPersonField = "birthdays";
   
-  let connectionObject = connection[nameOfPersonField];
-  let tmpObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, false);
-  if ('status' in tmpObject) {
-    console.log("status är definerad i objektet som " + tmpObject.status);
+  const connectionObject = connection[nameOfPersonField];
+  const tmpObject_firstcheck = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, false);
+  if ('status' in tmpObject_firstcheck) {
+    console.log("status är definerad i objektet som " + tmpObject_firstcheck.status);
     //En första koll om det är någon förändring true eller false. T.ex nytt attribut
-    return tmpObject.status;
+    return tmpObject_firstcheck.status;
   }
 
-  let memberData = tmpObject.memberData;
+  const memberData = tmpObject_firstcheck.memberData;
 
-  let tmpArray = [];
+  const tmpArray = [];
   
   for (let i = 0; i < connectionObject.length; i++) {
-    let tmpObject = {
+    const tmpObject = {
       "year": connectionObject[i].date.year,
       "month": connectionObject[i].date.month,
       "day": connectionObject[i].date.day
@@ -1244,7 +1244,7 @@ function checkDifferenceBirthdays_(connection, memberDataContactResource) {
 
   tmpMemberData = [];
   for (let i = 0; i < memberData.length; i++) {
-    let tmpObject = {
+    const tmpObject = {
       "year": memberData[i].date.year,
       "month": memberData[i].date.month,
       "day": memberData[i].date.day
@@ -1266,10 +1266,10 @@ function checkDifferenceBirthdays_(connection, memberDataContactResource) {
  */
 function makeArrayOfFilteredConnectionObject_(connectionObject, keys) {
   
-  let tmpArray = [];
+  const tmpArray = [];
   console.log("MakeArray Nycklar " + keys);
   for (let i = 0; i < connectionObject.length; i++) {
-    let tmpObject = {};
+    const tmpObject = {};
 
     for (let k = 0; k < keys.length; k++) {
       tmpObject[keys[k]] = connectionObject[i][keys[k]];
@@ -1325,7 +1325,7 @@ function checkDifferenceHelpfunction_(connectionObject, memberDataContactResourc
  */
 function removeElementsWithValueOrPersonEmpty_(memberData) {
 
-  let newMemberData = [];
+  const newMemberData = [];
   for (let i = 0; i < memberData.length; i++) {
     if (memberData[i].value || memberData[i].person)  {
       newMemberData.push(memberData[i]);
@@ -1359,8 +1359,8 @@ function checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField)  {
   }
 
   for (let i = 0; i < tmpArray.length; i++) {
-    let tmpObject = tmpArray[i];
-    let tmpMemberData = memberData[i];
+    const tmpObject = tmpArray[i];
+    const tmpMemberData = memberData[i];
 
     console.log("Datan som finns");
     console.log(tmpObject);
@@ -1368,7 +1368,7 @@ function checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField)  {
     console.log("Datan som ska finnas");
     console.log(tmpMemberData);
 
-    let tmpKeys = Object.keys(tmpObject);
+    const tmpKeys = Object.keys(tmpObject);
     console.log("Nycklar som ska kollas");
     console.log(tmpKeys);
     
@@ -1400,10 +1400,10 @@ function checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField)  {
  */
 function makeContactResource_(memberData, customEmailField)  {
   
-  //let avatar_updated = "avatar_updated";
-  //let avatar_url = "avatar_url";
+  //const avatar_updated = "avatar_updated";
+  //const avatar_url = "avatar_url";
 
-  let contactResource = {
+  const contactResource = {
     "addresses": [{
       "type": "Hem",
       "streetAddress": memberData.streetAddress,
@@ -1501,7 +1501,7 @@ function makeContactResource_(memberData, customEmailField)  {
  */
 function createContact_(memberData, customEmailField)  {
 
-  let contactResource = makeContactResource_(memberData, customEmailField);
+  const contactResource = makeContactResource_(memberData, customEmailField);
   //console.log("contactResource");
   //console.log(contactResource);
 
@@ -1509,7 +1509,7 @@ function createContact_(memberData, customEmailField)  {
     console.log("Funktionen createContact körs " + n);
     
     try {
-      let peopleResource = People.People.createContact(contactResource);
+      const peopleResource = People.People.createContact(contactResource);
       console.log(peopleResource);
       return peopleResource;
     }
@@ -1537,7 +1537,7 @@ function getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups)  {
   
   for (let i = 1; i < nyaKontakter.length; i++) {
 
-    let tmpNamn = prefixContactgroups + nyaKontakter[i][0].name;
+    const tmpNamn = prefixContactgroups + nyaKontakter[i][0].name;
     if (tmpNamn == namn)  {
       return nyaKontakter[i];
     }
@@ -1558,9 +1558,9 @@ function createAndDeleteContactGroups_(gamlaKontaktGrupper, nyaKontaktGrupper, p
 
   console.info("Skapar nya kontaktgrupper och tar bort gamla");
 
-  let nameOfOldContactGroups = getNameOfContactGroups_(gamlaKontaktGrupper);
+  const nameOfOldContactGroups = getNameOfContactGroups_(gamlaKontaktGrupper);
 
-  let nameOfToBeContactGroups = [];
+  const nameOfToBeContactGroups = [];
 
   console.log(nyaKontaktGrupper);
   for (let i = 1; i < nyaKontaktGrupper.length; i++) {
@@ -1583,7 +1583,7 @@ function createAndDeleteContactGroups_(gamlaKontaktGrupper, nyaKontaktGrupper, p
   //Skapa nya kontaktgrupper som ska finnas
   for (let i = 0; i < nameOfToBeContactGroups.length; i++) {
     if (!nameOfOldContactGroups.includes(nameOfToBeContactGroups[i])) {
-      let group = createContactGroup_(nameOfToBeContactGroups[i]);
+      const group = createContactGroup_(nameOfToBeContactGroups[i]);
     }
   }
   return getContactGroups_(prefixContactgroups);
@@ -1600,7 +1600,7 @@ function createAndDeleteContactGroups_(gamlaKontaktGrupper, nyaKontaktGrupper, p
 function getNameOfContactGroups_(kontaktgrupper) {
 
   console.log("Skapar lista med namn över kontaktgrupper");
-  let nameOfContactGroups = [];
+  const nameOfContactGroups = [];
 
   for (let i = 0; i < kontaktgrupper.length; i++) {
     nameOfContactGroups.push(kontaktgrupper[i].name);
@@ -1649,13 +1649,13 @@ function createContactGroup_(namn) {
     console.log("Funktionen createContactGroup körs " + n);
     
     try {
-      let contactGroupResource = {
+      const contactGroupResource = {
         "contactGroup": {
           "name": namn
         }
       };
 
-      let group = People.ContactGroups.create(contactGroupResource);
+      const group = People.ContactGroups.create(contactGroupResource);
       console.log("Skapat kontaktgruppen " + namn);
       return group;
     }
@@ -1683,9 +1683,9 @@ function getContactGroup_(contactGroup) {
     console.log("Funktionen getContactGroup körs " + n);
     
     try {
-      let group = People.ContactGroups.get(contactGroup.resourceName,
+      const group = People.ContactGroups.get(contactGroup.resourceName,
         {maxMembers: 999}
-        );
+      );
       
       console.log("Hämtat kontaktgruppen " + contactGroup.name);
       return group;
@@ -1716,7 +1716,7 @@ function getContactGroups_(prefixContactgroups) {
     console.log("Funktionen getContactGroups körs " + n);
 
     try {
-      let listOfContactGroups = [];
+      const listOfContactGroups = [];
 
       let pageToken, page;
       do {
@@ -1724,11 +1724,11 @@ function getContactGroups_(prefixContactgroups) {
           pageToken: pageToken,
           pageSize: 25
         });
-        let contactGroups = page.contactGroups;
+        const contactGroups = page.contactGroups;
         if (contactGroups) {   
           for (let i = 0; i < contactGroups.length; i++) {
             
-            let contactGroup = {
+            const contactGroup = {
               resourceName: contactGroups[i].resourceName,
               groupType	: contactGroups[i].groupType,
               name: contactGroups[i].name,
@@ -1771,7 +1771,7 @@ function getContactGroups_(prefixContactgroups) {
  * @returns {string[] | number[] | Object[]} - lista
  */
 function removeDublicates_(list) {
-  let tmp_array = []
+  const tmp_array = []
   console.log("Försöker radera dubletter");
     for(let i = 0;i < list.length; i++){
       if(tmp_array.indexOf(list[i]) == -1){
