@@ -120,7 +120,7 @@ function MedlemslistorVissaRaderSkickaEnbart1() {
  * Observera att dessa påverkar alla medlemslistor som används, så var försiktig om du
  * tar bort någon funktion nedan då den kanske används i någon annan lista.
  */
-var medlemslista_egna_attribut_funktioner = [
+const medlemslista_egna_attribut_funktioner = [
     {'namn': 'Ålder', 'formel': '=DATEDIF(R[0]C[-37]; TODAY(); "Y")'},   
     {'namn': 'Dagar till nästa födelsedag', 'formel': '=DATE(YEAR(R[0]C[-38])+DATEDIF(R[0]C[-38];TODAY();"Y")+1;MONTH(R[0]C[-38]);DAY(R[0]C[-38]))-TODAY()'},
     {'namn': 'Antal dagar som medlem i kåren', 'formel': '=DATEDIF(R[0]C[-36];TODAY(); "D")'},
