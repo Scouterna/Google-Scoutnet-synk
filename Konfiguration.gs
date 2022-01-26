@@ -3,39 +3,39 @@
  * @website https://github.com/Scouterna
  */
 
-var domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan till kåren utan www och som används i Google Workspace
+const domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan till kåren utan www och som används i Google Workspace
 
-var groupId = '12'; //Kårens id som kan hittas i Scoutnet om du har tillräcklig behörighet
+const groupId = '12'; //Kårens id som kan hittas i Scoutnet om du har tillräcklig behörighet
 
 
 //Get a detailed csv/xls/json list of all members
 //Används bland annat för att synkronisera användarkonton med Scoutnet
 //Används vid synkronisering för kårer, ej distrikt
-var api_key_list_all = '999888777315979a2a864664695671c7dfe7'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
+const api_key_list_all = '999888777315979a2a864664695671c7dfe7'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
 
 //Get a csv/xls/json list of members, based on mailing lists you have set up
 //Används bland annat för att synkronisera Google grupper med Scoutnet
-var api_key_mailinglists = '11122233356454d0dce624'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
+const api_key_mailinglists = '11122233356454d0dce624'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
 
 //E-post eller scoutnetListId för vart mejl om misstänkt spam till grupper ska skickas till
 //För e-postlistor som anges skickas endast till primär e-postadress listad i Scoutnet
 //T.ex 'webmaster@minscoutkår.se, 1234'
-var moderateContentEmail = '';
+const moderateContentEmail = '';
 
 //Inställning om viss kontaktinformation ska synkroniseras till användares Google Workspace-konto
-var syncUserContactInfo = true;
+const syncUserContactInfo = true;
 
 //Inställning om medlems profilbild ska synkroniseras till användares Google Workspace-konto
-var syncUserAvatar = true;
+const syncUserAvatar = true;
 
 //Adress till profilbild att använda för Googlekonton om ingen finns i Scoutnet
-var defaultUserAvatarUrl = "https://web.cdn.scouterna.net/uploads/sites/57/2021/05/avatar.png";
+const defaultUserAvatarUrl = "https://web.cdn.scouterna.net/uploads/sites/57/2021/05/avatar.png";
 
 //Typ av organisationsenhet
-var organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
+const organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
 
 //Adressen till Scoutnet. Ska ej ändras
-var scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
+const scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
 
 
 /**
@@ -48,7 +48,7 @@ var scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
  * Det går att ha flera nivår på underorgansiationer. T.ex /Scoutnet/Kårfunktionärer/Ledare/Spårarledare vilket då skrivs
  * som Kårfunktionärer/Ledare/Spårarledare nedan
  */
-var userAccountConfig = [
+const userAccountConfig = [
   {
     scoutnetListId: "1234",  //
     orgUnitPath: "Styrelsen",  //om du skriver Ledare så är det egentligen underorganisationen /Scoutnet/Ledare

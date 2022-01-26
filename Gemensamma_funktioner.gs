@@ -19,7 +19,7 @@ function Allt() {
  * Funktion för att skapa menyn i kalkylarket
  */
 function onOpen() {
-  var ui = SpreadsheetApp.getUi();
+  const ui = SpreadsheetApp.getUi();
   ui.createMenu('Scoutnet')
     .addSubMenu(ui.createMenu('Användare')
       .addItem('Synkronisera användare', 'Anvandare'))
@@ -47,7 +47,7 @@ function onOpen() {
  */
 function getGmailAdressWithoutDots(email) {
   
-  var regexGmailDots = /(?:\.|\+.*)(?=.*?@gmail\.com)/g;
+  const regexGmailDots = /(?:\.|\+.*)(?=.*?@gmail\.com)/g;
   
   email = email.replace(regexGmailDots, "");
   return email;  
@@ -63,26 +63,26 @@ function getGmailAdressWithoutDots(email) {
  */
 function getGroupMembers(groupId) {
   
-  for (var n=0; n<6; n++) {
+  for (let n=0; n<6; n++) {
     Logger.log("Funktionen getGroupMembers körs " + n);
     
     try {
-      var group = [];
+      const group = [];
       
-      var pageToken, page;
+      let pageToken, page;
       do {
         page = AdminDirectory.Members.list(groupId,{
           domainName: domain,
           maxResults: 150,  //Öka denna??, kanske på fler ställen också??
           pageToken: pageToken,
         });
-        var members = page.members
+        const members = page.members
         if (members)  {
-          for (var i = 0; i < members.length; i++)  {
-            var member = members[i];
+          for (let i = 0; i < members.length; i++)  {
+            let member = members[i];
             
-            var tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
-            var member = {
+            const tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
+            member = {
               email: tmpEmail,
               role: member.role,
               memberId: member.id
@@ -149,25 +149,25 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   Logger.log("FetchScoutnetMembersMultipleMailinglists " + scoutnet_list_id);
   Logger.log(typeof scoutnet_list_id);
   
-  var allMembers = [];
+  const allMembers = [];
 
   scoutnet_list_id = getCleanString(scoutnet_list_id);
   
   Logger.log("Innan splitt " + scoutnet_list_id);
-  var tmp_id = scoutnet_list_id.split(",");
+  const tmp_id = scoutnet_list_id.split(",");
   Logger.log("Efter splitt");
   
   Logger.log("tmp_id.length = " + tmp_id.length);
   Logger.log("tmp_id[0] = " + tmp_id[0]);
   Logger.log("tmp_id[1] = " + tmp_id[1]);
 
-  var manuellEpostadress = [];
+  const manuellEpostadress = [];
   
-  for (var i = 0; i < tmp_id.length; i++) {
+  for (let i = 0; i < tmp_id.length; i++) {
   
     if (checkIfEmail(tmp_id[i])) { //Om e-postadress
       
-      var tmp_member = {
+      const tmp_member = {
         manuell: tmp_id[i]       
       };      
       manuellEpostadress.push(tmp_member);      
@@ -175,11 +175,11 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
     else if ((tmp_id[i].length==1) && (tmp_id[i].indexOf("@")==0)) { //Om @ för kårens googlekonton
       
       Logger.log("lägg till kårens googlekonton");
-      for (var i = 0; i < listOfEmailAdressesOfActiveAccounts.length; i++) {
+      for (let k = 0; k < listOfEmailAdressesOfActiveAccounts.length; k++) {
         
-        var tmp_email = listOfEmailAdressesOfActiveAccounts[i];
+        const tmp_email = listOfEmailAdressesOfActiveAccounts[k];
         
-        var tmp_member = {
+        const tmp_member = {
           manuell: tmp_email       
         };
         manuellEpostadress.push(tmp_member);
@@ -190,10 +190,10 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
     }
   }
   
-  var memberNumbers = getMemberNumbers(allMembers); //Medlemmar med dessa medlemsnummer ska användas
+  const memberNumbers = getMemberNumbers(allMembers); //Medlemmar med dessa medlemsnummer ska användas
 //  Logger.log(memberNumbers);
   Logger.log("Fetch - getMemberNumbers klar");
-  var members = getMembersByMemberNumbers(allMembers, memberNumbers);  
+  const members = getMembersByMemberNumbers(allMembers, memberNumbers);  
   Logger.log("Fetch - getMembersByMemberNumbers klar");
   Logger.log("Hämta medlemmar från flera e-postlistor");
  
@@ -204,7 +204,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
     Logger.log("@ är ej ett tillåtet tecken för kommentarer");    
   }
   
-  /* for (var i = 0; i < members.length; i++) {    
+  /* for (let i = 0; i < members.length; i++) {    
     Logger.log(members[i].first_name + " " + members[i].last_name);
   }*/
   Logger.log("Slut hämta medlemmar från flera e-postlistor");
@@ -222,10 +222,10 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
  */
 function getMemberNumbers(members) {
   
-  var memberNumbers = [];
+  let memberNumbers = [];
   
-  for (var i = 0; i < members.length; i++) {
-    var memberNumber = members[i].member_no;
+  for (let i = 0; i < members.length; i++) {
+    const memberNumber = members[i].member_no;
     if (memberNumber) {
       memberNumbers.push(memberNumber);
     }
@@ -267,25 +267,25 @@ function checkIfEmail(email) {
  */
 function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list_id, forceUpdate) {
   
-  var cacheExpirationInSeconds = 21600; //6 timmar
+  const cacheExpirationInSeconds = 21600; //6 timmar
   console.time(scoutnet_list_id);
   
-  let cache = CacheService.getScriptCache();
+  const cache = CacheService.getScriptCache();
   
-  var allMembers = [];
+  const allMembers = [];
 
   if (scoutnet_list_id) {
     let kaka;
-    var json;
-    var data;
+    let json;
+    let data;
 
     if (forceUpdate || !(kaka = cache.get(scoutnet_list_id))) {
 
       Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
-      var email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
-      var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=' + scoutnet_list_id + email_fields;
-      var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
-      var response = UrlFetchApp.fetch(
+      const email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
+      const url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=' + scoutnet_list_id + email_fields;
+      const authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
+      const response = UrlFetchApp.fetch(
         url,
         {
           'muteHttpExceptions': true,
@@ -331,18 +331,18 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
       cell_scoutnet_list_id.setBackground("white");
     }
 
-    var medlemmar = data.data;
+    const medlemmar = data.data;
     //Logger.log(medlemmar);
     
     for (x in medlemmar) {
-      var medlem = medlemmar[x];
+      const medlem = medlemmar[x];
       
-      var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
+      const variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
       
       //Dessa attributvärden ska användas som gemener för bättre jämförelser
-      var variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
+      const variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
       
-      var member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
+      const member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
       
       allMembers.push(member);
     }
@@ -367,15 +367,15 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
  */
 function setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase) {
   
-  var member = {};
+  let member = {};
   
-  for (var i = 0; i < variabel_lista_not_lowercase.length; i++) {
+  for (let i = 0; i < variabel_lista_not_lowercase.length; i++) {
     
     member[variabel_lista_not_lowercase[i]] = fetchScoutnetMemberFieldAsString(medlem, variabel_lista_not_lowercase[i], false);
     //Logger.log(variabel_lista_not_lowercase[i] + " = " + member[variabel_lista_not_lowercase[i]]);
   }
   
-  for (var i = 0; i < variabel_lista_lowercase.length; i++) {
+  for (let i = 0; i < variabel_lista_lowercase.length; i++) {
     
     member[variabel_lista_lowercase[i]] = fetchScoutnetMemberFieldAsString(medlem, variabel_lista_lowercase[i], true);
     //Logger.log(variabel_lista_lowercase[i] + " = " + member[variabel_lista_lowercase[i]]);
@@ -394,12 +394,12 @@ function setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lo
  */ 
 function getMembersByMemberNumbers(members, memberNumbers) {
   Logger.log("Kör metoden getMembersByMemberNumbers");
-  var memberList = [];
+  const memberList = [];
   
   Loop1:
-  for (var i = 0; i < memberNumbers.length; i++) {
+  for (let i = 0; i < memberNumbers.length; i++) {
   
-    for (var k = 0; k < members.length; k++) {
+    for (let k = 0; k < members.length; k++) {
       
       if (memberNumbers[i]==members[k].member_no){
        
@@ -426,18 +426,18 @@ function getMembersByMemberNumbers(members, memberNumbers) {
  */
 function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
   
-  var member_emails = [];
+  const member_emails = [];
   
-  var email = member.email;
-  var member_no = member.member_no;
-  var email_mum = member.email_mum;
-  var contact_email_mum = member.contact_email_mum;
-  var email_dad = member.email_dad;
-  var contact_email_dad = member.contact_email_dad;
-  var email_alt = member.alt_email;
-  var contact_email_alt = member.contact_alt_email;
-  var extra_emails = member.extra_emails;
-  var manuell = member.manuell; //Om vi manuellt lägger till någon i kalkylarket
+  const email = member.email;
+  const member_no = member.member_no;
+  const email_mum = member.email_mum;
+  const contact_email_mum = member.contact_email_mum;
+  const email_dad = member.email_dad;
+  const contact_email_dad = member.contact_email_dad;
+  const email_alt = member.alt_email;
+  const contact_email_alt = member.contact_alt_email;
+  const extra_emails = member.extra_emails;
+  const manuell = member.manuell; //Om vi manuellt lägger till någon i kalkylarket
   
   synk_option = synk_option.toLowerCase().trim();
   
@@ -446,7 +446,7 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
     return member_emails;
   }
   
-  var tmp_email = getGoogleAccount(member_no);
+  const tmp_email = getGoogleAccount(member_no);
   
   if (synk_option.indexOf("@")!=-1 && boolGoogleAccounts) {
     //Lägg bara till om personen har ett google-konto via kåren och lägg till deras google-konto
@@ -473,7 +473,7 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
           
           Logger.log("(G179) extra emails " + extra_emails);
           Logger.log("Typ " + typeof extra_emails);
-          var extra_email_list = extra_emails.split(",");
+          const extra_email_list = extra_emails.split(",");
           Logger.log("Typ " + typeof extra_email_list);
           Logger.log(extra_email_list);
           member_emails.push.apply(member_emails, extra_email_list);
@@ -574,20 +574,20 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
  */
 function fetchScoutnetMembers(forceUpdate) {
 
-  var cacheExpirationInSeconds = 21600; //6 timmar
+  const cacheExpirationInSeconds = 21600; //6 timmar
   console.time("fetchScoutnetMembers");
   
-  let cache = CacheService.getScriptCache();
+  const cache = CacheService.getScriptCache();
   
   let kaka;
-  var json;
+  let json;
 
   //kaka sätts här för att spara ca 70ms då anropet inte behövs vid forceUpdate
   if (forceUpdate || !(kaka = cache.get("fetchScoutnetMembers"))) {
 
-    var url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist';
-    var authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_list_all);
-    var response = UrlFetchApp.fetch(
+    const url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist';
+    const authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_list_all);
+    const response = UrlFetchApp.fetch(
       url, 
       {
         'muteHttpExceptions': true,
@@ -616,16 +616,16 @@ function fetchScoutnetMembers(forceUpdate) {
     json = kaka;
   }
   
-  var data = JSON.parse(json);
+  const data = JSON.parse(json);
   
-  var medlemmar = data.data;
-  var allMembers = [];
+  const medlemmar = data.data;
+  const allMembers = [];
   
   //Logger.log(medlemmar);
   for (x in medlemmar) {
-    var medlem = medlemmar[x];
+    const medlem = medlemmar[x];
     
-    var variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'nickname', 'ssno',
+    const variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'nickname', 'ssno',
                                         'note', 'date_of_birth', 'status',
                                         'created_at', 'confirmed_at', 'group', 'unit', 'patrol', 'unit_role', 'group_role',
                                         'sex', 'address_co', 'address_1', 'address_2' , 'address_3', 'postcode', 'town',
@@ -635,9 +635,9 @@ function fetchScoutnetMembers(forceUpdate) {
                                         'current_term', 'current_term_due_date', 'avatar_updated', 'avatar_url'];
     
     //Dessa attributvärden ska användas som gemener för bättre jämförelser
-    var variabel_lista_lowercase = ['email', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email', 'extra_emails'];
+    const variabel_lista_lowercase = ['email', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email', 'extra_emails'];
     
-    var member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
+    const member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
         
     //Logger.log("MEMBER print object " + member);
     //Logger.log("%s %s, Medlem %s, Mobil %s",member.first_name, member.last_name, member.member_no, member.contact_mobile_phone); //member.member_no + "   " + member.first_name + "  " + member.last_name);
@@ -663,15 +663,15 @@ function fetchScoutnetMembers(forceUpdate) {
  */
 function getGoogleAccount(member_no) {
   
-  var users;
+  let users;
   
-  var qry = "externalId='"+ member_no +"'";
+  const qry = "externalId='"+ member_no +"'";
   
-  for (var n=0; n<6; n++) {
+  for (let n=0; n<6; n++) {
     Logger.log("Funktionen getGoogleAcount körs " + n);
     try {
       
-      var pageToken, page;
+      let pageToken, page;
       do {
         page = AdminDirectory.Users.list({
           domain: domain,
@@ -731,8 +731,8 @@ function checkIfEmailIsAGroup(email) {
  */
 function checkEmailFormat(email) {
   
-  var arr = email.split("@");
-  var tmp_domain = arr[1];
+  const arr = email.split("@");
+  const tmp_domain = arr[1];
   
   if (tmp_domain==domain) {
        return true;
@@ -750,7 +750,7 @@ function checkEmailFormat(email) {
  */
 function checkIfGroupExists(email) {
 
-  var tmpList = getListOfGroups();
+  const tmpList = getListOfGroups();
   //Logger.log(tmpList);
 
   if(tmpList.includes(email))  {
@@ -771,14 +771,14 @@ function getDataFromActiveSheet_(nameOfSheet)  {
 
   for (let n=0; n<6; n++) {
     try {
-      let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nameOfSheet);
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nameOfSheet);
       if (sheet == null) {
         Logger.log("Bladet " + nameOfSheet + " finns ej i kalkylarket");
       }
-      let selection = sheet.getDataRange();
-      let data = selection.getValues();
+      const selection = sheet.getDataRange();
+      const data = selection.getValues();
 
-      let sheetData = {};
+      const sheetData = {};
       sheetData["sheet"] = sheet;
       sheetData["selection"] = selection;
       sheetData["data"] = data;
@@ -797,7 +797,7 @@ function getDataFromActiveSheet_(nameOfSheet)  {
 }
 
 
-var listOfGroups = [];
+let listOfGroups = [];
 /**
  * Ger listan över e-postadresser för grupper
  *
@@ -815,22 +815,22 @@ function updateListOfGroups() {
   
   Logger.log("Uppdaterar listan över e-postadresser för grupper");
 
-  for (var n=0; n<6; n++) {
+  for (let n=0; n<6; n++) {
     Logger.log("Funktionen updateListOfGroups körs " + n);
     
     try {
       listOfGroups = [];
 
-      var pageToken, page;
+      let pageToken, page;
       do {
         page = AdminDirectory.Groups.list({
           domain: domain,
           maxResults: 150,
           pageToken: pageToken
         });
-        var groups = page.groups;
+        const groups = page.groups;
         if (groups) {      
-          for (var i = 0; i < groups.length; i++) {
+          for (let i = 0; i < groups.length; i++) {
             listOfGroups.push(groups[i].email);        
           }      
         }
@@ -874,8 +874,8 @@ function isFromEmailAdressAllowed(email) {
  */
 function getAllowedFromEmailAdresses() {
   
-  var aliases = GmailApp.getAliases();
-  var min_adress = Session.getEffectiveUser().getEmail();
+  const aliases = GmailApp.getAliases();
+  const min_adress = Session.getEffectiveUser().getEmail();
   
   aliases.push(min_adress);
   //Logger.log(aliases);
@@ -894,10 +894,10 @@ function getDraft(subject)  {
 
   subject = getComparableString(subject);
 
-  var drafts = GmailApp.getDraftMessages();
-  for (var i = 0; i<drafts.length; i++) {
+  const drafts = GmailApp.getDraftMessages();
+  for (let i = 0; i<drafts.length; i++) {
 
-    var draftSubject = drafts[i].getSubject();
+    let draftSubject = drafts[i].getSubject();
     draftSubject = getComparableString(draftSubject);
 
     if (draftSubject == subject)  {
@@ -937,7 +937,7 @@ function getComparableString(text)  {
  */
 function findWhatRowsToSync(start, slut, maxRowNumber) {
   
-  var minRowStart = 3;
+  const minRowStart = 3;
   
   if (typeof start ==='undefined' || start < minRowStart) {
     start = minRowStart; 
@@ -946,7 +946,7 @@ function findWhatRowsToSync(start, slut, maxRowNumber) {
     slut = maxRowNumber; 
   }
   
-  var rowsToSync = {
+  const rowsToSync = {
     "start": start,
     "slut": slut
   };
@@ -980,9 +980,9 @@ function getCleanString(input)  {
  */
 function deleteRowsFromSpreadsheet(sheet, delete_rows) {
   
-  for (var k = delete_rows.length-1; k >= 0 ; k--) { //Tar bort rader, starta nerifrån
+  for (let k = delete_rows.length-1; k >= 0 ; k--) { //Tar bort rader, starta nerifrån
     
-    var tmp_row = delete_rows[k];
+    const tmp_row = delete_rows[k];
     Logger.log("Remove row " + tmp_row);
     sheet.deleteRow(tmp_row);
   }  
@@ -995,9 +995,9 @@ function deleteRowsFromSpreadsheet(sheet, delete_rows) {
  * @returns {string[] | number[] | Object[]} - lista
  */
 function removeDublicates(list) {
-  var tmp_array = []
+  const tmp_array = []
   Logger.log("Försöker radera dubletter");
-    for(var i = 0;i < list.length; i++){
+    for(let i = 0;i < list.length; i++){
       if(tmp_array.indexOf(list[i]) == -1){
         tmp_array.push(list[i])
         //Logger.log("Denna är ny " + list[i]);
@@ -1013,20 +1013,20 @@ function removeDublicates(list) {
  * Gör strängen till ett svenskt internationellt nummer om möjligt
  */
 function intphonenumber(phnum) {
-  var rx = /^\+/;      
+  let rx = /^\+/;      
   //Logger.log('telefonnummer före: %s', phnum);  
-  var res = phnum.match(rx)
+  const res = phnum.match(rx)
   if(res)
   {
-    var ccok = false;
+    let ccok = false;
     Logger.log('Match');  
  
-    var ccodes =[];
+    const ccodes =[];
     ccodes.push("43"); //
     ccodes.push("44"); //
     ccodes.push("45"); //Danmark
     ccodes.push("46"); //sverige
-    for(var info in ccodes)
+    for(let info in ccodes)
     {
       rx = new RegExp('^\\+' + ccodes[info]  , 'g');   
       if (phnum.match(rx))
@@ -1079,7 +1079,7 @@ String.prototype.endsWith = function(suffix) {
  */
 function removeDiacritics (str) {
 
-  var defaultDiacriticsRemovalMap = [
+  const defaultDiacriticsRemovalMap = [
     {'base':'A', 'letters':/[\u0041\u24B6\uFF21\u00C0\u00C1\u00C2\u1EA6\u1EA4\u1EAA\u1EA8\u00C3\u0100\u0102\u1EB0\u1EAE\u1EB4\u1EB2\u0226\u01E0\u00C4\u01DE\u1EA2\u00C5\u01FA\u01CD\u0200\u0202\u1EA0\u1EAC\u1EB6\u1E00\u0104\u023A\u2C6F]/g},
     {'base':'AA','letters':/[\uA732]/g},
     {'base':'AE','letters':/[\u00C6\u01FC\u01E2]/g},
@@ -1166,7 +1166,7 @@ function removeDiacritics (str) {
     {'base':'z','letters':/[\u007A\u24E9\uFF5A\u017A\u1E91\u017C\u017E\u1E93\u1E95\u01B6\u0225\u0240\u2C6C\uA763]/g}
   ];
 
-  for(var i=0; i<defaultDiacriticsRemovalMap.length; i++) {
+  for(let i=0; i<defaultDiacriticsRemovalMap.length; i++) {
     str = str.replace(defaultDiacriticsRemovalMap[i].letters, defaultDiacriticsRemovalMap[i].base);
   }
   return str;
