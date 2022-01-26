@@ -51,8 +51,8 @@ function raderaKontakter()  {
 /**
  * Huvudfunktion för att hantera synkronisering av kontakter och kontaktgrupper med Scoutnet
  * 
- * @param {Boolean} forceUpdate - Tvinga uppdatering av kontakter om det går. Ej undansparad data.
- * @param {Boolean[]} deleteContacts - Om alla synkbara kontakter ska raderas eller ej
+ * @param {boolean} forceUpdate - Tvinga uppdatering av kontakter om det går. Ej undansparad data.
+ * @param {boolean[]} deleteContacts - Om alla synkbara kontakter ska raderas eller ej
  */
 function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   
@@ -151,7 +151,7 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
 function protectSheet_() {
 
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
-  if (sheet == null) {
+  if (null == sheet) {
     console.error("Bladet Kontakter finns ej i kalkylarket");
   }
 
@@ -167,10 +167,10 @@ function protectSheet_() {
  * Kollar om något användarfält saknar data och färgmarkerar dem vid behov.
  * Om något fält saknar data som måste ha data returneras falskt och annars sant.
  * 
- * @param {Objekt} cell - Objekt för flera celler i ett kalkylblad
- * @param {String} sdk -  Datan som användaren har angett i kalkylbladet
+ * @param {Object} cell - Objekt för flera celler i ett kalkylblad
+ * @param {string} sdk -  Datan som användaren har angett i kalkylbladet
  * 
- * @returns {Boolean} - Ger falskt om bakgrundsfärgen sätts till röd för något användarfält.
+ * @returns {boolean} - Ger falskt om bakgrundsfärgen sätts till röd för något användarfält.
  * Annars ger den sant.
  */
 function colourCellsIfEmpty_(cells, sdk) {
@@ -200,16 +200,16 @@ function colourCellsIfEmpty_(cells, sdk) {
  * Ändrar bakgrundsfärg på en cell beroende på om den
  * innehåller någon data eller ej.
  * 
- * @param {Objekt} cell - En cell i ett kalkylblad
- * @param {String} cellData - data i en cell i ett kalkylblad
- * @param {String} colour - Namn på färg eller rgb hexadecimalt värde för en färg
+ * @param {Object} cell - En cell i ett kalkylblad
+ * @param {string} cellData - data i en cell i ett kalkylblad
+ * @param {string} colour - Namn på färg eller rgb hexadecimalt värde för en färg
  * 
- * @returns {Boolean} - Ger falskt om bakgrundsfärgen sätts till röd.
+ * @returns {boolean} - Ger falskt om bakgrundsfärgen sätts till röd.
  * Annars ger den sant.
  */
 function colourCellIfEmpty_(cell, cellData, colour)  {
 
-  if (cellData=="") { //Kolla om cellen är tom
+  if ("" == cellData) { //Kolla om cellen är tom
     cell.setBackground(colour);
     if ("red" == colour)  {
       return false;
@@ -255,12 +255,12 @@ function createTriggerIfNeeded_()  {
 /**
  * Ger datan som användaren har angett i kalkylbladet
  *
- * @returns {Objekt} - Ger datan som användaren har angett i kalkylbladet
+ * @returns {Object} - Ger datan som användaren har angett i kalkylbladet
  */
 function getSheetDataKontakter_()  {
 
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
-  if (sheet == null) {
+  if (null == sheet) {
     console.error("Bladet Kontakter finns ej i kalkylarket");
   }
   const selection = sheet.getDataRange();
@@ -299,17 +299,17 @@ function getSheetDataKontakter_()  {
 /**
  * Gör ett get-anrop mot en url och ger JSON-tolkad data tillbaka
  * 
- * @param {String} url - Url att hämta data från
- * @param {Objekt} cellWebappUrl - Cell i kalkylbladet för webappUrl
+ * @param {string} url - Url att hämta data från
+ * @param {Object} cellWebappUrl - Cell i kalkylbladet för webappUrl
  * 
- * @returns {Objekt[][]} - JSON-tolkad data från angiven url
+ * @returns {Object[][]} - JSON-tolkad data från angiven url
  */
 function fetchUrl_(url, cellWebappUrl) {
 
   console.time("Anropa url");
 
   console.log("Anropar url " + url);
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen fetchUrl körs " + n);
 
     try {
@@ -343,7 +343,7 @@ function fetchUrl_(url, cellWebappUrl) {
 /**
  * Returnerar lista med vilket index som olika användarfält har i kalkylarket
  *
- * @returns {Number[][]} - Lista med index för rad och kolumn för olika användarfält
+ * @returns {number[][]} - Lista med index för rad och kolumn för olika användarfält
  */
 function getKontakterUserInputData_() {
   
@@ -369,9 +369,9 @@ function getKontakterUserInputData_() {
  * kriterierna för att kunna synkroniseras och kollar också igenom alla kontakter som
  * uppfyller kriterierna för att kunna synkroniseras men som inte är med i någon kontaktgrupp
  * 
- * @param {String[]} resourceNamesRemovedFromContactGroups - Lista med resursnamn för de kontakter
+ * @param {string[]} resourceNamesRemovedFromContactGroups - Lista med resursnamn för de kontakter
  * som har tagits bort från någon kontaktgrupp
- * @param {String[]} contactResourceKeys - Attribut för en kontakt
+ * @param {string[]} contactResourceKeys - Attribut för en kontakt
  */
 function deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceKeys) {
 
@@ -430,7 +430,7 @@ function deleteContacts_(resourceNamesRemovedFromContactGroups, contactResourceK
 /**
  * Ger en lista med resursnamn för alla användarskapade kontaktgrupper som finns
  * 
- * @returns {String[]} - Lista med resursnamn för alla användarskapade kontaktgrupper
+ * @returns {string[]} - Lista med resursnamn för alla användarskapade kontaktgrupper
  */
 function getContactGroupsResourceNames_()  {
 
@@ -451,11 +451,11 @@ function getContactGroupsResourceNames_()  {
  * Ger lista över resursnamn för de kontakter som har tagits bort från en kontaktgrupp och som inte
  * är synkbara och inte heller är med i någon annan kontaktgrupp som inte är en systemgrupp.
  * 
- * @param {Objekt[]} personResponses - Lista av Objekt av typen PersonResponse för kontaker som tagits bort
+ * @param {Object[]} personResponses - Lista av Objekt av typen PersonResponse för kontaker som tagits bort
  * från en kontaktgrupp och som inte är synkbara.
- * @param {String[]} kontaktgrupperResourceNames - Lista av resursnamn för kontaktgrupper som inte är systemgrupper
+ * @param {string[]} kontaktgrupperResourceNames - Lista av resursnamn för kontaktgrupper som inte är systemgrupper
  * 
- * @returns {String[]} - Lista över resursnamn för kontakter som inte är synkbara som ska tas bort
+ * @returns {string[]} - Lista över resursnamn för kontakter som inte är synkbara som ska tas bort
  */
 function getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgrupperResourceNames)  {
 
@@ -484,11 +484,11 @@ function getResourceNamesToDeleteFromPersonResponses_(personResponses, kontaktgr
  * Ger lista över resursnamn för de kontakter som har tagits bort från en kontaktgrupp och som
  * är synkbara och inte heller är med i någon annan kontaktgrupp som inte är en systemgrupp.
  * 
- *  @param {Objekt[]} connections - Lista med objekt för kontakter
+ *  @param {Object[]} connections - Lista med objekt för kontakter
  * från en kontaktgrupp och som inte är synkbara.
- * @param {String[]} kontaktgrupperResourceNames - Lista av resursnamn för kontaktgrupper som inte är systemgrupper
+ * @param {string[]} kontaktgrupperResourceNames - Lista av resursnamn för kontaktgrupper som inte är systemgrupper
  * 
- * @returns {String[]} - Lista över resursnamn för kontakter som är synkbara som ska tas bort
+ * @returns {string[]} - Lista över resursnamn för kontakter som är synkbara som ska tas bort
  */
 function getResourceNamesToDeleteFromConnections_(connections, kontaktgrupperResourceNames)  {
 
@@ -515,10 +515,10 @@ function getResourceNamesToDeleteFromConnections_(connections, kontaktgrupperRes
 /**
  * Kollar om en kontakt är med i en kontaktgrupp som inte är en systemgrupp
  * 
- * @param {String[]} kontaktgrupperResourceNames - Lista av resursnamn för kontaktgrupper som inte är systemgrupper
- * @param {Objekt[]} memberships - Lista av objeket med kontaktgruppsmedlemskap för en kontakt
+ * @param {string[]} kontaktgrupperResourceNames - Lista av resursnamn för kontaktgrupper som inte är systemgrupper
+ * @param {Object[]} memberships - Lista av objeket med kontaktgruppsmedlemskap för en kontakt
  * 
- * @returns {Boolean} - Sant eller falskt om denna kontakt är med i en kontaktgrupp som inte är en systemgrupp
+ * @returns {boolean} - Sant eller falskt om denna kontakt är med i en kontaktgrupp som inte är en systemgrupp
  */
 function checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, memberships)  {
 
@@ -539,13 +539,13 @@ function checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, 
  * Uppdaterar kontakter och skapar nya vid behov.
  * Returnerar resursnamn för de kontakter som tagits bort från någon kontaktgrupp
  * 
- * @param {Objekt[]} kontaktGrupper - Lista av Objekt med kontaktgruppsinformation
- * @param {Objekt[]} nyaKontakter - Lista av listor med information över de kontaktgrupper som ska finnas
- * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
- * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
- * @param {String[]} contactResourceKeys - Attribut för en kontakt
+ * @param {Object[]} kontaktGrupper - Lista av Objekt med kontaktgruppsinformation
+ * @param {Object[]} nyaKontakter - Lista av listor med information över de kontaktgrupper som ska finnas
+ * @param {string} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
+ * @param {string} customEmailField - Namn på eget kontaktfält för e-post att använda
+ * @param {string[]} contactResourceKeys - Attribut för en kontakt
  * 
- * @returns {String[]} - Lista med resursnamn för de kontakter som har tagits bort från någon kontaktgrupp
+ * @returns {string[]} - Lista med resursnamn för de kontakter som har tagits bort från någon kontaktgrupp
  */
 function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgroups, customEmailField, contactResourceKeys)  {
 
@@ -666,11 +666,11 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
 /**
  * Ger medlemsnummer för de medlemmar som ska vara med i en kontaktgrupp
  * 
- * @param {Objekt[]} nyaKontakter - Lista med info och e-postadresser för kommande kontaktgrupper
- * @param {String} namn - Namn för den kontaktgrupp att söka efter
- * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
+ * @param {Object[]} nyaKontakter - Lista med info och e-postadresser för kommande kontaktgrupper
+ * @param {string} namn - Namn för den kontaktgrupp att söka efter
+ * @param {string} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
  * 
- * @returns {String[]} - Lista med medlemsnummer för aktuell kommande kontaktgrupp
+ * @returns {string[]} - Lista med medlemsnummer för aktuell kommande kontaktgrupp
  */
 function getMemberNumbersShouldBeInContactGroup_(nyaKontakter, namn, prefixContactgroups) {
 
@@ -690,11 +690,11 @@ function getMemberNumbersShouldBeInContactGroup_(nyaKontakter, namn, prefixConta
 /**
  * Uppdatera vilka kontakter som ska tillhöra en kontaktgrupp
  * 
- * @param {String} contactGroupResourceName - Resursnamn för en kontaktgrupp
- * @param {String[]} resourceNamesToAdd - Lista av resursnamn för kontakter att lägga till i kontaktgruppen
- * @param {String[]} resourceNamesToRemove - Lista av resursnamn för kontakter att ta bort från kontaktgruppen
+ * @param {string} contactGroupResourceName - Resursnamn för en kontaktgrupp
+ * @param {string[]} resourceNamesToAdd - Lista av resursnamn för kontakter att lägga till i kontaktgruppen
+ * @param {string[]} resourceNamesToRemove - Lista av resursnamn för kontakter att ta bort från kontaktgruppen
  * 
- * @returns {Objekt} - Lista av resursnamn för kontakter som inte gick att hitta eller ta bort
+ * @returns {Object} - Lista av resursnamn för kontakter som inte gick att hitta eller ta bort
  */
 function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd, resourceNamesToRemove)  {
 
@@ -708,7 +708,7 @@ function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd
     return;
   }
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen modifyContactGroupMembers körs " + n);
 
     try {
@@ -734,10 +734,10 @@ function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd
 /**
  * Ger tillbaka en kontakt för ett angivet medlemsnummer
  * 
- * @param {Objekt[]} nyaKontakter - Lista av listor med information över de kontaktgrupper som ska finnas
- * @param {String} memberNumber - Ett medlemsnummer
+ * @param {Object[]} nyaKontakter - Lista av listor med information över de kontaktgrupper som ska finnas
+ * @param {string} memberNumber - Ett medlemsnummer
  * 
- * @returns {Objekt} - Objekt för en medlem
+ * @returns {Object} - Objekt för en medlem
  */
 function getMemberdataFromMemberNumber_(nyaKontakter, memberNumber)  {
 
@@ -761,10 +761,10 @@ function getMemberdataFromMemberNumber_(nyaKontakter, memberNumber)  {
 /**
  * Ger tillbaka en kontakt för ett angivet medlemsnummer
  * 
- * @param {Objekt[]} connections - Lista med objekt för kontakter
- * @param {String} memberNumber - Ett medlemsnummer
+ * @param {Object[]} connections - Lista med objekt för kontakter
+ * @param {string} memberNumber - Ett medlemsnummer
  * 
- * @returns {Objekt} - Objekt för en kontakt
+ * @returns {Object} - Objekt för en kontakt
  */
 function getConnectionByMemberNumber_(connections, memberNumber)  {
 
@@ -780,15 +780,15 @@ function getConnectionByMemberNumber_(connections, memberNumber)  {
  * De kontakter som uppfyller att de är användarens egna samt
  * att kontakterna har medlemsnummer ifyllt på korrekt sätt returneras
  * 
- * @param {String[]} contactResourceKeys - Attribut för en kontakt
+ * @param {string[]} contactResourceKeys - Attribut för en kontakt
  * 
- * @returns {Objekt[]} - Lista med objekt för kontakter
+ * @returns {Object[]} - Lista med objekt för kontakter
  */
 function updateListOfConnections_(contactResourceKeys) {
 
   const contactResourceKeysString = contactResourceKeys.toString();
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen updateListOfConnections körs " + n);
 
     try {
@@ -856,7 +856,7 @@ function updateListOfConnections_(contactResourceKeys) {
  * 
  * @param {Object[]} kontaktGruppInfo - Lista med info och medlemsnummer för aktuell kommande kontaktgrupp
  * 
- * @returns {String[]} - Lista med medlemsnummer för aktuell kommande kontaktgrupp
+ * @returns {string[]} - Lista med medlemsnummer för aktuell kommande kontaktgrupp
  */
 function getContactGroupMemberNumbers_(kontaktGruppInfo)  {
 
@@ -872,9 +872,9 @@ function getContactGroupMemberNumbers_(kontaktGruppInfo)  {
 /**
  * Ger lista med medlemsnummer givet en lista med resursnamn och medlemsnummer
  * 
- * @param {Objekt[]} - Lista av Objekt med resursnamn och medlemsnummmer
+ * @param {Object[]} - Lista av Objekt med resursnamn och medlemsnummmer
  * 
- * @returns {String[]} - Lista med medlemsnummer för angivna kontakter
+ * @returns {string[]} - Lista med medlemsnummer för angivna kontakter
  */
 function getMemberNumbersFromMembersInfo_(membersInfoList) {
 
@@ -890,9 +890,9 @@ function getMemberNumbersFromMembersInfo_(membersInfoList) {
 /**
  * Ger lista med objekt med viss medlemsinfo för de som redan är med i en kontaktgrupp
  * 
- * @param {Objekt[]} - Lista av Objekt av typen PersonRespone för angivna kontakter
+ * @param {Object[]} - Lista av Objekt av typen PersonRespone för angivna kontakter
  * 
- * @returns {Objekt[]} - Lista med objekt för angivna kontakter
+ * @returns {Object[]} - Lista med objekt för angivna kontakter
  */
 function getMembersInfoFromPersonResponses_(personResponses) {
 
@@ -907,7 +907,7 @@ function getMembersInfoFromPersonResponses_(personResponses) {
 
     if (externalIds !== undefined) {
       for (let k = 0; k < externalIds.length; k++) {
-        if (externalIds[k].type == "Medlemsnummer") {
+        if ("Medlemsnummer" == externalIds[k].type) {
           
           const memberInfo = {
             memberNumber: externalIds[k].value,
@@ -935,9 +935,9 @@ function getMembersInfoFromPersonResponses_(personResponses) {
 /**
  * Ger lista av objekt av kontakter givet resursnamn för kontakterna
  * 
- * @param {String[]} memberResourceNames - Lista av resursnamn för kontakter
+ * @param {string[]} memberResourceNames - Lista av resursnamn för kontakter
  * 
- * @returns {Objekt[]} - Lista av Objekt av typen PersonRespone för angivna kontakter
+ * @returns {Object[]} - Lista av Objekt av typen PersonRespone för angivna kontakter
  */
 function getContactsByMemberResourceNames_(resourceNames)  {
 
@@ -945,7 +945,7 @@ function getContactsByMemberResourceNames_(resourceNames)  {
     return [];
   }
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen getContactsByMemberResourceNames körs " + n);
     
     try {
@@ -970,11 +970,11 @@ function getContactsByMemberResourceNames_(resourceNames)  {
  * Kollar igenom alla kontakter som synkroniseras med Scoutnet vilka kontakter
  * som ska uppdateras och uppdaterar sen dem vid behov.
  * 
- * @param {Objekt[]} nyaKontakter - Lista av listor med information över de kontaktgrupper som ska finnas
- * @param {Objekt[]} connections - Lista med objekt för kontakter
- * @param {String[]} contactResourceKeys - Attribut för en kontakt
- * @param {String[]} resourceNamesAlreadyProcessed - Resursnamn för kontakter som ej behöver uppdateras
- * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
+ * @param {Object[]} nyaKontakter - Lista av listor med information över de kontaktgrupper som ska finnas
+ * @param {Object[]} connections - Lista med objekt för kontakter
+ * @param {string[]} contactResourceKeys - Attribut för en kontakt
+ * @param {string[]} resourceNamesAlreadyProcessed - Resursnamn för kontakter som ej behöver uppdateras
+ * @param {string} customEmailField - Namn på eget kontaktfält för e-post att använda
  */
 function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField) {
 
@@ -1046,7 +1046,7 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
     if (contactShouldBeUpdated)  {
       numbersOfContactsToUpdate++;
       console.info("Antal kontakter att uppdatera " + numbersOfContactsToUpdate);
-      if (numbersOfContactsToUpdate>200)  { //Max uppdatera 200 stycken i taget
+      if (numbersOfContactsToUpdate > 200)  { //Max uppdatera 200 stycken i taget
         console.warn("För många kontakter att uppdatera på en gång. Tar resten vid nästa körning");
         continue;
       }
@@ -1079,7 +1079,7 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
  */
 function batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate)  {
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen batchUpdateContacts körs " + n);
     
     try {
@@ -1105,7 +1105,7 @@ function batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate)  {
 /**
  * Raderar flera kontakter samtidigt
  * 
- * @param {String[]} resourceNames - Lista över resursnamn för kontakter som ska tas bort
+ * @param {string[]} resourceNames - Lista över resursnamn för kontakter som ska tas bort
  */
 function batchDeleteContacts_(resourceNames) {
 
@@ -1118,7 +1118,7 @@ function batchDeleteContacts_(resourceNames) {
     resourceNames = resourceNames.slice(0, 500);
   }
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen batchDeleteContacts körs " + n);
     
     try {
@@ -1142,7 +1142,7 @@ function batchDeleteContacts_(resourceNames) {
 /**
  * Ger lista med objekt med information om personkontaktfält
  * 
- * @returns {Objekt[]} - Lista med objekt med information om personkontaktfält
+ * @returns {Object[]} - Lista med objekt med information om personkontaktfält
  */
 function getSimplePersonFields_()  {
 
@@ -1182,11 +1182,11 @@ function getSimplePersonFields_()  {
 /**
  * Kollar om ett visst kontaktfält skiljer sig mellan nuvarande kontakt och ett kontaktobjekt
  * 
- * @param {Objekt} connection - Persondata för en kontakt som redan finns
- * @param {Objekt} memberDataContactResource - Ett objekt av typen Person med kontaktinfo för en person
- * @param {Objekt} personField - Objekt med information om ett specifikt kontaktfält
+ * @param {Object} connection - Persondata för en kontakt som redan finns
+ * @param {Object} memberDataContactResource - Ett objekt av typen Person med kontaktinfo för en person
+ * @param {Object} personField - Objekt med information om ett specifikt kontaktfält
  * 
- * @returns {Boolean} - Sant eller falskt om kontaktfältet skiljer sig åt
+ * @returns {boolean} - Sant eller falskt om kontaktfältet skiljer sig åt
  */
 function checkDifference_(connection, memberDataContactResource, personField) {
 
@@ -1212,10 +1212,10 @@ function checkDifference_(connection, memberDataContactResource, personField) {
 /**
  * Kollar om kontaktfältet för födelsedag skiljer sig mellan nuvarande kontakt och ett kontaktobjekt
  * 
- * @param {Objekt} connection - Persondata för en kontakt som redan finns
- * @param {Objekt} memberDataContactResource - Ett objekt av typen Person med kontaktinfo för en person
+ * @param {Object} connection - Persondata för en kontakt som redan finns
+ * @param {Object} memberDataContactResource - Ett objekt av typen Person med kontaktinfo för en person
  * 
- * @returns {Boolean} - Sant eller falskt om födelsedagarna skiljer sig åt
+ * @returns {boolean} - Sant eller falskt om födelsedagarna skiljer sig åt
  */
 function checkDifferenceBirthdays_(connection, memberDataContactResource) {
 
@@ -1259,10 +1259,10 @@ function checkDifferenceBirthdays_(connection, memberDataContactResource) {
 /**
  * Skapar lista av objekt för en typ av kontaktfält för en kontakt
  *
- * @param {Objekt[]} connectionObject - Data för ett kontaktfält för en kontakt som redan finns
- * @param {String[]} keys - Namn på attribut för ett visst kontaktfält
+ * @param {Object[]} connectionObject - Data för ett kontaktfält för en kontakt som redan finns
+ * @param {string[]} keys - Namn på attribut för ett visst kontaktfält
  * 
- * @returns {Objekt[]} - Lista av objekt för en typ av kontaktfält för en kontakt
+ * @returns {Object[]} - Lista av objekt för en typ av kontaktfält för en kontakt
  */
 function makeArrayOfFilteredConnectionObject_(connectionObject, keys) {
   
@@ -1281,12 +1281,12 @@ function makeArrayOfFilteredConnectionObject_(connectionObject, keys) {
 
 
 /**
- * @param {Objekt[]} connectionObject - Data för ett kontaktfält för en kontakt som redan finns
- * @param {Objekt} memberDataContactResource - Ett objekt av typen Person med kontaktinfo för en person
- * @param {String} nameOfPersonField - Namn på ett kontaktfält
- * @param {Boolean} removeValueEmpty - Om fältet ska tas bort om det är tomt
+ * @param {Object[]} connectionObject - Data för ett kontaktfält för en kontakt som redan finns
+ * @param {Object} memberDataContactResource - Ett objekt av typen Person med kontaktinfo för en person
+ * @param {string} nameOfPersonField - Namn på ett kontaktfält
+ * @param {boolean} removeValueEmpty - Om fältet ska tas bort om det är tomt
  * 
- * @returns {Objekt} - Ett objekt med attributet memberData med kontaktinfo för det angivna kontaktfältet
+ * @returns {Object} - Ett objekt med attributet memberData med kontaktinfo för det angivna kontaktfältet
  */
 function checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, removeValueEmpty)  {
   
@@ -1319,9 +1319,9 @@ function checkDifferenceHelpfunction_(connectionObject, memberDataContactResourc
  * Detta görs för att ta bort tomma kontaktfält från svaret som ges vid
  * anrop mot Google för att kunna jämföra med ny data.
  * 
- * @param {Objekt[]} memberData - Lista av objekt för en kontaktfältstyp för en kontakt
+ * @param {Object[]} memberData - Lista av objekt för en kontaktfältstyp för en kontakt
  * 
- * @returns {Objekt[]} - Lista av objekt för ett kontaktfältstyp för en kontakt
+ * @returns {Object[]} - Lista av objekt för ett kontaktfältstyp för en kontakt
  */
 function removeElementsWithValueOrPersonEmpty_(memberData) {
 
@@ -1339,11 +1339,11 @@ function removeElementsWithValueOrPersonEmpty_(memberData) {
  * Jämför listor av objekt bestående av kontaktfältsattribut och deras värden och
  * kollar om de är olika.
  * 
- * @param {Objekt[]} tmpArray - Lista av objekt för en typ av kontaktfält för en kontakt
- * @param {Objekt[]} memberData - Lista av objekt med medlemsdata för en typ av kontaktfält för en medlem
- * @param {String} nameOfPersonField - Namn på ett specifikt kontaktfält
+ * @param {Object[]} tmpArray - Lista av objekt för en typ av kontaktfält för en kontakt
+ * @param {Object[]} memberData - Lista av objekt med medlemsdata för en typ av kontaktfält för en medlem
+ * @param {string} nameOfPersonField - Namn på ett specifikt kontaktfält
  * 
- * @returns {Boolean} - Sant eller falskt om det är skillnad på nuvarande kontaktdata och den som ska vara
+ * @returns {boolean} - Sant eller falskt om det är skillnad på nuvarande kontaktdata och den som ska vara
  */
 function checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField)  {
 
@@ -1393,10 +1393,10 @@ function checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField)  {
 /**
  * Ger ett objekt för en kontaktresurs givet medlemsdata
  * 
- * @param {Objekt} memberData - Persondata för en medlem
- * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
+ * @param {Object} memberData - Persondata för en medlem
+ * @param {string} customEmailField - Namn på eget kontaktfält för e-post att använda
  * 
- * @returns {Objekt} - Ett objekt av typen Person med kontaktinfo för en person
+ * @returns {Object} - Ett objekt av typen Person med kontaktinfo för en person
  */
 function makeContactResource_(memberData, customEmailField)  {
   
@@ -1494,10 +1494,10 @@ function makeContactResource_(memberData, customEmailField)  {
 /**
  * Skapar en kontakt givet medlemsdata
  * 
- * @param {Objekt} memberData - Persondata för en medlem
- * @param {String} customEmailField - Namn på eget kontaktfält för e-post att använda
+ * @param {Object} memberData - Persondata för en medlem
+ * @param {string} customEmailField - Namn på eget kontaktfält för e-post att använda
  * 
- * @returns {Objekt} - Ett objekt av typen Person med kontaktinfo för en person
+ * @returns {Object} - Ett objekt av typen Person med kontaktinfo för en person
  */
 function createContact_(memberData, customEmailField)  {
 
@@ -1505,7 +1505,7 @@ function createContact_(memberData, customEmailField)  {
   //console.log("contactResource");
   //console.log(contactResource);
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen createContact körs " + n);
     
     try {
@@ -1527,11 +1527,11 @@ function createContact_(memberData, customEmailField)  {
 /**
  * Ger info om en specifik kontaktgrupp och dess kommande kontakter
  * 
- * @param {Objekt[]} nyaKontakter - Lista med info och e-postadresser för kommande kontaktgrupper
- * @param {String} namn - Namn för den kontaktgrupp att söka efter
- * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
+ * @param {Object[]} nyaKontakter - Lista med info och e-postadresser för kommande kontaktgrupper
+ * @param {string} namn - Namn för den kontaktgrupp att söka efter
+ * @param {string} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
  * 
- * @returns {Objekt[]} - Lista med info och medlemsnummer för aktuell kommande kontaktgrupp
+ * @returns {Object[]} - Lista med info och medlemsnummer för aktuell kommande kontaktgrupp
  */
 function getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups)  {
   
@@ -1548,11 +1548,11 @@ function getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups)  {
 /**
  * Skapar nya kontaktgrupper och tar bort inaktuella kontaktgrupper
  * 
- * @param {Objekt[]} gamlaKontaktGrupper - Lista av Objekt med kontaktgruppsinformation
+ * @param {Object[]} gamlaKontaktGrupper - Lista av Objekt med kontaktgruppsinformation
  * @param {Object[]} nyaKontaktGrupper - Lista av listor med information över de kontaktgrupper som ska finnas
- * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
+ * @param {string} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
  * 
- * @returns {Objekt[]} - Lista av Objekt med kontaktgruppsinformation
+ * @returns {Object[]} - Lista av Objekt med kontaktgruppsinformation
  */
 function createAndDeleteContactGroups_(gamlaKontaktGrupper, nyaKontaktGrupper, prefixContactgroups) {
 
@@ -1593,9 +1593,9 @@ function createAndDeleteContactGroups_(gamlaKontaktGrupper, nyaKontaktGrupper, p
 /**
  * Ger lista med namn över de kontaktgrupper som anges
  * 
- * @param {Objekt[]} gamlaKontaktGrupper - Lista av Objekt med kontaktgruppsinformation
+ * @param {Object[]} gamlaKontaktGrupper - Lista av Objekt med kontaktgruppsinformation
  * 
- * @returns {String[]} nameOfContactGroups - Lista med namnen på angivna kontaktgrupper
+ * @returns {string[]} nameOfContactGroups - Lista med namnen på angivna kontaktgrupper
  */
 function getNameOfContactGroups_(kontaktgrupper) {
 
@@ -1617,7 +1617,7 @@ function getNameOfContactGroups_(kontaktgrupper) {
  */
 function deleteContactGroup_(contactGroup) {
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen deleteContactGroup körs " + n);
     
     try {
@@ -1639,13 +1639,13 @@ function deleteContactGroup_(contactGroup) {
 /**
  * Skapa en kontaktgrupp
  * 
- * @param {String} namn - namn för en kontaktgrupp att skapa
+ * @param {string} namn - namn för en kontaktgrupp att skapa
  * 
  * @returns {Object} - Objekt av typen ContactGroup för skapad kontaktgrupp
  */
 function createContactGroup_(namn) {
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen createContactGroup körs " + n);
     
     try {
@@ -1673,13 +1673,13 @@ function createContactGroup_(namn) {
 /**
  * Hämta en kontaktgrupp
  * 
- * @param {Objekt} contactGroup - Objekt med kontaktgruppsinformation
+ * @param {Object} contactGroup - Objekt med kontaktgruppsinformation
  * 
- * @returns {Objekt} - Objekt med mer detaljerad kontaktgruppsinformation
+ * @returns {Object} - Objekt med mer detaljerad kontaktgruppsinformation
  */
 function getContactGroup_(contactGroup) {
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen getContactGroup körs " + n);
     
     try {
@@ -1704,15 +1704,15 @@ function getContactGroup_(contactGroup) {
 /**
  * Ger lista över de kontaktgrupper som redan finns och som ska uppdateras
  * 
- * @param {String} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
+ * @param {string} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
  * 
- * @returns {Objekt[]} - Lista av Objekt med kontaktgruppsinformation
+ * @returns {Object[]} - Lista av Objekt med kontaktgruppsinformation
  */
 function getContactGroups_(prefixContactgroups) {
 
   console.info("Hämtar lista över alla kontaktgrupper som finns just nu");
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     console.log("Funktionen getContactGroups körs " + n);
 
     try {
@@ -1735,7 +1735,7 @@ function getContactGroups_(prefixContactgroups) {
               memberCount: contactGroups[i].memberCount
             };
             
-            if (contactGroup.groupType == "USER_CONTACT_GROUP") {
+            if ("USER_CONTACT_GROUP" == contactGroup.groupType) {
               if (contactGroup.name.startsWith(prefixContactgroups)) {
                 console.log(contactGroups[i]);
                 console.log(contactGroup);
