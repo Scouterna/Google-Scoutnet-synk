@@ -1773,8 +1773,8 @@ function getContactGroups_(prefixContactgroups) {
 function removeDublicates_(list) {
   const tmp_array = []
   console.log("Försöker radera dubletter");
-    for(let i = 0;i < list.length; i++){
-      if(tmp_array.indexOf(list[i]) == -1){
+    for(let i = 0; i < list.length; i++){
+      if(!tmp_array.includes(list[i])){
         tmp_array.push(list[i])
         //console.log("Denna är ny " + list[i]);
       }
