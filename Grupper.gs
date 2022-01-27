@@ -4,12 +4,12 @@
  */
 
 
-/*
+/**
  * Returnerar lista med vilket index som olika rubriker har i kalkylarket
  *
  * @returns {number[]} - Lista med rubrikindex för respektive rubrik
  */
-function GrupperRubrikData() {
+function grupperRubrikData_() {
   
   //Siffran är vilken kolumn i kalkylarket.
   const gruppRubrikData = {};
@@ -54,9 +54,9 @@ function Grupper(...args) {
   const selection = sheetDataGrupper["selection"];
   const data = sheetDataGrupper["data"];
   
-  const grd = GrupperRubrikData();
+  const grd = grupperRubrikData_();
   
-  const listOfEmailAdressesOfActiveAccounts = getEmailAdressesofAllActiveGoogleAccounts();
+  const listOfEmailAdressesOfActiveAccounts = getEmailAdressesofAllActiveGoogleAccounts_();
   
   const delete_rows = [];
   
@@ -79,10 +79,10 @@ function Grupper(...args) {
 
   let arrayOfRows;
   if (0 == args.length || 2 == args.length) {
-    arrayOfRows = getArrayOfRows(start, slut);
+    arrayOfRows = getArrayOfRows_(start, slut);
   }
   else  {
-    arrayOfRows = getArrayOfRowsWithTag(data, grd, start, slut, args[args.length-1]);
+    arrayOfRows = getArrayOfRowsWithTag_(data, grd, start, slut, args[args.length-1]);
   }
 
   tmpRows = [];
@@ -111,9 +111,9 @@ function Grupper(...args) {
     
     let update_group = "yes";
     
-    if (groupId=="") { //Vi borde skapa en grupp
+    if (groupId == "") { //Vi borde skapa en grupp
       
-      if (name=="" && email=="") { //Ta bort raden
+      if (name == "" && email == "") { //Ta bort raden
         Logger.log("Försöker ta bort rad " + rad_nummer);
         
         delete_rows.push(rad_nummer);
@@ -131,22 +131,22 @@ function Grupper(...args) {
           email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
           email = removeDiacritics(email);
           
-          const group = createGroup(email, name, true);
+          const group = createGroup_(email, name, true);
           groupId = group.id;
           Logger.log("Skapade gruppen: " + email);
           
-          let cell=selection.getCell(rad_nummer, grd["e-post"]+1);
+          let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
           cell.setValue(email);
           cell.setBackground("white");
           
-          cell=selection.getCell(rad_nummer, grd["groupId"]+1);
+          cell = selection.getCell(rad_nummer, grd["groupId"]+1);
           cell.setValue(groupId);
           
-          setCellValueCellUrl(selection, rad_nummer, grd["cell_url"], email);
+          setCellValueCellUrl_(selection, rad_nummer, grd["cell_url"], email);
           
         }
         else { //Om gruppens e-postadress redan finns
-          const group = getAdminDirectoryGroup(email);
+          const group = getAdminDirectoryGroup_(email);
           groupId = group.id;
           let cell = selection.getCell(rad_nummer, grd["groupId"]+1);
           cell.setValue(groupId);
@@ -155,83 +155,83 @@ function Grupper(...args) {
     }
     
     
-    else if (groupId!="") {  //Gruppen finns sedan innan
+    else if (groupId != "") {  //Gruppen finns sedan innan
       
-      if (name=="" && email=="") { //Ta bort gruppen
+      if (name == "" && email == "") { //Ta bort gruppen
         
         Logger.log("Försöker ta bort " + groupId + " rad " + rad_nummer);
-        deleteGroup(groupId, true);
+        deleteGroup_(groupId, true);
         Logger.log(groupId + " raderades");
 
         delete_rows.push(rad_nummer);
         update_group = "no";
       }
-      else if (email=="") { //Om tom, hämta e-postadressen från systemet och sätt tillbaka den
+      else if (email == "") { //Om tom, hämta e-postadressen från systemet och sätt tillbaka den
         
-        const tmp_usr = getAdminDirectoryGroup(groupId);
+        const tmp_usr = getAdminDirectoryGroup_(groupId);
         email = tmp_usr.email;
-        let cell=selection.getCell(rad_nummer,grd["e-post"]+1);
+        let cell = selection.getCell(rad_nummer,grd["e-post"]+1);
         cell.setValue(email);
         cell.setBackground("white");
       }
-      else if (email!="") { //Kontrollerar om vi behöver uppdatera
+      else if (email != "") { //Kontrollerar om vi behöver uppdatera
         
-        let group = getAdminDirectoryGroup(groupId);
+        let group = getAdminDirectoryGroup_(groupId);
                 
-        if (email!=group.email) { //E-postadressen har ändrats
+        if (email != group.email) { //E-postadressen har ändrats
           
           Logger.log("E-postadress för gruppen har ändrats på raden " + rad_nummer);          
           
-          if (false==checkIfGroupExists(email) && true==checkEmailFormat(email)) {
+          if (false == checkIfGroupExists(email) && true==checkEmailFormat(email)) {
             
             email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
             email = removeDiacritics (email);            
             
             Logger.log("try remove " + groupId + " row " + rad_nummer);
-            deleteGroup(groupId, false);  //Vi gör på detta sätt då det varit stora problem
+            deleteGroup_(groupId, false);  //Vi gör på detta sätt då det varit stora problem
             //med att tjänsten ej svarat tidigare om vi gjort en patch/update
             Logger.log(groupId + " togs bort");
             
-            group = createGroup(email, name, true);
+            group = createGroup_(email, name, true);
             Logger.log("Uppdaterat e-postadress för gruppen: " + email);            
             groupId = group.id;
             
-            let cell=selection.getCell(rad_nummer, grd["e-post"]+1);
+            let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
             cell.setValue(email);
             cell.setBackground("white");
             
-            cell=selection.getCell(rad_nummer, grd["groupId"]+1);
+            cell = selection.getCell(rad_nummer, grd["groupId"]+1);
             cell.setValue(groupId);
             
-            setCellValueCellUrl(selection, rad_nummer, grd["cell_url"], email);
+            setCellValueCellUrl_(selection, rad_nummer, grd["cell_url"], email);
           }
           else { //Om gruppens e-postadress redan finns
             
-            const cell=selection.getCell(rad_nummer, grd["e-post"]+1);
+            const cell = selection.getCell(rad_nummer, grd["e-post"]+1);
             cell.setBackground("red");
           }
         }
         else if (name != group.name) { //Om namnet, men inte e-postadressen för gruppen ändrats
           
           Logger.log("Gruppnamnet har ändrats på rad " + rad_nummer);
-          patchAdminDirectoryGroup(name, groupId);
+          patchAdminDirectoryGroup_(name, groupId);
         }
         else if (email == group.email) { //Om e-posten är oförändrad. Behöver ändra bakgrund om man
           //ändrat till en ogiltig e-postadress och sen ändrar tillbaka
           Logger.log("E-post ej ändrad för grupppen " + email);
-          let cell=selection.getCell(rad_nummer, grd["e-post"]+1);
+          let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
           if ("#ffffff" != cell.getBackground()) {
             cell.setBackground("white");
           }
 
-          cell=selection.getCell(rad_nummer, grd["cell_url"]+1).getValue();
-          if (cell=="") {
+          cell = selection.getCell(rad_nummer, grd["cell_url"]+1).getValue();
+          if (cell == "") {
             Logger.log("Denna cell för länk är tom och ska upppdateras");
-            setCellValueCellUrl(selection, rad_nummer, grd["cell_url"], email);
+            setCellValueCellUrl_(selection, rad_nummer, grd["cell_url"], email);
           }
         }
         
-        group = getAdminGroupSettings(email);
+        group = getAdminGroupSettings_(email);
         if (customFooterText != group.customFooterText) {
           Logger.log("Sidfot ska ändras för gruppen");
           update_group = "yes";
@@ -257,15 +257,15 @@ function Grupper(...args) {
 /**
  * Ger en lista av alla rader som ska synkroniseras givet rader att kolla och en etikett
  * 
- * @param {Objekt[][]} data - Lista av listor med datan som finns i kalkylbladet
- * @param {String[]} grd - lista med vilka kolumnindex som respektive parameter har
- * @param {Number} start - rad att börja synkronisera på
- * @param {Number} slut - rad att sluta synkronisera på
- * @param {String} etikett - Etikett att hålla utkik efter
+ * @param {Object[][]} data - Lista av listor med datan som finns i kalkylbladet
+ * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
+ * @param {number} start - rad att börja synkronisera på
+ * @param {number} slut - rad att sluta synkronisera på
+ * @param {string} etikett - Etikett att hålla utkik efter
  * 
- * @returns {Number[]} arrayOfRows - Lista av radera som ska synkroniseras
+ * @returns {number[]} - Lista av raderna som ska synkroniseras
  */
-function getArrayOfRowsWithTag(data, grd, start, slut, etikett) {
+function getArrayOfRowsWithTag_(data, grd, start, slut, etikett) {
 
   const arrayOfRows = [];
 
@@ -285,12 +285,12 @@ function getArrayOfRowsWithTag(data, grd, start, slut, etikett) {
 /**
  * Ger en lista av alla rader som ska synkroniseras givet start- och slutrad
  * 
- * @param {Number} start - rad att börja synkronisera på
- * @param {Number} slut - rad att sluta synkronisera på
+ * @param {number} start - rad att börja synkronisera på
+ * @param {number} slut - rad att sluta synkronisera på
  * 
- * @returns {Number[]} arrayOfRows - Lista av radera som ska synkroniseras
+ * @returns {number[]} - Lista av radera som ska synkroniseras
  */
-function getArrayOfRows(start, slut)  {
+function getArrayOfRows_(start, slut)  {
 
   const arrayOfRows = [];
 
@@ -344,15 +344,15 @@ function checkIfIsArchivedShouldChange(input, boolIfArchive) {
 }
 
 
-/*
- * Skiver in i kalkylarket länken till gruppen
+/**
+ * Skiver in länkten till gruppen i kalkylarket
  *
  * @param {Object} selection - ett googleojekt
  * @param {string} rad_nummer - radnummer i kalkylarket för en specifik googlegrupp
  * @param {string} column - kolumnnummer som detta hör till
  * @param {string} email - e-postadress för googlegruppen
  */
-function setCellValueCellUrl(selection, rad_nummer, column, email) {
+function setCellValueCellUrl_(selection, rad_nummer, column, email) {
   
   const cell = selection.getCell(rad_nummer, column+1);
   
@@ -365,7 +365,7 @@ function setCellValueCellUrl(selection, rad_nummer, column, email) {
 }
 
 
-/*
+/**
  * Skapar en grupp med angiven e-postadress och namn
  * med fördefinerade behörighetsinställningar
  *
@@ -375,33 +375,31 @@ function setCellValueCellUrl(selection, rad_nummer, column, email) {
  *
  * @returns {Object} - Objekt av den nya skapade Googlegrupppen
  */
-function createGroup(email, name, shouldUpdateListOfGroups) {
+function createGroup_(email, name, shouldUpdateListOfGroups) {
 
   const tmp_group = {
     "email": email,
     "name": name,
     "description": "Scoutnet"
   };
-            
   AdminDirectory.Groups.insert(tmp_group);
             
   const group = getAdminDirectoryGroup(email);
 
   if (shouldUpdateListOfGroups) {
     updateListOfGroups();
-  }
-  
+  }  
   return group;
 }
 
 
-/*
- * Tar bort en grupp med angivet id för en grupp
+/**
+ * Tar bort en grupp med angivet id
  *
  * @param {string} groupId - Googles id för en grupp
  * @param {boolean} shouldUpdateListOfGroups - om listan över grupper ska uppdateras
  */
-function deleteGroup(groupId, shouldUpdateListOfGroups) {
+function deleteGroup_(groupId, shouldUpdateListOfGroups) {
   Logger.log("Försöker radera grupp " + groupId);
   AdminDirectory.Groups.remove(groupId);
 
@@ -411,7 +409,7 @@ function deleteGroup(groupId, shouldUpdateListOfGroups) {
 }
 
 
-/*
+/**
  * Returnera fullständig information om en medlem i en grupp
  *
  * @param {string} groupId - Googles id för en grupp
@@ -419,12 +417,12 @@ function deleteGroup(groupId, shouldUpdateListOfGroups) {
  *
  * @returns {Object[]} member - Ett medlemsobjekt
  */
-function getGroupMember(groupId, memberkey) {
+function getGroupMember_(groupId, memberkey) {
   
   //Logger.log("Försöker hämta grupp:" + groupId);
   //Logger.log("Försöker med memberKey:" + memberkey);
   
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen getGroupMember körs " + n);
     
     try {
@@ -463,7 +461,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   const synk_option_both = radInfo[grd["synk_option"]];
   Logger.log("..........1Båda....................");
   const allMembers_both = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_both, cell_scoutnet_list_id_both, listOfEmailAdressesOfActiveAccounts, forceUpdate);
-  let allMembers_both_email = getMemberlistsMemberEmail(allMembers_both, synk_option_both);
+  let allMembers_both_email = getMemberlistsMemberEmail_(allMembers_both, synk_option_both);
   Logger.log("..........1Slut Båda....................");
   /***********************/
   
@@ -473,7 +471,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   const synk_option_send = radInfo[grd["synk_option_send"]];
   Logger.log("..........1Bara skicka....................");
   const allMembers_send = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_send, cell_scoutnet_list_id_send, listOfEmailAdressesOfActiveAccounts, forceUpdate);
-  let allMembers_send_email = getMemberlistsMemberEmail(allMembers_send, synk_option_send);
+  let allMembers_send_email = getMemberlistsMemberEmail_(allMembers_send, synk_option_send);
   Logger.log("..........1Slut bara skicka....................");
   /***********************/
   
@@ -483,7 +481,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   const synk_option_receive = radInfo[grd["synk_option_receive"]];
   Logger.log("..........1Bara ta emot....................");
   const allMembers_receive = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_receive, cell_scoutnet_list_id_receive, listOfEmailAdressesOfActiveAccounts, forceUpdate);
-  let allMembers_receive_email = getMemberlistsMemberEmail(allMembers_receive, synk_option_receive);
+  let allMembers_receive_email = getMemberlistsMemberEmail_(allMembers_receive, synk_option_receive);
   Logger.log("..........1Slut bara ta emot....................");
   /***********************/
   
@@ -573,27 +571,27 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
     //Denna e-post finns redan med i gruppen, men har kanske fel roll?
     else {
       //Both, Send, Receive
-      const memberTypeOld = getMembertype(groupId, group_members, allMembers_email[i]);
+      const memberTypeOld = getMembertype_(groupId, group_members, allMembers_email[i]);
       const memberId = getMemberId(groupId, group_members, allMembers_email[i]);
       
       //Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
       
       if (allMembers_both_email.includes(allMembers_email[i])) { //Ska kunna skicka och ta emot        
-        if (memberTypeOld!="Both") { //Har någon annan roll sedan innan
+        if (memberTypeOld != "Both") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen skicka och ta emot");
         }
       }
       else if (allMembers_send_email.includes(allMembers_email[i])) { //Ska bara kunna skicka        
-        if (memberTypeOld!="Send") { //Har någon annan roll sedan innan
+        if (memberTypeOld != "Send") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'MANAGER', 'NONE');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara skicka");
         }
       }
       else if (allMembers_receive_email.includes(allMembers_email[i])) { //Ska bara kunna ta emot        
-        if (memberTypeOld!="Receive") { //Har någon annan roll sedan innan
+        if (memberTypeOld != "Receive") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara ta emot");
@@ -601,14 +599,14 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
       }
       
       else if (allMembers_both_email_admin.includes(allMembers_email[i])) { //Ska kunna skicka och ta emot ADMIN        
-        if (memberTypeOld!="OWNER_Both") { //Har någon annan roll sedan innan
+        if (memberTypeOld != "OWNER_Both") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara ta emot ADMIN");
         }
       }
       else if (allMembers_send_email_admin.includes(allMembers_email[i])) { //Ska bara kunna skicka ADMIN      
-        if (memberTypeOld!="OWNER_Send") { //Har någon annan roll sedan innan
+        if (memberTypeOld != "OWNER_Send") { //Har någon annan roll sedan innan
           updateGroupMember(groupId, memberId, allMembers_email[i], 'OWNER', 'DISABLED');
           Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
           Logger.log(allMembers_email[i] + " har nu rollen bara skicka ADMIN");
@@ -624,13 +622,13 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
 }
 
 
-/*
+/**
  * Ger lista över alla aktiva Google-konton i denna domän
  * om det finns flera domänen tillåter vi bara huvuddomänen
  *
  * @returns {string[]} - E-postadresser för aktiva Googlekonton
  */
-function getEmailAdressesofAllActiveGoogleAccounts() {
+function getEmailAdressesofAllActiveGoogleAccounts_() {
   
   const emailAddresses = [];
   let users;
@@ -640,7 +638,7 @@ function getEmailAdressesofAllActiveGoogleAccounts() {
     page = AdminDirectory.Users.list({
       domain: domain,
       orderBy: 'givenName',
-      maxResults: 500,
+      maxResults: 150,
       pageToken: pageToken
     });
     users = page.users;
@@ -649,8 +647,7 @@ function getEmailAdressesofAllActiveGoogleAccounts() {
         const user = users[i];
         //Logger.log('%s (%s)', user.name.fullName, user.primaryEmail);
         
-        if (!user.suspended) {
-          
+        if (!user.suspended) {          
           for (let k = 0; k < user.emails.length; k++) { //Varje användare kan ha alias också
             
             const email = user.emails[k].address;
@@ -694,51 +691,49 @@ function updateGroupMember(groupId, memberId, email, role, delivery_settings) {
     AdminDirectory.Members.update(settings, groupId, memberId);
   }
   catch (e) {
-    Logger.log("Kunde inte ändra medlemens rolltyp för e-postadress:" + email);
+    Logger.log("Kunde inte ändra en medlems rolltyp för e-postadress:" + email);
     deleteGroupMember(groupId, memberId, email);    
   }
 }
 
 
-/*
+/**
  * Returnerar vilken typ av person detta är på listan
  *
  * @param {string} groupId - Id för denna grupp
- * @param {Objekt[]} group_members - Lista med medlemsobjekt
+ * @param {Object[]} group_members - Lista med medlemsobjekt
  * @param {string} email - E-postadress för en specifik medlem i gruppen
  *
  * @returns {string} - Textsträng som förklarar medlemstypen i gruppen
  */
-function getMembertype(groupId, group_members, email) {
+function getMembertype_(groupId, group_members, email) {
   
   for (let i = 0; i < group_members.length; i++) {
    
-		if (group_members[i].email==email)	{
-          
-          if (group_members[i].role=='MANAGER') {
-            const tmp_GroupMember = getGroupMember(groupId, group_members[i].memberId);
-            const delivery_settings = tmp_GroupMember.delivery_settings;
-            if(delivery_settings=='ALL_MAIL') {
-              return "Both";
-            }
-            else {
-              return "Send";
-            }            
-          }
-          else if  (group_members[i].role=='OWNER') {
-            const tmp_GroupMember = getGroupMember(groupId, group_members[i].memberId);
-            const delivery_settings = tmp_GroupMember.delivery_settings;
-            if(delivery_settings=='ALL_MAIL') {
-              return "OWNER_Both";
-            }
-            else {
-              return "OWNER_Send";
-            }
-          }
-          else { 
-            return "Receive"
-          }
-          return group_members[i].role;
+		if (group_members[i].email == email)	{ 
+      if ('MANAGER' == group_members[i].role) {
+        const tmp_GroupMember = getGroupMember_(groupId, group_members[i].memberId);
+        const delivery_settings = tmp_GroupMember.delivery_settings;
+        if('ALL_MAIL' == delivery_settings) {
+          return "Both";
+        }
+        else {
+          return "Send";
+        }            
+      }
+      else if ('OWNER' == group_members[i].role) {
+        const tmp_GroupMember = getGroupMember_(groupId, group_members[i].memberId);
+        const delivery_settings = tmp_GroupMember.delivery_settings;
+        if('ALL_MAIL' == delivery_settings) {
+          return "OWNER_Both";
+        }
+        else {
+          return "OWNER_Send";
+        }
+      }
+      else { 
+        return "Receive"
+      }
 		}	
 	}
   return "Kunde inte hitta rollen på denna medlem " + email;
@@ -749,7 +744,7 @@ function getMembertype(groupId, group_members, email) {
  * Returnerar gruppmedlemens id givet dess email
  *
  * @param {string} groupId - Id för denna grupp
- * @param {Objekt[]} group_members - Lista med medlemsobjekt
+ * @param {Object[]} group_members - Lista med medlemsobjekt
  * @param {string} email - E-postadress för en specifik medlem i gruppen
  *
  * @returns {string} - Unik nyckel för gruppen
@@ -757,7 +752,7 @@ function getMembertype(groupId, group_members, email) {
 function getMemberId(groupId, group_members, email) {
   
   for (let i = 0; i < group_members.length; i++) {   
-		if (group_members[i].email==email)	{
+		if (group_members[i].email == email)	{
       return group_members[i].memberId;
 		}	
 	}
@@ -785,10 +780,10 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   }
   
   //Om e-post finns i "skicka" och "båda" ska de tas bort ur "skicka"
-  allMembers_send_email = getListsWithUniqueElements(allMembers_both_email, allMembers_send_email);
+  allMembers_send_email = getListsWithUniqueElements_(allMembers_both_email, allMembers_send_email);
   
   //Om e-post finns i "ta emot" och "båda" ska de tas bort ur "ta emot"
-  allMembers_receive_email = getListsWithUniqueElements(allMembers_both_email, allMembers_receive_email);
+  allMembers_receive_email = getListsWithUniqueElements_(allMembers_both_email, allMembers_receive_email);
   
   /*****E-postadresser för skräppostnotifikation*****/
   let allMembers_both_email_admin = [];
@@ -806,30 +801,30 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
     else {
       allMembers_send_email_admin.push(emailAdressesToSendSpamNotification[i]);
     }
-  }  
+  }
   
   //Om e-post finns i "skicka admin" och "båda admin" ska de tas bort ur "skicka admin"
-  allMembers_send_email_admin = getListsWithUniqueElements(allMembers_both_email_admin, allMembers_send_email_admin);
+  allMembers_send_email_admin = getListsWithUniqueElements_(allMembers_both_email_admin, allMembers_send_email_admin);
   
   //Om e-post finns i "båda" och "emailAdressesToSendSpamNotification" ska de tas bort ur "båda"
-  allMembers_both_email = getListsWithUniqueElements(emailAdressesToSendSpamNotification, allMembers_both_email);
+  allMembers_both_email = getListsWithUniqueElements_(emailAdressesToSendSpamNotification, allMembers_both_email);
   
   //Om e-post finns i "skicka" och "emailAdressesToSendSpamNotification" ska de tas bort ur "skicka"
-  allMembers_send_email = getListsWithUniqueElements(emailAdressesToSendSpamNotification, allMembers_send_email);
+  allMembers_send_email = getListsWithUniqueElements_(emailAdressesToSendSpamNotification, allMembers_send_email);
   
   //Om e-post finns i "ta emot" och "emailAdressesToSendSpamNotification" ska de tas bort ur "ta emot"
-  allMembers_receive_email = getListsWithUniqueElements(emailAdressesToSendSpamNotification, allMembers_receive_email);
+  allMembers_receive_email = getListsWithUniqueElements_(emailAdressesToSendSpamNotification, allMembers_receive_email);
   
   
   //Om e-post är en grupp och finns i "båda" ska den tas bort ur "båda" och läggas till i "ta emot"
-  const tmp_EmailsGroupOrNot_both = getEmailsSortedAsGroupOrNot(allMembers_both_email);
+  const tmp_EmailsGroupOrNot_both = getEmailsSortedAsGroupOrNot_(allMembers_both_email);
   const tmp_groupEmails_both = tmp_EmailsGroupOrNot_both[0];
   const tmp_notGroupEmails_both = tmp_EmailsGroupOrNot_both[1];
   allMembers_both_email = tmp_notGroupEmails_both;
   allMembers_receive_email.push.apply(allMembers_receive_email, tmp_groupEmails_both);
   
   //Om e-post är en grupp och finns i "skicka" ska den tas bort ur "skicka" och informera i loggen
-  const tmp_EmailsGroupOrNot_send = getEmailsSortedAsGroupOrNot(allMembers_send_email);
+  const tmp_EmailsGroupOrNot_send = getEmailsSortedAsGroupOrNot_(allMembers_send_email);
   const tmp_groupEmails_send = tmp_EmailsGroupOrNot_send[0];
   const tmp_notGroupEmails_send = tmp_EmailsGroupOrNot_send[1];
   allMembers_send_email = tmp_notGroupEmails_send;
@@ -875,7 +870,7 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
 }
 
 
-/*
+/**
  * Ta bort element ur secondList om de finns i mainList
  *
  * @param {string[]} mainList - Lista som vi lämnar orörd
@@ -883,28 +878,28 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
  *
  * @returns {string[]} - Lista av secondList utan de element som fanns i mainList
  */
-function getListsWithUniqueElements(mainList, secondList) {
+function getListsWithUniqueElements_(mainList, secondList) {
   
   const tmp_email_list = [];
   
   for (let i = 0; i < secondList.length; i++) {
     if (!mainList.includes(secondList[i])) {
-        tmp_email_list.push(secondList[i]);
+      tmp_email_list.push(secondList[i]);
     }
   }
   return tmp_email_list;
 }
 
 
-/*
+/**
  * Ger lista över alla unika e-postadresser för denna typ
  *
- * @param {Objekt[]} members - Objekt av medlemmar
+ * @param {Object[]} members - Objekt av medlemmar
  * @param {string} synk_option - Synkroniseringsinställning
  *
  * @returns {string[]} - Lista över unika e-postadresser
  */
-function getMemberlistsMemberEmail(members, synk_option) {
+function getMemberlistsMemberEmail_(members, synk_option) {
   
   let members_email = [];
   
@@ -912,8 +907,8 @@ function getMemberlistsMemberEmail(members, synk_option) {
     members_email.push.apply(members_email, getEmailListSyncOption(members[i], synk_option, true));
   }
   
-  for (let k = 0; k < members_email.length; k++) {
-    members_email[k] = getGmailAdressWithoutDots(members_email[k]);
+  for (let i = 0; i < members_email.length; i++) {
+    members_email[i] = getGmailAdressWithoutDots(members_email[i]);
   }
   members_email = removeDublicates(members_email);
   //Ifall samma e-postadress är hos flera medlemmar eller upprepas i olika kontaktfält.
@@ -1029,11 +1024,11 @@ function changeGroupPermissions(email, postPermission, customFooterText, isArchi
   group.whoCanContactOwner = "ALL_MANAGERS_CAN_CONTACT";
   group.whoCanDiscoverGroup = "ALL_MEMBERS_CAN_DISCOVER";
   
-  patchAdminGroupSettings(group, email);
+  patchAdminGroupSettings_(group, email);
 }
 
 
-/*
+/**
  * Skapa kolumnrubriker i kalkylarket och dölj kolumnen med Grupp-ID
  */
 function createHeaders_Grupper() {
@@ -1041,10 +1036,10 @@ function createHeaders_Grupper() {
   const sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
   const sheet = sheetDataGrupper["sheet"];
-  const selection = sheetDataGrupper["selection"];
-  const data = sheetDataGrupper["data"];
+  //const selection = sheetDataGrupper["selection"];
+  //const data = sheetDataGrupper["data"];
   
-  const grd = GrupperRubrikData();
+  const grd = grupperRubrikData_();
   
   // Frys de två översta raderna på arket så att rubrikerna alltid syns
   sheet.setFrozenRows(2);
@@ -1054,9 +1049,9 @@ function createHeaders_Grupper() {
   const range2_rad1 = sheet.getRange(1, grd["scoutnet_list_id_send"]+1, 1, 2);
   const range3_rad1 = sheet.getRange(1, grd["scoutnet_list_id_receive"]+1, 1, 2);
   
-  if (! (range1_rad1.isPartOfMerge() ||
-         range2_rad1.isPartOfMerge() ||
-      range3_rad1.isPartOfMerge())) { //Inga angivna celler på rad 1 är sammanfogade
+  if (!(range1_rad1.isPartOfMerge() ||
+        range2_rad1.isPartOfMerge() ||
+        range3_rad1.isPartOfMerge())) { //Inga angivna celler på rad 1 är sammanfogade
     
     Logger.log("Inga av de angivna cellerna på rad 1 är sammanfogade");
     
@@ -1155,7 +1150,7 @@ function getEmailadressesToSendSpamNotification(group_moderate_content_email, ce
     Logger.log("E-post för skräppostmoderator är angiven");
     boolModerateGroupEmail = true;
   }
-  else if (typeof moderateContentEmail !=='undefined' && moderateContentEmail) {
+  else if (typeof moderateContentEmail !== 'undefined' && moderateContentEmail) {
     emailAdresses = fetchScoutnetMembersMultipleMailinglists(moderateContentEmail, "", "", forceUpdate);
   }
   else { //Om man ej anger listId för en e-postlista ska användaren som kör detta program bli notifierad
@@ -1164,7 +1159,7 @@ function getEmailadressesToSendSpamNotification(group_moderate_content_email, ce
     };
     emailAdresses.push(tmp_member);
   }
-  emailAdresses = getMemberlistsMemberEmail(emailAdresses, "m-"); //Bara primäradress från Scoutnet
+  emailAdresses = getMemberlistsMemberEmail_(emailAdresses, "m-"); //Bara primäradress från Scoutnet
   
   const tmp_emailAdresses = [];
   
@@ -1195,16 +1190,16 @@ function getEmailadressesToSendSpamNotification(group_moderate_content_email, ce
 }
 
 
-/*
- * Returnera AdminGroupSettings
+/**
+ * Returnera gruppinställningar via AdminGroupSettings
  *
  * @param {string} email - E-postadress för gruppen
  *
- * @returns {object} - En Googlegrupp
+ * @returns {Object} - En Googlegrupp
  */
-function getAdminGroupSettings(email) {
+function getAdminGroupSettings_(email) {
   
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen getAdminGroupSettings körs " + n);
     
     try {
@@ -1222,15 +1217,15 @@ function getAdminGroupSettings(email) {
 }
 
 
-/*
- * Patcha AdminGroupSettings
+/**
+ * Patcha en grupp via AdminGroupsSettings
  *
- * @param {object} group - Gruppinställningar
+ * @param {Object} group - Gruppinställningar
  * @param {string} email - E-postadress för gruppen
  */
-function patchAdminGroupSettings(group, email) {
+function patchAdminGroupSettings_(group, email) {
   
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen patchAdminGroupSettings körs " + n);
     
     try {
@@ -1248,17 +1243,18 @@ function patchAdminGroupSettings(group, email) {
 }
 
 
-/*
+/**
  * Returna en grupp via AdminDirectory
  *
  * @param {string} groupKey - Unik nyckel för gruppen
  *
- * @returns {object} - En Googlegrupp
+ * @returns {Object} - En Googlegrupp
  */
-function getAdminDirectoryGroup(groupKey) {
+function getAdminDirectoryGroup_(groupKey) {
   Logger.log("GroupKey");
   Logger.log(groupKey);
-  for (let n=0; n<6; n++) {
+
+  for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen getAdminDirectoryGroup körs " + n);
     
     try {
@@ -1276,19 +1272,19 @@ function getAdminDirectoryGroup(groupKey) {
 }
 
 
-/*
- * Patcha AdminDirectoryGroup
+/**
+ * Patcha en grupp via AdminDirectoryGroup
  *
  * @param {string} newName - Nytt namn för gruppen
  * @param {string} groupId - Id för gruppen
  */
-function patchAdminDirectoryGroup(newName, groupId) {
+function patchAdminDirectoryGroup_(newName, groupId) {
   
   const tmp_group = {
     name: newName
   };
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen patchAdminDirectoryGroup körs " + n);
     
     try {
@@ -1306,36 +1302,36 @@ function patchAdminDirectoryGroup(newName, groupId) {
 }
 
 
-/*
- * Visar kolumner som styr avancerade inställningar
+/**
+ * Visar kolumner som styr avancerade inställningar för grupper
  */
 function avanceradLayoutGrupper() {
 
   const sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
   const sheet = sheetDataGrupper["sheet"];
-  const selection = sheetDataGrupper["selection"];
-  const data = sheetDataGrupper["data"];
+  //const selection = sheetDataGrupper["selection"];
+  //const data = sheetDataGrupper["data"];
   
-  const grd = GrupperRubrikData();
+  const grd = grupperRubrikData_();
   
   sheet.showColumns(grd["scoutnet_list_id_send"]+1, 5);  
   sheet.showColumns(grd["isArchived"]+1, 2);
 }
 
 
-/*
- * Döljer kolumner som styr avancerade inställningar
+/**
+ * Döljer kolumner som styr avancerade inställningar för grupper
  */
 function enkelLayoutGrupper() {
   
   const sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
   const sheet = sheetDataGrupper["sheet"];
-  const selection = sheetDataGrupper["selection"];
-  const data = sheetDataGrupper["data"];
+  //const selection = sheetDataGrupper["selection"];
+  //const data = sheetDataGrupper["data"];
   
-  const grd = GrupperRubrikData();
+  const grd = grupperRubrikData_();
   
   sheet.hideColumns(grd["scoutnet_list_id_send"]+1, 6);  
   sheet.hideColumns(grd["isArchived"]+1, 2);
@@ -1345,11 +1341,11 @@ function enkelLayoutGrupper() {
 /*
  * Ger området för en eller flera kolumner
  *
- * @param {Objekt} sheet - Ett ark
- * @param {int} columnIndex - Kolumnindex
- * @param {int} numColumns - Antal kolumner med columnIndex längst till vänster
+ * @param {Object} sheet - Ett ark
+ * @param {number} columnIndex - Kolumnindex
+ * @param {number} numColumns - Antal kolumner med columnIndex längst till vänster
  *
- * @returns {Objekt} - Området för hela kolumnen
+ * @returns {Object} - Området för hela kolumnen
  */
 function getA1RangeOfColumns(sheet, columnIndex, numColumns) {
   
@@ -1364,14 +1360,14 @@ function getA1RangeOfColumns(sheet, columnIndex, numColumns) {
 }
  
 
-/*
+/**
  * Returnerar en lista med e-postadresser som tillhör googlegrupper
  *
  * @param {string[]} emails - Lista med e-postadresser
  *
  * @returns {string[groupEmails, notGroupEmails]} - Lista med e-postadresser sorterade som grupp eller ej
  */       
-function getEmailsSortedAsGroupOrNot(emails) {
+function getEmailsSortedAsGroupOrNot_(emails) {
   
   const groupEmails = [];
   const notGroupEmails = [];
@@ -1424,7 +1420,7 @@ function TestReadSpreadSheet() {
   const selection = sheetDataGrupper["selection"];
   const data = sheetDataGrupper["data"];
 
-  const grd = GrupperRubrikData();
+  const grd = grupperRubrikData_();
   
   for (let i = 1; i < data.length; i++) {
     
