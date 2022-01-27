@@ -60,7 +60,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
   //Hämta lista med alla medlemmar i kåren och alla deras attribut
   const allMembers = fetchScoutnetMembers(true);
   
-  const rowsToSync = findWhatRowsToSync(start, slut, data.length);
+  const rowsToSync = findWhatRowsToSync_(start, slut, data.length);
   start = rowsToSync.start;
   slut = rowsToSync.slut;
   
@@ -127,7 +127,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
     }
   }
   //Ta bort tomma radera i kalkylarket
-  deleteRowsFromSpreadsheet(sheet, delete_rows);
+  deleteRowsFromSpreadsheet_(sheet, delete_rows);
 }
 
 
@@ -172,7 +172,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
 
   /***Dessa data hämta från utkastet och är lika för alla vid giltighetskontrollen***/
   Logger.log("Ämne på e-post i utkast " + email_draft_subject);
-  const draft = getDraft(email_draft_subject);
+  const draft = getDraft_(email_draft_subject);
 
   let cell=selection.getCell(rad_nummer, grd["email_draft_subject"]+1);
   if (!draft) { //Kolla om ämnesraden är korrekt
@@ -544,10 +544,10 @@ function getDocumentToMerge(ids) {
 function getSender(variable, nameOfVariable, attribut, data, cell, emailOptions)  {
 
   let tmp_variable = replaceTemplate(variable, attribut, data);
-  tmp_variable = getCleanString(tmp_variable);
+  tmp_variable = getCleanString_(tmp_variable);
   tmp_variable = tmp_variable.toLowerCase();
 
-  if ("avsändaradress"==nameOfVariable && isFromEmailAdressAllowed(tmp_variable)) {
+  if ("avsändaradress"==nameOfVariable && isFromEmailAdressAllowed_(tmp_variable)) {
     if ("#ffffff" != cell.getBackground()) {
       cell.setBackground("white");
     }
@@ -610,7 +610,7 @@ function getRecipient(variable, nameOfVariable, attribut, data) {
 function getCleanEmailArray(input) {
 
   const emailArray = [];
-  input = getCleanString(input);  
+  input = getCleanString_(input);  
   const tmpArray = input.split(",");
 
   for (let i = 0; i<tmpArray.length; i++) {

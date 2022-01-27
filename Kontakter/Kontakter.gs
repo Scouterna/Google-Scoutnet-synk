@@ -1767,20 +1767,23 @@ function getContactGroups_(prefixContactgroups) {
 
 /**
  * Ta bort dubletter från en lista
+ * 
  * @param {string[] | number[] | Object[]} - lista
+ * 
  * @returns {string[] | number[] | Object[]} - lista
  */
 function removeDublicates_(list) {
   const tmp_array = []
   console.log("Försöker radera dubletter");
-    for(let i = 0; i < list.length; i++){
-      if(!tmp_array.includes(list[i])){
-        tmp_array.push(list[i])
-        //console.log("Denna är ny " + list[i]);
-      }
-      else {
-        //console.log("Hittade dublett av " + list[i]);
-      }
+  
+  for(let i = 0; i < list.length; i++){
+    if(!tmp_array.includes(list[i])){
+      tmp_array.push(list[i])
+      //console.log("Denna är ny " + list[i]);
     }
+    else {
+      //console.log("Hittade dublett av " + list[i]);
+    }
+  }
   return tmp_array;
 }

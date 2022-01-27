@@ -182,7 +182,7 @@ function makeNameReadyForEmailAdress_(name) {
   let nameEmail = name.toLowerCase().trim(); //Ta bort tomma mellanrum vid start och slut och konvertera till gemener
   nameEmail = nameEmail.replace(/([\s])+/g, '.'); //Ersätt alla tommas mellanrum med en punkt (.)
   nameEmail = nameEmail.replace(/[.][\-]/g, '-').replace(/[\-][.]/g, '-'); //Om punkt följd av bindestreck eller tvärt om. Bara bindestreck i så fall.
-  nameEmail = removeDiacritics(nameEmail);
+  nameEmail = removeDiacritics_(nameEmail);
   nameEmail = nameEmail.replace(/[^0-9a-z.\-]/gi, ''); //Ta bort om det inte är en engelsk bokstav eller nummer
   return nameEmail;
 }
@@ -364,7 +364,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
   let update = false;
   
   let phnum_recovery = "";
-  if (validatePhonenumberForE164(phnum)) {
+  if (validatePhonenumberForE164_(phnum)) {
     phnum_recovery = phnum;
   }
   else {

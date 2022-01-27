@@ -41,11 +41,11 @@ function onOpen() {
 /**
  * Tar bort punkter före @ om det är en gmailadress
  *
- * @param {String} email - E-postadress
+ * @param {string} email - E-postadress
  *
- * @returns {String} - E-postadress utan punkter före @ om gmailadress
+ * @returns {string} - E-postadress utan punkter före @ om gmailadress
  */
-function getGmailAdressWithoutDots(email) {
+function getGmailAdressWithoutDots_(email) {
   
   const regexGmailDots = /(?:\.|\+.*)(?=.*?@gmail\.com)/g;
   
@@ -54,16 +54,16 @@ function getGmailAdressWithoutDots(email) {
 }
 
 
-/*
+/**
  * Returnera gruppmedlemmar för en specifik grupp
  *
  * @param {string} groupId - Googles id för en grupp
  *
  * @returns {Object[]} members - Lista av medlemsobjekt med attributen email, role, memberId för medlemmar i en grupp
  */
-function getGroupMembers(groupId) {
+function getGroupMembers_(groupId) {
   
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen getGroupMembers körs " + n);
     
     try {
@@ -73,7 +73,7 @@ function getGroupMembers(groupId) {
       do {
         page = AdminDirectory.Members.list(groupId,{
           domainName: domain,
-          maxResults: 150,  //Öka denna??, kanske på fler ställen också??
+          maxResults: 150,
           pageToken: pageToken,
         });
         const members = page.members
@@ -81,7 +81,7 @@ function getGroupMembers(groupId) {
           for (let i = 0; i < members.length; i++)  {
             let member = members[i];
             
-            const tmpEmail = getGmailAdressWithoutDots(member.email.toLowerCase());
+            const tmpEmail = getGmailAdressWithoutDots_(member.email.toLowerCase());
             member = {
               email: tmpEmail,
               role: member.role,
@@ -106,17 +106,18 @@ function getGroupMembers(groupId) {
 }
 
 
-/*
+/**
  * Hämta ett specificerat medlemsattributet för en specifik medlem
  * 
  * @param {Object} medlem - Ett medlemsobjekt
- * @param {string} fieldName - Namn på ett medlemsattribut
+ * @param {string} nameOfField - Namn på ett medlemsattribut
  * @param {boolean} lowerCase - Om svaret ska konverteras till gemener
  *
  * @returns {string} - Data för det specifierade användarattributet
  */
-function fetchScoutnetMemberFieldAsString(medlem, fieldName, lowerCase) {
+function fetchScoutnetMemberFieldAsString_(medlem, nameOfField, lowerCase) {
 
+  let fieldName = nameOfField;
   if (medlem[fieldName]){
     fieldName = medlem[fieldName].value;
     fieldName = JSON.stringify(fieldName);
@@ -139,8 +140,8 @@ function fetchScoutnetMemberFieldAsString(medlem, fieldName, lowerCase) {
  *
  * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en e-postlista i Scoutnet
  * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
- * @param {String[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
- * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
+ * @param {string[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
+ * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistorna
  */
@@ -151,7 +152,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   
   const allMembers = [];
 
-  scoutnet_list_id = getCleanString(scoutnet_list_id);
+  scoutnet_list_id = getCleanString_(scoutnet_list_id);
   
   Logger.log("Innan splitt " + scoutnet_list_id);
   const tmp_id = scoutnet_list_id.split(",");
@@ -172,7 +173,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
       };      
       manuellEpostadress.push(tmp_member);      
     }
-    else if ((tmp_id[i].length==1) && (tmp_id[i].indexOf("@")==0)) { //Om @ för kårens googlekonton
+    else if ((tmp_id[i].length == 1) && (tmp_id[i].indexOf("@") == 0)) { //Om @ för kårens googlekonton
       
       Logger.log("lägg till kårens googlekonton");
       for (let k = 0; k < listOfEmailAdressesOfActiveAccounts.length; k++) {
@@ -190,10 +191,10 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
     }
   }
   
-  const memberNumbers = getMemberNumbers(allMembers); //Medlemmar med dessa medlemsnummer ska användas
+  const memberNumbers = getMemberNumbers_(allMembers); //Medlemmar med dessa medlemsnummer ska användas
 //  Logger.log(memberNumbers);
   Logger.log("Fetch - getMemberNumbers klar");
-  const members = getMembersByMemberNumbers(allMembers, memberNumbers);  
+  const members = getMembersByMemberNumbers_(allMembers, memberNumbers);  
   Logger.log("Fetch - getMembersByMemberNumbers klar");
   Logger.log("Hämta medlemmar från flera e-postlistor");
  
@@ -212,7 +213,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
 }
 
 
-/*
+/**
  * Indata, lista över medlemmar
  * Returnera, lista över unika medlemsnummer för medlemmarna
  *
@@ -220,7 +221,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
  *
  * @returns {string[]} - Lista med unika medlemsnummer
  */
-function getMemberNumbers(members) {
+function getMemberNumbers_(members) {
   
   let memberNumbers = [];
   
@@ -231,7 +232,7 @@ function getMemberNumbers(members) {
     }
   }
   Logger.log(memberNumbers.length + " medlemsnummer innan dublettrensning");
-  memberNumbers = removeDublicates(memberNumbers);
+  memberNumbers = removeDublicates_(memberNumbers);
   Logger.log(memberNumbers.length + " medlemsnummer efter dublettrensning");
   return memberNumbers;
 }
@@ -248,7 +249,7 @@ function getMemberNumbers(members) {
 function checkIfEmail(email) {
   
   //Väldigt simpel koll a@b.c
-  if ((email.length>4) && (email.indexOf("@")!=-1) && (email.indexOf(".")!=-1)) {
+  if ((email.length > 4) && (email.indexOf("@") != -1) && (email.indexOf(".") != -1)) {
     return true;
   }
   return false;  
@@ -286,8 +287,7 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
       const url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=' + scoutnet_list_id + email_fields;
       const authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
       const response = UrlFetchApp.fetch(
-        url,
-        {
+        url, {
           'muteHttpExceptions': true,
           'headers': { 'Authorization': authHeader}
         }
@@ -334,15 +334,15 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
     const medlemmar = data.data;
     //Logger.log(medlemmar);
     
+    const variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
+      
+    //Dessa attributvärden ska användas som gemener för bättre jämförelser
+    const variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
+
     for (x in medlemmar) {
       const medlem = medlemmar[x];
       
-      const variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
-      
-      //Dessa attributvärden ska användas som gemener för bättre jämförelser
-      const variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
-      
-      const member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
+      const member = setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
       
       allMembers.push(member);
     }
@@ -356,7 +356,7 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
 }
 
 
-/*
+/**
  * Sätter attributen för en medlem då några kan saknas
  *
  * @param {Object} medlem - Ett medlemsobjekt
@@ -365,26 +365,26 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
  *
  * @returns {Object} member - Ett medlemsobjekt
  */
-function setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase) {
+function setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase) {
   
   let member = {};
   
   for (let i = 0; i < variabel_lista_not_lowercase.length; i++) {
     
-    member[variabel_lista_not_lowercase[i]] = fetchScoutnetMemberFieldAsString(medlem, variabel_lista_not_lowercase[i], false);
+    member[variabel_lista_not_lowercase[i]] = fetchScoutnetMemberFieldAsString_(medlem, variabel_lista_not_lowercase[i], false);
     //Logger.log(variabel_lista_not_lowercase[i] + " = " + member[variabel_lista_not_lowercase[i]]);
   }
   
   for (let i = 0; i < variabel_lista_lowercase.length; i++) {
-    
-    member[variabel_lista_lowercase[i]] = fetchScoutnetMemberFieldAsString(medlem, variabel_lista_lowercase[i], true);
+
+    member[variabel_lista_lowercase[i]] = fetchScoutnetMemberFieldAsString_(medlem, variabel_lista_lowercase[i], true);
     //Logger.log(variabel_lista_lowercase[i] + " = " + member[variabel_lista_lowercase[i]]);
   }    
   return member;
 }
 
 
-/*
+/**
  * Returnerar lista över medlemmar med de medlemsnummer som ges som indata
  *
  * @param {members[]} members - Lista med medlemsobjekt
@@ -392,7 +392,7 @@ function setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lo
  *
  * @returns {members[]} - Lista med medlemmar som har specificerade medlemsnummer
  */ 
-function getMembersByMemberNumbers(members, memberNumbers) {
+function getMembersByMemberNumbers_(members, memberNumbers) {
   Logger.log("Kör metoden getMembersByMemberNumbers");
   const memberList = [];
   
@@ -401,7 +401,7 @@ function getMembersByMemberNumbers(members, memberNumbers) {
   
     for (let k = 0; k < members.length; k++) {
       
-      if (memberNumbers[i]==members[k].member_no){
+      if (memberNumbers[i] == members[k].member_no){
        
        // Logger.log("Medlemsnummer " + memberNumbers[i]);
         Logger.log("Namn " + members[k].first_name + " " + members[k].last_name);
@@ -448,7 +448,7 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
   
   const tmp_email = getGoogleAccount(member_no);
   
-  if (synk_option.indexOf("@")!=-1 && boolGoogleAccounts) {
+  if (synk_option.indexOf("@") != -1 && boolGoogleAccounts) {
     //Lägg bara till om personen har ett google-konto via kåren och lägg till deras google-konto
     
     if (tmp_email) { //Denna medlem har ett Googlekonto
@@ -459,15 +459,15 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
   
   else { //Lägg bara till Scoutnet-e-postnly add Scoutnet-email
     //Logger.log("Annars    ");
-    if (synk_option.indexOf("m")!=-1 || synk_option.indexOf("e")!=-1 || synk_option.indexOf("f")!=-1 || synk_option.indexOf("a")!=-1) {
-      if (synk_option.indexOf("m")!=-1) { //Lägg bara till medlemmar som har en personlig e-postadress
+    if (synk_option.indexOf("m") != -1 || synk_option.indexOf("e") != -1 || synk_option.indexOf("f") != -1 || synk_option.indexOf("a") != -1) {
+      if (synk_option.indexOf("m") != -1) { //Lägg bara till medlemmar som har en personlig e-postadress
         if (email) { //Lägg bara till personer med en egen e-postadress      
           member_emails.push(email);
           Logger.log("6");
         }      
       }
       
-      if (synk_option.indexOf("e")!=-1) {
+      if (synk_option.indexOf("e") != -1) {
         //Lägg till medlemmars primära e-postadress + kopior enligt medlemsprofil
         if (extra_emails) { //Lägg till extra e-postadresser om det finns några      
           
@@ -486,7 +486,7 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
         }   
       }
       
-      if (synk_option.indexOf("f")!=-1) { //Lägg bara tilll föräldrars e-postadress
+      if (synk_option.indexOf("f") != -1) { //Lägg bara tilll föräldrars e-postadress
         if (email_mum) { //Lägg till pappor (Anhörig 2) med en e-postadress      
           member_emails.push(email_mum);
           Logger.log("7_1 " + email_mum);
@@ -505,7 +505,7 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
         }
       }
       
-      if (synk_option.indexOf("a")!=-1) { //Lägg till alternativ e-postadress
+      if (synk_option.indexOf("a") != -1) { //Lägg till alternativ e-postadress
         if (email_alt) { //Lägg till alternativ e-postadress      
           member_emails.push(email_alt);
           Logger.log("9_1");
@@ -550,7 +550,7 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
     }      
   }  
   
-  if (synk_option.indexOf("-")==-1 && boolGoogleAccounts) { //Lägg till både Scoutnet e-post och Google-konto e-post
+  if (synk_option.indexOf("-") == -1 && boolGoogleAccounts) { //Lägg till både Scoutnet e-post och Google-konto e-post
     
     if (tmp_email) { //Denna medlem har ett Googlekonto
       member_emails.push(tmp_email);
@@ -621,11 +621,7 @@ function fetchScoutnetMembers(forceUpdate) {
   const medlemmar = data.data;
   const allMembers = [];
   
-  //Logger.log(medlemmar);
-  for (x in medlemmar) {
-    const medlem = medlemmar[x];
-    
-    const variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'nickname', 'ssno',
+  const variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'nickname', 'ssno',
                                         'note', 'date_of_birth', 'status',
                                         'created_at', 'confirmed_at', 'group', 'unit', 'patrol', 'unit_role', 'group_role',
                                         'sex', 'address_co', 'address_1', 'address_2' , 'address_3', 'postcode', 'town',
@@ -633,11 +629,15 @@ function fetchScoutnetMembers(forceUpdate) {
                                         'contact_mobile_mum', 'contact_telephone_mum', 'contact_fathers_name', 'contact_mobile_dad',
                                         'contact_telephone_dad', 'contact_leader_interest', 'prev_term', 'prev_term_due_date',  
                                         'current_term', 'current_term_due_date', 'avatar_updated', 'avatar_url'];
+  
+  //Dessa attributvärden ska användas som gemener för bättre jämförelser
+  const variabel_lista_lowercase = ['email', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email', 'extra_emails'];
+
+  //Logger.log(medlemmar);
+  for (x in medlemmar) {
+    const medlem = medlemmar[x];
     
-    //Dessa attributvärden ska användas som gemener för bättre jämförelser
-    const variabel_lista_lowercase = ['email', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email', 'extra_emails'];
-    
-    const member = setMemberFields(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
+    const member = setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
         
     //Logger.log("MEMBER print object " + member);
     //Logger.log("%s %s, Medlem %s, Mobil %s",member.first_name, member.last_name, member.member_no, member.contact_mobile_phone); //member.member_no + "   " + member.first_name + "  " + member.last_name);
@@ -662,12 +662,11 @@ function fetchScoutnetMembers(forceUpdate) {
  * @returns {string} - E-postadress för medlem om finns, annars tom sträng
  */
 function getGoogleAccount(member_no) {
-  
-  let users;
-  
+   
   const qry = "externalId='"+ member_no +"'";
-  
-  for (let n=0; n<6; n++) {
+  let users;
+
+  for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen getGoogleAcount körs " + n);
     try {
       
@@ -704,24 +703,24 @@ function getGoogleAccount(member_no) {
 }
 
 
-/*
+/**
  * Returnerar true eller false om en e-post är en googlegrupp
  *
  * @param {string} email - E-postadress
  *
  * @returns {boolean} - Om e-postadressen är en googlegrupp
  */
-function checkIfEmailIsAGroup(email) {
+function checkIfEmailIsAGroup_(email) {
   
-  if (!checkEmailFormat(email)) {
+  if (!checkEmailFormat_(email)) {
     Logger.log("Ogiltigt format på e-postadress");
     return false;
   }
-  return checkIfGroupExists(email); 
+  return checkIfGroupExists_(email); 
 }
 
 
-/*
+/**
  * Kontrollerar att formatet på en e-postadress är godkänt
  * genom att se om den innehåller @ och om domännamnet är godkänt
  *
@@ -729,28 +728,28 @@ function checkIfEmailIsAGroup(email) {
  *
  * @returns {boolean} - Om e-postadressen är skriven på rätt format
  */
-function checkEmailFormat(email) {
+function checkEmailFormat_(email) {
   
   const arr = email.split("@");
   const tmp_domain = arr[1];
   
-  if (tmp_domain==domain) {
+  if (tmp_domain == domain) {
        return true;
   }
   return false;  
 }
 
 
-/*
+/**
  * Returnerar true eller false om en googlegrupp finns
  *
  * @param {string} email - E-postadress för en googlegrupp
  *
  * @returns {boolean} - Om gruppen finns eller ej
  */
-function checkIfGroupExists(email) {
+function checkIfGroupExists_(email) {
 
-  const tmpList = getListOfGroups();
+  const tmpList = getListOfGroups_();
   //Logger.log(tmpList);
 
   if(tmpList.includes(email))  {
@@ -763,13 +762,13 @@ function checkIfGroupExists(email) {
 /**
  * Hämta data från ett kalkylblad som skriptet är kopplat till
  *
- * @param {String} nameOfSheet - Namn på kalkylbladet
+ * @param {string} nameOfSheet - Namn på kalkylbladet
  * 
- * @returns {Objekt} - Objekt bestående av data från aktuellt kalkylblad
+ * @returns {Object} - Objekt bestående av data från aktuellt kalkylblad
  */
 function getDataFromActiveSheet_(nameOfSheet)  {
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     try {
       const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nameOfSheet);
       if (sheet == null) {
@@ -803,7 +802,7 @@ let listOfGroups = [];
  *
  * @returns {string[]} - Lista över e-postadresser för grupper
  */
-function getListOfGroups()  {
+function getListOfGroups_()  {
   return listOfGroups;
 }
 
@@ -811,11 +810,11 @@ function getListOfGroups()  {
 /**
  * Uppdaterar listan över e-postadresser för grupper
  */
-function updateListOfGroups() {
+function updateListOfGroups_() {
   
   Logger.log("Uppdaterar listan över e-postadresser för grupper");
 
-  for (let n=0; n<6; n++) {
+  for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen updateListOfGroups körs " + n);
     
     try {
@@ -862,8 +861,8 @@ function updateListOfGroups() {
  *
  * @returns {boolean} - om avsändaradressen är tillåten
  */
-function isFromEmailAdressAllowed(email) {  
-  return getAllowedFromEmailAdresses().includes(email);
+function isFromEmailAdressAllowed_(email) {  
+  return getAllowedFromEmailAdresses_().includes(email);
 }
 
 
@@ -872,7 +871,7 @@ function isFromEmailAdressAllowed(email) {
  *
  * @returns {string[]} - en lista med e-postadresser
  */
-function getAllowedFromEmailAdresses() {
+function getAllowedFromEmailAdresses_() {
   
   const aliases = GmailApp.getAliases();
   const min_adress = Session.getEffectiveUser().getEmail();
@@ -890,15 +889,15 @@ function getAllowedFromEmailAdresses() {
  *
  * @returns {Object} - ett e-postutkast av typen GmailMessage
  */
-function getDraft(subject)  {
+function getDraft_(subject)  {
 
-  subject = getComparableString(subject);
+  subject = getComparableString_(subject);
 
   const drafts = GmailApp.getDraftMessages();
-  for (let i = 0; i<drafts.length; i++) {
+  for (let i = 0; i < drafts.length; i++) {
 
     let draftSubject = drafts[i].getSubject();
-    draftSubject = getComparableString(draftSubject);
+    draftSubject = getComparableString_(draftSubject);
 
     if (draftSubject == subject)  {
       Logger.log(draftSubject);
@@ -916,7 +915,7 @@ function getDraft(subject)  {
  *
  * @returns {string} - textsträng som är enklare att jämföra
  */
-function getComparableString(text)  {
+function getComparableString_(text)  {
 
   //Ta bort tomma mellanrum vid start och slut och konvertera till gemener
   text = text.toLowerCase().trim();
@@ -926,23 +925,23 @@ function getComparableString(text)  {
 }
 
 
-/*
+/**
  * Tar reda på vilka rader i kalkylarket som ska synkroniseras
  *
  * @param {string} start - önskad startrad att synkronisera från
  * @param {string} slut - önskad slutrad att synkronisera till
- * @param {string} maxRowNumer - maximalt radnummer som går att synkronisera
+ * @param {string} maxRowNumber - maximalt radnummer som går att synkronisera
  *
  * @returns {Object} - Objekt med start- och slutrad att synkronisera
  */
-function findWhatRowsToSync(start, slut, maxRowNumber) {
+function findWhatRowsToSync_(start, slut, maxRowNumber) {
   
   const minRowStart = 3;
   
-  if (typeof start ==='undefined' || start < minRowStart) {
+  if (typeof start === 'undefined' || start < minRowStart) {
     start = minRowStart; 
   }
-  if (typeof slut ==='undefined' || slut > maxRowNumber) {
+  if (typeof slut === 'undefined' || slut > maxRowNumber) {
     slut = maxRowNumber; 
   }
   
@@ -955,14 +954,14 @@ function findWhatRowsToSync(start, slut, maxRowNumber) {
 
 
 /**
- * Tar bort kommentarer inom parens samt tomrum i
+ * Tar bort kommentarer inom parentes samt tomrum i
  * angiven variabel
  * 
  * @param {string} input - en variabel
  *
  * @returns {string} - en textsträng utan kommentarer eller mellanrum
  */
-function getCleanString(input)  {
+function getCleanString_(input)  {
 
   input = input.toString(); //Vi gör om till string för att metoden replace ska fungera
   input = input.replace(/\(.*?\)/g, ''); //Ta bort kommentarer inom parentes så de inte kommer med
@@ -972,13 +971,13 @@ function getCleanString(input)  {
 }
 
 
-/*
- * Ta bort rader från kalkylarket
+/**
+ * Ta bort rader från kalkylbladet
  *
  * @param {Object} sheet - Googleobjekt
  * @param {numbers[]} delete_rows - Lista med villka rader som ska tas bort
  */
-function deleteRowsFromSpreadsheet(sheet, delete_rows) {
+function deleteRowsFromSpreadsheet_(sheet, delete_rows) {
   
   for (let k = delete_rows.length-1; k >= 0 ; k--) { //Tar bort rader, starta nerifrån
     
@@ -991,23 +990,27 @@ function deleteRowsFromSpreadsheet(sheet, delete_rows) {
 
 /**
  * Ta bort dubletter från en lista
+ * 
  * @param {string[] | number[] | Object[]} - lista
+ * 
  * @returns {string[] | number[] | Object[]} - lista
  */
-function removeDublicates(list) {
+function removeDublicates_(list) {
   const tmp_array = []
-  Logger.log("Försöker radera dubletter");
-    for(let i = 0;i < list.length; i++){
-      if(tmp_array.indexOf(list[i]) == -1){
-        tmp_array.push(list[i])
-        //Logger.log("Denna är ny " + list[i]);
-      }
-      else {
-        //Logger.log("Hittade dublett av " + list[i]);
-      }
+  console.log("Försöker radera dubletter");
+  
+  for(let i = 0; i < list.length; i++){
+    if(!tmp_array.includes(list[i])){
+      tmp_array.push(list[i])
+      //console.log("Denna är ny " + list[i]);
     }
+    else {
+      //console.log("Hittade dublett av " + list[i]);
+    }
+  }
   return tmp_array;
 }
+
 
 /**
  * Gör strängen till ett svenskt internationellt nummer om möjligt
@@ -1058,7 +1061,7 @@ function intphonenumber(phnum) {
 /**
  * Testa om telefonnumret följer E.164 format
  */
-function validatePhonenumberForE164(phnum) {
+function validatePhonenumberForE164_(phnum) {
     const regEx = /^\+[1-9]\d{1,14}$/;
     return regEx.test(phnum);
 }
@@ -1074,10 +1077,12 @@ String.prototype.endsWith = function(suffix) {
 /**
  * Ersätt specialtecken med deras engelska bokstavsmotsvarigheter
  * https://stackoverflow.com/questions/18123501/replacing-accented-characters-with-plain-ascii-ones
- * @param {string} str
+ * 
+ * @param {string} str - textsträng
+ * 
  * @returns {string}
  */
-function removeDiacritics (str) {
+function removeDiacritics_(str) {
 
   const defaultDiacriticsRemovalMap = [
     {'base':'A', 'letters':/[\u0041\u24B6\uFF21\u00C0\u00C1\u00C2\u1EA6\u1EA4\u1EAA\u1EA8\u00C3\u0100\u0102\u1EB0\u1EAE\u1EB4\u1EB2\u0226\u01E0\u00C4\u01DE\u1EA2\u00C5\u01FA\u01CD\u0200\u0202\u1EA0\u1EAC\u1EB6\u1E00\u0104\u023A\u2C6F]/g},
@@ -1166,7 +1171,7 @@ function removeDiacritics (str) {
     {'base':'z','letters':/[\u007A\u24E9\uFF5A\u017A\u1E91\u017C\u017E\u1E93\u1E95\u01B6\u0225\u0240\u2C6C\uA763]/g}
   ];
 
-  for(let i=0; i<defaultDiacriticsRemovalMap.length; i++) {
+  for (let i = 0; i < defaultDiacriticsRemovalMap.length; i++) {
     str = str.replace(defaultDiacriticsRemovalMap[i].letters, defaultDiacriticsRemovalMap[i].base);
   }
   return str;

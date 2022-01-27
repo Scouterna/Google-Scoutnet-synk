@@ -137,7 +137,7 @@ function testGetHtmlEmailBody() {
   
   const subject = "Kontaktgrupper";
 
-  const draft = getDraft(subject);
+  const draft = getDraft_(subject);
 
   if (!draft) { //Kolla om ämnesraden är korrekt
     Logger.log("Finns ej ett utkast i Gmail med korrekt ämnesrad");
@@ -217,7 +217,7 @@ function updateContactGroupsAuthnSheetUsers()  {
 
   const listOfEmailsAlreadyAccess = [];
   
-  const rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  const rowsToSync = findWhatRowsToSync_(0, data.length, data.length);
   const start = rowsToSync.start;
   const slut = rowsToSync.slut;
   
@@ -237,7 +237,7 @@ function updateContactGroupsAuthnSheetUsers()  {
     
     Logger.log('Rad: ' + rad_nummer + ' E-post: ' + email + ' Lösenord: ' + password + ' Senast använd: ' + last_authn);
 
-    email = getGmailAdressWithoutDots(email.toLowerCase());
+    email = getGmailAdressWithoutDots_(email.toLowerCase());
     if(!listOfEmailsShouldHaveAccess.includes(email))  {
       Logger.log("Användare har ej behörighet längre till en kontaktgrupp " + email);
       Logger.log("Försöker ta bort rad " + rad_nummer);
@@ -258,7 +258,7 @@ function updateContactGroupsAuthnSheetUsers()  {
       }
     }
   }
-  deleteRowsFromSpreadsheet(sheet, delete_rows);
+  deleteRowsFromSpreadsheet_(sheet, delete_rows);
 
   Logger.log("Lägga till dessa så att de får behörighet")
   for (let i = 0; i < listOfEmailsShouldHaveAccess.length; i++) {
@@ -300,13 +300,13 @@ function createRandomPasswordForContactGroupsUser_() {
  */
 function getListOfAllGoogleGroupsShouldHaveAccess_()  {
 
-  updateListOfGroups();
+  updateListOfGroups_();
 
   const sheetDataKontakter = getDataFromSheet_("Kontakter");
 
   const data = sheetDataKontakter["data"];
 
-  const rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  const rowsToSync = findWhatRowsToSync_(0, data.length, data.length);
   const start = rowsToSync.start;
   const slut = rowsToSync.slut;
 
@@ -319,7 +319,7 @@ function getListOfAllGoogleGroupsShouldHaveAccess_()  {
   for (let i = start-1; i < slut; i++) {
 
     const email = data[i][grd["e-post"]];
-    if (checkIfGroupExists(email)) {
+    if (checkIfGroupExists_(email)) {
       listOfAllGoogleGroupsShouldHaveAccess.push(email);
     }
   }
@@ -344,14 +344,14 @@ function getAllEmailsShouldHaveAccess_(listOfAllGoogleGroupsShouldHaveAccess) {
     
     const email = listOfAllGoogleGroupsShouldHaveAccess[i];
 
-    const groupMembers = getGroupMembers(email);
+    const groupMembers = getGroupMembers_(email);
 
     const listOfEmails = getListOfEmailsFromListOfGroupMembers_(groupMembers);
     listOfAllEmails.push.apply(listOfAllEmails, listOfEmails);
   }
 
   Logger.log("Användare som ska ha behörighet");
-  listOfAllEmails = removeDublicates(listOfAllEmails);
+  listOfAllEmails = removeDublicates_(listOfAllEmails);
   Logger.log(listOfAllEmails);
   return listOfAllEmails;
 }
@@ -440,11 +440,11 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
   let allMembers = fetchScoutnetMembers(forceUpdate);
   allMembers = filterMemberAttributes_(allMembers);
 
-  const rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  const rowsToSync = findWhatRowsToSync_(0, data.length, data.length);
   const start = rowsToSync.start;
   const slut = rowsToSync.slut;
 
-  updateListOfGroups();
+  updateListOfGroups_();
 
   Logger.log("Startrad " + start + " slutrad " + slut);
 
@@ -488,7 +488,7 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
       }
     }
     
-    if ("" != email && checkIfEmailIsAGroup(email)) {
+    if ("" != email && checkIfEmailIsAGroup_(email)) {
       const cell = selection.getCell(rad_nummer,grd["e-post"]+1);
       if ("#ffffff" != cell.getBackground()) {
         Logger.log("Sätter cellen för e-post till vit");
@@ -519,7 +519,7 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
   //Lägga memberList först i en listan
   contactGroupsList.unshift(memberList);
 
-  deleteRowsFromSpreadsheet(sheet, delete_rows);
+  deleteRowsFromSpreadsheet_(sheet, delete_rows);
 
   return contactGroupsList;
 }
@@ -575,7 +575,7 @@ function getMemberNumbersFromContactGroupsList_(contactGroupsList)  {
   }
 
   //Ta bort dubbletter
-  memberNumbers = removeDublicates(memberNumbers);
+  memberNumbers = removeDublicates_(memberNumbers);
 
   Logger.log("memberNumbers");
   Logger.log(memberNumbers);
@@ -797,7 +797,7 @@ function makeStringForGoogleContactGroup_(emailList)  {
   }
 
   //Ta bort dubletter
-  realEmailList = removeDublicates(realEmailList);
+  realEmailList = removeDublicates_(realEmailList);
 
   let contactGroupList = [];
   for (let i = 0; i < realEmailList.length; i++) {
@@ -839,7 +839,7 @@ function checkCredentials_(userEmail, userPassword, userVersion) {
   
   Logger.log("Kontrollerar om följande uppgifter är giltiga")
   
-  userEmail = getGmailAdressWithoutDots(userEmail.toLowerCase());
+  userEmail = getGmailAdressWithoutDots_(userEmail.toLowerCase());
 
   Logger.log("Inskickad data");
   Logger.log("userEmail: " + userEmail);
@@ -853,7 +853,7 @@ function checkCredentials_(userEmail, userPassword, userVersion) {
 
   const grd = getKontaktGruppAuthnRubrikData_();
   
-  const rowsToSync = findWhatRowsToSync(0, data.length, data.length);
+  const rowsToSync = findWhatRowsToSync_(0, data.length, data.length);
   const start = rowsToSync.start;
   const slut = rowsToSync.slut;
 
@@ -866,7 +866,7 @@ function checkCredentials_(userEmail, userPassword, userVersion) {
     const last_authn = data[i][grd["senast_använd"]];
     const version = data[i][grd["version"]];
 
-    email = getGmailAdressWithoutDots(email.toLowerCase());
+    email = getGmailAdressWithoutDots_(email.toLowerCase());
 
     if (email != userEmail) {
       continue;
@@ -920,7 +920,7 @@ function sendEmailWithContactsGroupsPassword_(userEmail, password) {
 
   /***Avsändaradress***/
   if (contact_groups_email_sender_from)  {
-    if (isFromEmailAdressAllowed(contact_groups_email_sender_from)) {
+    if (isFromEmailAdressAllowed_(contact_groups_email_sender_from)) {
       emailOptions["from"] = contact_groups_email_sender_from;
     }
     else  {

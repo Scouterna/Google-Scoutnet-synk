@@ -71,11 +71,11 @@ function Grupper(...args) {
     slut = args[1];
   }
 
-  const rowsToSync = findWhatRowsToSync(start, slut, data.length);
+  const rowsToSync = findWhatRowsToSync_(start, slut, data.length);
   start = rowsToSync.start;
   slut = rowsToSync.slut;  
   
-  updateListOfGroups();
+  updateListOfGroups_();
 
   let arrayOfRows;
   if (0 == args.length || 2 == args.length) {
@@ -126,10 +126,10 @@ function Grupper(...args) {
       
       else if (name!="" && email!="") {        
         
-        if (false==checkIfGroupExists(email) && true==checkEmailFormat(email)) { //Skapa gruppen
+        if (false == checkIfGroupExists_(email) && true == checkEmailFormat_(email)) { //Skapa gruppen
           
           email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
-          email = removeDiacritics(email);
+          email = removeDiacritics_(email);
           
           const group = createGroup_(email, name, true);
           groupId = group.id;
@@ -167,7 +167,7 @@ function Grupper(...args) {
         update_group = "no";
       }
       else if (email == "") { //Om tom, hämta e-postadressen från systemet och sätt tillbaka den
-        
+
         const tmp_usr = getAdminDirectoryGroup_(groupId);
         email = tmp_usr.email;
         let cell = selection.getCell(rad_nummer,grd["e-post"]+1);
@@ -182,10 +182,10 @@ function Grupper(...args) {
           
           Logger.log("E-postadress för gruppen har ändrats på raden " + rad_nummer);          
           
-          if (false == checkIfGroupExists(email) && true==checkEmailFormat(email)) {
+          if (false == checkIfGroupExists_(email) && true == checkEmailFormat_(email)) {
             
             email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
-            email = removeDiacritics (email);            
+            email = removeDiacritics_(email);            
             
             Logger.log("try remove " + groupId + " row " + rad_nummer);
             deleteGroup_(groupId, false);  //Vi gör på detta sätt då det varit stora problem
@@ -249,7 +249,7 @@ function Grupper(...args) {
       updateGroup(selection, rad_nummer, groupId, email, data[rowIndex], grd, listOfEmailAdressesOfActiveAccounts, forceUpdate);
     }
   }
-  deleteRowsFromSpreadsheet(sheet, delete_rows);
+  deleteRowsFromSpreadsheet_(sheet, delete_rows);
   console.timeEnd("Grupper");
 }
 
@@ -387,7 +387,7 @@ function createGroup_(email, name, shouldUpdateListOfGroups) {
   const group = getAdminDirectoryGroup(email);
 
   if (shouldUpdateListOfGroups) {
-    updateListOfGroups();
+    updateListOfGroups_();
   }  
   return group;
 }
@@ -404,7 +404,7 @@ function deleteGroup_(groupId, shouldUpdateListOfGroups) {
   AdminDirectory.Groups.remove(groupId);
 
   if (shouldUpdateListOfGroups) {
-    updateListOfGroups();
+    updateListOfGroups_();
   }
 }
 
@@ -522,10 +522,10 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   allMembers_email.push.apply(allMembers_email, allMembers_both_email_admin);
   allMembers_email.push.apply(allMembers_email, allMembers_send_email_admin);
   
-  allMembers_email = removeDublicates(allMembers_email);
+  allMembers_email = removeDublicates_(allMembers_email);
   // allMembers_email ==  alla distinkta e-postadresser som finns från alla tre+två(admin) grupper
   
-  const group_members = getGroupMembers(groupId); //Alla gruppmedlemmar med deras roller
+  const group_members = getGroupMembers_(groupId); //Alla gruppmedlemmar med deras roller
   const group_members_email = [];
   
   //Om finns i googlegrupp men inte i vår lista
@@ -838,12 +838,12 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   /*****************************/
   
   //Vi tar bort alla upprepade e-postadresser inom sina egna listor
-  allMembers_both_email = removeDublicates(allMembers_both_email);
-  allMembers_send_email = removeDublicates(allMembers_send_email);
-  allMembers_receive_email = removeDublicates(allMembers_receive_email);
+  allMembers_both_email = removeDublicates_(allMembers_both_email);
+  allMembers_send_email = removeDublicates_(allMembers_send_email);
+  allMembers_receive_email = removeDublicates_(allMembers_receive_email);
   
-  allMembers_both_email_admin = removeDublicates(allMembers_both_email_admin);
-  allMembers_send_email_admin = removeDublicates(allMembers_send_email_admin);
+  allMembers_both_email_admin = removeDublicates_(allMembers_both_email_admin);
+  allMembers_send_email_admin = removeDublicates_(allMembers_send_email_admin);
   
   Logger.log("..........2Båda....................");
   Logger.log(allMembers_both_email);
@@ -908,9 +908,9 @@ function getMemberlistsMemberEmail_(members, synk_option) {
   }
   
   for (let i = 0; i < members_email.length; i++) {
-    members_email[i] = getGmailAdressWithoutDots(members_email[i]);
+    members_email[i] = getGmailAdressWithoutDots_(members_email[i]);
   }
-  members_email = removeDublicates(members_email);
+  members_email = removeDublicates_(members_email);
   //Ifall samma e-postadress är hos flera medlemmar eller upprepas i olika kontaktfält.
   //Sparar in på dataförfrågningar till Google något
   return members_email;
@@ -1164,7 +1164,7 @@ function getEmailadressesToSendSpamNotification(group_moderate_content_email, ce
   const tmp_emailAdresses = [];
   
   for (let i = 0; i < emailAdresses.length; i++) {
-    if (checkIfEmailIsAGroup(emailAdresses[i])) {
+    if (checkIfEmailIsAGroup_(emailAdresses[i])) {
       cell_group_moderate_content_email.setBackground("red");
     }
     else {
@@ -1373,7 +1373,7 @@ function getEmailsSortedAsGroupOrNot_(emails) {
   const notGroupEmails = [];
   
   for (let i = 0; i < emails.length; i++) {    
-    if(checkIfEmailIsAGroup(emails[i])) {
+    if(checkIfEmailIsAGroup_(emails[i])) {
       groupEmails.push(emails[i]);
     }
     else {
