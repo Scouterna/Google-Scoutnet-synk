@@ -437,7 +437,7 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
   let contactGroupsList = [];
 
   //Hämta lista med alla medlemmar i kåren och alla deras attribut
-  let allMembers = fetchScoutnetMembers(forceUpdate);
+  let allMembers = fetchScoutnetMembers_(forceUpdate);
   allMembers = filterMemberAttributes_(allMembers);
 
   const rowsToSync = findWhatRowsToSync_(0, data.length, data.length);
@@ -760,7 +760,7 @@ function getUpdateForContactGroup_(selection, rad_nummer, radInfo, grd, forceUpd
   const scoutnet_list_id = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   const cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
 
-  const tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
+  const tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
   
   const contactGroupInfo = {
     name: name
@@ -788,7 +788,7 @@ function makeStringForGoogleContactGroup_(emailList)  {
   //Skapa lista med enbart korrekta e-postadresser
   let realEmailList = [];
   for (let i = 0; i < emailList.length; i++) {
-    if (checkIfEmail(emailList[i])) {
+    if (checkIfEmail_(emailList[i])) {
       realEmailList.push(emailList[i]);
     }
     else {

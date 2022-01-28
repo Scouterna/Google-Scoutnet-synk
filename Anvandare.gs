@@ -14,7 +14,7 @@ function Anvandare() {
   
   let allMembers;
   if ("group" == organisationType) {
-    allMembers = fetchScoutnetMembers(true); //Hämta lista över alla medlemmar
+    allMembers = fetchScoutnetMembers_(true); //Hämta lista över alla medlemmar
     Logger.log("AllMembers.length by fetchScoutnetMembers = " + allMembers.length);
     Logger.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     Logger.log("Antal medlemmar i scoutnet = %s " , allMembers.length);
@@ -46,7 +46,7 @@ function Anvandare() {
     
     let membersInAList;
     if (scoutnetListId) {
-      membersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnetListId, "", "", true);
+      membersInAList = fetchScoutnetMembersMultipleMailinglists_(scoutnetListId, "", "", true);
     }
     else if ("group" == organisationType) { //Om man ej anger listId för en e-postlista; endast för kårer, ej distrikt
       membersInAList = getScoutleaders_(allMembers);
@@ -86,7 +86,7 @@ function Anvandare() {
           //const ib = useraccounts.length
           Logger.log("Hittade Googleanvändaren %s, id=%s ", googleUserAccount.name.fullName, googleUserAccount.id);
           //Logger.log("Antal innan: %s, efter: %s", ia, ib );
-          updateAccount(obj, googleUserAccount, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) //uppdatera alla uppgifter på googlekontot med uppgifter från Scoutnet
+          updateAccount_(obj, googleUserAccount, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) //uppdatera alla uppgifter på googlekontot med uppgifter från Scoutnet
         }
         else {
           Logger.log("Skapar Ny Googleanvändare");
@@ -344,7 +344,7 @@ function getAvatarIdImageToUse_(avatar_updated, defaultAvatarId) {
 }
 
 
-/*
+/**
  * Uppdatera konto vid behov
  * Uppdatera namn, organisationssökväg och avbryt avstängning vid behov
  * 
@@ -354,14 +354,13 @@ function getAvatarIdImageToUse_(avatar_updated, defaultAvatarId) {
  * @param {byte[]} defaultUserAvatar - Byte array för en standardbild
  * @param {string} defaultUserAvatarId - Id för standardbilden
  */
-function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) {
+function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) {
     
   if ("district" == organisationType) {  //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
     member.contact_mobile_phone = member.mobile_phone;
   }
  
-  const phnum = intphonenumber(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
-  let update = false;
+  const phnum = intphonenumber_(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
   
   let phnum_recovery = "";
   if (validatePhonenumberForE164_(phnum)) {
@@ -372,7 +371,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
   }
   
   let accountPrimaryPhoneNumber = "";
-  if (typeof useraccount.phones !=='undefined' && useraccount.phones) {
+  if (typeof useraccount.phones !== 'undefined' && useraccount.phones) {
     if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.type === "mobile" && phoneNumber.primary === true)) {
       accountPrimaryPhoneNumber = useraccount.phones.find(phoneNumber => phoneNumber.type === "mobile" && phoneNumber.primary === true).value;
     }
@@ -428,130 +427,53 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
       || useraccount.orgUnitPath != orgUnitPath  
       || ((useraccount.recoveryEmail != member.email) && (!(!useraccount.recoveryEmail && member.email==="")))
       || ((useraccount.recoveryPhone != phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery===""))) 
-      || ((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone))
+      || (accountPrimaryPhoneNumber != phnum)
       || (accountKeywordAvatarUpdated != shouldBeKeywordAvatarUpdated))  {
-    // Något behöver uppdateras
-    
-    Logger.log('Användare %s %s uppdateras', useraccount.name.givenName, useraccount.name.familyName);  
+    // Något behöver uppdateras 
 
-    const user = {} // skapa kontoobjekt med det som skall ändras
+    let user = {} // skapa kontoobjekt med det som skall ändras
     
     if(useraccount.name.givenName != member.first_name) {
       if (!user.name)
       {user.name = {}}
       Logger.log("Nytt förnamn: %s", member.first_name);
       user.name.givenName = member.first_name;
-      update = true;
     }
     if(useraccount.name.familyName != member.last_name) {
       if (!user.name)
       {user.name = {}}
       Logger.log("Nytt efternamn: %s", member.last_name);
       user.name.familyName = member.last_name;
-      update = true;
     }
     if(useraccount.orgUnitPath != orgUnitPath)  {
       Logger.log("Ny OrganizationUnit: %s", orgUnitPath);
       user.orgUnitPath = orgUnitPath;
-      update = true;
     }
-        
-    //Logger.log("useraccount.recoveryEmail " + useraccount.recoveryEmail);
-    //Logger.log("useraccount.recoveryEmail typeof " + typeof useraccount.recoveryEmail);
-    //Logger.log("member.email " + member.email);
-    //Logger.log("member.email typeof " + typeof member.email);
-    //Om de inte är lika && de inte är tomma båda två
-    if((useraccount.recoveryEmail != member.email) && (!(!useraccount.recoveryEmail && member.email==="")))  {
-     
-      Logger.log("Ny återställningse-post: %s",member.email);
-      user.recoveryEmail = member.email;
-      update = true;
-    };
+
     // Lägg till återställningsinformation på Googlekontot
-    //Logger.log("useraccount.recoveryPhone " + useraccount.recoveryPhone);
-    //Logger.log("phnum_recovery " + phnum_recovery);
-    //Logger.log("phnum " + phnum);
-    //Logger.log("member.contact_mobile_phone " + member.contact_mobile_phone);
-    if  ((useraccount.recoveryPhone != phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery===""))) {
-        Logger.log("Nytt återställningsnummer: %s", phnum_recovery);
-        user.recoveryPhone = phnum_recovery;
-        update = true;
+    //Om de inte är lika && de inte är tomma båda två
+    if((useraccount.recoveryEmail != member.email) && (!(!useraccount.recoveryEmail && member.email === "")))  {
+      Logger.log("Ny återställningse-post: %s", member.email);
+      user.recoveryEmail = member.email;
+    };    
+    
+    if  ((useraccount.recoveryPhone != phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery === ""))) {
+      Logger.log("Nytt återställningsnummer: %s", phnum_recovery);
+      user.recoveryPhone = phnum_recovery;
     }
     
     if  (typeof syncUserContactInfo !== 'undefined' && syncUserContactInfo) {
-      if((accountPrimaryPhoneNumber != phnum) && (member.contact_mobile_phone)) {  
-        if(phnum) {
-          Logger.log("Nytt mobilnummer: %s", phnum);        
-          
-          let accountPhoneNumbersNotPrimaryOrTheSame = [];
-          if (typeof useraccount.phones !== 'undefined' && useraccount.phones) {
-            if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.primary !== true)) {
-              accountPhoneNumbersNotPrimaryOrTheSame = useraccount.phones.filter(phoneNumber => phoneNumber.primary !== true && phoneNumber.value !== phnum);
-            }
-          }
-          
-          const newPrimaryPhoneNumber = {
-            "value": phnum,
-            "primary": true,
-            "type": "mobile"
-          };
-          
-          accountPhoneNumbersNotPrimaryOrTheSame.push(newPrimaryPhoneNumber);
-          Logger.log("Dessa ska de nya numren för denna person vara");
-          Logger.log(accountPhoneNumbersNotPrimaryOrTheSame);
-          user.phones = accountPhoneNumbersNotPrimaryOrTheSame;
-          update = true;
-        }
+      if(accountPrimaryPhoneNumber != phnum) {
+        Logger.log("Nytt mobilnummer: %s", phnum);
+        user.phones = findPhoneNumbersToBeForUser_(useraccount, phnum);       
       }
-    }
-    
+    } 
+
     if (accountKeywordAvatarUpdated != shouldBeKeywordAvatarUpdated) {
       Logger.log("Profilbilden ska uppdateras");
-
       Logger.log("accountKeywordAvatarUpdated " + accountKeywordAvatarUpdated);
       Logger.log("shouldBeKeywordAvatarUpdated " + shouldBeKeywordAvatarUpdated);
-      
-      let userPhoto;
-      let keywordAvatarUpdatedToUpdate = "";
-      
-      //Om tillgänglig Scoutnet- eller standardbild; uppdatera bild i Google Workspace
-      if (shouldBeKeywordAvatarUpdated) {
-        Logger.log("Finns ny profilbild. Antingen i Scoutnet eller ny standardbild");        
-        
-        try {
-          const data = getByteArrayImageToUse_(member.avatar_url, defaultUserAvatar);
-          userPhoto = AdminDirectory.Users.Photos.update({photoData: data}, useraccount.primaryEmail);
-        }
-        catch(err)  {
-          Logger.log("--------------------------");
-          Logger.log("Error: %s",err.message);
-          Logger.log("--------------------------");
-        }
-        
-        try {
-          userPhoto = AdminDirectory.Users.get(useraccount.primaryEmail);          
-          const avatarId = getAvatarIdImageToUse_(member.avatar_updated, defaultUserAvatarId);
-
-          keywordAvatarUpdatedToUpdate = avatarId + userPhoto.thumbnailPhotoEtag;
-          Logger.log("Uppdaterat profilbild");
-        }
-        catch(err)  {
-          Logger.log("--------------------------");
-          Logger.log("Error: %s",err.message);
-          Logger.log("--------------------------");
-        }
-      }
-      //Uppdatera sen Userfältet med avatar_updated och bildens etag
-      Logger.log("Den nya avatarUpdated " + keywordAvatarUpdatedToUpdate);
-      const keywordArray = [];
-      const tmp_avatarUpdated = {
-        "value": keywordAvatarUpdatedToUpdate,
-        "type": "custom",
-        "customType": "avatar_updated"
-      };
-      keywordArray.push(tmp_avatarUpdated);
-      user.keywords = keywordArray;
-      update = true;
+      user.keywords = updateUserPhoto_(member, useraccount, defaultUserAvatar, defaultUserAvatarId, shouldBeKeywordAvatarUpdated);
     }
 
     if (useraccount.suspended) {
@@ -560,6 +482,7 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
     }
 
     try {
+      Logger.log('Användare %s %s uppdateras', useraccount.name.givenName, useraccount.name.familyName); 
       user = AdminDirectory.Users.update(user, useraccount.primaryEmail);
       //Logger.log("Användaren är nu i org " + orgUnitPath);
     }
@@ -570,6 +493,92 @@ function updateAccount(member, useraccount, orgUnitPath, defaultUserAvatar, defa
       Logger.log("--------------------------")
     }
   }
+}
+
+
+/**
+ * Ger vilka telefonnummer som ska sättas för ett användarkonto
+ * 
+ * @param {Object} useraccount - Ett Googlekontoobjekt
+ * @param {string} phnum - Telefonnumret skrivet på internationellt sett
+ */
+function findPhoneNumbersToBeForUser_(useraccount, phnum)  {
+
+  let accountPhoneNumbersNotPrimaryOrTheSame = [];
+  if (typeof useraccount.phones !== 'undefined' && useraccount.phones) {
+    if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.primary !== true)) {
+      accountPhoneNumbersNotPrimaryOrTheSame = useraccount.phones.filter(phoneNumber => phoneNumber.primary !== true && phoneNumber.value !== phnum);
+    }
+  }
+  
+  if(phnum) {
+    const newPrimaryPhoneNumber = {
+      "value": phnum,
+      "primary": true,
+      "type": "mobile"
+    };
+    accountPhoneNumbersNotPrimaryOrTheSame.push(newPrimaryPhoneNumber);
+  }
+  Logger.log("Dessa ska de nya numren för denna person vara");
+  Logger.log(accountPhoneNumbersNotPrimaryOrTheSame);
+  return accountPhoneNumbersNotPrimaryOrTheSame;
+}
+
+
+/**
+ * Uppdatera profilbild för ett användarkonto
+ * samt uppdatera data som sparas på användarkontot för profilbilden
+ * 
+ * @param {Object} member - Ett medlemsobjekt
+ * @param {Object} useraccount - Ett Googlekontoobjekt
+ * @param {byte[]} defaultUserAvatar - Byte array för en standardbild
+ * @param {string} defaultUserAvatarId - Id för standardbilden
+ * @param {string} shouldBeKeywordAvatarUpdated - Data som sparas på användarkonto för profilbild
+ */
+function updateUserPhoto_(member, useraccount, defaultUserAvatar, defaultUserAvatarId, shouldBeKeywordAvatarUpdated)  {
+
+  let keywordAvatarUpdatedToUpdate = "";
+      
+  //Om tillgänglig Scoutnet- eller standardbild; uppdatera bild i Google Workspace
+  if (shouldBeKeywordAvatarUpdated) {
+    Logger.log("Finns ny profilbild. Antingen i Scoutnet eller ny standardbild");        
+    
+    let userPhoto;
+
+    try {
+      const data = getByteArrayImageToUse_(member.avatar_url, defaultUserAvatar);
+      userPhoto = AdminDirectory.Users.Photos.update({photoData: data}, useraccount.primaryEmail);
+    }
+    catch(err)  {
+      Logger.log("--------------------------");
+      Logger.log("Error: %s",err.message);
+      Logger.log("--------------------------");
+    }
+    
+    try {
+      userPhoto = AdminDirectory.Users.get(useraccount.primaryEmail);          
+      const avatarId = getAvatarIdImageToUse_(member.avatar_updated, defaultUserAvatarId);
+
+      keywordAvatarUpdatedToUpdate = avatarId + userPhoto.thumbnailPhotoEtag;
+      Logger.log("Uppdaterat profilbild");
+    }
+    catch(err)  {
+      Logger.log("--------------------------");
+      Logger.log("Error: %s",err.message);
+      Logger.log("--------------------------");
+    }
+  }
+  //Uppdatera sen Userfältet med avatar_updated och bildens etag
+  Logger.log("Den nya avatarUpdated " + keywordAvatarUpdatedToUpdate);
+  const keywordArray = [];
+  const tmp_avatarUpdated = {
+    "value": keywordAvatarUpdatedToUpdate,
+    "type": "custom",
+    "customType": "avatar_updated"
+  };
+  keywordArray.push(tmp_avatarUpdated);
+  
+  return keywordArray;  
 }
 
 

@@ -108,7 +108,7 @@ function Grupper(...args) {
     const rad_nummer = rowIndex+1;
     
     Logger.log('Rad: ' + rad_nummer + ' Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id + ' Grupp-ID: ' + groupId);
-    
+
     let update_group = "yes";
     
     if (groupId == "") { //Vi borde skapa en grupp
@@ -460,7 +460,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   const cell_scoutnet_list_id_both = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
   const synk_option_both = radInfo[grd["synk_option"]];
   Logger.log("..........1Båda....................");
-  const allMembers_both = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_both, cell_scoutnet_list_id_both, listOfEmailAdressesOfActiveAccounts, forceUpdate);
+  const allMembers_both = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id_both, cell_scoutnet_list_id_both, listOfEmailAdressesOfActiveAccounts, forceUpdate);
   let allMembers_both_email = getMemberlistsMemberEmail_(allMembers_both, synk_option_both);
   Logger.log("..........1Slut Båda....................");
   /***********************/
@@ -470,7 +470,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   const cell_scoutnet_list_id_send = selection.getCell(rad_nummer, grd["scoutnet_list_id_send"]+1); //Range
   const synk_option_send = radInfo[grd["synk_option_send"]];
   Logger.log("..........1Bara skicka....................");
-  const allMembers_send = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_send, cell_scoutnet_list_id_send, listOfEmailAdressesOfActiveAccounts, forceUpdate);
+  const allMembers_send = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id_send, cell_scoutnet_list_id_send, listOfEmailAdressesOfActiveAccounts, forceUpdate);
   let allMembers_send_email = getMemberlistsMemberEmail_(allMembers_send, synk_option_send);
   Logger.log("..........1Slut bara skicka....................");
   /***********************/
@@ -480,7 +480,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   const cell_scoutnet_list_id_receive = selection.getCell(rad_nummer, grd["scoutnet_list_id_receive"]+1); //Range
   const synk_option_receive = radInfo[grd["synk_option_receive"]];
   Logger.log("..........1Bara ta emot....................");
-  const allMembers_receive = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id_receive, cell_scoutnet_list_id_receive, listOfEmailAdressesOfActiveAccounts, forceUpdate);
+  const allMembers_receive = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id_receive, cell_scoutnet_list_id_receive, listOfEmailAdressesOfActiveAccounts, forceUpdate);
   let allMembers_receive_email = getMemberlistsMemberEmail_(allMembers_receive, synk_option_receive);
   Logger.log("..........1Slut bara ta emot....................");
   /***********************/
@@ -904,7 +904,7 @@ function getMemberlistsMemberEmail_(members, synk_option) {
   let members_email = [];
   
   for (let i = 0; i < members.length; i++) {
-    members_email.push.apply(members_email, getEmailListSyncOption(members[i], synk_option, true));
+    members_email.push.apply(members_email, getEmailListSyncOption_(members[i], synk_option, true));
   }
   
   for (let i = 0; i < members_email.length; i++) {
@@ -1145,13 +1145,13 @@ function getEmailadressesToSendSpamNotification(group_moderate_content_email, ce
   let emailAdresses = [];
   let boolModerateGroupEmail = false;
   
-  emailAdresses = fetchScoutnetMembersMultipleMailinglists(group_moderate_content_email, cell_group_moderate_content_email, "", forceUpdate)
+  emailAdresses = fetchScoutnetMembersMultipleMailinglists_(group_moderate_content_email, cell_group_moderate_content_email, "", forceUpdate)
   if (0 != emailAdresses.length) {
     Logger.log("E-post för skräppostmoderator är angiven");
     boolModerateGroupEmail = true;
   }
   else if (typeof moderateContentEmail !== 'undefined' && moderateContentEmail) {
-    emailAdresses = fetchScoutnetMembersMultipleMailinglists(moderateContentEmail, "", "", forceUpdate);
+    emailAdresses = fetchScoutnetMembersMultipleMailinglists_(moderateContentEmail, "", "", forceUpdate);
   }
   else { //Om man ej anger listId för en e-postlista ska användaren som kör detta program bli notifierad
     const tmp_member = {

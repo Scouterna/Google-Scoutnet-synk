@@ -135,7 +135,7 @@ function fetchScoutnetMemberFieldAsString_(medlem, nameOfField, lowerCase) {
 }
 
 
-/*
+/**
  * Hämtar lista med personer som är med i någon av de e-postlistor eller e-postadresser som specificeras
  *
  * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en e-postlista i Scoutnet
@@ -145,7 +145,7 @@ function fetchScoutnetMemberFieldAsString_(medlem, nameOfField, lowerCase) {
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistorna
  */
-function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, listOfEmailAdressesOfActiveAccounts, forceUpdate) {
+function fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutnet_list_id, listOfEmailAdressesOfActiveAccounts, forceUpdate) {
   
   Logger.log("FetchScoutnetMembersMultipleMailinglists " + scoutnet_list_id);
   Logger.log(typeof scoutnet_list_id);
@@ -166,7 +166,7 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
   
   for (let i = 0; i < tmp_id.length; i++) {
   
-    if (checkIfEmail(tmp_id[i])) { //Om e-postadress
+    if (checkIfEmail_(tmp_id[i])) { //Om e-postadress
       
       const tmp_member = {
         manuell: tmp_id[i]       
@@ -187,12 +187,12 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
       }      
     }
     else { //Om e-postlista från Scoutnet angiven
-      allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist(tmp_id[i], cell_scoutnet_list_id, forceUpdate));
+      allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist_(tmp_id[i], cell_scoutnet_list_id, forceUpdate));
     }
   }
   
   const memberNumbers = getMemberNumbers_(allMembers); //Medlemmar med dessa medlemsnummer ska användas
-//  Logger.log(memberNumbers);
+  //Logger.log(memberNumbers);
   Logger.log("Fetch - getMemberNumbers klar");
   const members = getMembersByMemberNumbers_(allMembers, memberNumbers);  
   Logger.log("Fetch - getMembersByMemberNumbers klar");
@@ -205,9 +205,6 @@ function fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutne
     Logger.log("@ är ej ett tillåtet tecken för kommentarer");    
   }
   
-  /* for (let i = 0; i < members.length; i++) {    
-    Logger.log(members[i].first_name + " " + members[i].last_name);
-  }*/
   Logger.log("Slut hämta medlemmar från flera e-postlistor");
   return members;
 }
@@ -238,35 +235,36 @@ function getMemberNumbers_(members) {
 }
 
 
-/*
+/**
  * Indata en sträng
- * Returnera sant eller falskt om det är en e-postadress
+ * Returnera sant eller falskt om det verkar vara en e-postadress
  *
  * @param {string} email - textsträng
  *
  * @returns {boolean} - sant eller falskt om det är en e-postadress
  */
-function checkIfEmail(email) {
-  
+function checkIfEmail_(email) {
   //Väldigt simpel koll a@b.c
-  if ((email.length > 4) && (email.indexOf("@") != -1) && (email.indexOf(".") != -1)) {
+  if ((email.length > 4) && email.includes("@") && email.includes(".")) {
+    //Logger.log("Verkar vara en e-postadress");
     return true;
   }
+  //Logger.log("Verkar EJ vara en e-postadress");
   return false;  
 }
 
 
-/*
+/**
  * Hämta lista med personer för denna e-postlista
  * Returnera lista med medlemsobjekt
  *
  * @param {string} scoutnet_list_id - List-id för en e-postlista i Scoutnet
  * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
- * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
+ * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistan
  */
-function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list_id, forceUpdate) {
+function fetchScoutnetMembersOneMailinglist_(scoutnet_list_id, cell_scoutnet_list_id, forceUpdate) {
   
   const cacheExpirationInSeconds = 21600; //6 timmar
   console.time(scoutnet_list_id);
@@ -294,7 +292,6 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
       );
       Logger.log(response); 
       json = response.getContentText();
-
       Logger.log("Json.length " + json.length);
 
       //Kolla så att inte större än 100kb per kaka och sätt i så fall cache; om ej skippa det.
@@ -332,18 +329,14 @@ function fetchScoutnetMembersOneMailinglist(scoutnet_list_id, cell_scoutnet_list
     }
 
     const medlemmar = data.data;
-    //Logger.log(medlemmar);
-    
+    //Logger.log(medlemmar);    
     const variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
-      
     //Dessa attributvärden ska användas som gemener för bättre jämförelser
     const variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
 
     for (x in medlemmar) {
-      const medlem = medlemmar[x];
-      
+      const medlem = medlemmar[x];      
       const member = setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
-      
       allMembers.push(member);
     }
   }
@@ -424,7 +417,7 @@ function getMembersByMemberNumbers_(members, memberNumbers) {
  * 
  * @returns {string[]} - Lista över e-postadresser enligt specificerade attribut
  */
-function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
+function getEmailListSyncOption_(member, synk_option, boolGoogleAccounts) {
   
   const member_emails = [];
   
@@ -446,73 +439,57 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
     return member_emails;
   }
   
-  const tmp_email = getGoogleAccount(member_no);
+  const googleAccountEmail = getGoogleAccount_(member_no);
   
-  if (synk_option.indexOf("@") != -1 && boolGoogleAccounts) {
+  if (synk_option.includes("@") && boolGoogleAccounts) {
     //Lägg bara till om personen har ett google-konto via kåren och lägg till deras google-konto
-    
-    if (tmp_email) { //Denna medlem har ett Googlekonto
-      member_emails.push(tmp_email);
-      Logger.log("5");
+    if (googleAccountEmail) { //Denna medlem har ett Googlekonto
+      member_emails.push(googleAccountEmail);
     }      
   }    
   
-  else { //Lägg bara till Scoutnet-e-postnly add Scoutnet-email
-    //Logger.log("Annars    ");
-    if (synk_option.indexOf("m") != -1 || synk_option.indexOf("e") != -1 || synk_option.indexOf("f") != -1 || synk_option.indexOf("a") != -1) {
-      if (synk_option.indexOf("m") != -1) { //Lägg bara till medlemmar som har en personlig e-postadress
+  else { //Lägg bara till Scoutnet e-post
+    if (synk_option.includes("m") || synk_option.includes("e") || synk_option.includes("f") || synk_option.includes("a")) {
+      
+      if (synk_option.includes("m")) { //Lägg bara till medlemmar som har en personlig e-postadress
         if (email) { //Lägg bara till personer med en egen e-postadress      
           member_emails.push(email);
-          Logger.log("6");
         }      
-      }
-      
-      if (synk_option.indexOf("e") != -1) {
+      }      
+      if (synk_option.includes("e")) {
         //Lägg till medlemmars primära e-postadress + kopior enligt medlemsprofil
         if (extra_emails) { //Lägg till extra e-postadresser om det finns några      
           
-          Logger.log("(G179) extra emails " + extra_emails);
-          Logger.log("Typ " + typeof extra_emails);
           const extra_email_list = extra_emails.split(",");
-          Logger.log("Typ " + typeof extra_email_list);
           Logger.log(extra_email_list);
           member_emails.push.apply(member_emails, extra_email_list);
-          
-          Logger.log("(G185) 10");
         }
         if (email) { //Lägg till medlemmars primära e-postadress      
           member_emails.push(email);
-          Logger.log("6");
         }   
       }
       
-      if (synk_option.indexOf("f") != -1) { //Lägg bara tilll föräldrars e-postadress
-        if (email_mum) { //Lägg till pappor (Anhörig 2) med en e-postadress      
+      if (synk_option.includes("f")) { //Lägg bara tilll föräldrars e-postadress
+        if (email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress      
           member_emails.push(email_mum);
-          Logger.log("7_1 " + email_mum);
         }
         if (contact_email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress      
           member_emails.push(contact_email_mum);
-          Logger.log("7_2 " + contact_email_mum);
         }
         if (email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress      
           member_emails.push(email_dad);
-          Logger.log("8_1 " + email_dad);
         }
-        if (contact_email_dad) { //Lägg till mammor (Anhörig 1) med en e-postadress      
+        if (contact_email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress      
           member_emails.push(contact_email_dad);
-          Logger.log("8_2 " + contact_email_dad);
         }
       }
       
-      if (synk_option.indexOf("a") != -1) { //Lägg till alternativ e-postadress
+      if (synk_option.includes("a")) { //Lägg till alternativ e-postadress
         if (email_alt) { //Lägg till alternativ e-postadress      
           member_emails.push(email_alt);
-          Logger.log("9_1");
         }
         if (contact_email_alt) { //Lägg till alternativ e-postadress      
           member_emails.push(contact_email_alt);
-          Logger.log("9_2");
         }
       }
     }
@@ -521,40 +498,31 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
       //så vi testar de olika versionerna och ser vad som nappar
       if (email) { //Lägg till person med egen e-postadress      
         member_emails.push(email);
-        Logger.log("1");
       }
       if (email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress        
-        member_emails.push(email_mum);
-        Logger.log("2_1");          
+        member_emails.push(email_mum);         
       }
       if (contact_email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress      
           member_emails.push(contact_email_mum);
-          Logger.log("2_2");
-        }
+      }
       if (email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress      
-        member_emails.push(email_dad);
-        Logger.log("3_1");          
+        member_emails.push(email_dad);         
       }
       if (contact_email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress      
           member_emails.push(contact_email_dad);
-          Logger.log("3_2");
         }
       if (email_alt) { //Lägg till alternativ e-postadress      
         member_emails.push(email_alt);
-        Logger.log("4_1");
       }
       if (contact_email_alt) { //Lägg till alternativ e-postadress      
         member_emails.push(contact_email_alt);
-        Logger.log("4_2");
       }       
     }      
   }  
   
-  if (synk_option.indexOf("-") == -1 && boolGoogleAccounts) { //Lägg till både Scoutnet e-post och Google-konto e-post
-    
-    if (tmp_email) { //Denna medlem har ett Googlekonto
-      member_emails.push(tmp_email);
-      Logger.log("9");
+  if (!synk_option.includes("-") && boolGoogleAccounts) { //Lägg till både Scoutnet e-post och Google-konto e-post
+    if (googleAccountEmail) { //Denna medlem har ett Googlekonto
+      member_emails.push(googleAccountEmail);
     }      
   }
     
@@ -565,14 +533,14 @@ function getEmailListSyncOption(member, synk_option, boolGoogleAccounts) {
 }
 
 
-/*
+/**
  * Hämta lista över alla medlemmar
  * 
- * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
+ * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
  */
-function fetchScoutnetMembers(forceUpdate) {
+function fetchScoutnetMembers_(forceUpdate) {
 
   const cacheExpirationInSeconds = 21600; //6 timmar
   console.time("fetchScoutnetMembers");
@@ -588,8 +556,7 @@ function fetchScoutnetMembers(forceUpdate) {
     const url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist';
     const authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_list_all);
     const response = UrlFetchApp.fetch(
-      url, 
-      {
+      url, {
         'muteHttpExceptions': true,
         'headers': { 'Authorization': authHeader}
       }
@@ -616,8 +583,7 @@ function fetchScoutnetMembers(forceUpdate) {
     json = kaka;
   }
   
-  const data = JSON.parse(json);
-  
+  const data = JSON.parse(json);  
   const medlemmar = data.data;
   const allMembers = [];
   
@@ -636,24 +602,15 @@ function fetchScoutnetMembers(forceUpdate) {
   //Logger.log(medlemmar);
   for (x in medlemmar) {
     const medlem = medlemmar[x];
-    
-    const member = setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
-        
-    //Logger.log("MEMBER print object " + member);
-    //Logger.log("%s %s, Medlem %s, Mobil %s",member.first_name, member.last_name, member.member_no, member.contact_mobile_phone); //member.member_no + "   " + member.first_name + "  " + member.last_name);
-    //Logger.log(member.date_of_birth + "   " + member.confirmed_at + "  " + member.unit);
-    //Logger.log(member.unit_role + "   " + member.group_role + "  " + member.email);
-    //Logger.log(member.email_mum + "   " + member.email_dad + "  " + member.alt_email);
-    allMembers.push(member); 
-    
-  } 
-  //Logger.log("FETCH MEMBERS print object " + allMembers);
+    const member = setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);    
+    allMembers.push(member);    
+  }
   console.timeEnd("fetchScoutnetMembers");
   return allMembers;  
 }
 
 
-/*
+/**
  * Om en medlem (dennes member_no) har ett Googlekonto
  * så returnerar vi dennes e-postadress. Annars bara en tom sträng
  *
@@ -661,37 +618,29 @@ function fetchScoutnetMembers(forceUpdate) {
  *
  * @returns {string} - E-postadress för medlem om finns, annars tom sträng
  */
-function getGoogleAccount(member_no) {
-   
+function getGoogleAccount_(member_no) {
+
   const qry = "externalId='"+ member_no +"'";
   let users;
 
   for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen getGoogleAcount körs " + n);
-    try {
-      
-      let pageToken, page;
-      do {
-        page = AdminDirectory.Users.list({
-          domain: domain,
-          query: qry,
-          orderBy: 'givenName',
-          maxResults: 150,
-          pageToken: pageToken
-        });
-        users = page.users;
-        if (users) {
-          
-          //Logger.log('%s (%s)', users[0].name.fullName, users[0].primaryEmail);
-          return users[0].primaryEmail;
-          
-        } else {
-          //Logger.log('Inga användare hittades.');
-          return "";
-        }
-        pageToken = page.nextPageToken;
-      } while (pageToken);    
-      
+    try {   
+      const page = AdminDirectory.Users.list({
+        domain: domain,
+        query: qry,
+        orderBy: 'givenName',
+        maxResults: 1
+      });
+      users = page.users;
+      if (users) {
+        Logger.log('%s (%s)', users[0].name.fullName, users[0].primaryEmail);
+        return users[0].primaryEmail;
+      }
+      else {
+        Logger.log('Inget användarkonto hittades med medlemsnummer ' + member_no);
+        return "";
+      }      
     } catch(e) {
       Logger.log("Problem med att anropa GoogleTjänst Users.list i funktionen getGoogleAccount");
       if (n == 5) {
@@ -1015,45 +964,42 @@ function removeDublicates_(list) {
 /**
  * Gör strängen till ett svenskt internationellt nummer om möjligt
  */
-function intphonenumber(phnum) {
+function intphonenumber_(phnum) {
+
   let rx = /^\+/;      
-  //Logger.log('telefonnummer före: %s', phnum);  
+  //Logger.log('Telefonnummer före: %s', phnum);  
   const res = phnum.match(rx)
-  if(res)
-  {
+  if(res) {
     let ccok = false;
     Logger.log('Match');  
  
-    const ccodes =[];
+    const ccodes = [];
     ccodes.push("43"); //
     ccodes.push("44"); //
     ccodes.push("45"); //Danmark
-    ccodes.push("46"); //sverige
-    for(let info in ccodes)
-    {
-      rx = new RegExp('^\\+' + ccodes[info]  , 'g');   
-      if (phnum.match(rx))
-        {
-          phnum = "+" +  ccodes[info] + phnum.substr(3).replace(/[^0-9]/g, '');
+    ccodes.push("46"); //Sverige
+    for(let info in ccodes) {
+      rx = new RegExp('^\\+' + ccodes[info], 'g');   
+      if (phnum.match(rx)) {
+        phnum = "+" +  ccodes[info] + phnum.substr(3).replace(/[^0-9]/g, '');
         ccok = true;
-        }
-    }
-    if (!ccok){phnum = null;}
- //Logger.log('after cc %s',phnum);  
-  
-  }
-  else
-  {
-   // Logger.log('NoMatch');  
-    if (phnum.replace(/[^0-9]/g, '').match(/^0/)){
-        phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1)
       }
+    }
+    if (!ccok) {
+      phnum = null;
+    }
+    //Logger.log('Efter landskod %s', phnum);
+  }
+  else {
+    //Logger.log('Börjar ej med landskod');  
+    if (phnum.replace(/[^0-9]/g, '').match(/^0/)) {
+      phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1)
+    }
     else {
       //phnum = null
     }
   }
-   //Logger.log('done... %s',phnum);  
-  
+  //Logger.log('Klar %s', phnum);
   return phnum
 }
 

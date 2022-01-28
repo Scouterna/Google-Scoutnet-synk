@@ -23,6 +23,14 @@ function MedlemslistorVissaRaderSkickaEnbartTmp() {
 
 
 /**
+ * Funktion att använda för att uppdatera samtliga medlemslistor
+ */
+function MedlemslistorUppdateraEnbart() {
+  Medlemslistor(0, 100, true, false);
+}
+
+
+/**
  * Funktion att använda för att ställa in att start- och slutrad
  * är lika
  * 
@@ -58,7 +66,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
   const delete_rows = [];
   
   //Hämta lista med alla medlemmar i kåren och alla deras attribut
-  const allMembers = fetchScoutnetMembers(true);
+  const allMembers = fetchScoutnetMembers_(true);
   
   const rowsToSync = findWhatRowsToSync_(start, slut, data.length);
   start = rowsToSync.start;
@@ -72,13 +80,13 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
     const scoutnet_list_id = data[i][grd["scoutnet_list_id"]];
     const spreadsheetUrl = data[i][grd["spreadsheetUrl"]];
     
-    const rad_nummer = i+1;
+    const rad_nummer = i + 1;
     Logger.log('Rad: ' + rad_nummer + ' Namn: ' + name + ' Scoutnet: ' + scoutnet_list_id + ' spreadsheetUrl: ' + spreadsheetUrl);
-    
+
     let update_group = "yes";
     
     let cell=selection.getCell(rad_nummer, grd["namn"]+1);
-    if (name=="") { //Kolla om fältet för namn är angivet
+    if (name == "") { //Kolla om fältet för namn är angivet
       cell.setBackground("yellow");
     }
     else {
@@ -87,8 +95,8 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
       }
     }
     
-    if (spreadsheetUrl=="") { //Inget kalkylark är angivet      
-      if (name=="" && scoutnet_list_id=="") { //Ta bort raden
+    if (spreadsheetUrl == "") { //Inget kalkylark är angivet      
+      if (name == "" && scoutnet_list_id == "") { //Ta bort raden
         Logger.log("Försöker ta bort rad " + rad_nummer);        
         delete_rows.push(rad_nummer);        
       }
@@ -174,7 +182,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
   Logger.log("Ämne på e-post i utkast " + email_draft_subject);
   const draft = getDraft_(email_draft_subject);
 
-  let cell=selection.getCell(rad_nummer, grd["email_draft_subject"]+1);
+  let cell = selection.getCell(rad_nummer, grd["email_draft_subject"]+1);
   if (!draft) { //Kolla om ämnesraden är korrekt
     Logger.log("Ogiltig ämmnesrad " + email_draft_subject);
     cell.setBackground("red");
@@ -186,7 +194,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     }
   }
 
-  cell=selection.getCell(rad_nummer, grd["email_sender_name"]+1);
+  cell = selection.getCell(rad_nummer, grd["email_sender_name"]+1);
   if (email_sender_name) { //Kolla om fältet för avsändarnamn är angivet
     if ("#ffffff" != cell.getBackground()) {
       cell.setBackground("white");
@@ -197,7 +205,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     cell.setBackground("yellow");
   }
   
-  cell=selection.getCell(rad_nummer, grd["email_document_merge"]+1);
+  cell = selection.getCell(rad_nummer, grd["email_document_merge"]+1);
   let documentToMerge;
   if (email_document_merge) { //Kolla om fältet för koppla dokument är angivet
     
@@ -226,7 +234,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
   const plainBody = draft.getPlainBody();
   const attachments = draft.getAttachments();
 
-  for (let i = 0; i<data.length; i++) {
+  for (let i = 0; i < data.length; i++) {
     Logger.log("Rad  i kalkylarket " + i);
 
     /***Villkor***/
@@ -334,14 +342,6 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
 
 
 /**
- * Funktion att använda för att uppdatera samtliga medlemslistor
- */
-function MedlemslistorUppdateraEnbart() {
-  Medlemslistor(0, 100, true, false);
-}
-
-
-/**
  * Ger en lista med de bilagor som ska skickas
  * genom att använda de bilagor som finns i utkastet samt de
  * dokument som ska kopplas
@@ -357,12 +357,12 @@ function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray
 
   const tmp_attachments = [];
 
-  for (let i = 0; i<attachments.length; i++)  {
+  for (let i = 0; i < attachments.length; i++)  {
     tmp_attachments.push(attachments[i]);
     Logger.log("Lägger till bilagan " + attachments[i].getName());
   }
 
-  for (let i = 0; documentToMerge && i<documentToMerge.length; i++)  {
+  for (let i = 0; documentToMerge && i < documentToMerge.length; i++)  {
     
     let tmp_copy_id;
     try {
@@ -379,7 +379,6 @@ function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray
 
       const footer = tmp_copy.getFooter();
       replaceContentOfDocument(footer, attribut, dataArray);
-      
 
       Logger.log("URL för temporärt skapad fil är");
       Logger.log(tmp_copy.getUrl());
@@ -422,7 +421,7 @@ function replaceContentOfDocument(section, attribut, dataArray) {
   const textMatches = getListOfUsedShortcodes(section_text);
 
   //Mycket här i kan läggas i en egen funktion
-  for (let i = 0; textMatches && i<textMatches.length; i++)  {
+  for (let i = 0; textMatches && i < textMatches.length; i++)  {
 
     //Ny data för aktuell person som ska ersätta kortkoden
     const replaceData = getReplaceDataForShortcode(textMatches[i], attribut, dataArray);
@@ -547,13 +546,13 @@ function getSender(variable, nameOfVariable, attribut, data, cell, emailOptions)
   tmp_variable = getCleanString_(tmp_variable);
   tmp_variable = tmp_variable.toLowerCase();
 
-  if ("avsändaradress"==nameOfVariable && isFromEmailAdressAllowed_(tmp_variable)) {
+  if ("avsändaradress" == nameOfVariable && isFromEmailAdressAllowed_(tmp_variable)) {
     if ("#ffffff" != cell.getBackground()) {
       cell.setBackground("white");
     }
     emailOptions["from"] = tmp_variable;
   }
-  else if ("svarsadress"==nameOfVariable && checkIfEmail(tmp_variable))  {
+  else if ("svarsadress" == nameOfVariable && checkIfEmail_(tmp_variable))  {
     if ("#ffffff" != cell.getBackground()) {
       cell.setBackground("white");
     }
@@ -589,6 +588,7 @@ function getRecipient(variable, nameOfVariable, attribut, data) {
   tmp_variable = getCleanEmailArray(tmp_variable).toString();
   Logger.log(nameOfVariable);
   Logger.log(tmp_variable);
+  
   if (tmp_variable)  {
     Logger.log(nameOfVariable + " är angiven " + tmp_variable);
   }
@@ -613,8 +613,8 @@ function getCleanEmailArray(input) {
   input = getCleanString_(input);  
   const tmpArray = input.split(",");
 
-  for (let i = 0; i<tmpArray.length; i++) {
-    if (checkIfEmail(tmpArray[i]))  {
+  for (let i = 0; i < tmpArray.length; i++) {
+    if (checkIfEmail_(tmpArray[i]))  {
       emailArray.push(tmpArray[i]);
     }
   }
@@ -662,7 +662,7 @@ function getVerkligaRubriker(sheet) {
   Logger.log(values);
 
   const data = {};
-  for (let i = 0; i<values.length; i++) {
+  for (let i = 0; i < values.length; i++) {
     data[values[i]] = i;
   }
   return data;
@@ -677,8 +677,8 @@ function skapaRubrikerML() {
   const sheetDataMedlemslistor = getDataFromActiveSheet_("Medlemslistor");
 
   const sheet = sheetDataMedlemslistor["sheet"];
-  const selection = sheetDataMedlemslistor["selection"];
-  const data = sheetDataMedlemslistor["data"];
+  //const selection = sheetDataMedlemslistor["selection"];
+  //const data = sheetDataMedlemslistor["data"];
 
   const mlkrd = getMedlemslistorKonfigRubrikData();
 
@@ -753,7 +753,7 @@ function skapaRubrikerML() {
  * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
  * @param {Object[]} allMembers - lista med medlemsobjekt
  * @param {Object[]} spreadsheet - ett googleobjekt av typen Spreadsheet där listan finns
- * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
+ * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  */
 function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, spreadsheet, forceUpdate) {
 
@@ -761,12 +761,12 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
   const scoutnet_list_id = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   const cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
   Logger.log(".......Synkronisering - hämta data............");
-  const tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
+  const tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
   Logger.log(".......Slut Synkronisering - hämta data.......");
   /***********************/ 
 
   const membersInAList = []
-  for (let i = 0; i<tmpMembersInAList.length; i++) {
+  for (let i = 0; i < tmpMembersInAList.length; i++) {
     //Leta upp medlemmen i listan övar alla medlemmar
     const obj = allMembers.find(obj => obj.member_no == tmpMembersInAList[i].member_no);
     membersInAList.push(obj);
@@ -785,7 +785,7 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
   let lastColumn = sheet.getLastColumn();
   let numRows = lastRow+1;
 
-  if (membersInAList.length+1>lastRow)  {
+  if (membersInAList.length+1 > lastRow)  {
     //Vi ska rensa om det blir fler rader i nya också
     numRows = membersInAList.length+1;
   }  
@@ -834,7 +834,7 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
 function createMemberlistRubrikRow(mlrd)  {
 
   const row = [];
-  for (let i = 0; i<mlrd.length; i++) {    
+  for (let i = 0; i < mlrd.length; i++) {    
     const svName = mlrd[i].svName;
     row.push(svName);
   }
@@ -854,7 +854,7 @@ function createMemberlistRubrikRow(mlrd)  {
 function createMemberlistMatrix(membersInAList, mlrd) {
 
   const memberMatrix = [];
-  for (let i = 0; i<membersInAList.length; i++) {
+  for (let i = 0; i < membersInAList.length; i++) {
     const row = createMemberlistRow(membersInAList[i], mlrd);
     memberMatrix.push(row);
   }
@@ -873,7 +873,7 @@ function createMemberlistMatrix(membersInAList, mlrd) {
 function createMemberlistRow(member, mlrd)  {
 
   const row = [];
-  for (let i = 0; i<mlrd.length; i++) {   
+  for (let i = 0; i < mlrd.length; i++) {   
     const name = mlrd[i].apiName;
     value = member[name];
     //Logger.log("Attribut " + name + " värde " + value);
@@ -897,7 +897,7 @@ function setCustomColumns(sheet, startCol, numRow)  {
 
   /***********Rubriker**********/
   const row = [];
-  for (let i = 0; i<num_cf; i++) {
+  for (let i = 0; i < num_cf; i++) {
     const namn = cf[i].namn;
     row.push(namn);
   }
@@ -906,7 +906,7 @@ function setCustomColumns(sheet, startCol, numRow)  {
   range_cf_rubrik.setValues([row]);
 
   /***********Data i extra kolumner*****/
-  for (let i = 0; i<num_cf; i++) {
+  for (let i = 0; i < num_cf; i++) {
     const formula = cf[i].formel;
     const range_cf = sheet.getRange(2, startCol+i, numRow, 1);
     range_cf.setFormulaR1C1(formula);
