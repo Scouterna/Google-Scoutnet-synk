@@ -676,7 +676,6 @@ function getScoutleaders_(allMembers) {
 
 /**
  * Testfunktion för att lista alla Googlekonton som finns i underorganisationen "Scoutnet"
- * Max 200 stycken
  */
 function listAllUsers() {
   let pageToken, page;

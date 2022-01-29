@@ -139,7 +139,7 @@ function fetchScoutnetMemberFieldAsString_(medlem, nameOfField, lowerCase) {
  * Hämtar lista med personer som är med i någon av de e-postlistor eller e-postadresser som specificeras
  *
  * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en e-postlista i Scoutnet
- * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
+ * @param {Object} cell_scoutnet_list_id - En cell i ett Google Kalkylblad
  * @param {string[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
  * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
@@ -259,7 +259,7 @@ function checkIfEmail_(email) {
  * Returnera lista med medlemsobjekt
  *
  * @param {string} scoutnet_list_id - List-id för en e-postlista i Scoutnet
- * @param {Object} cell_scoutnet_list_id - En cell för Google Kalkylark
+ * @param {Object} cell_scoutnet_list_id - En cell i ett Google Kalkylblad
  * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för de medlemmar på e-postlistan
@@ -635,7 +635,7 @@ function getGoogleAccount_(member_no) {
       users = page.users;
       if (users) {
         Logger.log('%s (%s)', users[0].name.fullName, users[0].primaryEmail);
-        return users[0].primaryEmail;
+        return users[0].primaryEmail;  
       }
       else {
         Logger.log('Inget användarkonto hittades med medlemsnummer ' + member_no);
@@ -917,6 +917,28 @@ function getCleanString_(input)  {
   input = input.replace(/\s+/g, ''); //Ta bort tomma mellanrum
 
   return input;
+}
+
+
+/**
+ * Ger området för en eller flera kolumner
+ *
+ * @param {Object} sheet - Ett ark
+ * @param {number} columnIndex - Kolumnindex
+ * @param {number} numColumns - Antal kolumner med columnIndex längst till vänster
+ *
+ * @returns {Object} - Området för hela kolumnen
+ */
+function getA1RangeOfColumns_(sheet, columnIndex, numColumns) {
+  
+  let range = sheet.getRange(1, columnIndex, 2, numColumns);
+  //Vi anger att det ska vara två rader så att vi får en start och slutkolumn
+  const a1_cell_row_one = range.getA1Notation();
+  
+  const a1Notation = a1_cell_row_one.replace(/[0-9]/g, '');  
+  range = sheet.getRange(a1Notation);
+  
+  return range;
 }
 
 

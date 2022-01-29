@@ -734,11 +734,11 @@ function skapaRubrikerML() {
   /*******************************/
 
   /*******Sätt kantlinjer*********/ 
-  const kolumn1 = getA1RangeOfColumns(sheet, mlkrd["email_sender_name"]+1, 4);
+  const kolumn1 = getA1RangeOfColumns_(sheet, mlkrd["email_sender_name"]+1, 4);
   //Kolumnen för scoutnet_list_id;
   kolumn1.setBorder(null, true, null, true, null, null);
   
-  const kolumn2 = getA1RangeOfColumns(sheet, mlkrd["email_recipient"]+1, 3);
+  const kolumn2 = getA1RangeOfColumns_(sheet, mlkrd["email_recipient"]+1, 3);
   kolumn2.setBorder(null, true, null, true, null, null);  
   /*******************************/
 }
