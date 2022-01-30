@@ -61,7 +61,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
   const selection = sheetDataMedlemslistor["selection"];
   const data = sheetDataMedlemslistor["data"];
   
-  const grd = getMedlemslistorKonfigRubrikData();
+  const grd = getMedlemslistorKonfigRubrikData_();
   
   const delete_rows = [];
   
@@ -169,8 +169,8 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
   Logger.log("lastColumn ska vara " + lastColumn);
   Logger.log("lastRow ska vara " + lastRow); 
 
-  const attribut = getVerkligaRubriker(sheet);
-  const data = getVerkligMedlemslista(sheet);
+  const attribut = getVerkligaRubriker_(sheet);
+  const data = getVerkligMedlemslista_(sheet);
 
   /***Dessa celler ska färgmarkeras eller ändras vid fel***/
   const cell_email_sender_email = selection.getCell(rad_nummer, grd["email_sender_email"]+1);
@@ -418,7 +418,7 @@ function replaceContentOfDocument(section, attribut, dataArray) {
   const section_text = section.getText();
   
   //Skapar en lista med alla kortkoder som används
-  const textMatches = getListOfUsedShortcodes(section_text);
+  const textMatches = getListOfUsedShortcodes_(section_text);
 
   //Mycket här i kan läggas i en egen funktion
   for (let i = 0; textMatches && i < textMatches.length; i++)  {
@@ -445,7 +445,7 @@ function replaceTemplate(textInput, attribut, dataArray)  {
 
   let text = textInput.slice();
   //Skapar en lista med alla kortkoder som används
-  const textMatches = getListOfUsedShortcodes(text);
+  const textMatches = getListOfUsedShortcodes_(text);
 
   for (let i = 0; textMatches && i<textMatches.length; i++)  {
     
@@ -491,9 +491,9 @@ function getReplaceDataForShortcode(textMatch, attribut, dataArray)  {
  *
  * @returns {string[]} - en lista av de kortkoder som används
  */
-function getListOfUsedShortcodes(text)  {
-  const tmp_list = text.match(/\{\{[^\{\}]+\}\}/g);
-  return tmp_list;
+function getListOfUsedShortcodes_(text)  {
+  const listOfUsedShortcodes = text.match(/\{\{[^\{\}]+\}\}/g);
+  return listOfUsedShortcodes;
 }
 
 
@@ -623,13 +623,13 @@ function getCleanEmailArray_(input) {
 
 
 /**
- * Ger en matris med data för medlemslistan i kalkylarket
+ * Ger en matris med data för medlemslistan i kalkylbladet
  * 
  * @param {Object} sheet - ett objekt av typen Sheet
  *
  * @returns {string[][]} - en matris innehållande persondata
  */
-function getVerkligMedlemslista(sheet) {
+function getVerkligMedlemslista_(sheet) {
 
   const lastRow = sheet.getLastRow();
   const lastColumn = sheet.getLastColumn();
@@ -644,14 +644,14 @@ function getVerkligMedlemslista(sheet) {
 
 
 /**
- * Ger ett objekt med rubrikerna i kalkylarket som nycklar och
+ * Ger ett objekt med rubrikerna i kalkylbladet som nycklar och
  * dess respektive kolumnplacering som värde
  * 
  * @param {Object} sheet - ett objekt av typen Sheet
  *
  * @returns {Object} - ett objekt med kolumnrubriker och dess placeringar
  */
-function getVerkligaRubriker(sheet) {
+function getVerkligaRubriker_(sheet) {
 
   const lastColumn = sheet.getLastColumn();
   const range = sheet.getRange(1, 1, 1, lastColumn);
@@ -680,7 +680,7 @@ function skapaRubrikerML() {
   //const selection = sheetDataMedlemslistor["selection"];
   //const data = sheetDataMedlemslistor["data"];
 
-  const mlkrd = getMedlemslistorKonfigRubrikData();
+  const mlkrd = getMedlemslistorKonfigRubrikData_();
 
   // Frys de två översta raderna på arket så att rubrikerna alltid syns
   sheet.setFrozenRows(2);
@@ -773,7 +773,7 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
     Logger.log(obj);
   }
 
-  const mlrd = getMedlemslistorRubrikData();
+  const mlrd = getMedlemslistorRubrikData_();
   Logger.log(mlrd);
   const numAttrMembers = mlrd.length;
   Logger.log("Antal medlemsattribut att använda " + numAttrMembers);
@@ -790,7 +790,7 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
     numRows = membersInAList.length+1;
   }  
 
-  if (numAttrMembers>lastColumn)  {
+  if (numAttrMembers > lastColumn)  {
     //Vi ska rensa om det blir fler kolumner i nya också
     lastColumn = numAttrMembers;
   }  
@@ -807,14 +807,14 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
   range_rad1.setFontWeight("bold");
   range_rad1.setFontStyle("italic");
 
-  const memberRubrikMatrix = createMemberlistRubrikRow(mlrd);
+  const memberRubrikMatrix = createMemberlistRubrikRow_(mlrd);
   range_rad1.setValues([memberRubrikMatrix]);
   /********************************************/
 
   if (membersInAList.length > 0)  {
     /****Storlek på den nya datan som ska in*****/
     const range_medlemmar = sheet.getRange(2, 1, membersInAList.length, numAttrMembers);
-    const memberMatrix = createMemberlistMatrix(membersInAList, mlrd);
+    const memberMatrix = createMemberlistMatrix_(membersInAList, mlrd);
     Logger.log(memberMatrix);
     range_medlemmar.setValues(memberMatrix);  
     /********************************************/
@@ -831,7 +831,7 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
  * 
  * @returns {string[]} - lista bestående av rubrikerna för medlemsdatan
  */
-function createMemberlistRubrikRow(mlrd)  {
+function createMemberlistRubrikRow_(mlrd)  {
 
   const row = [];
   for (let i = 0; i < mlrd.length; i++) {    
@@ -849,13 +849,13 @@ function createMemberlistRubrikRow(mlrd)  {
  * @param {Object[]} membersInAList - lista över medlemsobjekt
  * @param {Object[]} mlrd - en lista över rubriker och och attribut för tillhörande medlemmar
  * 
- * @returns {string[[]]} - matris bestående av listor som är rader med medlemsdata
+ * @returns {string[][]} - matris bestående av listor som är rader med medlemsdata
  */
-function createMemberlistMatrix(membersInAList, mlrd) {
+function createMemberlistMatrix_(membersInAList, mlrd) {
 
   const memberMatrix = [];
   for (let i = 0; i < membersInAList.length; i++) {
-    const row = createMemberlistRow(membersInAList[i], mlrd);
+    const row = createMemberlistRow_(membersInAList[i], mlrd);
     memberMatrix.push(row);
   }
   return memberMatrix;
@@ -863,14 +863,14 @@ function createMemberlistMatrix(membersInAList, mlrd) {
 
 
 /**
- * Bygger upp en rad med medlemsdata
+ * Bygger upp en rad med medlemsdata för en medlem
  * 
  * @param {Object} member - ett medlemsobjekt
  * @param {Object[]} mlrd - en lista över rubriker och och attribut för tillhörande medlemmar
  * 
  * @returns {string[]} - Lista med medlemsdata
  */
-function createMemberlistRow(member, mlrd)  {
+function createMemberlistRow_(member, mlrd)  {
 
   const row = [];
   for (let i = 0; i < mlrd.length; i++) {   
@@ -915,11 +915,11 @@ function setCustomColumns(sheet, startCol, numRow)  {
 
 
 /**
- * Returnerar lista med vilket index som olika rubriker har i kalkylarket
+ * Returnerar lista med vilket index som olika rubriker har i kalkylbladet
  *
  * @returns {number[]} - Lista med rubrikindex för respektive rubrik
  */
-function getMedlemslistorKonfigRubrikData() {
+function getMedlemslistorKonfigRubrikData_() {
   
   //Siffran är vilken kolumn i kalkylarket.
   const medlemslistaKonfigRubrikData = {};
@@ -944,12 +944,12 @@ function getMedlemslistorKonfigRubrikData() {
 
 
 /**
- * Returnerar lista med objekt för standardkolumner i kalkylarket med namn
+ * Returnerar lista med objekt för standardkolumner i externa kalkylbladet med namn
  * i Scoutnets API och det svenska attributnamnet
  *
- * @returns {Object[]} - Lista med objekt för standardkolumner i kalkylarket
+ * @returns {Object[]} - Lista med objekt för standardkolumner i externa kalkylbladet
  */
-function getMedlemslistorRubrikData()  {
+function getMedlemslistorRubrikData_()  {
   
   const mlrd = [
     {"apiName": "member_no", "svName": "Medlemsnr."},
