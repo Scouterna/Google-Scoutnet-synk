@@ -451,7 +451,7 @@ function getGroupMember_(groupId, memberkey) {
  * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  */
 function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOfEmailAdressesOfActiveAccounts, forceUpdate) {
-    
+
   /*****Skicka och ta emot*/
   const scoutnet_list_id_both = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   const cell_scoutnet_list_id_both = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
@@ -489,7 +489,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   /**************************************************************/
   
   /*****Vi ska flytta runt e-postadresserna mellan listorna om de finns i flera*****/
-  const email_lists = moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification);
+  const email_lists = moveEmailToCorrectList_(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification);
   allMembers_both_email = email_lists[0]
   allMembers_send_email = email_lists[1];
   allMembers_receive_email = email_lists[2];
@@ -757,7 +757,7 @@ function getMemberId_(group_members, email) {
 }
 
 
-/*
+/**
  * Flytta runt e-postadresser till korrekt lista om de finns i flera olika
  *
  * @param {string[]} allMembers_both_email - E-postlista för att skicka och ta emot e-brev
@@ -765,9 +765,9 @@ function getMemberId_(group_members, email) {
  * @param {string[]} allMembers_receive_email - E-postlista för att bara kunna ta emot e-brev
  * @param {string[]} emailAdressesToSendSpamNotification - E-postlista för vart e-brev gällande misstänkt skräppost ska skickas till
  *
- * @returns {string[allMembers_both_email, allMembers_send_email, allMembers_receive_email]}
+ * @returns {string[allMembers_both_email, allMembers_send_email, allMembers_receive_email, allMembers_both_email_admin, allMembers_send_email_admin]}
  */
-function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification) {
+function moveEmailToCorrectList_(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification) {
   
   //Om e-post finns i "skicka" och "ta emot" ska de läggas till i "båda"
   for (let i = 0; i < allMembers_send_email.length; i++) {
@@ -783,6 +783,39 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
   allMembers_receive_email = getListsWithUniqueElements_(allMembers_both_email, allMembers_receive_email);
   
   /*****E-postadresser för skräppostnotifikation*****/
+  const email_lists = moveEmailToCorrectListRegardingSpamNotification_(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification);
+  allMembers_both_email = email_lists[0]
+  allMembers_send_email = email_lists[1];
+  allMembers_receive_email = email_lists[2];
+  
+  let allMembers_both_email_admin = email_lists[3];
+  let allMembers_send_email_admin = email_lists[4];  
+  /*****************************/
+  
+  //Vi tar bort alla upprepade e-postadresser inom sina egna listor och skriver ut dem
+  allMembers_both_email = printListAndRemoveDublicates_(allMembers_both_email, "Båda");
+  allMembers_send_email = printListAndRemoveDublicates_(allMembers_send_email, "Bara skicka");
+  allMembers_receive_email = printListAndRemoveDublicates_(allMembers_receive_email, "Bara ta emot");
+  
+  allMembers_both_email_admin = printListAndRemoveDublicates_(allMembers_both_email_admin, "Båda ADMIN");
+  allMembers_send_email_admin = printListAndRemoveDublicates_(allMembers_send_email_admin, "Bara skicka ADMIN");
+  
+  return [allMembers_both_email, allMembers_send_email, allMembers_receive_email, allMembers_both_email_admin, allMembers_send_email_admin];  
+}
+
+
+/**
+ * Flytta runt e-postadresser till korrekt lista anseende skäppostnotifikation
+ * 
+ * @param {string[]} allMembers_both_email - E-postlista för att skicka och ta emot e-brev
+ * @param {string[]} allMembers_send_email - E-postlista för att bara kunna skicka e-brev
+ * @param {string[]} allMembers_receive_email - E-postlista för att bara kunna ta emot e-brev
+ * @param {string[]} emailAdressesToSendSpamNotification - E-postlista för vart e-brev gällande misstänkt skräppost ska skickas till
+ *
+ * @returns {string[allMembers_both_email, allMembers_send_email, allMembers_receive_email, allMembers_both_email_admin, allMembers_send_email_admin]}
+ */
+function moveEmailToCorrectListRegardingSpamNotification_(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification) {
+
   let allMembers_both_email_admin = [];
   let allMembers_send_email_admin = [];
   
@@ -831,18 +864,8 @@ function moveEmailToCorrectList(allMembers_both_email, allMembers_send_email, al
     Logger.log("De är dock grupper och får ej stå med där och kommer tas bort");
     Logger.log(tmp_groupEmails);
   }
-  
-  /*****************************/
-  
-  //Vi tar bort alla upprepade e-postadresser inom sina egna listor och skriver ut dem
-  allMembers_both_email = printListAndRemoveDublicates_(allMembers_both_email, "Båda");
-  allMembers_send_email = printListAndRemoveDublicates_(allMembers_send_email, "Bara skicka");
-  allMembers_receive_email = printListAndRemoveDublicates_(allMembers_receive_email, "44444Bara ta emot");
-  
-  allMembers_both_email_admin = printListAndRemoveDublicates_(allMembers_both_email_admin, "Båda ADMIN");
-  allMembers_send_email_admin = printListAndRemoveDublicates_(allMembers_send_email_admin, "Bara skicka ADMIN");
-  
-  return [allMembers_both_email, allMembers_send_email, allMembers_receive_email, allMembers_both_email_admin, allMembers_send_email_admin];  
+
+  return [allMembers_both_email, allMembers_send_email, allMembers_receive_email, allMembers_both_email_admin, allMembers_send_email_admin];
 }
 
 

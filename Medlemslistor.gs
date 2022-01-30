@@ -585,7 +585,7 @@ function getSender(variable, nameOfVariable, attribut, data, cell, emailOptions)
 function getRecipient(variable, nameOfVariable, attribut, data) {
 
   let tmp_variable = replaceTemplate(variable, attribut, data);
-  tmp_variable = getCleanEmailArray(tmp_variable).toString();
+  tmp_variable = getCleanEmailArray_(tmp_variable).toString();
   Logger.log(nameOfVariable);
   Logger.log(tmp_variable);
   
@@ -607,7 +607,7 @@ function getRecipient(variable, nameOfVariable, attribut, data) {
  *
  * @returns {string[]} - en textsträng utan kommentarer eller mellanrum
  */
-function getCleanEmailArray(input) {
+function getCleanEmailArray_(input) {
 
   const emailArray = [];
   input = getCleanString_(input);  

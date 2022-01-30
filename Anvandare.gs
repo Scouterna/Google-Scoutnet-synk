@@ -658,7 +658,7 @@ function getGoogleAccounts_(defaultOrgUnitPath) {
  * @returns {Object[]} leaders - Lista med medlemsobjekt för kårfunktionärer
  */
 function getScoutleaders_(allMembers) {
-  
+
   const leaders = [];
   
   for (let i = 0; i < allMembers.length; i++) {
