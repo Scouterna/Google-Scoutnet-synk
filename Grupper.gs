@@ -246,7 +246,7 @@ function Grupper(...args) {
     
     if (update_group == "yes") {
       //Uppdatera medlemmar av en grupp
-      updateGroup(selection, rad_nummer, groupId, email, data[rowIndex], grd, listOfEmailAdressesOfActiveAccounts, forceUpdate);
+      updateGroup_(selection, rad_nummer, groupId, email, data[rowIndex], grd, listOfEmailAdressesOfActiveAccounts, forceUpdate);
     }
   }
   deleteRowsFromSpreadsheet_(sheet, delete_rows);
@@ -438,48 +438,28 @@ function getGroupMember_(groupId, memberkey) {
 }
 
 
-/*
+/**
  * Uppdatera medlemmar för en grupp
  *
  * @param {Objekt} selection - Hela området på kalkylarket som används
- * @param {int} rad_nummer - Radnummer för aktuell grupp i kalkylarket
- * @param {string} groupId - Googles id för gruppen
+ * @param {number} rad_nummer - Radnummer för aktuell grupp i kalkylarket
+ * @param {string} groupId - Googles id för en grupp
  * @param {string} email - Gruppens e-postadress
  * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
  * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
  * @param {string[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
- * @param {Boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
+ * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  */
-function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOfEmailAdressesOfActiveAccounts, forceUpdate) {
+function updateGroup_(selection, rad_nummer, groupId, email, radInfo, grd, listOfEmailAdressesOfActiveAccounts, forceUpdate) {
 
   /*****Skicka och ta emot*/
-  const scoutnet_list_id_both = radInfo[grd["scoutnet_list_id"]]; //Själva datan
-  const cell_scoutnet_list_id_both = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
-  const synk_option_both = radInfo[grd["synk_option"]];
-  Logger.log("..........1Båda....................");
-  const allMembers_both = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id_both, cell_scoutnet_list_id_both, listOfEmailAdressesOfActiveAccounts, forceUpdate);
-  let allMembers_both_email = getMemberlistsMemberEmail_(allMembers_both, synk_option_both);
-  Logger.log("..........1Slut Båda....................");
+  let allMembers_both_email = getEmailsForAGroupByNameOfColumnAndSyncOption_(selection, rad_nummer, radInfo, grd["scoutnet_list_id"], grd["synk_option"], listOfEmailAdressesOfActiveAccounts, forceUpdate, "Båda");
   /***********************/
-  
   /*****Bara skicka*******/
-  const scoutnet_list_id_send = radInfo[grd["scoutnet_list_id_send"]]; //Själva datan
-  const cell_scoutnet_list_id_send = selection.getCell(rad_nummer, grd["scoutnet_list_id_send"]+1); //Range
-  const synk_option_send = radInfo[grd["synk_option_send"]];
-  Logger.log("..........1Bara skicka....................");
-  const allMembers_send = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id_send, cell_scoutnet_list_id_send, listOfEmailAdressesOfActiveAccounts, forceUpdate);
-  let allMembers_send_email = getMemberlistsMemberEmail_(allMembers_send, synk_option_send);
-  Logger.log("..........1Slut bara skicka....................");
+  let allMembers_send_email = getEmailsForAGroupByNameOfColumnAndSyncOption_(selection, rad_nummer, radInfo, grd["scoutnet_list_id_send"], grd["synk_option_send"], listOfEmailAdressesOfActiveAccounts, forceUpdate, "Bara skicka");
   /***********************/
-  
   /*****Bara ta emot******/
-  const scoutnet_list_id_receive = radInfo[grd["scoutnet_list_id_receive"]]; //Själva datan
-  const cell_scoutnet_list_id_receive = selection.getCell(rad_nummer, grd["scoutnet_list_id_receive"]+1); //Range
-  const synk_option_receive = radInfo[grd["synk_option_receive"]];
-  Logger.log("..........1Bara ta emot....................");
-  const allMembers_receive = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id_receive, cell_scoutnet_list_id_receive, listOfEmailAdressesOfActiveAccounts, forceUpdate);
-  let allMembers_receive_email = getMemberlistsMemberEmail_(allMembers_receive, synk_option_receive);
-  Logger.log("..........1Slut bara ta emot....................");
+  let allMembers_receive_email = getEmailsForAGroupByNameOfColumnAndSyncOption_(selection, rad_nummer, radInfo, grd["scoutnet_list_id_receive"], grd["synk_option_receive"], listOfEmailAdressesOfActiveAccounts, forceUpdate, "Bara ta emot");
   /***********************/
   
   /*****Till vilka som ska bli informerade om misstänkt spam*****/
@@ -487,40 +467,92 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
   const cell_group_moderate_content_email = selection.getCell(rad_nummer, grd["group_moderate_content_email"]+1); //Range
   const emailAdressesToSendSpamNotification = getEmailadressesToSendSpamNotification_(group_moderate_content_email, cell_group_moderate_content_email, forceUpdate);
   /**************************************************************/
-  
-  /*****Vi ska flytta runt e-postadresserna mellan listorna om de finns i flera*****/
-  const email_lists = moveEmailToCorrectList_(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification);
-  allMembers_both_email = email_lists[0]
-  allMembers_send_email = email_lists[1];
-  allMembers_receive_email = email_lists[2];
-  
-  const allMembers_both_email_admin = email_lists[3];
-  const allMembers_send_email_admin = email_lists[4];
-  /***********************/
-  
-  
+
   /*****Kolla vilka som ska få skicka till listan*****/
   let postPermission = 'ANYONE_CAN_POST';
   
-  if (scoutnet_list_id_send) { //Vi vill att bara några ska kunna skicka till listan
-    
+  if (0 != allMembers_send_email.length) { //Vi vill att bara några ska kunna skicka till listan
     postPermission = 'ALL_MANAGERS_CAN_POST';
     Logger.log("Bara på listan kan skicka till listan");    
-  }  
-  /***********************/
-  
-  
+  }
   Logger.log("postPermission = " + postPermission);
-  let allMembers_email = [];
-  allMembers_email.push.apply(allMembers_email, allMembers_both_email);
-  allMembers_email.push.apply(allMembers_email, allMembers_send_email);
-  allMembers_email.push.apply(allMembers_email, allMembers_receive_email);
-  
-  allMembers_email.push.apply(allMembers_email, allMembers_both_email_admin);
-  allMembers_email.push.apply(allMembers_email, allMembers_send_email_admin);
-  
-  allMembers_email = removeDublicates_(allMembers_email);
+  /***********************/
+
+  /*****Vi ska flytta runt e-postadresserna mellan listorna om de finns i flera*****/
+  const different_email_lists = moveEmailToCorrectList_(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification);
+  /***********************/
+
   // allMembers_email ==  alla distinkta e-postadresser som finns från alla tre+två(admin) grupper
+  let allMembers_email = addMultipleListsInObjectToAList_(different_email_lists);
+
+  addDeleteAndUpdateGroupmembersToGroup_(groupId, allMembers_email, different_email_lists);
+
+  let customFooterText = radInfo[grd["customFooterText"]];
+  const isArchivedText = radInfo[grd["isArchived"]];
+  changeGroupPermissions_(email, postPermission, customFooterText, isArchivedText);  
+  
+  Logger.log("Slut på funktionen UpdateGroup");
+}
+
+
+/**
+ * Ger delmängd av e-postadresser för som ska vara med i en grupp
+ * enligt namn på kolumn i kalkylblad och synkinställning
+ *
+ * @param {Objekt} selection - Hela området på kalkylarket som används
+ * @param {number} rad_nummer - Radnummer för aktuell grupp i kalkylarket
+ * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
+ * @param {number} kolumnIndex_list_id - Kolumnindex för var listId står
+ * @param {number} kolumnIndex_synk_option - Kolumnindex för var synkinställning står
+ * @param {string[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
+ * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
+ * @param {string} text - Text som ska stå i loggen vid körning för att markera vad e-postadresserna avser
+ */
+function getEmailsForAGroupByNameOfColumnAndSyncOption_(selection, rad_nummer, radInfo, kolumnIndex_list_id, kolumnIndex_synk_option, listOfEmailAdressesOfActiveAccounts, forceUpdate, text) {
+
+  const scoutnet_list_id = radInfo[kolumnIndex_list_id]; //Själva datan
+  const cell_scoutnet_list_id = selection.getCell(rad_nummer, kolumnIndex_list_id+1); //Range
+  const synk_option = radInfo[kolumnIndex_synk_option];
+  
+  Logger.log(".......... " + text + " ....................");  
+  const allMembers = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutnet_list_id, listOfEmailAdressesOfActiveAccounts, forceUpdate);
+  let allMembers_email = getMemberlistsMemberEmail_(allMembers, synk_option);
+  Logger.log("...1Slut - " + text + " ....................");
+
+  return allMembers_email;
+}
+
+
+/**
+ * Ger en lista givet ett objekt och värden för samtliga attribut.
+ *
+ * @param {Object} different_email_lists - Olika listor med e-postadresser för olika behörighetsroller i gruppen
+ * 
+ * @returns {string[]} - Samtliga e-postadresser för de med olika behörighetsroller i gruppen
+ */ 
+function addMultipleListsInObjectToAList_(different_email_lists)  {
+
+  let allMembers_email = [];
+
+  const different_email_lists_values = Object.values(different_email_lists);
+
+  for (let i = 0; i < different_email_lists_values.length; i++) {
+    allMembers_email.push.apply(allMembers_email, different_email_lists_values[i]);
+  }
+  allMembers_email = removeDublicates_(allMembers_email);
+
+  return allMembers_email;
+}
+
+
+/**
+ * Uppdatera en grupp genom att lägga till, ta bort och uppdatera medlemmar i en grupp
+ *
+ * @param {string} groupId - Googles id för en grupp
+ * @param {string[]} allMembers_email - Lista med e-postadresser för medlemmar i en grupp
+ * @param {Object} different_email_lists - Olika listor med e-postadresser för olika behörighetsroller i gruppen
+ */ 
+function addDeleteAndUpdateGroupmembersToGroup_(groupId, allMembers_email, different_email_lists)  {
   
   const group_members = getGroupMembers_(groupId); //Alla gruppmedlemmar med deras roller
   const group_members_email = [];
@@ -533,7 +565,7 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
       deleteGroupMember_(groupId, group_members[i].memberId, group_members[i].email);
     }
     group_members_email.push(group_members[i].email);
-  }   
+  }
   
   
   for (let i = 0; i < allMembers_email.length; i++) { //Vi gör detta som nummer två för att spara lite tid,
@@ -541,81 +573,116 @@ function updateGroup(selection, rad_nummer, groupId, email, radInfo, grd, listOf
     
     //Denna e-post finns ej med, så vi lägger till personen
     if (!group_members_email.includes(allMembers_email[i])) { //Lägg till person till e-postlista
-      
-      if (allMembers_both_email.includes(allMembers_email[i])) { //Lägg till så att både kan skicka och ta emot
-        Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Skicka och ta emot");
-        addGroupMember_(groupId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
-      }
-      else if (allMembers_send_email.includes(allMembers_email[i])) { //Lägg till så att bara kan skicka
-        Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Bara skicka");
-        addGroupMember_(groupId, allMembers_email[i], 'MANAGER', 'NONE');
-      }
-      else if (allMembers_receive_email.includes(allMembers_email[i])){ //Lägg till så att bara kan ta emot
-        Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Bara ta emot");
-        addGroupMember_(groupId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
-      }
-      
-      else if (allMembers_both_email_admin.includes(allMembers_email[i])){ //Lägg till admin så att både kan skicka och ta emot
-        Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Admin Skicka och ta emot");
-        addGroupMember_(groupId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
-      }
-      else if (allMembers_send_email_admin.includes(allMembers_email[i])){ //Lägg till admin så att bara kan skicka
-        Logger.log(allMembers_email[i] + " Borde lägga till i Googles e-postlista. Admin Bara skicka");
-        addGroupMember_(groupId, allMembers_email[i], 'OWNER', 'DISABLED');
-      }
+      updateGroupEmailThatIsNewInGroup_(groupId, allMembers_email[i], different_email_lists);
     }
     
     //Denna e-post finns redan med i gruppen, men har kanske fel roll?
     else {
-      //Both, Send, Receive
-      const memberTypeOld = getMembertype_(groupId, group_members, allMembers_email[i]);
-      const memberId = getMemberId_(group_members, allMembers_email[i]);
-      
-      //Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
-      
-      if (allMembers_both_email.includes(allMembers_email[i])) { //Ska kunna skicka och ta emot        
-        if (memberTypeOld != "Both") { //Har någon annan roll sedan innan
-          updateGroupMember_(groupId, memberId, allMembers_email[i], 'MANAGER', 'ALL_MAIL');
-          Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
-          Logger.log(allMembers_email[i] + " har nu rollen skicka och ta emot");
-        }
-      }
-      else if (allMembers_send_email.includes(allMembers_email[i])) { //Ska bara kunna skicka        
-        if (memberTypeOld != "Send") { //Har någon annan roll sedan innan
-          updateGroupMember_(groupId, memberId, allMembers_email[i], 'MANAGER', 'NONE');
-          Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
-          Logger.log(allMembers_email[i] + " har nu rollen bara skicka");
-        }
-      }
-      else if (allMembers_receive_email.includes(allMembers_email[i])) { //Ska bara kunna ta emot        
-        if (memberTypeOld != "Receive") { //Har någon annan roll sedan innan
-          updateGroupMember_(groupId, memberId, allMembers_email[i], 'MEMBER', 'ALL_MAIL');
-          Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
-          Logger.log(allMembers_email[i] + " har nu rollen bara ta emot");
-        }
-      }
-      
-      else if (allMembers_both_email_admin.includes(allMembers_email[i])) { //Ska kunna skicka och ta emot ADMIN        
-        if (memberTypeOld != "OWNER_Both") { //Har någon annan roll sedan innan
-          updateGroupMember_(groupId, memberId, allMembers_email[i], 'OWNER', 'ALL_MAIL');
-          Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
-          Logger.log(allMembers_email[i] + " har nu rollen bara ta emot ADMIN");
-        }
-      }
-      else if (allMembers_send_email_admin.includes(allMembers_email[i])) { //Ska bara kunna skicka ADMIN      
-        if (memberTypeOld != "OWNER_Send") { //Har någon annan roll sedan innan
-          updateGroupMember_(groupId, memberId, allMembers_email[i], 'OWNER', 'DISABLED');
-          Logger.log(allMembers_email[i] + " fanns redan på listan med rollen " + memberTypeOld);
-          Logger.log(allMembers_email[i] + " har nu rollen bara skicka ADMIN");
-        }
-      }
+      updateGroupEmailThatAlreadyExists_(groupId, group_members, allMembers_email[i], different_email_lists);
     }
   }
-  let customFooterText = radInfo[grd["customFooterText"]];
-  const isArchivedText = radInfo[grd["isArchived"]];
-  changeGroupPermissions_(email, postPermission, customFooterText, isArchivedText);  
+}
+
+
+/**
+ * Uppdatera en grupp genom att lägga till en ny e-postadress i gruppen
+ *
+ * @param {string} groupId - Gruppens id hos grupp
+ * @param {string} member_email - E-postadress för en specifik medlem i gruppen
+ * @param {Object} different_email_lists - Olika listor med e-postadresser för olika behörighetsroller i gruppen
+ */ 
+function updateGroupEmailThatIsNewInGroup_(groupId, member_email, different_email_lists)  {
+
+  const allMembers_both_email = different_email_lists.allMembers_both_email;
+  const allMembers_send_email = different_email_lists.allMembers_send_email;
+  const allMembers_receive_email = different_email_lists.allMembers_receive_email;
+
+  const allMembers_both_email_admin = different_email_lists.allMembers_both_email_admin;
+  const allMembers_send_email_admin = different_email_lists.allMembers_send_email_admin;
+
+  if (allMembers_both_email.includes(member_email)) { //Lägg till så att både kan skicka och ta emot
+    Logger.log(member_email + " Borde lägga till i Googles e-postlista. Skicka och ta emot");
+    addGroupMember_(groupId, member_email, 'MANAGER', 'ALL_MAIL');
+  }
+  else if (allMembers_send_email.includes(member_email)) { //Lägg till så att bara kan skicka
+    Logger.log(member_email + " Borde lägga till i Googles e-postlista. Bara skicka");
+    addGroupMember_(groupId, member_email, 'MANAGER', 'NONE');
+  }
+  else if (allMembers_receive_email.includes(member_email)){ //Lägg till så att bara kan ta emot
+    Logger.log(member_email + " Borde lägga till i Googles e-postlista. Bara ta emot");
+    addGroupMember_(groupId, member_email, 'MEMBER', 'ALL_MAIL');
+  }
   
-  Logger.log("Slut på funktionen UpdateGroup");
+  else if (allMembers_both_email_admin.includes(member_email)){ //Lägg till admin så att både kan skicka och ta emot
+    Logger.log(member_email + " Borde lägga till i Googles e-postlista. Admin Skicka och ta emot");
+    addGroupMember_(groupId, member_email, 'OWNER', 'ALL_MAIL');
+  }
+  else if (allMembers_send_email_admin.includes(member_email)){ //Lägg till admin så att bara kan skicka
+    Logger.log(member_email + " Borde lägga till i Googles e-postlista. Admin Bara skicka");
+    addGroupMember_(groupId, member_email, 'OWNER', 'DISABLED');
+  }
+}
+
+
+/**
+ * Uppdatera roll för en e-postadress i en grupp
+ *
+ * @param {string} groupId - Gruppens id hos grupp
+ * @param {Object[]} group_members - Lista av medlemsobjekt med attributen email, role, memberId för medlemmar i en grupp
+ * @param {string} member_email - E-postadress för en specifik medlem i gruppen
+ * @param {Object} different_email_lists - Olika listor med e-postadresser för olika behörighetsroller i gruppen
+ */ 
+function updateGroupEmailThatAlreadyExists_(groupId, group_members, member_email, different_email_lists)  {
+
+  const allMembers_both_email = different_email_lists.allMembers_both_email;
+  const allMembers_send_email = different_email_lists.allMembers_send_email;
+  const allMembers_receive_email = different_email_lists.allMembers_receive_email;
+
+  const allMembers_both_email_admin = different_email_lists.allMembers_both_email_admin;
+  const allMembers_send_email_admin = different_email_lists.allMembers_send_email_admin;
+
+  //Both, Send, Receive
+  const memberTypeOld = getMembertype_(groupId, group_members, member_email);
+  const memberId = getMemberId_(group_members, member_email);
+  
+  Logger.log(member_email + " fanns redan på listan med rollen " + memberTypeOld);
+  
+  if (allMembers_both_email.includes(member_email)) { //Ska kunna skicka och ta emot        
+    if (memberTypeOld != "Both") { //Har någon annan roll sedan innan
+      updateGroupMember_(groupId, memberId, member_email, 'MANAGER', 'ALL_MAIL');
+      Logger.log(member_email + " fanns redan på listan med rollen " + memberTypeOld);
+      Logger.log(member_email + " har nu rollen skicka och ta emot");
+    }
+  }
+  else if (allMembers_send_email.includes(member_email)) { //Ska bara kunna skicka        
+    if (memberTypeOld != "Send") { //Har någon annan roll sedan innan
+      updateGroupMember_(groupId, memberId, member_email, 'MANAGER', 'NONE');
+      Logger.log(member_email + " fanns redan på listan med rollen " + memberTypeOld);
+      Logger.log(member_email + " har nu rollen bara skicka");
+    }
+  }
+  else if (allMembers_receive_email.includes(member_email)) { //Ska bara kunna ta emot        
+    if (memberTypeOld != "Receive") { //Har någon annan roll sedan innan
+      updateGroupMember_(groupId, memberId, member_email, 'MEMBER', 'ALL_MAIL');
+      Logger.log(member_email + " fanns redan på listan med rollen " + memberTypeOld);
+      Logger.log(member_email + " har nu rollen bara ta emot");
+    }
+  }
+  
+  else if (allMembers_both_email_admin.includes(member_email)) { //Ska kunna skicka och ta emot ADMIN        
+    if (memberTypeOld != "OWNER_Both") { //Har någon annan roll sedan innan
+      updateGroupMember_(groupId, memberId, member_email, 'OWNER', 'ALL_MAIL');
+      Logger.log(member_email + " fanns redan på listan med rollen " + memberTypeOld);
+      Logger.log(member_email + " har nu rollen bara ta emot ADMIN");
+    }
+  }
+  else if (allMembers_send_email_admin.includes(member_email)) { //Ska bara kunna skicka ADMIN      
+    if (memberTypeOld != "OWNER_Send") { //Har någon annan roll sedan innan
+      updateGroupMember_(groupId, memberId, member_email, 'OWNER', 'DISABLED');
+      Logger.log(member_email + " fanns redan på listan med rollen " + memberTypeOld);
+      Logger.log(member_email + " har nu rollen bara skicka ADMIN");
+    }
+  }
 }
 
 
@@ -765,7 +832,7 @@ function getMemberId_(group_members, email) {
  * @param {string[]} allMembers_receive_email - E-postlista för att bara kunna ta emot e-brev
  * @param {string[]} emailAdressesToSendSpamNotification - E-postlista för vart e-brev gällande misstänkt skräppost ska skickas till
  *
- * @returns {string[allMembers_both_email, allMembers_send_email, allMembers_receive_email, allMembers_both_email_admin, allMembers_send_email_admin]}
+ * @returns {Object} - Objekt med e-postadresser för olika listor
  */
 function moveEmailToCorrectList_(allMembers_both_email, allMembers_send_email, allMembers_receive_email, emailAdressesToSendSpamNotification) {
   
@@ -800,7 +867,17 @@ function moveEmailToCorrectList_(allMembers_both_email, allMembers_send_email, a
   allMembers_both_email_admin = printListAndRemoveDublicates_(allMembers_both_email_admin, "Båda ADMIN");
   allMembers_send_email_admin = printListAndRemoveDublicates_(allMembers_send_email_admin, "Bara skicka ADMIN");
   
-  return [allMembers_both_email, allMembers_send_email, allMembers_receive_email, allMembers_both_email_admin, allMembers_send_email_admin];  
+
+  const different_email_lists = {};
+  different_email_lists.allMembers_both_email = allMembers_both_email;
+  different_email_lists.allMembers_send_email = allMembers_send_email;
+  different_email_lists.allMembers_receive_email = allMembers_receive_email;
+
+  different_email_lists.allMembers_both_email_admin = allMembers_both_email_admin;
+  different_email_lists.allMembers_send_email_admin = allMembers_send_email_admin;
+
+  Logger.log(different_email_lists);
+  return different_email_lists;
 }
 
 

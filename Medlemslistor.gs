@@ -372,13 +372,13 @@ function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray
       const tmp_copy = DocumentApp.openById(tmp_copy_id);
 
       const body = tmp_copy.getBody();
-      replaceContentOfDocument(body, attribut, dataArray);
+      replaceContentOfDocument_(body, attribut, dataArray);
 
       const header = tmp_copy.getHeader();
-      replaceContentOfDocument(header, attribut, dataArray);
+      replaceContentOfDocument_(header, attribut, dataArray);
 
       const footer = tmp_copy.getFooter();
-      replaceContentOfDocument(footer, attribut, dataArray);
+      replaceContentOfDocument_(footer, attribut, dataArray);
 
       Logger.log("URL för temporärt skapad fil är");
       Logger.log(tmp_copy.getUrl());
@@ -413,7 +413,7 @@ function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray
  * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
  * @param {string[]} dataArray - en lista innehållande persondata för en person
  */
-function replaceContentOfDocument(section, attribut, dataArray) {
+function replaceContentOfDocument_(section, attribut, dataArray) {
 
   const section_text = section.getText();
   
