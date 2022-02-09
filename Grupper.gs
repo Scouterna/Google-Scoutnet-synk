@@ -381,7 +381,7 @@ function createGroup_(email, name, shouldUpdateListOfGroups) {
   };
   AdminDirectory.Groups.insert(tmp_group);
             
-  const group = getAdminDirectoryGroup(email);
+  const group = getAdminDirectoryGroup_(email);
 
   if (shouldUpdateListOfGroups) {
     updateListOfGroups_();
