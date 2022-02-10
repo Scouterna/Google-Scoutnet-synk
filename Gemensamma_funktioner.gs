@@ -709,6 +709,38 @@ function checkIfGroupExists_(email) {
 
 
 /**
+ * Uppdaterar bakgrundsfärgen för en cell.
+ * Antingen endast vid behov eller gör det oavsett färg innan.
+ * 
+ * @param {Object} cell - Ett objekt av typen Range
+ * @param {string} colour - Färgen som ska sättas enligt CSS-standard
+ * @param {boolean} force - Om färgen ska uppdateras oavsett tidigare färg
+ */
+function setBackgroundColour_(cell, colour, force) {
+
+  const colourString = colour.toLowerCase();
+  let colourCode;
+
+  if ("white" === colourString) {
+    colourCode = "#ffffff";
+  }
+  else  {
+    colourCode = colour;
+    Logger.log("Denna färg är ej definerad sedan tidigare");
+  }
+
+  if (!force && colourCode !== cell.getBackground())  {
+    Logger.log("FÄRG ej tvingad färgändring");
+    cell.setBackground(colourCode);
+  }
+  else if (force)  {
+    Logger.log("FÄRG tvingad färgändring");
+    cell.setBackground(colourCode);
+  }
+}
+
+
+/**
  * Hämta data från ett kalkylblad som skriptet är kopplat till
  *
  * @param {string} nameOfSheet - Namn på kalkylbladet

@@ -90,9 +90,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
       cell.setBackground("yellow");
     }
     else {
-      if ("#ffffff" != cell.getBackground()) {
-        cell.setBackground("white");
-      }
+      setBackgroundColour_(cell, "white", false);
     }
     
     if (spreadsheetUrl == "") { //Inget kalkylark är angivet      
@@ -111,10 +109,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
     let rowSpreadsheet;
     try {
       rowSpreadsheet = SpreadsheetApp.openByUrl(spreadsheetUrl);
-      
-      if ("#ffffff" != cell.getBackground()) {
-        cell.setBackground("white");
-      }
+      setBackgroundColour_(cell, "white", false);
     }
     catch (e) { //Om url är fel
       Logger.log(e);
@@ -189,16 +184,12 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     return;
   }
   else {
-    if ("#ffffff" != cell.getBackground()) {
-      cell.setBackground("white");
-    }
+    setBackgroundColour_(cell, "white", false);
   }
 
   cell = selection.getCell(rad_nummer, grd["email_sender_name"]+1);
   if (email_sender_name) { //Kolla om fältet för avsändarnamn är angivet
-    if ("#ffffff" != cell.getBackground()) {
-      cell.setBackground("white");
-    }
+    setBackgroundColour_(cell, "white", false);
   }
   else {
     Logger.log("Inget avsändarnamn angivet");
@@ -214,9 +205,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     if (documentToMerge) {
       Logger.log("Lyckades hitta dokument att koppla");
       Logger.log(documentToMerge);
-      if ("#ffffff" != cell.getBackground()) {
-        cell.setBackground("white");
-      }
+      setBackgroundColour_(cell, "white", false);
     }
     else  {
       Logger.log("Fel på något dokument-id");
@@ -547,15 +536,11 @@ function getSender(variable, nameOfVariable, attribut, data, cell, emailOptions)
   tmp_variable = tmp_variable.toLowerCase();
 
   if ("avsändaradress" == nameOfVariable && isFromEmailAdressAllowed_(tmp_variable)) {
-    if ("#ffffff" != cell.getBackground()) {
-      cell.setBackground("white");
-    }
+    setBackgroundColour_(cell, "white", false);
     emailOptions["from"] = tmp_variable;
   }
   else if ("svarsadress" == nameOfVariable && checkIfEmail_(tmp_variable))  {
-    if ("#ffffff" != cell.getBackground()) {
-      cell.setBackground("white");
-    }
+    setBackgroundColour_(cell, "white", false);
     emailOptions["replyTo"] = tmp_variable;
   }
   else if (!tmp_variable)  {

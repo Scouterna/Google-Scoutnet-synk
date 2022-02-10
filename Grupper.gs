@@ -220,9 +220,7 @@ function Grupper(...args) {
           //ändrat till en ogiltig e-postadress och sen ändrar tillbaka
           Logger.log("E-post ej ändrad för grupppen " + email);
           let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
-          if ("#ffffff" != cell.getBackground()) {
-            cell.setBackground("white");
-          }
+          setBackgroundColour_(cell, "white", false);
 
           cell = selection.getCell(rad_nummer, grd["cell_url"]+1).getValue();
           if (cell == "") {
