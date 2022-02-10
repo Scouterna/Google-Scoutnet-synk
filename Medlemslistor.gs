@@ -121,7 +121,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
 
       if (null == shouldUpdate || shouldUpdate) {
         //Uppdatera aktuell medlemslista
-        updateMemberlist(selection, rad_nummer, data[i], grd, allMembers, rowSpreadsheet, forceUpdate);
+        updateMemberlist_(selection, rad_nummer, data[i], grd, allMembers, rowSpreadsheet, forceUpdate);
       }
       if (null == shouldSend || shouldSend) {
         //skicka ut e-brev till de i medlemslistan
@@ -227,7 +227,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     Logger.log("Rad  i kalkylarket " + i);
 
     /***Villkor***/
-    const tmp_email_condition = replaceTemplate(email_condition, attribut, data[i]);
+    const tmp_email_condition = replaceTemplate_(email_condition, attribut, data[i]);
     if (tmp_email_condition)  {
       if (!eval(tmp_email_condition)) {
         Logger.log("Uppfyller INTE villkoren " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
@@ -244,12 +244,12 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     /***Hämta & Ersätt text***/
     
     /***Ämnesrad***/
-    const tmp_subject = replaceTemplate(email_draft_subject, attribut, data[i]);
+    const tmp_subject = replaceTemplate_(email_draft_subject, attribut, data[i]);
     /***Ämnesrad - Slut***/
 
     /***Avsändarnamn***/
     if (email_sender_name)  {
-      const tmp_email_sender_name = replaceTemplate(email_sender_name, attribut, data[i]);
+      const tmp_email_sender_name = replaceTemplate_(email_sender_name, attribut, data[i]);
       emailOptions["name"] = tmp_email_sender_name;
     }
     /***Avsändarnamn - Slut***/
@@ -269,18 +269,9 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     /***Svarsadress e-post - Slut***/
 
     /***Svara-ej***/
-    let tmp_email_noreply = replaceTemplate(email_noreply, attribut, data[i]);
-    if (tmp_email_noreply)  { //Om den ej är tom
-      tmp_email_noreply = JSON.parse(tmp_email_noreply);
-    }
-    if (tmp_email_noreply)  {
-      cell_email_noreply.setValue(true);
-      Logger.log("Svara-ej är påslagen " + tmp_email_noreply);
+    const tmp_email_noreply = checkIfNoReplyOption(email_noreply, attribut, data[i], cell_email_noreply)
+    if (tmp_email_noreply) {
       emailOptions["noReply"] = true;
-    }
-    else {
-      cell_email_noreply.setValue(false);
-      Logger.log("Svara-ej är avstängd " + tmp_email_noreply);
     }
     /***Svara-ej - Slut***/
 
@@ -308,15 +299,14 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     }
     
     /***Brödtext***/
-    const tmp_plainBody = replaceTemplate(plainBody, attribut, data[i]);
-    const tmp_body = replaceTemplate(body, attribut, data[i]);
+    const tmp_plainBody = replaceTemplate_(plainBody, attribut, data[i]);
+    const tmp_body = replaceTemplate_(body, attribut, data[i]);
     emailOptions["htmlBody"] = tmp_body;   
     /***Brödtext  Slut***/
     
     /***Bilagor***/
     emailOptions["attachments"] = getAndMakeAttachments(attachments, documentToMerge, attribut, data[i]);
     /***Bilagor - Slut***/
-
     
     Logger.log("tmp_email_recipient " + tmp_email_recipient);
     Logger.log("tmp_subject " + tmp_subject);
@@ -326,6 +316,35 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     Logger.log(emailOptions);
 
     GmailApp.sendEmail(tmp_email_recipient, tmp_subject, tmp_plainBody, emailOptions);
+  }
+}
+
+
+/**
+ * Ger sant eller falskt om Svara-ej är påslagen eller ej
+ * 
+ * @param {Object[]} attachments - lista av objekt av typen GmailAttachment som finns i utkastet som bilaga
+ * @param {Object[]} documentToMerge - en lista av objekt av typen File
+ * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - en lista innehållande persondata för en person
+ *
+ * @returns {boolean} - Sant eller falskt om Svara-ej är påslagen eller ej
+ */
+function checkIfNoReplyOption(email_noreply, attribut, dataArray, cell_email_noreply) {
+
+  let tmp_email_noreply = replaceTemplate_(email_noreply, attribut, dataArray);
+  if (tmp_email_noreply)  { //Om den ej är tom
+    tmp_email_noreply = JSON.parse(tmp_email_noreply);
+  }
+  if (tmp_email_noreply)  {
+    cell_email_noreply.setValue(true);
+    Logger.log("Svara-ej är påslagen " + tmp_email_noreply);
+    return true;
+  }
+  else {
+    cell_email_noreply.setValue(false);
+    Logger.log("Svara-ej är avstängd " + tmp_email_noreply);
+    return false;
   }
 }
 
@@ -356,7 +375,7 @@ function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray
     let tmp_copy_id;
     try {
       const docName = documentToMerge[i].getName();
-      const newDocName = replaceTemplate(docName, attribut, dataArray);
+      const newDocName = replaceTemplate_(docName, attribut, dataArray);
       tmp_copy_id = documentToMerge[i].makeCopy(newDocName).getId();
       const tmp_copy = DocumentApp.openById(tmp_copy_id);
 
@@ -413,7 +432,7 @@ function replaceContentOfDocument_(section, attribut, dataArray) {
   for (let i = 0; textMatches && i < textMatches.length; i++)  {
 
     //Ny data för aktuell person som ska ersätta kortkoden
-    const replaceData = getReplaceDataForShortcode(textMatches[i], attribut, dataArray);
+    const replaceData = getReplaceDataForShortcode_(textMatches[i], attribut, dataArray);
 
     //Ersätt koden med personlig data
     section.replaceText(textMatches[i], replaceData || '');
@@ -430,7 +449,7 @@ function replaceContentOfDocument_(section, attribut, dataArray) {
  *
  * @returns {string} - en personligfierad textsträng
  */
-function replaceTemplate(textInput, attribut, dataArray)  {
+function replaceTemplate_(textInput, attribut, dataArray)  {
 
   let text = textInput.slice();
   //Skapar en lista med alla kortkoder som används
@@ -439,7 +458,7 @@ function replaceTemplate(textInput, attribut, dataArray)  {
   for (let i = 0; textMatches && i<textMatches.length; i++)  {
     
     //Ny data för aktuell personsom ska ersätta kortkoden
-    const replaceData = getReplaceDataForShortcode(textMatches[i], attribut, dataArray);
+    const replaceData = getReplaceDataForShortcode_(textMatches[i], attribut, dataArray);
     //Ersätt koden med personlig data
     text = text.replace(textMatches[i], replaceData || '');
   }
@@ -457,7 +476,7 @@ function replaceTemplate(textInput, attribut, dataArray)  {
  *
  * @returns {string[]} - en lista av de kortkoder som används
  */
-function getReplaceDataForShortcode(textMatch, attribut, dataArray)  {
+function getReplaceDataForShortcode_(textMatch, attribut, dataArray)  {
 
   //Ta bort måsvingarna
   textMatch = textMatch.replace(/[\{\}][\{\}]/g, '');
@@ -531,7 +550,7 @@ function getDocumentToMerge(ids) {
  */
 function getSender(variable, nameOfVariable, attribut, data, cell, emailOptions)  {
 
-  let tmp_variable = replaceTemplate(variable, attribut, data);
+  let tmp_variable = replaceTemplate_(variable, attribut, data);
   tmp_variable = getCleanString_(tmp_variable);
   tmp_variable = tmp_variable.toLowerCase();
 
@@ -569,7 +588,7 @@ function getSender(variable, nameOfVariable, attribut, data, cell, emailOptions)
  */
 function getRecipient(variable, nameOfVariable, attribut, data) {
 
-  let tmp_variable = replaceTemplate(variable, attribut, data);
+  let tmp_variable = replaceTemplate_(variable, attribut, data);
   tmp_variable = getCleanEmailArray_(tmp_variable).toString();
   Logger.log(nameOfVariable);
   Logger.log(tmp_variable);
@@ -664,7 +683,6 @@ function skapaRubrikerML() {
   const sheet = sheetDataMedlemslistor["sheet"];
   //const selection = sheetDataMedlemslistor["selection"];
   //const data = sheetDataMedlemslistor["data"];
-
   const mlkrd = getMedlemslistorKonfigRubrikData_();
 
   // Frys de två översta raderna på arket så att rubrikerna alltid syns
@@ -678,10 +696,8 @@ function skapaRubrikerML() {
   if (! (range1_rad1.isPartOfMerge() || range2_rad1.isPartOfMerge())) { 
     
     Logger.log("Inga av de angivna cellerna på rad 1 är sammanfogade");
-    
     range1_rad1.merge();
     range2_rad1.merge();
-    
     Logger.log("Vi har nu sammanfogat dem");    
   }
   else {
@@ -740,7 +756,7 @@ function skapaRubrikerML() {
  * @param {Object[]} spreadsheet - ett googleobjekt av typen Spreadsheet där listan finns
  * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  */
-function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, spreadsheet, forceUpdate) {
+function updateMemberlist_(selection, rad_nummer, radInfo, grd, allMembers, spreadsheet, forceUpdate) {
 
   /************************/
   const scoutnet_list_id = radInfo[grd["scoutnet_list_id"]]; //Själva datan
@@ -765,26 +781,8 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
 
   const sheet = spreadsheet.getSheets()[0];
 
-  /****Storlek på den gamla datan som ska bort***/
-  const lastRow = sheet.getLastRow();
-  let lastColumn = sheet.getLastColumn();
-  let numRows = lastRow+1;
-
-  if (membersInAList.length+1 > lastRow)  {
-    //Vi ska rensa om det blir fler rader i nya också
-    numRows = membersInAList.length+1;
-  }  
-
-  if (numAttrMembers > lastColumn)  {
-    //Vi ska rensa om det blir fler kolumner i nya också
-    lastColumn = numAttrMembers;
-  }  
-  Logger.log("lastColumn ska vara " + lastColumn);
-  Logger.log("lastRow ska vara " + lastRow);
-  
-  //Storlek på den gamla datan som ska bort
-  const range_allt = sheet.getRange(1, 1, numRows, lastColumn);
-  range_allt.clearContent();
+  /****Den gamla datan som ska bort***/
+  clearOldSpreadsheetData_(sheet, membersInAList, numAttrMembers);  
   /*********************************************/
 
   /****Storlek på den nya rubriken som ska in**/
@@ -804,8 +802,39 @@ function updateMemberlist(selection, rad_nummer, radInfo, grd, allMembers, sprea
     range_medlemmar.setValues(memberMatrix);  
     /********************************************/
 
-    setCustomColumns(sheet, numAttrMembers+1, membersInAList.length);
+    setCustomColumns_(sheet, numAttrMembers+1, membersInAList.length);
   }
+}
+
+
+/**
+ * Tar bort gammal medlemsdata från ett kalkylblad
+ * 
+ * @param {Object} sheet - Ett googleobjekt av typen Sheet
+ * @param {Object[]} membersInAList - En lista av medlemsobjekt
+ * @param {number} numAttrMembers - Antal medlemsattribut som används
+ */
+function clearOldSpreadsheetData_(sheet, membersInAList, numAttrMembers)  {
+
+  const lastRow = sheet.getLastRow();
+  let lastColumn = sheet.getLastColumn();
+  let numRows = lastRow+1;
+
+  if (membersInAList.length+1 > lastRow)  {
+    //Vi ska rensa om det blir fler rader i nya också
+    numRows = membersInAList.length+1;
+  }  
+
+  if (numAttrMembers > lastColumn)  {
+    //Vi ska rensa om det blir fler kolumner i nya också
+    lastColumn = numAttrMembers;
+  }  
+  Logger.log("lastColumn ska vara " + lastColumn);
+  Logger.log("lastRow ska vara " + lastRow);
+  
+  //Storlek på den gamla datan som ska bort
+  const range_allt = sheet.getRange(1, 1, numRows, lastColumn);
+  range_allt.clearContent();
 }
 
 
@@ -875,7 +904,7 @@ function createMemberlistRow_(member, mlrd)  {
  * @param {number} startCol - startkolumn för var dessa kolumner ska skrivas
  * @param {number} numRow - antal rader att skriva specialfunktionerna på
  */
-function setCustomColumns(sheet, startCol, numRow)  {
+function setCustomColumns_(sheet, startCol, numRow)  {
 
   const cf = medlemslista_egna_attribut_funktioner;
   const num_cf = cf.length;
