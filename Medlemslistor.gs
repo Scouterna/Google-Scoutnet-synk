@@ -85,7 +85,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
 
     let update_group = "yes";
     
-    let cell=selection.getCell(rad_nummer, grd["namn"]+1);
+    let cell = selection.getCell(rad_nummer, grd["namn"]+1);
     if (name == "") { //Kolla om fältet för namn är angivet
       cell.setBackground("yellow");
     }
@@ -105,7 +105,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
       update_group = "no";          
     }
 
-    cell=selection.getCell(rad_nummer, grd["spreadsheetUrl"]+1);
+    cell = selection.getCell(rad_nummer, grd["spreadsheetUrl"]+1);
     let rowSpreadsheet;
     try {
       rowSpreadsheet = SpreadsheetApp.openByUrl(spreadsheetUrl);
@@ -255,39 +255,39 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     /***Avsändarnamn - Slut***/
 
     /***Avsändaradress***/
-    const tmp_email_sender_email = getSender(email_sender_email, "avsändaradress", attribut, data[i], cell_email_sender_email, emailOptions);
+    const tmp_email_sender_email = getSender_(email_sender_email, "avsändaradress", attribut, data[i], cell_email_sender_email, emailOptions);
     if (!tmp_email_sender_email) {
       continue;
     }
     /***Avsändaradress - Slut***/
 
     /***Svarsadress e-post***/
-    const tmp_email_replyto = getSender(email_replyto, "svarsadress", attribut, data[i], cell_email_replyto, emailOptions);
+    const tmp_email_replyto = getSender_(email_replyto, "svarsadress", attribut, data[i], cell_email_replyto, emailOptions);
     if (!tmp_email_replyto) {
       continue;
     }
     /***Svarsadress e-post - Slut***/
 
     /***Svara-ej***/
-    const tmp_email_noreply = checkIfNoReplyOption(email_noreply, attribut, data[i], cell_email_noreply)
+    const tmp_email_noreply = checkIfNoReplyOption_(email_noreply, attribut, data[i], cell_email_noreply)
     if (tmp_email_noreply) {
       emailOptions["noReply"] = true;
     }
     /***Svara-ej - Slut***/
 
     /***Mottagare e-post***/
-    const tmp_email_recipient = getRecipient(email_recipient, "mottagaradress", attribut, data[i]);
+    const tmp_email_recipient = getRecipient_(email_recipient, "mottagaradress", attribut, data[i]);
     /***Mottagare e-post- Slut***/
 
     /***Kopia e-post***/
-    const tmp_email_cc = getRecipient(email_cc, "kopia e-post", attribut, data[i]);
+    const tmp_email_cc = getRecipient_(email_cc, "kopia e-post", attribut, data[i]);
     if (tmp_email_cc) {
       emailOptions["cc"] = tmp_email_cc;
     }
     /***Kopia e-post - Slut***/
 
     /***Blindkopia e-post***/
-    const tmp_email_bcc = getRecipient(email_bcc, "blindkopia e-post", attribut, data[i]);
+    const tmp_email_bcc = getRecipient_(email_bcc, "blindkopia e-post", attribut, data[i]);
     if (tmp_email_bcc) {
       emailOptions["bcc"] = tmp_email_bcc;
     }
@@ -305,7 +305,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     /***Brödtext  Slut***/
     
     /***Bilagor***/
-    emailOptions["attachments"] = getAndMakeAttachments(attachments, documentToMerge, attribut, data[i]);
+    emailOptions["attachments"] = getAndMakeAttachments_(attachments, documentToMerge, attribut, data[i]);
     /***Bilagor - Slut***/
     
     Logger.log("tmp_email_recipient " + tmp_email_recipient);
@@ -330,7 +330,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
  *
  * @returns {boolean} - Sant eller falskt om Svara-ej är påslagen eller ej
  */
-function checkIfNoReplyOption(email_noreply, attribut, dataArray, cell_email_noreply) {
+function checkIfNoReplyOption_(email_noreply, attribut, dataArray, cell_email_noreply) {
 
   let tmp_email_noreply = replaceTemplate_(email_noreply, attribut, dataArray);
   if (tmp_email_noreply)  { //Om den ej är tom
@@ -361,7 +361,7 @@ function checkIfNoReplyOption(email_noreply, attribut, dataArray, cell_email_nor
  *
  * @returns {Object[]} - lista av objekt för de bilagor som ska skickas
  */
-function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray) {
+function getAndMakeAttachments_(attachments, documentToMerge, attribut, dataArray) {
 
   const tmp_attachments = [];
 
@@ -372,29 +372,29 @@ function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray
 
   for (let i = 0; documentToMerge && i < documentToMerge.length; i++)  {
     
-    let tmp_copy_id;
+    let copy_id;
     try {
       const docName = documentToMerge[i].getName();
       const newDocName = replaceTemplate_(docName, attribut, dataArray);
-      tmp_copy_id = documentToMerge[i].makeCopy(newDocName).getId();
-      const tmp_copy = DocumentApp.openById(tmp_copy_id);
+      copy_id = documentToMerge[i].makeCopy(newDocName).getId();
+      const copy_file = DocumentApp.openById(copy_id);
 
-      const body = tmp_copy.getBody();
+      const body = copy_file.getBody();
       replaceContentOfDocument_(body, attribut, dataArray);
 
-      const header = tmp_copy.getHeader();
+      const header = copy_file.getHeader();
       replaceContentOfDocument_(header, attribut, dataArray);
 
-      const footer = tmp_copy.getFooter();
+      const footer = copy_file.getFooter();
       replaceContentOfDocument_(footer, attribut, dataArray);
 
       Logger.log("URL för temporärt skapad fil är");
-      Logger.log(tmp_copy.getUrl());
-      tmp_copy.saveAndClose();
+      Logger.log(copy_file.getUrl());
+      copy_file.saveAndClose();
 
-      const tmp_pdf = DocumentApp.openById(tmp_copy_id).getAs('application/pdf');
-      tmp_attachments.push(tmp_pdf);
-      Logger.log("Lägger till den personliga bilagan " + tmp_pdf.getName());
+      const pdf = DocumentApp.openById(copy_id).getAs('application/pdf');
+      tmp_attachments.push(pdf);
+      Logger.log("Lägger till den personliga bilagan " + pdf.getName());
     }
     catch (e) {
       Logger.log(e);
@@ -402,7 +402,7 @@ function getAndMakeAttachments(attachments, documentToMerge, attribut, dataArray
     finally {
       try {
         //Radera den temporärt skapade filen
-        DriveApp.getFileById(tmp_copy_id).setTrashed(true);
+        DriveApp.getFileById(copy_id).setTrashed(true);
       }
       catch (e) {
         Logger.log(e);
@@ -539,35 +539,35 @@ function getDocumentToMerge(ids) {
  * syfte. Data läggs till i objekten emailOptions för hur e-post ska
  * skickas. Ändrar färg på cell i kalkylark vid statusändring.
  * 
- * @param {string} variable - en textmall innehållande ev kortkoder
- * @param {string} nameOfVariable - en textsträng med namnet på e-postattributet
+ * @param {string} textInput - en textmall innehållande ev kortkoder
+ * @param {string} nameOfTheAttribute - en textsträng med namnet på e-postattributet
  * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} data - en lista innehållande persondata för en person
+ * @param {string[]} dataArray - en lista innehållande persondata för en person
  * @param {Object} cell - ett objekt av typen Range
  * @param {Object} emailOptions - ett objekt där extra data för att skicka e-posten finns
  *
  * @returns {string} - en textsträng utan kommentarer eller mellanrum
  */
-function getSender(variable, nameOfVariable, attribut, data, cell, emailOptions)  {
+function getSender_(textInput, nameOfTheAttribute, attribut, dataArray, cell, emailOptions)  {
 
-  let tmp_variable = replaceTemplate_(variable, attribut, data);
-  tmp_variable = getCleanString_(tmp_variable);
-  tmp_variable = tmp_variable.toLowerCase();
+  let text = replaceTemplate_(textInput, attribut, dataArray);
+  text = getCleanString_(text);
+  text = text.toLowerCase();
 
-  if ("avsändaradress" == nameOfVariable && isFromEmailAdressAllowed_(tmp_variable)) {
+  if ("avsändaradress" == nameOfTheAttribute && isFromEmailAdressAllowed_(text)) {
     setBackgroundColour_(cell, "white", false);
-    emailOptions["from"] = tmp_variable;
+    emailOptions["from"] = text;
   }
-  else if ("svarsadress" == nameOfVariable && checkIfEmail_(tmp_variable))  {
+  else if ("svarsadress" == nameOfTheAttribute && checkIfEmail_(text))  {
     setBackgroundColour_(cell, "white", false);
-    emailOptions["replyTo"] = tmp_variable;
+    emailOptions["replyTo"] = text;
   }
-  else if (!tmp_variable)  {
-    Logger.log("Ingen " + nameOfVariable + " angiven");
+  else if (!text)  {
+    Logger.log("Ingen " + nameOfTheAttribute + " angiven");
     cell.setBackground("yellow");
   }
   else {
-    Logger.log("Ogiltig " + nameOfVariable + " angiven " + tmp_variable +". Vi hoppar över denna person");
+    Logger.log("Ogiltig " + nameOfTheAttribute + " angiven " + text +". Vi hoppar över denna person");
     cell.setBackground("red");
     return false;
   }
@@ -579,27 +579,27 @@ function getSender(variable, nameOfVariable, attribut, data, cell, emailOptions)
  * Givet en mall returnerar funktionen en personlig gjord kommaseparerad
  * textsträng
  * 
- * @param {string} variable - en textmall innehållande ev kortkoder
- * @param {string} nameOfVariable - en textsträng med namnet på e-postattributet
+ * @param {string} textInput - en textmall innehållande ev kortkoder
+ * @param {string} nameOfTheAttribute - en textsträng med namnet på e-postattributet
  * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} data - en lista innehållande persondata för en person
+ * @param {string[]} dataArray - en lista innehållande persondata för en person
  *
  * @returns {string} - en textsträng utan kommentarer eller mellanrum
  */
-function getRecipient(variable, nameOfVariable, attribut, data) {
+function getRecipient_(textInput, nameOfTheAttribute, attribut, dataArray) {
 
-  let tmp_variable = replaceTemplate_(variable, attribut, data);
-  tmp_variable = getCleanEmailArray_(tmp_variable).toString();
-  Logger.log(nameOfVariable);
-  Logger.log(tmp_variable);
+  let text = replaceTemplate_(textInput, attribut, dataArray);
+  text = getCleanEmailArray_(text).toString();
+  Logger.log(nameOfTheAttribute);
+  Logger.log(text);
   
-  if (tmp_variable)  {
-    Logger.log(nameOfVariable + " är angiven " + tmp_variable);
+  if (text)  {
+    Logger.log(nameOfTheAttribute + " är angiven " + text);
   }
   else {
-    Logger.log("Ingen " + nameOfVariable + " är angiven " + tmp_variable);
+    Logger.log("Ingen " + nameOfTheAttribute + " är angiven " + text);
   }
-  return tmp_variable;
+  return text;
 }
 
 
