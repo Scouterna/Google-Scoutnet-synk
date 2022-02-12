@@ -26,7 +26,7 @@ function MedlemslistorVissaRaderSkickaEnbartTmp() {
  * Funktion att använda för att uppdatera samtliga medlemslistor
  */
 function MedlemslistorUppdateraEnbart() {
-  Medlemslistor(0, 100, true, false);
+  synkroniseraMedlemslistor_(0, 100, true, false);
 }
 
 
@@ -39,7 +39,7 @@ function MedlemslistorUppdateraEnbart() {
  * @param {boolean} shouldSend - om e-brev ska skickas ut till medlemlemslistan
  */
 function medlemslistorEnRad_(radNummer, shouldUpdate, shouldSend) {
-  Medlemslistor(radNummer, radNummer, shouldUpdate, shouldSend);
+  synkroniseraMedlemslistor_(radNummer, radNummer, shouldUpdate, shouldSend);
 }
 
 
@@ -51,7 +51,7 @@ function medlemslistorEnRad_(radNummer, shouldUpdate, shouldSend) {
  * @param {boolean} shouldUpdate - om medlemslistan ska uppdateras
  * @param {boolean} shouldSend - om e-brev ska skickas ut till medlemlemslistan
  */
-function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
+function synkroniseraMedlemslistor_(start, slut, shouldUpdate, shouldSend) {
   
   const forceUpdate = true;
 
@@ -118,7 +118,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
       }      
     }
   }
-  //Ta bort tomma radera i kalkylarket
+  //Ta bort tomma rader i kalkylarket
   deleteRowsFromSpreadsheet_(sheet, delete_rows);
 }
 

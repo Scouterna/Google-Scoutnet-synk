@@ -11,7 +11,6 @@ function Allt() {
  
   Anvandare();
   Grupper();
-  //Medlemslistor();
 }
 
 

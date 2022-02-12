@@ -1118,7 +1118,7 @@ function changeGroupPermissions_(email, postPermission, customFooterText, isArch
 /**
  * Skapa kolumnrubriker i kalkylarket och dölj kolumnen med Grupp-ID
  */
-function createHeaders_Grupper() {
+function skapaRubrikerGrupper() {
   
   const sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
