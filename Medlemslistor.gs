@@ -125,7 +125,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
       }
       if (null == shouldSend || shouldSend) {
         //skicka ut e-brev till de i medlemslistan
-        skickaMedlemslista(selection, rad_nummer, data[i], grd, rowSpreadsheet);
+        skickaMedlemslista_(selection, rad_nummer, data[i], grd, rowSpreadsheet);
       }      
     }
   }
@@ -143,10 +143,9 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
  * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
  * @param {Object[]} rowSpreadsheet - ett googleobjekt av typen Spreadsheet där listan finns
  */
-function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)  {
+function skickaMedlemslista_(selection, rad_nummer, radInfo, grd, rowSpreadsheet)  {
 
   const email_draft_subject = radInfo[grd["email_draft_subject"]];
-  const email_condition = radInfo[grd["email_condition"]];
   const email_document_merge = radInfo[grd["email_document_merge"]];
   const email_sender_name = radInfo[grd["email_sender_name"]];
 
@@ -154,11 +153,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
   const lastRow = sheet.getLastRow();
   const lastColumn = sheet.getLastColumn();
   Logger.log("lastColumn ska vara " + lastColumn);
-  Logger.log("lastRow ska vara " + lastRow); 
-
-  const attribut = getVerkligaRubriker_(sheet);
-  const data = getVerkligMedlemslista_(sheet);
-  
+  Logger.log("lastRow ska vara " + lastRow);
 
   /***Dessa data hämta från utkastet och är lika för alla vid giltighetskontrollen***/
   Logger.log("Ämne på e-post i utkast " + email_draft_subject);
@@ -204,7 +199,30 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     Logger.log("Inget koppla dokument angivet");
     cell.setBackground("yellow");
   }
-  /**************************************************************************/  
+  /**************************************************************************/
+
+  sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet, documentToMerge);
+}
+
+
+/**
+ * Skickar e-post för medlemslistor
+ * 
+ * @param {Object} selection - området på kalkylarket för alla listor som används just nu
+ * @param {number} rad_nummer - radnummer för aktuell medlemslista i kalkylarket
+ * @param {string[]} radInfo - lista med data för aktuell rad i kalkylarket
+ * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
+ * @param {Object} draft - ett e-postutkast av typen GmailMessage
+ * @param {Object} sheet - ett Google-objekt för ett kalkylblad
+ * @param {Object[]} documentToMerge - en lista av objekt av typen File
+ */
+function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet, documentToMerge)  {
+
+  const data = getVerkligMedlemslista_(sheet);
+  const attribut = getVerkligaRubriker_(sheet);
+
+  const email_condition = radInfo[grd["email_condition"]];
+  const email_draft_subject = radInfo[grd["email_draft_subject"]];
 
   const body = draft.getBody();
   const plainBody = draft.getPlainBody();
