@@ -9,7 +9,7 @@
  * medlemslista på en specifik rad
  */
 function MedlemslistorVissaRaderUppdateraEnbartTmp() {
-  MedlemslistorEnRad(1, true, false);
+  medlemslistorEnRad_(1, true, false);
 }
 
 
@@ -18,7 +18,7 @@ function MedlemslistorVissaRaderUppdateraEnbartTmp() {
  * en specifik medlemslista på en specifik rad
  */
 function MedlemslistorVissaRaderSkickaEnbartTmp() {
-  MedlemslistorEnRad(1, false, true);
+  medlemslistorEnRad_(1, false, true);
 }
 
 
@@ -38,7 +38,7 @@ function MedlemslistorUppdateraEnbart() {
  * @param {boolean} shouldUpdate - om medlemslistan ska uppdateras
  * @param {boolean} shouldSend - om e-brev ska skickas ut till medlemlemslistan
  */
-function MedlemslistorEnRad(radNummer, shouldUpdate, shouldSend) {
+function medlemslistorEnRad_(radNummer, shouldUpdate, shouldSend) {
   Medlemslistor(radNummer, radNummer, shouldUpdate, shouldSend);
 }
 
@@ -148,15 +148,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
   const email_draft_subject = radInfo[grd["email_draft_subject"]];
   const email_condition = radInfo[grd["email_condition"]];
   const email_document_merge = radInfo[grd["email_document_merge"]];
-
   const email_sender_name = radInfo[grd["email_sender_name"]];
-  const email_sender_email = radInfo[grd["email_sender_email"]];
-  const email_replyto = radInfo[grd["email_replyto"]];
-  const email_noreply = radInfo[grd["email_noreply"]].toString();
-  const email_recipient = radInfo[grd["email_recipient"]];
-  const email_cc = radInfo[grd["email_cc"]];
-  const email_bcc = radInfo[grd["email_bcc"]];
-
 
   const sheet = rowSpreadsheet.getSheets()[0];
   const lastRow = sheet.getLastRow();
@@ -166,12 +158,7 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
 
   const attribut = getVerkligaRubriker_(sheet);
   const data = getVerkligMedlemslista_(sheet);
-
-  /***Dessa celler ska färgmarkeras eller ändras vid fel***/
-  const cell_email_sender_email = selection.getCell(rad_nummer, grd["email_sender_email"]+1);
-  const cell_email_replyto = selection.getCell(rad_nummer, grd["email_replyto"]+1);
-  const cell_email_noreply = selection.getCell(rad_nummer, grd["email_noreply"]+1);
-  /*******************************************/
+  
 
   /***Dessa data hämta från utkastet och är lika för alla vid giltighetskontrollen***/
   Logger.log("Ämne på e-post i utkast " + email_draft_subject);
@@ -247,57 +234,13 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     const tmp_subject = replaceTemplate_(email_draft_subject, attribut, data[i]);
     /***Ämnesrad - Slut***/
 
-    /***Avsändarnamn***/
-    if (email_sender_name)  {
-      const tmp_email_sender_name = replaceTemplate_(email_sender_name, attribut, data[i]);
-      emailOptions["name"] = tmp_email_sender_name;
-    }
-    /***Avsändarnamn - Slut***/
-
-    /***Avsändaradress***/
-    const tmp_email_sender_email = getSender_(email_sender_email, "avsändaradress", attribut, data[i], cell_email_sender_email, emailOptions);
-    if (!tmp_email_sender_email) {
-      continue;
-    }
-    /***Avsändaradress - Slut***/
-
-    /***Svarsadress e-post***/
-    const tmp_email_replyto = getSender_(email_replyto, "svarsadress", attribut, data[i], cell_email_replyto, emailOptions);
-    if (!tmp_email_replyto) {
-      continue;
-    }
-    /***Svarsadress e-post - Slut***/
-
-    /***Svara-ej***/
-    const tmp_email_noreply = checkIfNoReplyOption_(email_noreply, attribut, data[i], cell_email_noreply)
-    if (tmp_email_noreply) {
-      emailOptions["noReply"] = true;
-    }
-    /***Svara-ej - Slut***/
-
     /***Mottagare e-post***/
-    const tmp_email_recipient = getRecipient_(email_recipient, "mottagaradress", attribut, data[i]);
+    const email_recipient = getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, attribut, data[i], emailOptions);
+    if (!email_recipient) {
+      continue;
+    }
     /***Mottagare e-post- Slut***/
 
-    /***Kopia e-post***/
-    const tmp_email_cc = getRecipient_(email_cc, "kopia e-post", attribut, data[i]);
-    if (tmp_email_cc) {
-      emailOptions["cc"] = tmp_email_cc;
-    }
-    /***Kopia e-post - Slut***/
-
-    /***Blindkopia e-post***/
-    const tmp_email_bcc = getRecipient_(email_bcc, "blindkopia e-post", attribut, data[i]);
-    if (tmp_email_bcc) {
-      emailOptions["bcc"] = tmp_email_bcc;
-    }
-    /***Blindkopia e-post - Slut***/
-
-    if (!(tmp_email_recipient || tmp_email_cc || tmp_email_bcc))  {
-      Logger.log("Ingen mottagare är angiven på något sätt. Vi hoppar över denna person");
-      continue;
-    }
-    
     /***Brödtext***/
     const tmp_plainBody = replaceTemplate_(plainBody, attribut, data[i]);
     const tmp_body = replaceTemplate_(body, attribut, data[i]);
@@ -308,42 +251,128 @@ function skickaMedlemslista(selection, rad_nummer, radInfo, grd, rowSpreadsheet)
     emailOptions["attachments"] = getAndMakeAttachments_(attachments, documentToMerge, attribut, data[i]);
     /***Bilagor - Slut***/
     
-    Logger.log("tmp_email_recipient " + tmp_email_recipient);
+    Logger.log("email_recipient " + email_recipient);
     Logger.log("tmp_subject " + tmp_subject);
     Logger.log("tmp_plainBody " + tmp_plainBody);
     Logger.log("Bilagor " + attachments);
     Logger.log("emailOptions");
     Logger.log(emailOptions);
 
-    GmailApp.sendEmail(tmp_email_recipient, tmp_subject, tmp_plainBody, emailOptions);
+    GmailApp.sendEmail(email_recipient, tmp_subject, tmp_plainBody, emailOptions);
   }
+}
+
+
+/**
+ * Lägger till data gällande avsändare och mottagare till
+ * medskickat objekt emailOptions samt returnererar
+ * e-postadress för mottagare alternativt boolean falskt om
+ * mottagare, kopia-mottagare samt blindkopia-mottagare saknas
+ * 
+ * @param {Object} selection - området på kalkylarket för alla listor som används just nu
+ * @param {number} rad_nummer - radnummer för aktuell medlemslista i kalkylarket
+ * @param {string[]} radInfo - lista med data för aktuell rad i kalkylarket
+ * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
+ * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - en lista innehållande persondata för en person
+ * @param {Object} emailOptions - Objekt med inställningar för e-brevet
+ * 
+ * @param {boolean | string} - falskt eller e-postadress för mottagare
+ */
+function getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, attribut, dataArray, emailOptions) {
+
+  const email_sender_name = radInfo[grd["email_sender_name"]];
+  const email_sender_email = radInfo[grd["email_sender_email"]];
+  const email_replyto = radInfo[grd["email_replyto"]];
+  const email_noreply = radInfo[grd["email_noreply"]].toString();
+  const email_recipient = radInfo[grd["email_recipient"]];
+  const email_cc = radInfo[grd["email_cc"]];
+  const email_bcc = radInfo[grd["email_bcc"]];
+
+  /***Dessa celler ska färgmarkeras eller ändras vid fel***/
+  const cell_email_sender_email = selection.getCell(rad_nummer, grd["email_sender_email"]+1);
+  const cell_email_replyto = selection.getCell(rad_nummer, grd["email_replyto"]+1);
+  const cell_email_noreply = selection.getCell(rad_nummer, grd["email_noreply"]+1);
+  /*******************************************/
+
+  /***Avsändarnamn***/
+  if (email_sender_name)  {
+    const tmp_email_sender_name = replaceTemplate_(email_sender_name, attribut, dataArray);
+    emailOptions["name"] = tmp_email_sender_name;
+  }
+  /***Avsändarnamn - Slut***/
+
+  /***Avsändaradress***/
+  const tmp_email_sender_email = getSender_(email_sender_email, "avsändaradress", attribut, dataArray, cell_email_sender_email, emailOptions);
+  if (!tmp_email_sender_email) {
+    return false;
+  }
+  /***Avsändaradress - Slut***/
+
+  /***Svarsadress e-post***/
+  const tmp_email_replyto = getSender_(email_replyto, "svarsadress", attribut, dataArray, cell_email_replyto, emailOptions);
+  if (!tmp_email_replyto) {
+    return false;
+  }
+  /***Svarsadress e-post - Slut***/
+
+  /***Svara-ej***/
+  const tmp_email_noreply = checkIfNoReplyOption_(email_noreply, attribut, dataArray, cell_email_noreply)
+  if (tmp_email_noreply) {
+    emailOptions["noReply"] = true;
+  }
+  /***Svara-ej - Slut***/
+
+  /***Mottagare e-post***/
+  const tmp_email_recipient = getRecipient_(email_recipient, "mottagaradress", attribut, dataArray);
+  /***Mottagare e-post- Slut***/
+
+  /***Kopia e-post***/
+  const tmp_email_cc = getRecipient_(email_cc, "kopia e-post", attribut, dataArray);
+  if (tmp_email_cc) {
+    emailOptions["cc"] = tmp_email_cc;
+  }
+  /***Kopia e-post - Slut***/
+
+  /***Blindkopia e-post***/
+  const tmp_email_bcc = getRecipient_(email_bcc, "blindkopia e-post", attribut, dataArray);
+  if (tmp_email_bcc) {
+    emailOptions["bcc"] = tmp_email_bcc;
+  }
+  /***Blindkopia e-post - Slut***/
+
+  if (!(tmp_email_recipient || tmp_email_cc || tmp_email_bcc))  {
+    Logger.log("Ingen mottagare är angiven på något sätt. Vi hoppar över denna person");
+    return false;
+  }
+  return tmp_email_recipient;
 }
 
 
 /**
  * Ger sant eller falskt om Svara-ej är påslagen eller ej
  * 
- * @param {Object[]} attachments - lista av objekt av typen GmailAttachment som finns i utkastet som bilaga
- * @param {Object[]} documentToMerge - en lista av objekt av typen File
+ * @param {string} textInput - en textmall innehållande ev kortkoder
  * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
  * @param {string[]} dataArray - en lista innehållande persondata för en person
+ * @param {Object} cell - ett objekt av typen Range
  *
  * @returns {boolean} - Sant eller falskt om Svara-ej är påslagen eller ej
  */
-function checkIfNoReplyOption_(email_noreply, attribut, dataArray, cell_email_noreply) {
+function checkIfNoReplyOption_(textInput, attribut, dataArray, cell) {
 
-  let tmp_email_noreply = replaceTemplate_(email_noreply, attribut, dataArray);
-  if (tmp_email_noreply)  { //Om den ej är tom
-    tmp_email_noreply = JSON.parse(tmp_email_noreply);
+  let text = replaceTemplate_(textInput, attribut, dataArray);
+  if (text)  { //Om den ej är tom
+    text = JSON.parse(text);
   }
-  if (tmp_email_noreply)  {
-    cell_email_noreply.setValue(true);
-    Logger.log("Svara-ej är påslagen " + tmp_email_noreply);
+  if (text)  {
+    cell.setValue(true);
+    Logger.log("Svara-ej är påslagen " + text);
     return true;
   }
   else {
-    cell_email_noreply.setValue(false);
-    Logger.log("Svara-ej är avstängd " + tmp_email_noreply);
+    cell.setValue(false);
+    Logger.log("Svara-ej är avstängd " + text);
     return false;
   }
 }
@@ -354,20 +383,20 @@ function checkIfNoReplyOption_(email_noreply, attribut, dataArray, cell_email_no
  * genom att använda de bilagor som finns i utkastet samt de
  * dokument som ska kopplas
  * 
- * @param {Object[]} attachments - lista av objekt av typen GmailAttachment som finns i utkastet som bilaga
+ * @param {Object[]} attachmentsInput - lista av objekt av typen GmailAttachment som finns i utkastet som bilaga
  * @param {Object[]} documentToMerge - en lista av objekt av typen File
  * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
  * @param {string[]} dataArray - en lista innehållande persondata för en person
  *
  * @returns {Object[]} - lista av objekt för de bilagor som ska skickas
  */
-function getAndMakeAttachments_(attachments, documentToMerge, attribut, dataArray) {
+function getAndMakeAttachments_(attachmentsInput, documentToMerge, attribut, dataArray) {
 
-  const tmp_attachments = [];
+  const attachments = [];
 
-  for (let i = 0; i < attachments.length; i++)  {
-    tmp_attachments.push(attachments[i]);
-    Logger.log("Lägger till bilagan " + attachments[i].getName());
+  for (let i = 0; i < attachmentsInput.length; i++)  {
+    attachments.push(attachmentsInput[i]);
+    Logger.log("Lägger till bilagan " + attachmentsInput[i].getName());
   }
 
   for (let i = 0; documentToMerge && i < documentToMerge.length; i++)  {
@@ -393,7 +422,7 @@ function getAndMakeAttachments_(attachments, documentToMerge, attribut, dataArra
       copy_file.saveAndClose();
 
       const pdf = DocumentApp.openById(copy_id).getAs('application/pdf');
-      tmp_attachments.push(pdf);
+      attachments.push(pdf);
       Logger.log("Lägger till den personliga bilagan " + pdf.getName());
     }
     catch (e) {
@@ -409,7 +438,7 @@ function getAndMakeAttachments_(attachments, documentToMerge, attribut, dataArra
       }
     }
   }
-  return tmp_attachments;
+  return attachments;
 }
 
 
