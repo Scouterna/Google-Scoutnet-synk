@@ -56,22 +56,19 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
   const forceUpdate = true;
 
   const sheetDataMedlemslistor = getDataFromActiveSheet_("Medlemslistor");
+  const grd = getMedlemslistorKonfigRubrikData_();
+  //Hämta lista med alla medlemmar i kåren och alla deras attribut
+  const allMembers = fetchScoutnetMembers_(true);
 
   const sheet = sheetDataMedlemslistor["sheet"];
   const selection = sheetDataMedlemslistor["selection"];
   const data = sheetDataMedlemslistor["data"];
   
-  const grd = getMedlemslistorKonfigRubrikData_();
-  
-  const delete_rows = [];
-  
-  //Hämta lista med alla medlemmar i kåren och alla deras attribut
-  const allMembers = fetchScoutnetMembers_(true);
+  const delete_rows = [];  
   
   const rowsToSync = findWhatRowsToSync_(start, slut, data.length);
   start = rowsToSync.start;
   slut = rowsToSync.slut;
-  
   Logger.log("Startrad " + start + " slutrad " + slut);
   
   for (let i = start-1; i < slut; i++) {
@@ -83,7 +80,7 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
     const rad_nummer = i + 1;
     Logger.log('Rad: ' + rad_nummer + ' Namn: ' + name + ' Scoutnet: ' + scoutnet_list_id + ' spreadsheetUrl: ' + spreadsheetUrl);
 
-    let update_group = "yes";
+    let update_memberlist = true;
     
     let cell = selection.getCell(rad_nummer, grd["namn"]+1);
     if (name == "") { //Kolla om fältet för namn är angivet
@@ -102,35 +99,54 @@ function Medlemslistor(start, slut, shouldUpdate, shouldSend) {
         //Kalkylark är ej angivet
         continue;
       }
-      update_group = "no";          
+      update_memberlist = false;          
     }
-
-    cell = selection.getCell(rad_nummer, grd["spreadsheetUrl"]+1);
-    let rowSpreadsheet;
-    try {
-      rowSpreadsheet = SpreadsheetApp.openByUrl(spreadsheetUrl);
-      setBackgroundColour_(cell, "white", false);
+              
+    const rowSpreadsheet = openSpreadsheetUrlForMemberlist_(selection, rad_nummer, grd, spreadsheetUrl);
+    if (!rowSpreadsheet)  {
+      update_memberlist = false;
     }
-    catch (e) { //Om url är fel
-      Logger.log(e);
-      update_group = "no";
-      cell.setBackground("red");
-    }    
-
-    if (update_group == "yes") {
-
+    
+    if (update_memberlist) {
       if (null == shouldUpdate || shouldUpdate) {
         //Uppdatera aktuell medlemslista
         updateMemberlist_(selection, rad_nummer, data[i], grd, allMembers, rowSpreadsheet, forceUpdate);
       }
       if (null == shouldSend || shouldSend) {
-        //skicka ut e-brev till de i medlemslistan
+        //Skicka ut e-brev till de i medlemslistan
         skickaMedlemslista_(selection, rad_nummer, data[i], grd, rowSpreadsheet);
       }      
     }
   }
   //Ta bort tomma radera i kalkylarket
   deleteRowsFromSpreadsheet_(sheet, delete_rows);
+}
+
+
+/**
+ * Ger ett kalkylark för en medlemslista givet URL
+ * 
+ * @param {Object} selection - området på kalkylarket för alla listor som används just nu
+ * @param {number} rad_nummer - radnummer för aktuell medlemslista i kalkylarket
+ * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
+ * @param {Object[]} rowSpreadsheet - ett googleobjekt av typen Spreadsheet där listan finns
+ * @param {string} spreadsheetUrl - URL för ett kalkylark för en medlemslista
+ * 
+ * @param {Object | boolean} - Ett Google-kalkylark eller falskt
+ */
+function openSpreadsheetUrlForMemberlist_(selection, rad_nummer, grd, spreadsheetUrl)  {
+
+  const cell = selection.getCell(rad_nummer, grd["spreadsheetUrl"]+1);
+  try {
+    const rowSpreadsheet = SpreadsheetApp.openByUrl(spreadsheetUrl);
+    setBackgroundColour_(cell, "white", false);
+    return rowSpreadsheet;
+  }
+  catch (e) { //Om url är fel
+    Logger.log(e);
+    cell.setBackground("red");
+    return false;
+  }
 }
 
 
@@ -295,7 +311,7 @@ function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet
  * @param {string[]} dataArray - en lista innehållande persondata för en person
  * @param {Object} emailOptions - Objekt med inställningar för e-brevet
  * 
- * @param {boolean | string} - falskt eller e-postadress för mottagare
+ * @param {string | boolean} - falskt eller e-postadress för mottagare
  */
 function getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, attribut, dataArray, emailOptions) {
 
