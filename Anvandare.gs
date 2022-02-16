@@ -598,7 +598,7 @@ function suspendAccount_(userAccount, suspendedOrgUnitPath) {
   
   if (!suspended || (orgUnitPath != suspendedOrgUnitPath)) {
   
-    const user = {
+    let user = {
       suspended: true,
       "orgUnitPath": suspendedOrgUnitPath
     };
