@@ -49,15 +49,13 @@ function Grupper(...args) {
 
   console.time("Grupper");
   const sheetDataGrupper = getDataFromActiveSheet_("Grupper");
-
   const sheet = sheetDataGrupper["sheet"];
   const selection = sheetDataGrupper["selection"];
   const data = sheetDataGrupper["data"];
   
   const grd = grupperRubrikData_();
   const listOfEmailAdressesOfActiveAccounts = getEmailAdressesofAllActiveGoogleAccounts_();
-  const delete_rows = [];
-  
+  const delete_rows = [];  
   const arrayOfRows = getActualGroupRowsToSync_(args, data, grd);
   
   for (let i = 0; i < arrayOfRows.length; i++) {
@@ -92,34 +90,11 @@ function Grupper(...args) {
       
       else if (name!="" && email!="") {        
         
-        if (!checkIfGroupExists_(email) && checkEmailFormat_(email)) { //Skapa gruppen
-          
-          email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
-          email = removeDiacritics_(email);
-          
-          const group = createGroup_(email, name, true);
-          groupId = group.id;
-          Logger.log("Skapade gruppen: " + email);
-          
-          let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
-          cell.setValue(email);
-          cell.setBackground("white");
-          
-          cell = selection.getCell(rad_nummer, grd["groupId"]+1);
-          cell.setValue(groupId);
-          
-          setCellValueCellUrl_(selection, rad_nummer, grd["cell_url"], email);
-          
-        }
-        else { //Om gruppens e-postadress redan finns
-          const group = getAdminDirectoryGroup_(email);
-          groupId = group.id;
-          let cell = selection.getCell(rad_nummer, grd["groupId"]+1);
-          cell.setValue(groupId);
-        }
+        const groupInfo = mightNeedToCreateGroup_(selection, rad_nummer, email, name, grd);
+        email = groupInfo.email;
+        groupId = groupInfo.groupId;
       }
-    }
-    
+    }    
     
     else if (groupId != "") {  //Gruppen finns sedan innan
       
@@ -218,13 +193,62 @@ function Grupper(...args) {
 
 
 /**
+ * Skapar en googlegrupp vid behov alternativt hämtar och sätter gruppId i kalkylbladet
+ * 
+ * @param {Objekt} selection - Hela området på kalkylarket som används
+ * @param {number} rad_nummer - Radnummer för aktuell grupp i kalkylarket
+ * @param {string} email - Gruppens e-postadress
+ * @param {string} name - Namn på e-postgruppen
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * 
+ * @returns {Object} - Objekt med email och groupId
+ */
+function mightNeedToCreateGroup_(selection, rad_nummer, email, name, grd) {
+
+  let groupId;
+
+  if (!checkIfGroupExists_(email) && checkEmailFormat_(email)) { //Skapa gruppen
+          
+    email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
+    email = removeDiacritics_(email);
+    
+    const group = createGroup_(email, name, true);
+    groupId = group.id;
+    Logger.log("Skapade gruppen: " + email);
+    
+    let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
+    cell.setValue(email);
+    cell.setBackground("white");
+    
+    cell = selection.getCell(rad_nummer, grd["groupId"]+1);
+    cell.setValue(groupId);
+    
+    setCellValueCellUrl_(selection, rad_nummer, grd["cell_url"], email);
+    
+  }
+  else { //Om gruppens e-postadress redan finns
+    const group = getAdminDirectoryGroup_(email);
+    groupId = group.id;
+    let cell = selection.getCell(rad_nummer, grd["groupId"]+1);
+    cell.setValue(groupId);
+  }
+
+  const groupInfo = {};
+  groupInfo.email = email;
+  groupInfo.groupId = groupId;
+
+  return groupInfo;
+}
+
+
+/**
  * Ger en lista med alla rader för grupper som ska synkroniseras
  * 
  * @param {string[]} args - Variabler som skickas med funktionanrop för gruppsynkronisering
  * @param {Object[][]} data - Lista av listor med datan som finns i kalkylbladet
  * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
  * 
- * @returns {number[]} - Objekt med inmatad start- och slutrad
+ * @returns {number[]} - Lista med rader för grupper som ska synkroniseras
  */
 function getActualGroupRowsToSync_(args, data, grd) {
 
@@ -261,7 +285,7 @@ function getActualGroupRowsToSync_(args, data, grd) {
  * 
  * @param {string[]} args - Variabler som skickas med funktionanrop för gruppsynkronisering
  * 
- * @returns {Object[]} - Objekt med inmatad start- och slutrad
+ * @returns {Object} - Objekt med inmatad start- och slutrad
  */
 function getStartEndRowsToSyncAccordingToInput_(args)  {
 
