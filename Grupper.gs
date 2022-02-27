@@ -55,42 +55,10 @@ function Grupper(...args) {
   const data = sheetDataGrupper["data"];
   
   const grd = grupperRubrikData_();
-  
   const listOfEmailAdressesOfActiveAccounts = getEmailAdressesofAllActiveGoogleAccounts_();
-  
   const delete_rows = [];
   
-  let start;
-  let slut;
-  if (1 == args.length) {
-    start = 0;
-    slut = 999;
-  }
-  else  {
-    start = args[0];
-    slut = args[1];
-  }
-
-  const rowsToSync = findWhatRowsToSync_(start, slut, data.length);
-  start = rowsToSync.start;
-  slut = rowsToSync.slut;  
-  
-  updateListOfGroups_();
-
-  let arrayOfRows;
-  if (0 == args.length || 2 == args.length) {
-    arrayOfRows = getArrayOfRows_(start, slut);
-  }
-  else  {
-    arrayOfRows = getArrayOfRowsWithTag_(data, grd, start, slut, args[args.length-1]);
-  }
-
-  tmpRows = [];
-  for (let i = 0; i < arrayOfRows.length; i++) {
-    tmpRows.push(arrayOfRows[i]+1);
-  }
-  Logger.log("Rader att synkronisera");
-  Logger.log(tmpRows);
+  const arrayOfRows = getActualGroupRowsToSync_(args, data, grd);
   
   for (let i = 0; i < arrayOfRows.length; i++) {
     const rowIndex = arrayOfRows[i];
@@ -106,18 +74,16 @@ function Grupper(...args) {
     //const group_moderate_content_email = data[rowIndex][grd["group_moderate_content_email"]];
     
     const rad_nummer = rowIndex+1;
-    
     Logger.log('Rad: ' + rad_nummer + ' Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id + ' Grupp-ID: ' + groupId);
 
-    let update_group = "yes";
+    let update_group = true;
     
     if (groupId == "") { //Vi borde skapa en grupp
       
       if (name == "" && email == "") { //Ta bort raden
         Logger.log("Försöker ta bort rad " + rad_nummer);
-        
         delete_rows.push(rad_nummer);
-        update_group = "no";
+        update_group = false;
       }
       else if (name=="" && email!="") { //Vi gör ingenting
       }
@@ -126,7 +92,7 @@ function Grupper(...args) {
       
       else if (name!="" && email!="") {        
         
-        if (false == checkIfGroupExists_(email) && true == checkEmailFormat_(email)) { //Skapa gruppen
+        if (!checkIfGroupExists_(email) && checkEmailFormat_(email)) { //Skapa gruppen
           
           email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
           email = removeDiacritics_(email);
@@ -164,7 +130,7 @@ function Grupper(...args) {
         Logger.log(groupId + " raderades");
 
         delete_rows.push(rad_nummer);
-        update_group = "no";
+        update_group = false;
       }
       else if (email == "") { //Om tom, hämta e-postadressen från systemet och sätt tillbaka den
 
@@ -182,7 +148,7 @@ function Grupper(...args) {
           
           Logger.log("E-postadress för gruppen har ändrats på raden " + rad_nummer);          
           
-          if (false == checkIfGroupExists_(email) && true == checkEmailFormat_(email)) {
+          if (!checkIfGroupExists_(email) && checkEmailFormat_(email)) {
             
             email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
             email = removeDiacritics_(email);            
@@ -232,23 +198,84 @@ function Grupper(...args) {
         group = getAdminGroupSettings_(email);
         if (customFooterText != group.customFooterText) {
           Logger.log("Sidfot ska ändras för gruppen");
-          update_group = "yes";
+          update_group = true;
         }
         
         if (checkIfIsArchivedShouldChange_(isArchived, group.isArchived)) {
           Logger.log("Arkivinställning ska ändras för gruppen");
-          update_group = "yes";          
+          update_group = true;          
         }
       }
     }    
     
-    if (update_group == "yes") {
-      //Uppdatera medlemmar av en grupp
+    if (update_group) { //Uppdatera medlemmar av en grupp
       updateGroup_(selection, rad_nummer, groupId, email, data[rowIndex], grd, listOfEmailAdressesOfActiveAccounts, forceUpdate);
     }
   }
   deleteRowsFromSpreadsheet_(sheet, delete_rows);
   console.timeEnd("Grupper");
+}
+
+
+/**
+ * Ger en lista med alla rader för grupper som ska synkroniseras
+ * 
+ * @param {string[]} args - Variabler som skickas med funktionanrop för gruppsynkronisering
+ * @param {Object[][]} data - Lista av listor med datan som finns i kalkylbladet
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * 
+ * @returns {number[]} - Objekt med inmatad start- och slutrad
+ */
+function getActualGroupRowsToSync_(args, data, grd) {
+
+  const startEndInput = getStartEndRowsToSyncAccordingToInput_(args);
+  const rowsToSync = findWhatRowsToSync_(startEndInput.start, startEndInput.slut, data.length);
+  const start = rowsToSync.start;
+  const slut = rowsToSync.slut;  
+  
+  Logger.log(start + " " + slut);
+  updateListOfGroups_();
+
+  let arrayOfRows;
+  if (0 == args.length || 2 == args.length) {
+    arrayOfRows = getArrayOfRows_(start, slut);
+  }
+  else  {
+    arrayOfRows = getArrayOfRowsWithTag_(data, grd, start, slut, args[args.length-1]);
+  }
+
+  tmpRows = [];
+  for (let i = 0; i < arrayOfRows.length; i++) {
+    tmpRows.push(arrayOfRows[i]+1);
+  }
+  Logger.log("Rader att synkronisera");
+  Logger.log(tmpRows);
+
+  return arrayOfRows;
+}
+
+
+/**
+ * Ger ett objekt med antingen begärd start- och slutrad att synkronisera
+ * alternativt alla rader om endast etikett att synkronisera är angivet
+ * 
+ * @param {string[]} args - Variabler som skickas med funktionanrop för gruppsynkronisering
+ * 
+ * @returns {Object[]} - Objekt med inmatad start- och slutrad
+ */
+function getStartEndRowsToSyncAccordingToInput_(args)  {
+
+  const startEndInput = {};
+
+  if (1 == args.length) {
+    startEndInput.start = 0;
+    startEndInput.slut = 999;
+  }
+  else  {
+    startEndInput.start = args[0];
+    startEndInput.slut = args[1];
+  }
+  return startEndInput;
 }
 
 
@@ -340,7 +367,7 @@ function checkIfIsArchivedShouldChange_(shouldBeArchived, groupIsArchived) {
 
 
 /**
- * Skiver in länkten till gruppen i kalkylarket
+ * Skriver in länken till gruppen i kalkylarket
  *
  * @param {Object} selection - ett googleojekt
  * @param {string} rad_nummer - radnummer i kalkylarket för en specifik googlegrupp
