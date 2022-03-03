@@ -137,7 +137,7 @@ function fetchScoutnetMemberFieldAsString_(medlem, nameOfField, lowerCase) {
 /**
  * Hämtar lista med personer som är med i någon av de e-postlistor eller e-postadresser som specificeras
  *
- * @param {string} scoutnet_list_id - kommaseparerad sträng med List-id för en e-postlista i Scoutnet
+ * @param {string} scoutnet_list_id - Kommaseparerad sträng med List-id för en e-postlista i Scoutnet
  * @param {Object} cell_scoutnet_list_id - En cell i ett Google Kalkylblad
  * @param {string[]} listOfEmailAdressesOfActiveAccounts - Lista över e-postadresser för aktiva Googlekonton
  * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
@@ -238,9 +238,9 @@ function getMemberNumbers_(members) {
  * Indata en sträng
  * Returnera sant eller falskt om det verkar vara en e-postadress
  *
- * @param {string} email - textsträng
+ * @param {string} email - Textsträng
  *
- * @returns {boolean} - sant eller falskt om det är en e-postadress
+ * @returns {boolean} - Sant eller falskt om det är en e-postadress
  */
 function checkIfEmail_(email) {
   //Väldigt simpel koll a@b.c
@@ -352,8 +352,8 @@ function fetchScoutnetMembersOneMailinglist_(scoutnet_list_id, cell_scoutnet_lis
  * Sätter attributen för en medlem då några kan saknas
  *
  * @param {Object} medlem - Ett medlemsobjekt
- * @param {string[]} variabel_lista_not_lowercase - lista med attribut som ej ska göras om till gemener
- * @param {string[]} variabel_lista_lowercase - lista med attribut som ska göras om till gemener
+ * @param {string[]} variabel_lista_not_lowercase - Lista med attribut som ej ska göras om till gemener
+ * @param {string[]} variabel_lista_lowercase - Lista med attribut som ska göras om till gemener
  *
  * @returns {Object} member - Ett medlemsobjekt
  */
@@ -837,9 +837,9 @@ function updateListOfGroups_() {
  * Ger sant eller falskt om angiven e-postadress är tillåten
  * som avsändareadress
  * 
- * @param {string} email - en e-postadress
+ * @param {string} email - En e-postadress
  *
- * @returns {boolean} - om avsändaradressen är tillåten
+ * @returns {boolean} - Om avsändaradressen är tillåten
  */
 function isFromEmailAdressAllowed_(email) {  
   return getAllowedFromEmailAdresses_().includes(email);
@@ -849,7 +849,7 @@ function isFromEmailAdressAllowed_(email) {
 /**
  * Ger vilka e-postadresser som det går att ange som avsändare
  *
- * @returns {string[]} - en lista med e-postadresser
+ * @returns {string[]} - En lista med e-postadresser
  */
 function getAllowedFromEmailAdresses_() {
   
@@ -865,9 +865,9 @@ function getAllowedFromEmailAdresses_() {
 /**
  * Ger ett e-postutkast om det finns givet ämnesraden på det
  * 
- * @param {string} subject - ämnesrad på e-postutkast
+ * @param {string} subject - Ämnesrad på e-postutkast
  *
- * @returns {Object} - ett e-postutkast av typen GmailMessage
+ * @returns {Object} - Ett e-postutkast av typen GmailMessage
  */
 function getDraft_(subject)  {
 
@@ -891,9 +891,9 @@ function getDraft_(subject)  {
 /**
  * Gör om en textsträng till gemener och tar bort tomrum
  * 
- * @param {string} text - textsträng
+ * @param {string} text - Textsträng
  *
- * @returns {string} - textsträng som är enklare att jämföra
+ * @returns {string} - Textsträng som är enklare att jämföra
  */
 function getComparableString_(text)  {
 
@@ -908,9 +908,9 @@ function getComparableString_(text)  {
 /**
  * Tar reda på vilka rader i kalkylarket som ska synkroniseras
  *
- * @param {string} start - önskad startrad att synkronisera från
- * @param {string} slut - önskad slutrad att synkronisera till
- * @param {string} maxRowNumber - maximalt radnummer som går att synkronisera
+ * @param {string} start - Önskad startrad att synkronisera från
+ * @param {string} slut - Önskad slutrad att synkronisera till
+ * @param {string} maxRowNumber - Maximalt radnummer som går att synkronisera
  *
  * @returns {Object} - Objekt med start- och slutrad att synkronisera
  */
@@ -937,9 +937,9 @@ function findWhatRowsToSync_(start, slut, maxRowNumber) {
  * Tar bort kommentarer inom parentes samt tomrum i
  * angiven variabel
  * 
- * @param {string} input - en variabel
+ * @param {string} input - En variabel
  *
- * @returns {string} - en textsträng utan kommentarer eller mellanrum
+ * @returns {string} - En textsträng utan kommentarer eller mellanrum
  */
 function getCleanString_(input)  {
 
@@ -1063,6 +1063,10 @@ function intphonenumber_(phnum) {
 
 /**
  * Testa om telefonnumret följer E.164 format
+ * 
+ * @param {string} phnum - Ett oformaterat telefonnummer
+ * 
+ * @returns {boolean} - Sant eller falskt om korrekt format
  */
 function validatePhonenumberForE164_(phnum) {
     const regEx = /^\+[1-9]\d{1,14}$/;
@@ -1081,9 +1085,9 @@ String.prototype.endsWith = function(suffix) {
  * Ersätt specialtecken med deras engelska bokstavsmotsvarigheter
  * https://stackoverflow.com/questions/18123501/replacing-accented-characters-with-plain-ascii-ones
  * 
- * @param {string} str - textsträng
+ * @param {string} str - Textsträng
  * 
- * @returns {string}
+ * @returns {string} - Textsträng med endast bokstäver i engelska alfabetet
  */
 function removeDiacritics_(str) {
 

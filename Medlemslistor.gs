@@ -34,9 +34,9 @@ function MedlemslistorUppdateraEnbart() {
  * Funktion att använda för att ställa in att start- och slutrad
  * är lika
  * 
- * @param {number} radNummer - rad att synkronisera
- * @param {boolean} shouldUpdate - om medlemslistan ska uppdateras
- * @param {boolean} shouldSend - om e-brev ska skickas ut till medlemlemslistan
+ * @param {number} radNummer - Rad att synkronisera
+ * @param {boolean} shouldUpdate - Om medlemslistan ska uppdateras
+ * @param {boolean} shouldSend - Om e-brev ska skickas ut till medlemlemslistan
  */
 function medlemslistorEnRad_(radNummer, shouldUpdate, shouldSend) {
   synkroniseraMedlemslistor_(radNummer, radNummer, shouldUpdate, shouldSend);
@@ -46,10 +46,10 @@ function medlemslistorEnRad_(radNummer, shouldUpdate, shouldSend) {
 /**
  * Huvudfunktion för att hantera synkronisering av medlemslistor med Scoutnet
  * 
- * @param {number} start - rad att börja synkronisera på
- * @param {number} slut - rad att sluta synkronisera på
- * @param {boolean} shouldUpdate - om medlemslistan ska uppdateras
- * @param {boolean} shouldSend - om e-brev ska skickas ut till medlemlemslistan
+ * @param {number} start - Rad att börja synkronisera på
+ * @param {number} slut - Rad att sluta synkronisera på
+ * @param {boolean} shouldUpdate - Om medlemslistan ska uppdateras
+ * @param {boolean} shouldSend - Om e-brev ska skickas ut till medlemlemslistan
  */
 function synkroniseraMedlemslistor_(start, slut, shouldUpdate, shouldSend) {
   
@@ -126,10 +126,10 @@ function synkroniseraMedlemslistor_(start, slut, shouldUpdate, shouldSend) {
 /**
  * Ger ett kalkylark för en medlemslista givet URL
  * 
- * @param {Object} selection - området på kalkylarket för alla listor som används just nu
- * @param {number} rad_nummer - radnummer för aktuell medlemslista i kalkylarket
- * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
- * @param {Object[]} rowSpreadsheet - ett googleobjekt av typen Spreadsheet där listan finns
+ * @param {Object} selection - Området på kalkylarket för alla listor som används just nu
+ * @param {number} rad_nummer - Radnummer för aktuell medlemslista i kalkylarket
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * @param {Object[]} rowSpreadsheet - Ett googleobjekt av typen Spreadsheet där listan finns
  * @param {string} spreadsheetUrl - URL för ett kalkylark för en medlemslista
  * 
  * @param {Object | boolean} - Ett Google-kalkylark eller falskt
@@ -153,11 +153,11 @@ function openSpreadsheetUrlForMemberlist_(selection, rad_nummer, grd, spreadshee
 /**
  * Skickar ut e-brev till de i aktuell medlemlista
  * 
- * @param {Object} selection - området på kalkylarket för alla listor som används just nu
- * @param {number} rad_nummer - radnummer för aktuell medlemslista i kalkylarket
- * @param {string[]} radInfo - lista med data för aktuell rad i kalkylarket
- * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
- * @param {Object[]} rowSpreadsheet - ett googleobjekt av typen Spreadsheet där listan finns
+ * @param {Object} selection - Området på kalkylarket för alla listor som används just nu
+ * @param {number} rad_nummer - Radnummer för aktuell medlemslista i kalkylarket
+ * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * @param {Object[]} rowSpreadsheet - Ett googleobjekt av typen Spreadsheet där listan finns
  */
 function skickaMedlemslista_(selection, rad_nummer, radInfo, grd, rowSpreadsheet)  {
 
@@ -224,13 +224,13 @@ function skickaMedlemslista_(selection, rad_nummer, radInfo, grd, rowSpreadsheet
 /**
  * Skickar e-post för medlemslistor
  * 
- * @param {Object} selection - området på kalkylarket för alla listor som används just nu
- * @param {number} rad_nummer - radnummer för aktuell medlemslista i kalkylarket
- * @param {string[]} radInfo - lista med data för aktuell rad i kalkylarket
- * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
- * @param {Object} draft - ett e-postutkast av typen GmailMessage
- * @param {Object} sheet - ett Google-objekt för ett kalkylblad
- * @param {Object[]} documentToMerge - en lista av objekt av typen File
+ * @param {Object} selection - Området på kalkylarket för alla listor som används just nu
+ * @param {number} rad_nummer - Radnummer för aktuell medlemslista i kalkylarket
+ * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * @param {Object} draft - Ett e-postutkast av typen GmailMessage
+ * @param {Object} sheet - Ett Google-objekt för ett kalkylblad
+ * @param {Object[]} documentToMerge - En lista av objekt av typen File
  */
 function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet, documentToMerge)  {
 
@@ -303,15 +303,15 @@ function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet
  * e-postadress för mottagare alternativt boolean falskt om
  * mottagare, kopia-mottagare samt blindkopia-mottagare saknas
  * 
- * @param {Object} selection - området på kalkylarket för alla listor som används just nu
- * @param {number} rad_nummer - radnummer för aktuell medlemslista i kalkylarket
- * @param {string[]} radInfo - lista med data för aktuell rad i kalkylarket
- * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
- * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} dataArray - en lista innehållande persondata för en person
+ * @param {Object} selection - Området på kalkylarket för alla listor som används just nu
+ * @param {number} rad_nummer - Radnummer för aktuell medlemslista i kalkylarket
+ * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * @param {Object} attribut - Ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - En lista innehållande persondata för en person
  * @param {Object} emailOptions - Objekt med inställningar för e-brevet
  * 
- * @param {string | boolean} - falskt eller e-postadress för mottagare
+ * @param {string | boolean} - Falskt eller e-postadress för mottagare
  */
 function getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, attribut, dataArray, emailOptions) {
 
@@ -386,10 +386,10 @@ function getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, a
 /**
  * Ger sant eller falskt om Svara-ej är påslagen eller ej
  * 
- * @param {string} textInput - en textmall innehållande ev kortkoder
- * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} dataArray - en lista innehållande persondata för en person
- * @param {Object} cell - ett objekt av typen Range
+ * @param {string} textInput - En textmall innehållande ev kortkoder
+ * @param {Object} attribut - Ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - En lista innehållande persondata för en person
+ * @param {Object} cell - Ett objekt av typen Range
  *
  * @returns {boolean} - Sant eller falskt om Svara-ej är påslagen eller ej
  */
@@ -417,12 +417,12 @@ function checkIfNoReplyOption_(textInput, attribut, dataArray, cell) {
  * genom att använda de bilagor som finns i utkastet samt de
  * dokument som ska kopplas
  * 
- * @param {Object[]} attachmentsInput - lista av objekt av typen GmailAttachment som finns i utkastet som bilaga
- * @param {Object[]} documentToMerge - en lista av objekt av typen File
- * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} dataArray - en lista innehållande persondata för en person
+ * @param {Object[]} attachmentsInput - Lista av objekt av typen GmailAttachment som finns i utkastet som bilaga
+ * @param {Object[]} documentToMerge - En lista av objekt av typen File
+ * @param {Object} attribut - Ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - En lista innehållande persondata för en person
  *
- * @returns {Object[]} - lista av objekt för de bilagor som ska skickas
+ * @returns {Object[]} - Lista av objekt för de bilagor som ska skickas
  */
 function getAndMakeAttachments_(attachmentsInput, documentToMerge, attribut, dataArray) {
 
@@ -480,9 +480,9 @@ function getAndMakeAttachments_(attachmentsInput, documentToMerge, attribut, dat
  * Ersätter kortkoder med personlig text i ett Google-dokument
  * inom ett typområde i dokumentet
  * 
- * @param {Object} section - ett objekt av typen för ett typområde i ett dokument
- * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} dataArray - en lista innehållande persondata för en person
+ * @param {Object} section - Ett objekt av typen för ett typområde i ett dokument
+ * @param {Object} attribut - Ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - En lista innehållande persondata för en person
  */
 function replaceContentOfDocument_(section, attribut, dataArray) {
 
@@ -506,11 +506,11 @@ function replaceContentOfDocument_(section, attribut, dataArray) {
 /**
  * Ger en personlig text givet indatatext med kortkoder
  * 
- * @param {string} textInput - en textmall innehållande ev kortkoder
- * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} dataArray - en lista innehållande persondata för en person
+ * @param {string} textInput - En textmall innehållande ev kortkoder
+ * @param {Object} attribut - Ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - En lista innehållande persondata för en person
  *
- * @returns {string} - en personligfierad textsträng
+ * @returns {string} - En personligfierad textsträng
  */
 function replaceTemplate_(textInput, attribut, dataArray)  {
 
@@ -533,11 +533,11 @@ function replaceTemplate_(textInput, attribut, dataArray)  {
 /**
  * Ger texten som ska ersätta en specifik kortkod
  * 
- * @param {string} textMatch - en kortkod som används
- * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} dataArray - en lista innehållande persondata för en person
+ * @param {string} textMatch - En kortkod som används
+ * @param {Object} attribut - Ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - En lista innehållande persondata för en person
  *
- * @returns {string[]} - en lista av de kortkoder som används
+ * @returns {string[]} - En lista av de kortkoder som används
  */
 function getReplaceDataForShortcode_(textMatch, attribut, dataArray)  {
 
@@ -558,9 +558,9 @@ function getReplaceDataForShortcode_(textMatch, attribut, dataArray)  {
 /**
  * Givet text ger en lista av alla kortkoder som används i texten
  * 
- * @param {string} text - en textsträng
+ * @param {string} text - En textsträng
  *
- * @returns {string[]} - en lista av de kortkoder som används
+ * @returns {string[]} - En lista av de kortkoder som används
  */
 function getListOfUsedShortcodes_(text)  {
   const listOfUsedShortcodes = text.match(/\{\{[^\{\}]+\}\}/g);
@@ -572,9 +572,9 @@ function getListOfUsedShortcodes_(text)  {
  * Givet en kommaseparerad sträng med id för filer på Google drive
  * ges en lista med objekten av filerna
  * 
- * @param {string} ids - en kommaseparerad sträng av id:n för filer
+ * @param {string} ids - En kommaseparerad sträng av id:n för filer
  *
- * @returns {Object[]} - en lista av objekt av typen File
+ * @returns {Object[]} - En lista av objekt av typen File
  */
 function getDocumentToMerge(ids) {
   
@@ -602,14 +602,14 @@ function getDocumentToMerge(ids) {
  * syfte. Data läggs till i objekten emailOptions för hur e-post ska
  * skickas. Ändrar färg på cell i kalkylark vid statusändring.
  * 
- * @param {string} textInput - en textmall innehållande ev kortkoder
- * @param {string} nameOfTheAttribute - en textsträng med namnet på e-postattributet
- * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} dataArray - en lista innehållande persondata för en person
- * @param {Object} cell - ett objekt av typen Range
- * @param {Object} emailOptions - ett objekt där extra data för att skicka e-posten finns
+ * @param {string} textInput - En textmall innehållande ev kortkoder
+ * @param {string} nameOfTheAttribute - En textsträng med namnet på e-postattributet
+ * @param {Object} attribut - Ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - En lista innehållande persondata för en person
+ * @param {Object} cell - Ett objekt av typen Range
+ * @param {Object} emailOptions - Ett objekt där extra data för att skicka e-posten finns
  *
- * @returns {string} - en textsträng utan kommentarer eller mellanrum
+ * @returns {string} - En textsträng utan kommentarer eller mellanrum
  */
 function getSender_(textInput, nameOfTheAttribute, attribut, dataArray, cell, emailOptions)  {
 
@@ -642,12 +642,12 @@ function getSender_(textInput, nameOfTheAttribute, attribut, dataArray, cell, em
  * Givet en mall returnerar funktionen en personlig gjord kommaseparerad
  * textsträng
  * 
- * @param {string} textInput - en textmall innehållande ev kortkoder
- * @param {string} nameOfTheAttribute - en textsträng med namnet på e-postattributet
- * @param {Object} attribut - ett objekt med kolumnrubriker och dess placeringar
- * @param {string[]} dataArray - en lista innehållande persondata för en person
+ * @param {string} textInput - En textmall innehållande ev kortkoder
+ * @param {string} nameOfTheAttribute - En textsträng med namnet på e-postattributet
+ * @param {Object} attribut - Ett objekt med kolumnrubriker och dess placeringar
+ * @param {string[]} dataArray - En lista innehållande persondata för en person
  *
- * @returns {string} - en textsträng utan kommentarer eller mellanrum
+ * @returns {string} - En textsträng utan kommentarer eller mellanrum
  */
 function getRecipient_(textInput, nameOfTheAttribute, attribut, dataArray) {
 
@@ -670,9 +670,9 @@ function getRecipient_(textInput, nameOfTheAttribute, attribut, dataArray) {
  * Givet en variabel returnerar funktionen en kommaseparerad textsträng
  * där endast de element som är e-postadresser är med
  * 
- * @param {string} input - en variabel
+ * @param {string} input - En variabel
  *
- * @returns {string[]} - en textsträng utan kommentarer eller mellanrum
+ * @returns {string[]} - En textsträng utan kommentarer eller mellanrum
  */
 function getCleanEmailArray_(input) {
 
@@ -692,9 +692,9 @@ function getCleanEmailArray_(input) {
 /**
  * Ger en matris med data för medlemslistan i kalkylbladet
  * 
- * @param {Object} sheet - ett objekt av typen Sheet
+ * @param {Object} sheet - Ett objekt av typen Sheet
  *
- * @returns {string[][]} - en matris innehållande persondata
+ * @returns {string[][]} - En matris innehållande persondata
  */
 function getVerkligMedlemslista_(sheet) {
 
@@ -714,9 +714,9 @@ function getVerkligMedlemslista_(sheet) {
  * Ger ett objekt med rubrikerna i kalkylbladet som nycklar och
  * dess respektive kolumnplacering som värde
  * 
- * @param {Object} sheet - ett objekt av typen Sheet
+ * @param {Object} sheet - Ett objekt av typen Sheet
  *
- * @returns {Object} - ett objekt med kolumnrubriker och dess placeringar
+ * @returns {Object} - Ett objekt med kolumnrubriker och dess placeringar
  */
 function getVerkligaRubriker_(sheet) {
 
@@ -811,12 +811,12 @@ function skapaRubrikerML() {
 /**
  * Uppdatera en lista över medlemmar
  * 
- * @param {Object} selection - området på kalkylarket för alla listor som används just nu
- * @param {number} rad_nummer - radnummer för aktuell medlemslista i kalkylarket
- * @param {string[]} radInfo - lista med data för aktuell rad i kalkylarket
- * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
- * @param {Object[]} allMembers - lista med medlemsobjekt
- * @param {Object[]} spreadsheet - ett googleobjekt av typen Spreadsheet där listan finns
+ * @param {Object} selection - Området på kalkylarket för alla listor som används just nu
+ * @param {number} rad_nummer - Radnummer för aktuell medlemslista i kalkylarket
+ * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * @param {Object[]} allMembers - Lista med medlemsobjekt
+ * @param {Object[]} spreadsheet - Ett googleobjekt av typen Spreadsheet där listan finns
  * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  */
 function updateMemberlist_(selection, rad_nummer, radInfo, grd, allMembers, spreadsheet, forceUpdate) {
@@ -904,9 +904,9 @@ function clearOldSpreadsheetData_(sheet, membersInAList, numAttrMembers)  {
 /**
  * Bygger upp en rad med rubriker för medlemsdatan
  * 
- * @param {Object[]} mlrd - en lista över rubriker och och attribut för tillhörande medlemmar
+ * @param {Object[]} mlrd - En lista över rubriker och och attribut för tillhörande medlemmar
  * 
- * @returns {string[]} - lista bestående av rubrikerna för medlemsdatan
+ * @returns {string[]} - Lista bestående av rubrikerna för medlemsdatan
  */
 function createMemberlistRubrikRow_(mlrd)  {
 
@@ -923,10 +923,10 @@ function createMemberlistRubrikRow_(mlrd)  {
 /**
  * Bygger upp en matris med medlemsdata för flera medlemmar
  * 
- * @param {Object[]} membersInAList - lista över medlemsobjekt
- * @param {Object[]} mlrd - en lista över rubriker och och attribut för tillhörande medlemmar
+ * @param {Object[]} membersInAList - Lista över medlemsobjekt
+ * @param {Object[]} mlrd - En lista över rubriker och och attribut för tillhörande medlemmar
  * 
- * @returns {string[][]} - matris bestående av listor som är rader med medlemsdata
+ * @returns {string[][]} - Matris bestående av listor som är rader med medlemsdata
  */
 function createMemberlistMatrix_(membersInAList, mlrd) {
 
@@ -942,8 +942,8 @@ function createMemberlistMatrix_(membersInAList, mlrd) {
 /**
  * Bygger upp en rad med medlemsdata för en medlem
  * 
- * @param {Object} member - ett medlemsobjekt
- * @param {Object[]} mlrd - en lista över rubriker och och attribut för tillhörande medlemmar
+ * @param {Object} member - Ett medlemsobjekt
+ * @param {Object[]} mlrd - En lista över rubriker och och attribut för tillhörande medlemmar
  * 
  * @returns {string[]} - Lista med medlemsdata
  */
@@ -963,9 +963,9 @@ function createMemberlistRow_(member, mlrd)  {
 /**
  * Sätter specialkolumner i ett kalkylark
  * 
- * @param {Object} sheet - ett googleobjekt av typen Sheet
- * @param {number} startCol - startkolumn för var dessa kolumner ska skrivas
- * @param {number} numRow - antal rader att skriva specialfunktionerna på
+ * @param {Object} sheet - Ett googleobjekt av typen Sheet
+ * @param {number} startCol - Startkolumn för var dessa kolumner ska skrivas
+ * @param {number} numRow - Antal rader att skriva specialfunktionerna på
  */
 function setCustomColumns_(sheet, startCol, numRow)  {
 

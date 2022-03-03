@@ -370,9 +370,9 @@ function getStartEndRowsToSyncAccordingToInput_(args)  {
  * Ger en lista av alla rader som ska synkroniseras givet rader att kolla och en etikett
  * 
  * @param {Object[][]} data - Lista av listor med datan som finns i kalkylbladet
- * @param {string[]} grd - lista med vilka kolumnindex som respektive parameter har
- * @param {number} start - rad att börja synkronisera på
- * @param {number} slut - rad att sluta synkronisera på
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * @param {number} start - Rad att börja synkronisera på
+ * @param {number} slut - Rad att sluta synkronisera på
  * @param {string} etikett - Etikett att hålla utkik efter
  * 
  * @returns {number[]} - Lista av raderna som ska synkroniseras
@@ -397,8 +397,8 @@ function getArrayOfRowsWithTag_(data, grd, start, slut, etikett) {
 /**
  * Ger en lista av alla rader som ska synkroniseras givet start- och slutrad
  * 
- * @param {number} start - rad att börja synkronisera på
- * @param {number} slut - rad att sluta synkronisera på
+ * @param {number} start - Rad att börja synkronisera på
+ * @param {number} slut - Rad att sluta synkronisera på
  * 
  * @returns {number[]} - Lista av radera som ska synkroniseras
  */
@@ -416,7 +416,7 @@ function getArrayOfRows_(start, slut)  {
 /**
  * Konvertera inställning om att arkivera e-brev till boolean
  *
- * @param {string} input - cellvärde från kalkylark
+ * @param {string} input - Cellvärde från kalkylark
  *
  * @returns {string} - Om vi ska arkivera e-brev eller ej
  */
@@ -437,8 +437,8 @@ function convertInputForIsArchivedToBoolString_(input) {
 /**
  * Ta reda på om inställning för att arkivera e-post har ändrats
  *
- * @param {string} shouldBeArchived - cellvärde från kalkylark
- * @param {string} groupIsArchived - string true eller false-värde om aktuell inställning
+ * @param {string} shouldBeArchived - Cellvärde från kalkylark
+ * @param {string} groupIsArchived - String true eller false-värde om aktuell inställning
  *
  * @returns {boolean} - Om arkiveringsinställningen ska ändras eller ej
  */
@@ -456,10 +456,10 @@ function checkIfIsArchivedShouldChange_(shouldBeArchived, groupIsArchived) {
 /**
  * Skriver in länken till gruppen i kalkylarket
  *
- * @param {Object} selection - ett googleojekt
- * @param {string} rad_nummer - radnummer i kalkylarket för en specifik googlegrupp
- * @param {string} column - kolumnnummer som detta hör till
- * @param {string} email - e-postadress för googlegruppen
+ * @param {Object} selection - Ett googleojekt
+ * @param {string} rad_nummer - Radnummer i kalkylarket för en specifik googlegrupp
+ * @param {string} column - Kolumnnummer som detta hör till
+ * @param {string} email - E-postadress för googlegruppen
  */
 function setCellValueCellUrl_(selection, rad_nummer, column, email) {
   
@@ -478,9 +478,9 @@ function setCellValueCellUrl_(selection, rad_nummer, column, email) {
  * Skapar en grupp med angiven e-postadress och namn
  * med fördefinerade behörighetsinställningar
  *
- * @param {string} email - e-postadress för gruppen
- * @param {string} name - namn på e-postgruppen
- * @param {boolean} shouldUpdateListOfGroups - om listan över grupper ska uppdateras
+ * @param {string} email - E-postadress för gruppen
+ * @param {string} name - Namn på e-postgruppen
+ * @param {boolean} shouldUpdateListOfGroups - Om listan över grupper ska uppdateras
  *
  * @returns {Object} - Objekt av den nya skapade Googlegrupppen
  */
@@ -506,7 +506,7 @@ function createGroup_(email, name, shouldUpdateListOfGroups) {
  * Tar bort en grupp med angivet id
  *
  * @param {string} groupId - Googles id för en grupp
- * @param {boolean} shouldUpdateListOfGroups - om listan över grupper ska uppdateras
+ * @param {boolean} shouldUpdateListOfGroups - Om listan över grupper ska uppdateras
  */
 function deleteGroup_(groupId, shouldUpdateListOfGroups) {
   Logger.log("Försöker radera grupp " + groupId);
@@ -1559,7 +1559,7 @@ function getEmailsSortedAsGroupOrNot_(emails) {
 
 
 /**
- * Testfunktion för att läsa alla grupper
+ * Testfunktion för att lista alla grupper
  */
 function TestListAllGroups() {
   let pageToken, page;
