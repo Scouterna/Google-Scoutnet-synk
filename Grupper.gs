@@ -5,39 +5,13 @@
 
 
 /**
- * Returnerar lista med vilket index som olika rubriker har i kalkylarket
- *
- * @returns {number[]} - Lista med rubrikindex för respektive rubrik
+ * Testfunktion för att synkronisera några rader med grupper
  */
-function grupperRubrikData_() {
-  
-  //Siffran är vilken kolumn i kalkylarket.
-  const gruppRubrikData = {};
-  gruppRubrikData["namn"] = 0;
-  gruppRubrikData["e-post"] = 1;
-  gruppRubrikData["etikett"] = 2;
-  
-  gruppRubrikData["scoutnet_list_id"] = 3;
-  gruppRubrikData["synk_option"] = 4;
-  gruppRubrikData["scoutnet_list_id_send"] = 5;
-  gruppRubrikData["synk_option_send"] = 6;
-  gruppRubrikData["scoutnet_list_id_receive"] = 7;
-  gruppRubrikData["synk_option_receive"] = 8;
-  gruppRubrikData["customFooterText"] = 9;
-  
-  gruppRubrikData["groupId"] = 10;
-  gruppRubrikData["cell_url"] = 11;
-  
-  gruppRubrikData["isArchived"] = 12;
-  gruppRubrikData["group_moderate_content_email"] = 13;
-  
-  gruppRubrikData["felmeddelande"] = 14;
-                  
-  return gruppRubrikData;
+function GrupperTestsynk() {
+  Grupper(1, 10);
 }
 
-
-/*
+/**
  * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
  * Anropas antingen med (startrad, slutrad)
  * (startrad, slutrad, etikett)
@@ -93,40 +67,103 @@ function Grupper(...args) {
     }    
     
     else if (groupId != "") {  //Gruppen finns sedan innan
-      
-      if (name == "" && email == "") { //Ta bort gruppen
-        
-        Logger.log("Försöker ta bort " + groupId + " rad " + rad_nummer);
-        deleteGroup_(groupId, true);
-        Logger.log(groupId + " raderades");
+      const groupInfo = groupAlreadyExists_(selection, rad_nummer, groupId, email, data[rowIndex], name, grd, delete_rows, update_group);
+      email = groupInfo.email;
+      groupId = groupInfo.groupId;
+      update_group = groupInfo.update_group;
+    }
 
-        delete_rows.push(rad_nummer);
-        update_group = false;
-      }
-      else if (email == "") { //Om tom, hämta e-postadressen från systemet och sätt tillbaka den
-
-        const tmp_usr = getAdminDirectoryGroup_(groupId);
-        email = tmp_usr.email;
-        let cell = selection.getCell(rad_nummer,grd["e-post"]+1);
-        cell.setValue(email);
-        cell.setBackground("white");
-      }
-      else if (email != "") { //Kontrollerar om vi behöver uppdatera
-        
-        /**************************** */
-        const groupInfo = groupIdAndEmailExists_(selection, rad_nummer, groupId, email, data[rowIndex], name, grd);
-        email = groupInfo.email;
-        groupId = groupInfo.groupId; 
-      /*****************************/
-      }
-    }    
-    
     if (update_group) { //Uppdatera medlemmar av en grupp
       updateGroup_(selection, rad_nummer, groupId, email, data[rowIndex], grd, listOfEmailAdressesOfActiveAccounts, forceUpdate);
     }
   }
   deleteRowsFromSpreadsheet_(sheet, delete_rows);
   console.timeEnd("Grupper");
+}
+
+
+/**
+ * Returnerar lista med vilket index som olika rubriker har i kalkylarket
+ *
+ * @returns {number[]} - Lista med rubrikindex för respektive rubrik
+ */
+function grupperRubrikData_() {
+  
+  //Siffran är vilken kolumn i kalkylarket.
+  const gruppRubrikData = {};
+  gruppRubrikData["namn"] = 0;
+  gruppRubrikData["e-post"] = 1;
+  gruppRubrikData["etikett"] = 2;
+  
+  gruppRubrikData["scoutnet_list_id"] = 3;
+  gruppRubrikData["synk_option"] = 4;
+  gruppRubrikData["scoutnet_list_id_send"] = 5;
+  gruppRubrikData["synk_option_send"] = 6;
+  gruppRubrikData["scoutnet_list_id_receive"] = 7;
+  gruppRubrikData["synk_option_receive"] = 8;
+  gruppRubrikData["customFooterText"] = 9;
+  
+  gruppRubrikData["groupId"] = 10;
+  gruppRubrikData["cell_url"] = 11;
+  
+  gruppRubrikData["isArchived"] = 12;
+  gruppRubrikData["group_moderate_content_email"] = 13;
+  
+  gruppRubrikData["felmeddelande"] = 14;
+                  
+  return gruppRubrikData;
+}
+
+
+/**
+ * Funktion för logik för synkronisering av Grupper gruppen redan finns
+ * 
+ * @param {Objekt} selection - Hela området på kalkylarket som används
+ * @param {number} rad_nummer - Radnummer för aktuell grupp i kalkylarket
+ * @param {string} groupId - Googles id för en grupp
+ * @param {string} email - Gruppens e-postadress
+ * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
+ * @param {string} name - Namn på e-postgruppen
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * @param {numbers[]} delete_rows - Lista med villka rader som ska tas bort
+ * @param {boolean} update_group - Sant eller falskt om gruppen ska uppdateras eller ej
+ * 
+ * @returns {Object} - Objekt med email och groupId
+ */
+function groupAlreadyExists_(selection, rad_nummer, groupId, email, radInfo, name, grd, delete_rows, update_group) {
+
+  if (name == "" && email == "") { //Ta bort gruppen
+        
+    Logger.log("Försöker ta bort " + groupId + " rad " + rad_nummer);
+    deleteGroup_(groupId, true);
+    Logger.log(groupId + " raderades");
+
+    delete_rows.push(rad_nummer);
+    update_group = false;
+  }
+  else if (email == "") { //Om tom, hämta e-postadressen från systemet och sätt tillbaka den
+
+    const tmp_usr = getAdminDirectoryGroup_(groupId);
+    email = tmp_usr.email;
+    let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
+    cell.setValue(email);
+    cell.setBackground("white");
+  }
+  else if (email != "") { //Kontrollerar om vi behöver uppdatera
+    
+    /**************************** */
+    const groupInfo = groupIdAndEmailExists_(selection, rad_nummer, groupId, email, radInfo, name, grd);
+    email = groupInfo.email;
+    groupId = groupInfo.groupId; 
+    /*****************************/
+  }
+
+  const groupInfo = {};
+  groupInfo.email = email;
+  groupInfo.groupId = groupId;
+  groupInfo.update_group = update_group;
+
+  return groupInfo;
 }
 
 
