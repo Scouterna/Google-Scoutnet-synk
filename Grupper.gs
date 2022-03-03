@@ -125,7 +125,7 @@ function grupperRubrikData_() {
  * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
  * @param {string} name - Namn på e-postgruppen
  * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
- * @param {numbers[]} delete_rows - Lista med villka rader som ska tas bort
+ * @param {number[]} delete_rows - Lista med villka rader som ska tas bort
  * @param {boolean} update_group - Sant eller falskt om gruppen ska uppdateras eller ej
  * 
  * @returns {Object} - Objekt med email och groupId

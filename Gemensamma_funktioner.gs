@@ -1016,6 +1016,10 @@ function removeDublicates_(list) {
 
 /**
  * Gör strängen till ett svenskt internationellt nummer om möjligt
+ * 
+ * @param {string} phnum - Ett oformaterat telefonnummer
+ * 
+ * @returns {string} - Ett telefonnummer skrivet på internationellt vis om möjligt
  */
 function intphonenumber_(phnum) {
 
