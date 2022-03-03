@@ -67,8 +67,6 @@ function Grupper(...args) {
     const scoutnet_list_id = data[rowIndex][grd["scoutnet_list_id"]];
     //const synk_option = data[rowIndex][grd["synk_option"]];
     let groupId = data[rowIndex][grd["groupId"]];
-    const customFooterText = data[rowIndex][grd["customFooterText"]];
-    const isArchived = data[rowIndex][grd["isArchived"]];
     //const group_moderate_content_email = data[rowIndex][grd["group_moderate_content_email"]];
     
     const rad_nummer = rowIndex+1;
@@ -76,20 +74,18 @@ function Grupper(...args) {
 
     let update_group = true;
     
-    if (groupId == "") { //Vi borde skapa en grupp
+    if (groupId == "") { //Vi borde nog skapa en grupp
       
       if (name == "" && email == "") { //Ta bort raden
         Logger.log("Försöker ta bort rad " + rad_nummer);
         delete_rows.push(rad_nummer);
         update_group = false;
       }
-      else if (name=="" && email!="") { //Vi gör ingenting
+      else if (name == "" && email != "") { //Vi gör ingenting
       }
-      else if (name!="" && email=="") { //Vi gör ingenting
-      }
-      
-      else if (name!="" && email!="") {        
-        
+      else if (name != "" && email == "") { //Vi gör ingenting
+      }      
+      else if (name != "" && email != "") { //Ev skapa ny grupp        
         const groupInfo = mightNeedToCreateGroup_(selection, rad_nummer, email, name, grd);
         email = groupInfo.email;
         groupId = groupInfo.groupId;
@@ -117,69 +113,11 @@ function Grupper(...args) {
       }
       else if (email != "") { //Kontrollerar om vi behöver uppdatera
         
-        let group = getAdminDirectoryGroup_(groupId);
-                
-        if (email != group.email) { //E-postadressen har ändrats
-          
-          Logger.log("E-postadress för gruppen har ändrats på raden " + rad_nummer);          
-          
-          if (!checkIfGroupExists_(email) && checkEmailFormat_(email)) {
-            
-            email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
-            email = removeDiacritics_(email);            
-            
-            Logger.log("try remove " + groupId + " row " + rad_nummer);
-            deleteGroup_(groupId, false);  //Vi gör på detta sätt då det varit stora problem
-            //med att tjänsten ej svarat tidigare om vi gjort en patch/update
-            Logger.log(groupId + " togs bort");
-            
-            group = createGroup_(email, name, true);
-            Logger.log("Uppdaterat e-postadress för gruppen: " + email);            
-            groupId = group.id;
-            
-            let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
-            cell.setValue(email);
-            cell.setBackground("white");
-            
-            cell = selection.getCell(rad_nummer, grd["groupId"]+1);
-            cell.setValue(groupId);
-            
-            setCellValueCellUrl_(selection, rad_nummer, grd["cell_url"], email);
-          }
-          else { //Om gruppens e-postadress redan finns
-            
-            const cell = selection.getCell(rad_nummer, grd["e-post"]+1);
-            cell.setBackground("red");
-          }
-        }
-        else if (name != group.name) { //Om namnet, men inte e-postadressen för gruppen ändrats
-          
-          Logger.log("Gruppnamnet har ändrats på rad " + rad_nummer);
-          patchAdminDirectoryGroup_(name, groupId);
-        }
-        else if (email == group.email) { //Om e-posten är oförändrad. Behöver ändra bakgrund om man
-          //ändrat till en ogiltig e-postadress och sen ändrar tillbaka
-          Logger.log("E-post ej ändrad för grupppen " + email);
-          let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
-          setBackgroundColour_(cell, "white", false);
-
-          cell = selection.getCell(rad_nummer, grd["cell_url"]+1).getValue();
-          if (cell == "") {
-            Logger.log("Denna cell för länk är tom och ska upppdateras");
-            setCellValueCellUrl_(selection, rad_nummer, grd["cell_url"], email);
-          }
-        }
-        
-        group = getAdminGroupSettings_(email);
-        if (customFooterText != group.customFooterText) {
-          Logger.log("Sidfot ska ändras för gruppen");
-          update_group = true;
-        }
-        
-        if (checkIfIsArchivedShouldChange_(isArchived, group.isArchived)) {
-          Logger.log("Arkivinställning ska ändras för gruppen");
-          update_group = true;          
-        }
+        /**************************** */
+        const groupInfo = groupIdAndEmailExists_(selection, rad_nummer, groupId, email, data[rowIndex], name, grd);
+        email = groupInfo.email;
+        groupId = groupInfo.groupId; 
+      /*****************************/
       }
     }    
     
@@ -189,6 +127,94 @@ function Grupper(...args) {
   }
   deleteRowsFromSpreadsheet_(sheet, delete_rows);
   console.timeEnd("Grupper");
+}
+
+
+/**
+ * Funktion för logik för synkronisering av Grupper om gruppId och e-postadress finns
+ * 
+ * @param {Objekt} selection - Hela området på kalkylarket som används
+ * @param {number} rad_nummer - Radnummer för aktuell grupp i kalkylarket
+ * @param {string} groupId - Googles id för en grupp
+ * @param {string} email - Gruppens e-postadress
+ * @param {string[]} radInfo - Lista med data för aktuell rad i kalkylarket
+ * @param {string} name - Namn på e-postgruppen
+ * @param {string[]} grd - Lista med vilka kolumnindex som respektive parameter har
+ * 
+ * @returns {Object} - Objekt med email och groupId
+ */
+function groupIdAndEmailExists_(selection, rad_nummer, groupId, email, radInfo, name, grd)  {
+
+  const customFooterText = radInfo[grd["customFooterText"]];
+  const isArchived = radInfo[grd["isArchived"]];
+
+  let group = getAdminDirectoryGroup_(groupId);
+                
+  if (email != group.email) { //E-postadressen har ändrats
+    
+    Logger.log("E-postadress för gruppen har ändrats på raden " + rad_nummer);          
+    
+    if (!checkIfGroupExists_(email) && checkEmailFormat_(email)) {
+      
+      email = email.toLowerCase().replace(/\s+/g, ''); //Ta bort tomma mellanrum
+      email = removeDiacritics_(email);            
+      
+      Logger.log("try remove " + groupId + " row " + rad_nummer);
+      deleteGroup_(groupId, false);  //Vi gör på detta sätt då det varit stora problem
+      //med att tjänsten ej svarat tidigare om vi gjort en patch/update
+      Logger.log(groupId + " togs bort");
+      
+      group = createGroup_(email, name, true);
+      Logger.log("Uppdaterat e-postadress för gruppen: " + email);            
+      groupId = group.id;
+      
+      let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
+      cell.setValue(email);
+      cell.setBackground("white");
+      
+      cell = selection.getCell(rad_nummer, grd["groupId"]+1);
+      cell.setValue(groupId);
+      
+      setCellValueCellUrl_(selection, rad_nummer, grd["cell_url"], email);
+    }
+    else { //Om gruppens e-postadress redan finns
+      
+      const cell = selection.getCell(rad_nummer, grd["e-post"]+1);
+      cell.setBackground("red");
+    }
+  }
+  else if (name != group.name) { //Om namnet, men inte e-postadressen för gruppen ändrats
+    
+    Logger.log("Gruppnamnet har ändrats på rad " + rad_nummer);
+    patchAdminDirectoryGroup_(name, groupId);
+  }
+  else if (email == group.email) { //Om e-posten är oförändrad. Behöver ändra bakgrund om man
+    //ändrat till en ogiltig e-postadress och sen ändrar tillbaka
+    Logger.log("E-post ej ändrad för grupppen " + email);
+    let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
+    setBackgroundColour_(cell, "white", false);
+
+    cell = selection.getCell(rad_nummer, grd["cell_url"]+1).getValue();
+    if (cell == "") {
+      Logger.log("Denna cell för länk är tom och ska upppdateras");
+      setCellValueCellUrl_(selection, rad_nummer, grd["cell_url"], email);
+    }
+  }
+  
+  group = getAdminGroupSettings_(email);
+  if (customFooterText != group.customFooterText) {
+    Logger.log("Sidfot ska ändras för gruppen");
+  }
+  
+  if (checkIfIsArchivedShouldChange_(isArchived, group.isArchived)) {
+    Logger.log("Arkivinställning ska ändras för gruppen");          
+  }
+
+  const groupInfo = {};
+  groupInfo.email = email;
+  groupInfo.groupId = groupId;
+
+  return groupInfo;
 }
 
 
