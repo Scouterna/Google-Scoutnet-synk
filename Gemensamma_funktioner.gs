@@ -103,6 +103,15 @@ function checkDataFromKonfig_() {
   else {
     Logger.log(moderateContentEmail + " - Eventuellt felaktig. Får ej vara en googlegrupp");
   }
+
+  Logger.log("*****************");
+  Logger.log("Adress till standardprofilbild (defaultUserAvatarUrl)");
+  if (getByteArrayOfDefaultImage_()) {
+    Logger.log(defaultUserAvatarUrl + " - KORREKT");
+  }
+  else {
+    Logger.log(defaultUserAvatarUrl + " - Eventuellt felaktig");
+  }
 }
 
 
