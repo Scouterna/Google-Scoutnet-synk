@@ -38,6 +38,75 @@ function onOpen() {
 
 
 /**
+ * Kontrollerar om inställningarna i Konfiguration.gs verkar korrekta
+ */
+function checkDataFromKonfig_()  {
+  Logger.log("Kontrollera data från Konfiguration.gs");
+  
+  Logger.log("*****************");
+  Logger.log("Kårens domännamn");
+  try {
+    updateListOfGroups_();
+    Logger.log(domain + " - KORREKT");
+  } catch (e) {
+    Logger.log(domain + " - Eventuellt felaktig");
+  }
+
+  const url_all_members = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist';
+  const allMembers = urlFetch_(url_all_members, api_key_list_all);
+
+  const url_maillist = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=';
+  const mailinglist = urlFetch_(url_maillist, api_key_mailinglists);
+
+  if (allMembers || mailinglist)  {
+    Logger.log("*****************");
+    Logger.log("Url till Scoutnet");
+    Logger.log(scoutnet_url + " - KORREKT");
+
+    Logger.log("*****************");
+    Logger.log("Typ av enhet kår (group) eller distrikt (district)");
+    Logger.log(organisationType + " - KORREKT");
+  }
+  else  {
+    Logger.log("*****************");
+    Logger.log("Url till Scoutnet");
+    Logger.log(scoutnet_url + " - Eventuellt felaktig");
+
+    Logger.log("*****************");
+    Logger.log("Typ av enhet kår (group) eller distrikt (district)");
+    Logger.log(organisationType + " - Eventuellt felaktig");
+  }
+
+  Logger.log("*****************");
+  Logger.log("API-nyckel för alla medlemmar (api_key_list_all)");
+  if (allMembers) {    
+    Logger.log(api_key_list_all + " - KORREKT");
+  }
+  else {    
+    Logger.log(api_key_list_all + " - Eventuellt felaktig");
+  }
+
+  Logger.log("*****************");
+  Logger.log("API-nyckel för e-postlistor (api_key_mailinglists)");
+  if (mailinglist) {    
+    Logger.log(api_key_mailinglists + " - KORREKT");
+  }
+  else {    
+    Logger.log(api_key_mailinglists + " - Eventuellt felaktig");
+  }
+
+  Logger.log("*****************");
+  Logger.log("E-post för skräppostmoderering (moderateContentEmail)");
+  if (checkEmailFormat_(moderateContentEmail) && !checkIfGroupExists_(moderateContentEmail)) {
+    Logger.log(moderateContentEmail + " - KORREKT");
+  }
+  else  {
+    Logger.log(moderateContentEmail + " - Eventuellt felaktig. Får ej vara en googlegrupp");
+  }
+}
+
+
+/**
  * Tar bort punkter före @ om det är en gmailadress
  *
  * @param {string} email - E-postadress
@@ -254,6 +323,28 @@ function checkIfEmail_(email) {
 
 
 /**
+ * Hämta data från angiven url
+ * 
+ * @param {string} url - Url att hämta data från
+ * @param {string} apiKey - API-nyckel att skicka med i anropet
+ * 
+ * @returns {string} - Datan som hämtats från Scoutnet
+ */
+function urlFetch_(url, apiKey) {
+
+  const authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + apiKey);
+  const response = UrlFetchApp.fetch(
+    url, {
+      'muteHttpExceptions': true,
+      'headers': { 'Authorization': authHeader}
+    }
+  ); 
+  const json = response.getContentText();
+  return json;
+}
+
+
+/**
  * Hämta lista med personer för denna e-postlista
  * Returnera lista med medlemsobjekt
  *
@@ -282,15 +373,7 @@ function fetchScoutnetMembersOneMailinglist_(scoutnet_list_id, cell_scoutnet_lis
       Logger.log("Scoutnet mailinglist-id=" + scoutnet_list_id);
       const email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
       const url = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=' + scoutnet_list_id + email_fields;
-      const authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_mailinglists);
-      const response = UrlFetchApp.fetch(
-        url, {
-          'muteHttpExceptions': true,
-          'headers': { 'Authorization': authHeader}
-        }
-      );
-      Logger.log(response); 
-      json = response.getContentText();
+      json = urlFetch_(url, api_key_mailinglists);
       Logger.log("Json.length " + json.length);
 
       //Kolla så att inte större än 100kb per kaka och sätt i så fall cache; om ej skippa det.
@@ -553,16 +636,7 @@ function fetchScoutnetMembers_(forceUpdate) {
   if (forceUpdate || !(kaka = cache.get("fetchScoutnetMembers"))) {
 
     const url = 'https://' + scoutnet_url + '/api/' + organisationType + '/memberlist';
-    const authHeader = 'Basic ' + Utilities.base64Encode(groupId + ':' + api_key_list_all);
-    const response = UrlFetchApp.fetch(
-      url, {
-        'muteHttpExceptions': true,
-        'headers': { 'Authorization': authHeader}
-      }
-    );
-    //Logger.log(response); 
-    json = response.getContentText();
-
+    json = urlFetch_(url, api_key_list_all);
     Logger.log("Json.length " + json.length);
 
     //Kolla så att inte större än 100kb per kaka och sätt i så fall cache; om ej skippa det.
@@ -791,11 +865,11 @@ function getListOfGroups_()  {
  * Uppdaterar listan över e-postadresser för grupper
  */
 function updateListOfGroups_() {
-  
-  Logger.log("Uppdaterar listan över e-postadresser för grupper");
 
   for (let n = 0; n < 6; n++) {
-    Logger.log("Funktionen updateListOfGroups körs " + n);
+    if (n !== 0)  {
+      Logger.log("Funktionen updateListOfGroups körs " + n);
+    }
     
     try {
       listOfGroups = [];
@@ -819,7 +893,6 @@ function updateListOfGroups_() {
         pageToken = page.nextPageToken;
       } while (pageToken);
 
-      Logger.log(listOfGroups);
       return listOfGroups;
     
     } catch (e) {

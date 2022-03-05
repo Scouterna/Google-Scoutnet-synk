@@ -11,6 +11,7 @@ function GrupperTestsynk() {
   Grupper(1, 10);
 }
 
+
 /**
  * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
  * Anropas antingen med (startrad, slutrad)
