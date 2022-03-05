@@ -248,24 +248,24 @@ function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet
     Logger.log("Rad  i kalkylarket " + i);
 
     /***Villkor***/
-    const tmp_email_condition = replaceTemplate_(email_condition, attribut, data[i]);
-    if (tmp_email_condition)  {
-      if (!eval(tmp_email_condition)) {
+    const actual_email_condition = replaceTemplate_(email_condition, attribut, data[i]);
+    if (actual_email_condition)  {
+      if (!eval(actual_email_condition)) {
         Logger.log("Uppfyller INTE villkoren " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
-        Logger.log(tmp_email_condition);
+        Logger.log(actual_email_condition);
         continue;
       }
     }
     
     Logger.log("Uppfyller villkoren " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
-    Logger.log(tmp_email_condition);
+    Logger.log(actual_email_condition);
     /***Villkor - Slut***/
 
     const emailOptions = {};
     /***Hämta & Ersätt text***/
     
     /***Ämnesrad***/
-    const tmp_subject = replaceTemplate_(email_draft_subject, attribut, data[i]);
+    const actual_subject = replaceTemplate_(email_draft_subject, attribut, data[i]);
     /***Ämnesrad - Slut***/
 
     /***Mottagare e-post***/
@@ -276,9 +276,9 @@ function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet
     /***Mottagare e-post- Slut***/
 
     /***Brödtext***/
-    const tmp_plainBody = replaceTemplate_(plainBody, attribut, data[i]);
-    const tmp_body = replaceTemplate_(body, attribut, data[i]);
-    emailOptions["htmlBody"] = tmp_body;   
+    const actual_plainBody = replaceTemplate_(plainBody, attribut, data[i]);
+    const actual_body = replaceTemplate_(body, attribut, data[i]);
+    emailOptions["htmlBody"] = actual_body;   
     /***Brödtext  Slut***/
     
     /***Bilagor***/
@@ -286,13 +286,13 @@ function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet
     /***Bilagor - Slut***/
     
     Logger.log("email_recipient " + email_recipient);
-    Logger.log("tmp_subject " + tmp_subject);
-    Logger.log("tmp_plainBody " + tmp_plainBody);
+    Logger.log("actual_subject " + actual_subject);
+    Logger.log("actual_plainBody " + actual_plainBody);
     Logger.log("Bilagor " + attachments);
     Logger.log("emailOptions");
     Logger.log(emailOptions);
 
-    GmailApp.sendEmail(email_recipient, tmp_subject, tmp_plainBody, emailOptions);
+    GmailApp.sendEmail(email_recipient, actual_subject, actual_plainBody, emailOptions);
   }
 }
 
@@ -331,55 +331,55 @@ function getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, a
 
   /***Avsändarnamn***/
   if (email_sender_name)  {
-    const tmp_email_sender_name = replaceTemplate_(email_sender_name, attribut, dataArray);
-    emailOptions["name"] = tmp_email_sender_name;
+    const actual_email_sender_name = replaceTemplate_(email_sender_name, attribut, dataArray);
+    emailOptions["name"] = actual_email_sender_name;
   }
   /***Avsändarnamn - Slut***/
 
   /***Avsändaradress***/
-  const tmp_email_sender_email = getSender_(email_sender_email, "avsändaradress", attribut, dataArray, cell_email_sender_email, emailOptions);
-  if (!tmp_email_sender_email) {
+  const actual_email_sender_email = getSender_(email_sender_email, "avsändaradress", attribut, dataArray, cell_email_sender_email, emailOptions);
+  if (!actual_email_sender_email) {
     return false;
   }
   /***Avsändaradress - Slut***/
 
   /***Svarsadress e-post***/
-  const tmp_email_replyto = getSender_(email_replyto, "svarsadress", attribut, dataArray, cell_email_replyto, emailOptions);
-  if (!tmp_email_replyto) {
+  const actual_email_replyto = getSender_(email_replyto, "svarsadress", attribut, dataArray, cell_email_replyto, emailOptions);
+  if (!actual_email_replyto) {
     return false;
   }
   /***Svarsadress e-post - Slut***/
 
   /***Svara-ej***/
-  const tmp_email_noreply = checkIfNoReplyOption_(email_noreply, attribut, dataArray, cell_email_noreply)
-  if (tmp_email_noreply) {
+  const actual_email_noreply = checkIfNoReplyOption_(email_noreply, attribut, dataArray, cell_email_noreply)
+  if (actual_email_noreply) {
     emailOptions["noReply"] = true;
   }
   /***Svara-ej - Slut***/
 
   /***Mottagare e-post***/
-  const tmp_email_recipient = getRecipient_(email_recipient, "mottagaradress", attribut, dataArray);
+  const actual_email_recipient = getRecipient_(email_recipient, "mottagaradress", attribut, dataArray);
   /***Mottagare e-post- Slut***/
 
   /***Kopia e-post***/
-  const tmp_email_cc = getRecipient_(email_cc, "kopia e-post", attribut, dataArray);
-  if (tmp_email_cc) {
-    emailOptions["cc"] = tmp_email_cc;
+  const actual_email_cc = getRecipient_(email_cc, "kopia e-post", attribut, dataArray);
+  if (actual_email_cc) {
+    emailOptions["cc"] = actual_email_cc;
   }
   /***Kopia e-post - Slut***/
 
   /***Blindkopia e-post***/
-  const tmp_email_bcc = getRecipient_(email_bcc, "blindkopia e-post", attribut, dataArray);
-  if (tmp_email_bcc) {
-    emailOptions["bcc"] = tmp_email_bcc;
+  const actual_email_bcc = getRecipient_(email_bcc, "blindkopia e-post", attribut, dataArray);
+  if (actual_email_bcc) {
+    emailOptions["bcc"] = actual_email_bcc;
   }
   /***Blindkopia e-post - Slut***/
 
-  if (!(tmp_email_recipient || tmp_email_cc || tmp_email_bcc))  {
+  if (!(actual_email_recipient || actual_email_cc || actual_email_bcc))  {
     Logger.log("Ingen mottagare är angiven på något sätt. Vi hoppar över denna person");
     return false;
   }
-  return tmp_email_recipient;
+  return actual_email_recipient;
 }
 
 
@@ -597,9 +597,9 @@ function getDocumentToMerge(ids) {
 
 
 /**
- * Givet en mall returnerar funktionen en personlig e-postadress
- * att använda som avsändaradress respektive svarsadress beroende på
- * syfte. Data läggs till i objekten emailOptions för hur e-post ska
+ * Givet en mall returnerar funktionen sant eller falskt om en personlig e-postadress
+ * går att använda som avsändaradress respektive svarsadress beroende på
+ * syfte. Data läggs också till i objektet emailOptions för hur e-post ska
  * skickas. Ändrar färg på cell i kalkylark vid statusändring.
  * 
  * @param {string} textInput - En textmall innehållande ev kortkoder
@@ -609,7 +609,7 @@ function getDocumentToMerge(ids) {
  * @param {Object} cell - Ett objekt av typen Range
  * @param {Object} emailOptions - Ett objekt där extra data för att skicka e-posten finns
  *
- * @returns {string} - En textsträng utan kommentarer eller mellanrum
+ * @returns {boolean} - Sant eller falskt om adressen är tillåten att använda
  */
 function getSender_(textInput, nameOfTheAttribute, attribut, dataArray, cell, emailOptions)  {
 
@@ -678,11 +678,11 @@ function getCleanEmailArray_(input) {
 
   const emailArray = [];
   input = getCleanString_(input);  
-  const tmpArray = input.split(",");
+  const inputSplitArray = input.split(",");
 
-  for (let i = 0; i < tmpArray.length; i++) {
-    if (checkIfEmail_(tmpArray[i]))  {
-      emailArray.push(tmpArray[i]);
+  for (let i = 0; i < inputSplitArray.length; i++) {
+    if (checkIfEmail_(inputSplitArray[i]))  {
+      emailArray.push(inputSplitArray[i]);
     }
   }
   return emailArray;
@@ -825,14 +825,14 @@ function updateMemberlist_(selection, rad_nummer, radInfo, grd, allMembers, spre
   const scoutnet_list_id = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   const cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
   Logger.log(".......Synkronisering - hämta data............");
-  const tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
+  const membersMultipleMailinglists = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
   Logger.log(".......Slut Synkronisering - hämta data.......");
   /***********************/ 
 
   const membersInAList = []
-  for (let i = 0; i < tmpMembersInAList.length; i++) {
+  for (let i = 0; i < membersMultipleMailinglists.length; i++) {
     //Leta upp medlemmen i listan övar alla medlemmar
-    const obj = allMembers.find(obj => obj.member_no == tmpMembersInAList[i].member_no);
+    const obj = allMembers.find(obj => obj.member_no == membersMultipleMailinglists[i].member_no);
     membersInAList.push(obj);
     Logger.log(obj);
   }

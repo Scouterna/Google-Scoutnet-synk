@@ -143,8 +143,8 @@ function groupAlreadyExists_(selection, rad_nummer, groupId, email, radInfo, nam
   }
   else if (email == "") { //Om tom, hämta e-postadressen från systemet och sätt tillbaka den
 
-    const tmp_usr = getAdminDirectoryGroup_(groupId);
-    email = tmp_usr.email;
+    const group = getAdminDirectoryGroup_(groupId);
+    email = group.email;
     let cell = selection.getCell(rad_nummer, grd["e-post"]+1);
     cell.setValue(email);
     cell.setBackground("white");
@@ -331,12 +331,12 @@ function getActualGroupRowsToSync_(args, data, grd) {
     arrayOfRows = getArrayOfRowsWithTag_(data, grd, start, slut, args[args.length-1]);
   }
 
-  tmpRows = [];
+  rowNumbersToSync = [];
   for (let i = 0; i < arrayOfRows.length; i++) {
-    tmpRows.push(arrayOfRows[i]+1);
+    rowNumbersToSync.push(arrayOfRows[i]+1);
   }
   Logger.log("Rader att synkronisera");
-  Logger.log(tmpRows);
+  Logger.log(rowNumbersToSync);
 
   return arrayOfRows;
 }
@@ -385,8 +385,8 @@ function getArrayOfRowsWithTag_(data, grd, start, slut, etikett) {
 
   for (let i = start-1; i < slut; i++)  {
 
-    const tmp_etikett = data[i][grd["etikett"]].toLowerCase();
-    if (tmp_etikett == etikett)  {
+    const etikettFromSpreadsheet = data[i][grd["etikett"]].toLowerCase();
+    if (etikettFromSpreadsheet == etikett)  {
       arrayOfRows.push(i);
     }
   }
@@ -486,12 +486,12 @@ function setCellValueCellUrl_(selection, rad_nummer, column, email) {
  */
 function createGroup_(email, name, shouldUpdateListOfGroups) {
 
-  const tmp_group = {
+  const groupToCreate = {
     "email": email,
     "name": name,
     "description": "Scoutnet"
   };
-  AdminDirectory.Groups.insert(tmp_group);
+  AdminDirectory.Groups.insert(groupToCreate);
             
   const group = getAdminDirectoryGroup_(email);
 
@@ -828,7 +828,7 @@ function getEmailAdressesofAllActiveGoogleAccounts_() {
             
             const email = user.emails[k].address;
             if (email.endsWith(domain)) { //Endast adresser för huvuddomänen
-              if (email!=catchAllAddress) {
+              if (email != catchAllAddress) {
                 emailAddresses.push(email);
                 //Logger.log(email);
               }
@@ -888,8 +888,8 @@ function getMembertype_(groupId, group_members, email) {
    
 		if (group_members[i].email == email)	{ 
       if ('MANAGER' == group_members[i].role) {
-        const tmp_GroupMember = getGroupMember_(groupId, group_members[i].memberId);
-        const delivery_settings = tmp_GroupMember.delivery_settings;
+        const groupMember = getGroupMember_(groupId, group_members[i].memberId);
+        const delivery_settings = groupMember.delivery_settings;
         if('ALL_MAIL' == delivery_settings) {
           return "Both";
         }
@@ -898,8 +898,8 @@ function getMembertype_(groupId, group_members, email) {
         }            
       }
       else if ('OWNER' == group_members[i].role) {
-        const tmp_GroupMember = getGroupMember_(groupId, group_members[i].memberId);
-        const delivery_settings = tmp_GroupMember.delivery_settings;
+        const groupMember = getGroupMember_(groupId, group_members[i].memberId);
+        const delivery_settings = groupMember.delivery_settings;
         if('ALL_MAIL' == delivery_settings) {
           return "OWNER_Both";
         }
@@ -994,7 +994,7 @@ function moveEmailToCorrectList_(allMembers_both_email, allMembers_send_email, a
 
 
 /**
- * Flytta runt e-postadresser till korrekt lista anseende skäppostnotifikation
+ * Flytta runt e-postadresser till korrekt lista avseende skäppostnotifikation
  * 
  * @param {string[]} allMembers_both_email - E-postlista för att skicka och ta emot e-brev
  * @param {string[]} allMembers_send_email - E-postlista för att bara kunna skicka e-brev
@@ -1036,22 +1036,22 @@ function moveEmailToCorrectListRegardingSpamNotification_(allMembers_both_email,
   
   
   //Om e-post är en grupp och finns i "båda" ska den tas bort ur "båda" och läggas till i "ta emot"
-  const tmp_EmailsGroupOrNot_both = getEmailsSortedAsGroupOrNot_(allMembers_both_email);
-  const tmp_groupEmails_both = tmp_EmailsGroupOrNot_both[0];
-  const tmp_notGroupEmails_both = tmp_EmailsGroupOrNot_both[1];
-  allMembers_both_email = tmp_notGroupEmails_both;
-  allMembers_receive_email.push.apply(allMembers_receive_email, tmp_groupEmails_both);
+  const emailsSortedAsGroupOrNot_both = getEmailsSortedAsGroupOrNot_(allMembers_both_email);
+  const groupEmails_both = emailsSortedAsGroupOrNot_both[0];
+  const notGroupEmails_both = emailsSortedAsGroupOrNot_both[1];
+  allMembers_both_email = notGroupEmails_both;
+  allMembers_receive_email.push.apply(allMembers_receive_email, groupEmails_both);
   
   //Om e-post är en grupp och finns i "skicka" ska den tas bort ur "skicka" och informera i loggen
-  const tmp_EmailsGroupOrNot_send = getEmailsSortedAsGroupOrNot_(allMembers_send_email);
-  const tmp_groupEmails_send = tmp_EmailsGroupOrNot_send[0];
-  const tmp_notGroupEmails_send = tmp_EmailsGroupOrNot_send[1];
-  allMembers_send_email = tmp_notGroupEmails_send;
+  const emailsSortedAsGroupOrNot_send = getEmailsSortedAsGroupOrNot_(allMembers_send_email);
+  const groupEmails_send = emailsSortedAsGroupOrNot_send[0];
+  const notGroupEmails_send = emailsSortedAsGroupOrNot_send[1];
+  allMembers_send_email = notGroupEmails_send;
 
-  if (0 != tmp_groupEmails_send.length) {
+  if (0 != groupEmails_send.length) {
     Logger.log("Följande e-postadresser står i kolumnen skicka.");
     Logger.log("De är dock grupper och får ej stå med där och kommer tas bort");
-    Logger.log(tmp_groupEmails);
+    Logger.log(groupEmails_send);
   }
 
   return [allMembers_both_email, allMembers_send_email, allMembers_receive_email, allMembers_both_email_admin, allMembers_send_email_admin];
@@ -1088,14 +1088,14 @@ function printListAndRemoveDublicates_(listInput, text) {
  */
 function getListsWithUniqueElements_(mainList, secondList) {
   
-  const tmp_email_list = [];
+  const emailListWithUniqueElements = [];
   
   for (let i = 0; i < secondList.length; i++) {
     if (!mainList.includes(secondList[i])) {
-      tmp_email_list.push(secondList[i]);
+      emailListWithUniqueElements.push(secondList[i]);
     }
   }
-  return tmp_email_list;
+  return emailListWithUniqueElements;
 }
 
 
@@ -1359,25 +1359,25 @@ function getEmailadressesToSendSpamNotification_(group_moderate_content_email, c
     emailAdresses = fetchScoutnetMembersMultipleMailinglists_(moderateContentEmail, "", "", forceUpdate);
   }
   else { //Om man ej anger listId för en e-postlista ska användaren som kör detta program bli notifierad
-    const tmp_member = {
+    const activeUser = {
       manuell: Session.getActiveUser().getEmail()
     };
-    emailAdresses.push(tmp_member);
+    emailAdresses.push(activeUser);
   }
   emailAdresses = getMemberlistsMemberEmail_(emailAdresses, "m-"); //Bara primäradress från Scoutnet
   
-  const tmp_emailAdresses = [];
+  const emailAdressesNotGroups = [];
   
   for (let i = 0; i < emailAdresses.length; i++) {
     if (checkIfEmailIsAGroup_(emailAdresses[i])) {
       cell_group_moderate_content_email.setBackground("red");
     }
     else {
-      tmp_emailAdresses.push(emailAdresses[i]);
+      emailAdressesNotGroups.push(emailAdresses[i]);
     }
   }
   
-  if (tmp_emailAdresses.length == emailAdresses.length) {
+  if (emailAdressesNotGroups.length == emailAdresses.length) {
     if (boolModerateGroupEmail) {
       //E-post för skräppostmoderator är angiven
       cell_group_moderate_content_email.setBackground("white");
@@ -1387,7 +1387,7 @@ function getEmailadressesToSendSpamNotification_(group_moderate_content_email, c
       cell_group_moderate_content_email.setBackground("yellow");
     }
   }
-  emailAdresses = tmp_emailAdresses;
+  emailAdresses = emailAdressesNotGroups;
   
   Logger.log("EmailAdresses");
   Logger.log(emailAdresses);
@@ -1484,7 +1484,7 @@ function getAdminDirectoryGroup_(groupKey) {
  */
 function patchAdminDirectoryGroup_(newName, groupId) {
   
-  const tmp_group = {
+  const group = {
     name: newName
   };
 
@@ -1492,7 +1492,7 @@ function patchAdminDirectoryGroup_(newName, groupId) {
     Logger.log("Funktionen patchAdminDirectoryGroup körs " + n);
     
     try {
-      AdminDirectory.Groups.patch(tmp_group, groupId);
+      AdminDirectory.Groups.patch(group, groupId);
       return;
     }
     catch (e) {

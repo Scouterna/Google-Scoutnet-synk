@@ -40,7 +40,7 @@ function Anvandare() {
       
     Logger.log("----------------------------------");
     Logger.log("orgUnitPath = %s", orgUnitPath);
-    Logger.log("Beskrivning: %s",userAccountConfig[p].description);
+    Logger.log("Beskrivning: %s", userAccountConfig[p].description);
     
     createSuborganisationIfNeeded_(orgUnitPath);
     
@@ -53,9 +53,9 @@ function Anvandare() {
     }
     Logger.log("MembersInAlist antal personer= " + membersInAList.length);
 
-    for (let i = 0; i < membersInAList.length; i++) {  //Här Processas alla medlemmar
+    for (let i = 0; i < membersInAList.length; i++) {  //Här processas alla medlemmar
       Logger.log("**************");
-      if(membersProcessed.find(o => o == membersInAList[i].member_no)) {// Leta efter kontot i listan över redan processade konton
+      if(membersProcessed.find(o => o == membersInAList[i].member_no)) { // Leta efter kontot i listan över redan processade konton
         Logger.log("Användaren är redan processad: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
       }
       else {
@@ -81,8 +81,9 @@ function Anvandare() {
         if(googleUserAccount) {
           // Användaren fanns i listan
           //const ia = useraccounts.length
-          const indx = useraccounts.findIndex(v => v.id === googleUserAccount.id);
-          useraccounts.splice(indx, indx >= 0 ? 1 : 0); // radera kontot ut listan med alla googlekonto, när updateringen av alla konto är klar skall resterande konto i denna lista avaktiveras.
+          const indexOfList = useraccounts.findIndex(v => v.id === googleUserAccount.id);
+          useraccounts.splice(indexOfList, indexOfList >= 0 ? 1 : 0);
+          // radera kontot ut listan med alla googlekonto, när updateringen av alla konto är klar skall resterande konto i denna lista avaktiveras.
           //const ib = useraccounts.length
           Logger.log("Hittade Googleanvändaren %s, id=%s ", googleUserAccount.name.fullName, googleUserAccount.id);
           //Logger.log("Antal innan: %s, efter: %s", ia, ib );
@@ -122,14 +123,14 @@ function createSuborganisationIfNeeded_(orgUnitPath) {
   Logger.log("Orgname " + name);
   
   if (!checkIfOrgUnitExists_(parentOrgUnitPath)) {
-    //Vi kollar om föräldra organisationen finns rekursivt, om ej så skapar vi den
+    //Vi kollar rekursivt om föräldraorganisationen finns, om ej så skapar vi den
     createSuborganisationIfNeeded_(parentOrgUnitPath);
   }
   
   const boolOrgUnitExists = checkIfOrgUnitExists_(orgUnitPath);
   if (!boolOrgUnitExists) {
     
-    const orgUnit = {      
+    const orgUnit = {
       name: name,
       parentOrgUnitPath: parentOrgUnitPath
     };
@@ -360,7 +361,7 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
     member.contact_mobile_phone = member.mobile_phone;
   }
  
-  const phnum = intphonenumber_(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
+  const phnum = intPhoneNumber_(member.contact_mobile_phone); // gör mobilnummret till internationellt nummer om möjligt
   
   let phnum_recovery = "";
   if (validatePhonenumberForE164_(phnum)) {
@@ -571,12 +572,12 @@ function updateUserPhoto_(member, useraccount, defaultUserAvatar, defaultUserAva
   //Uppdatera sen Userfältet med avatar_updated och bildens etag
   Logger.log("Den nya avatarUpdated " + keywordAvatarUpdatedToUpdate);
   const keywordArray = [];
-  const tmp_avatarUpdated = {
+  const avatarUpdated = {
     "value": keywordAvatarUpdatedToUpdate,
     "type": "custom",
     "customType": "avatar_updated"
   };
-  keywordArray.push(tmp_avatarUpdated);
+  keywordArray.push(avatarUpdated);
   
   return keywordArray;  
 }

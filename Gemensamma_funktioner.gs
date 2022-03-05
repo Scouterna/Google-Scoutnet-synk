@@ -80,9 +80,9 @@ function getGroupMembers_(groupId) {
           for (let i = 0; i < members.length; i++)  {
             let member = members[i];
             
-            const tmpEmail = getGmailAdressWithoutDots_(member.email.toLowerCase());
+            const gmailAdressWithoutDots = getGmailAdressWithoutDots_(member.email.toLowerCase());
             member = {
-              email: tmpEmail,
+              email: gmailAdressWithoutDots,
               role: member.role,
               memberId: member.id
             };
@@ -154,39 +154,39 @@ function fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutn
   scoutnet_list_id = getCleanString_(scoutnet_list_id);
   
   Logger.log("Innan splitt " + scoutnet_list_id);
-  const tmp_id = scoutnet_list_id.split(",");
+  const listOfScoutnetListIds = scoutnet_list_id.split(",");
   Logger.log("Efter splitt");
   
-  Logger.log("tmp_id.length = " + tmp_id.length);
-  Logger.log("tmp_id[0] = " + tmp_id[0]);
-  Logger.log("tmp_id[1] = " + tmp_id[1]);
+  Logger.log("listOfScoutnetListIds.length = " + listOfScoutnetListIds.length);
+  Logger.log("listOfScoutnetListIds[0] = " + listOfScoutnetListIds[0]);
+  Logger.log("listOfScoutnetListIds[1] = " + listOfScoutnetListIds[1]);
 
   const manuellEpostadress = [];
   
-  for (let i = 0; i < tmp_id.length; i++) {
+  for (let i = 0; i < listOfScoutnetListIds.length; i++) {
   
-    if (checkIfEmail_(tmp_id[i])) { //Om e-postadress
+    if (checkIfEmail_(listOfScoutnetListIds[i])) { //Om e-postadress
       
-      const tmp_member = {
-        manuell: tmp_id[i]       
+      const member_manuell = {
+        manuell: listOfScoutnetListIds[i]       
       };      
-      manuellEpostadress.push(tmp_member);      
+      manuellEpostadress.push(member_manuell);      
     }
-    else if ((tmp_id[i].length == 1) && (tmp_id[i].indexOf("@") == 0)) { //Om @ för kårens googlekonton
+    else if ((listOfScoutnetListIds[i].length == 1) && (listOfScoutnetListIds[i].indexOf("@") == 0)) { //Om @ för kårens googlekonton
       
       Logger.log("lägg till kårens googlekonton");
       for (let k = 0; k < listOfEmailAdressesOfActiveAccounts.length; k++) {
         
-        const tmp_email = listOfEmailAdressesOfActiveAccounts[k];
+        const emailOfOneActiveAccount = listOfEmailAdressesOfActiveAccounts[k];
         
-        const tmp_member = {
-          manuell: tmp_email       
+        const member_manuell = {
+          manuell: emailOfOneActiveAccount       
         };
-        manuellEpostadress.push(tmp_member);
+        manuellEpostadress.push(member_manuell);
       }      
     }
     else { //Om e-postlista från Scoutnet angiven
-      allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist_(tmp_id[i], cell_scoutnet_list_id, forceUpdate));
+      allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist_(listOfScoutnetListIds[i], cell_scoutnet_list_id, forceUpdate));
     }
   }
   
@@ -679,9 +679,9 @@ function checkIfEmailIsAGroup_(email) {
 function checkEmailFormat_(email) {
   
   const arr = email.split("@");
-  const tmp_domain = arr[1];
+  const domain_part = arr[1];
   
-  if (tmp_domain == domain) {
+  if (domain_part == domain) {
        return true;
   }
   return false;  
@@ -697,10 +697,10 @@ function checkEmailFormat_(email) {
  */
 function checkIfGroupExists_(email) {
 
-  const tmpList = getListOfGroups_();
-  //Logger.log(tmpList);
+  const listOfGroupsToCheckIfGroupExists = getListOfGroups_();
+  //Logger.log(listOfGroupsToCheckIfGroupExists);
 
-  if(tmpList.includes(email))  {
+  if(listOfGroupsToCheckIfGroupExists.includes(email))  {
     return true;
   }
   return false;
@@ -854,9 +854,9 @@ function isFromEmailAdressAllowed_(email) {
 function getAllowedFromEmailAdresses_() {
   
   const aliases = GmailApp.getAliases();
-  const min_adress = Session.getEffectiveUser().getEmail();
+  const my_email = Session.getEffectiveUser().getEmail();
   
-  aliases.push(min_adress);
+  aliases.push(my_email);
   //Logger.log(aliases);
   return aliases;
 }
@@ -983,9 +983,9 @@ function deleteRowsFromSpreadsheet_(sheet, delete_rows) {
   
   for (let k = delete_rows.length-1; k >= 0 ; k--) { //Tar bort rader, starta nerifrån
     
-    const tmp_row = delete_rows[k];
-    Logger.log("Remove row " + tmp_row);
-    sheet.deleteRow(tmp_row);
+    const rowToDelete = delete_rows[k];
+    Logger.log("Remove row " + rowToDelete);
+    sheet.deleteRow(rowToDelete);
   }  
 }
 
@@ -998,19 +998,19 @@ function deleteRowsFromSpreadsheet_(sheet, delete_rows) {
  * @returns {string[] | number[] | Object[]} - lista
  */
 function removeDublicates_(list) {
-  const tmp_array = []
+  const listWithoutDuplicates = []
   console.log("Försöker radera dubletter");
   
   for(let i = 0; i < list.length; i++){
-    if(!tmp_array.includes(list[i])){
-      tmp_array.push(list[i])
+    if(!listWithoutDuplicates.includes(list[i])){
+      listWithoutDuplicates.push(list[i])
       //console.log("Denna är ny " + list[i]);
     }
     else {
       //console.log("Hittade dublett av " + list[i]);
     }
   }
-  return tmp_array;
+  return listWithoutDuplicates;
 }
 
 
@@ -1021,28 +1021,28 @@ function removeDublicates_(list) {
  * 
  * @returns {string} - Ett telefonnummer skrivet på internationellt vis om möjligt
  */
-function intphonenumber_(phnum) {
+function intPhoneNumber_(phnum) {
 
-  let rx = /^\+/;      
+  let regex = /^\+/;      
   //Logger.log('Telefonnummer före: %s', phnum);  
-  const res = phnum.match(rx)
+  const res = phnum.match(regex);
   if(res) {
-    let ccok = false;
+    let countryCodeIsFound = false;
     Logger.log('Match');  
  
-    const ccodes = [];
-    ccodes.push("43"); //
-    ccodes.push("44"); //
-    ccodes.push("45"); //Danmark
-    ccodes.push("46"); //Sverige
-    for(let info in ccodes) {
-      rx = new RegExp('^\\+' + ccodes[info], 'g');   
-      if (phnum.match(rx)) {
-        phnum = "+" +  ccodes[info] + phnum.substr(3).replace(/[^0-9]/g, '');
-        ccok = true;
+    const countryCodes = [];
+    countryCodes.push("43"); //
+    countryCodes.push("44"); //
+    countryCodes.push("45"); //Danmark
+    countryCodes.push("46"); //Sverige
+    for(let k in countryCodes) {
+      regex = new RegExp('^\\+' + countryCodes[k], 'g');   
+      if (phnum.match(regex)) {
+        phnum = "+" +  countryCodes[k] + phnum.substr(3).replace(/[^0-9]/g, '');
+        countryCodeIsFound = true;
       }
     }
-    if (!ccok) {
+    if (!countryCodeIsFound) {
       phnum = null;
     }
     //Logger.log('Efter landskod %s', phnum);
@@ -1050,7 +1050,7 @@ function intphonenumber_(phnum) {
   else {
     //Logger.log('Börjar ej med landskod');  
     if (phnum.replace(/[^0-9]/g, '').match(/^0/)) {
-      phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1)
+      phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1);
     }
     else {
       //phnum = null
@@ -1069,8 +1069,8 @@ function intphonenumber_(phnum) {
  * @returns {boolean} - Sant eller falskt om korrekt format
  */
 function validatePhonenumberForE164_(phnum) {
-    const regEx = /^\+[1-9]\d{1,14}$/;
-    return regEx.test(phnum);
+    const regex = /^\+[1-9]\d{1,14}$/;
+    return regex.test(phnum);
 }
 
 
