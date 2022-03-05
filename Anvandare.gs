@@ -678,7 +678,7 @@ function getScoutleaders_(allMembers) {
 /**
  * Testfunktion för att lista alla Googlekonton som finns i underorganisationen "Scoutnet"
  */
-function listAllUsers() {
+function listaAllaGooglekonton() {
   let pageToken, page;
   do {
     page = AdminDirectory.Users.list({
