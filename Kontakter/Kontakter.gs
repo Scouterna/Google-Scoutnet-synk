@@ -201,7 +201,7 @@ function colourCellsIfEmpty_(cells, sdk) {
  * innehåller någon data eller ej.
  * 
  * @param {Object} cell - En cell i ett kalkylblad
- * @param {string} cellData - data i en cell i ett kalkylblad
+ * @param {string} cellData - Data i en cell i ett kalkylblad
  * @param {string} colour - Namn på färg eller rgb hexadecimalt värde för en färg
  * 
  * @returns {boolean} - Ger falskt om bakgrundsfärgen sätts till röd.
@@ -1075,7 +1075,7 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
  * Uppdaterar flera kontakters specificerade kontaktfält samtidigt
  * 
  * @param {Objekt} contactsToUpdate - Objekt med vilka kontakter som ska uppdateras och med ny data
- * @param {String} personFieldsToUpdate - Vilka kontaktfält som ska uppdateras
+ * @param {string} personFieldsToUpdate - Vilka kontaktfält som ska uppdateras
  */
 function batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate)  {
 
@@ -1193,19 +1193,19 @@ function checkDifference_(connection, memberDataContactResource, personField) {
   const nameOfPersonField = personField.apiName;
 
   const connectionObject = connection[nameOfPersonField];
-  const tmpObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, personField.removeValueEmpty);
-  if ('status' in tmpObject) {
-    console.log("status är definerad i objektet som " + tmpObject.status);
+  const statusAndDataObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, personField.removeValueEmpty);
+  if ('status' in statusAndDataObject) {
+    console.log("status är definerad i objektet som " + statusAndDataObject.status);
     //En första koll om det är någon förändring true eller false. T.ex nytt attribut
-    return tmpObject.status;
+    return statusAndDataObject.status;
   }
 
-  const memberData = tmpObject.memberData;
+  const memberData = statusAndDataObject.memberData;
   
   const keys = personField.keys;
-  const tmpArray = makeArrayOfFilteredConnectionObject_(connectionObject, keys); 
+  const existingData = makeArrayOfFilteredConnectionObject_(connectionObject, keys); 
 
-  return checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField);
+  return checkDifferenceMemberInfo_(existingData, memberData, nameOfPersonField);
 }
 
 
@@ -1222,37 +1222,37 @@ function checkDifferenceBirthdays_(connection, memberDataContactResource) {
   const nameOfPersonField = "birthdays";
   
   const connectionObject = connection[nameOfPersonField];
-  const tmpObject_firstcheck = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, false);
-  if ('status' in tmpObject_firstcheck) {
-    console.log("status är definerad i objektet som " + tmpObject_firstcheck.status);
+  const statusAndDataObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, false);
+  if ('status' in statusAndDataObject) {
+    console.log("status är definerad i objektet som " + statusAndDataObject.status);
     //En första koll om det är någon förändring true eller false. T.ex nytt attribut
-    return tmpObject_firstcheck.status;
+    return statusAndDataObject.status;
   }
 
-  const memberData = tmpObject_firstcheck.memberData;
+  const memberData = statusAndDataObject.memberData;
 
-  const tmpArray = [];
+  const existingData = [];
   
   for (let i = 0; i < connectionObject.length; i++) {
-    const tmpObject = {
+    const birthdayObject = {
       "year": connectionObject[i].date.year,
       "month": connectionObject[i].date.month,
       "day": connectionObject[i].date.day
     };
-    tmpArray.push(tmpObject);
+    existingData.push(birthdayObject);
   }
 
-  tmpMemberData = [];
+  const memberDataObject = [];
   for (let i = 0; i < memberData.length; i++) {
-    const tmpObject = {
+    const birthdayObject = {
       "year": memberData[i].date.year,
       "month": memberData[i].date.month,
       "day": memberData[i].date.day
     };
-    tmpMemberData.push(tmpObject);
+    memberDataObject.push(birthdayObject);
   }
   
-  return checkDifferenceMemberInfo_(tmpArray, tmpMemberData, nameOfPersonField);
+  return checkDifferenceMemberInfo_(existingData, memberDataObject, nameOfPersonField);
 }
 
 
@@ -1266,21 +1266,26 @@ function checkDifferenceBirthdays_(connection, memberDataContactResource) {
  */
 function makeArrayOfFilteredConnectionObject_(connectionObject, keys) {
   
-  const tmpArray = [];
+  const existingDataList = [];
   console.log("MakeArray Nycklar " + keys);
   for (let i = 0; i < connectionObject.length; i++) {
-    const tmpObject = {};
+    const existingDataObject = {};
 
     for (let k = 0; k < keys.length; k++) {
-      tmpObject[keys[k]] = connectionObject[i][keys[k]];
+      existingDataObject[keys[k]] = connectionObject[i][keys[k]];
     }    
-    tmpArray.push(tmpObject);
+    existingDataList.push(existingDataObject);
   }
-  return tmpArray;
+  return existingDataList;
 }
 
 
 /**
+ * Om det inte finns något inlagt på kontakten i Google sedan innan ger funktionen
+ * ett objekt med status falskt om det inte heller finns någon ny data och om det nu
+ * finns ett till kontaktfält ges ett objekt med status sant.
+ * Om redan finns data inlagt på kontakten ges objekt med memberData med aktuell information
+ * 
  * @param {Object[]} connectionObject - Data för ett kontaktfält för en kontakt som redan finns
  * @param {Object} memberDataContactResource - Ett objekt av typen Person med kontaktinfo för en person
  * @param {string} nameOfPersonField - Namn på ett kontaktfält
@@ -1339,48 +1344,48 @@ function removeElementsWithValueOrPersonEmpty_(memberData) {
  * Jämför listor av objekt bestående av kontaktfältsattribut och deras värden och
  * kollar om de är olika.
  * 
- * @param {Object[]} tmpArray - Lista av objekt för en typ av kontaktfält för en kontakt
+ * @param {Object[]} existingData - Lista av objekt för en typ av kontaktfält för en kontakt
  * @param {Object[]} memberData - Lista av objekt med medlemsdata för en typ av kontaktfält för en medlem
  * @param {string} nameOfPersonField - Namn på ett specifikt kontaktfält
  * 
  * @returns {boolean} - Sant eller falskt om det är skillnad på nuvarande kontaktdata och den som ska vara
  */
-function checkDifferenceMemberInfo_(tmpArray, memberData, nameOfPersonField)  {
+function checkDifferenceMemberInfo_(existingData, memberData, nameOfPersonField)  {
 
   console.log(nameOfPersonField);
 
   console.log("checkDifferenceMemberInfo");
-  console.log(tmpArray);
+  console.log(existingData);
   console.log(memberData);
 
-  if (tmpArray.length != memberData.length) {
+  if (existingData.length != memberData.length) {
     console.log("Olika många fält för detta kontaktattribut. Någon ändring har skett");
     return true;
   }
 
-  for (let i = 0; i < tmpArray.length; i++) {
-    const tmpObject = tmpArray[i];
-    const tmpMemberData = memberData[i];
+  for (let i = 0; i < existingData.length; i++) {
+    const existingDataObject = existingData[i];
+    const memberDataObject = memberData[i];
 
     console.log("Datan som finns");
-    console.log(tmpObject);
+    console.log(existingDataObject);
 
     console.log("Datan som ska finnas");
-    console.log(tmpMemberData);
+    console.log(memberDataObject);
 
-    const tmpKeys = Object.keys(tmpObject);
+    const keysOfExistingDataObject = Object.keys(existingDataObject);
     console.log("Nycklar som ska kollas");
-    console.log(tmpKeys);
+    console.log(keysOfExistingDataObject);
     
-    for (let n = 0; n < tmpKeys.length; n++) {
+    for (let n = 0; n < keysOfExistingDataObject.length; n++) {
 
-      if (tmpObject[tmpKeys[n]] == tmpMemberData[tmpKeys[n]]) {
-        console.log("Samma data " + tmpKeys[n] + " = " + tmpObject[tmpKeys[n]]);
+      if (existingDataObject[keysOfExistingDataObject[n]] == memberDataObject[keysOfExistingDataObject[n]]) {
+        console.log("Samma data " + keysOfExistingDataObject[n] + " = " + existingDataObject[keysOfExistingDataObject[n]]);
       }
       else  {
         console.log("Data är ej lika");
-        console.log("Gammal data " + tmpKeys[n] + " = " + tmpObject[tmpKeys[n]]);
-        console.log("Ny data " + tmpKeys[n] + " = " + tmpMemberData[tmpKeys[n]]);
+        console.log("Gammal data " + keysOfExistingDataObject[n] + " = " + existingDataObject[keysOfExistingDataObject[n]]);
+        console.log("Ny data " + keysOfExistingDataObject[n] + " = " + memberDataObject[keysOfExistingDataObject[n]]);
         return true; 
       }
     }
@@ -1537,8 +1542,8 @@ function getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups)  {
   
   for (let i = 1; i < nyaKontakter.length; i++) {
 
-    const tmpNamn = prefixContactgroups + nyaKontakter[i][0].name;
-    if (tmpNamn == namn)  {
+    const nameOfActualContactGroup = prefixContactgroups + nyaKontakter[i][0].name;
+    if (nameOfActualContactGroup == namn)  {
       return nyaKontakter[i];
     }
   }
@@ -1639,7 +1644,7 @@ function deleteContactGroup_(contactGroup) {
 /**
  * Skapa en kontaktgrupp
  * 
- * @param {string} namn - namn för en kontaktgrupp att skapa
+ * @param {string} namn - Namn för en kontaktgrupp att skapa
  * 
  * @returns {Object} - Objekt av typen ContactGroup för skapad kontaktgrupp
  */
@@ -1773,17 +1778,17 @@ function getContactGroups_(prefixContactgroups) {
  * @returns {string[] | number[] | Object[]} - lista
  */
 function removeDublicates_(list) {
-  const tmp_array = []
+  const listWithoutDuplicates = []
   console.log("Försöker radera dubletter");
   
   for(let i = 0; i < list.length; i++){
-    if(!tmp_array.includes(list[i])){
-      tmp_array.push(list[i])
+    if(!listWithoutDuplicates.includes(list[i])){
+      listWithoutDuplicates.push(list[i])
       //console.log("Denna är ny " + list[i]);
     }
     else {
       //console.log("Hittade dublett av " + list[i]);
     }
   }
-  return tmp_array;
+  return listWithoutDuplicates;
 }

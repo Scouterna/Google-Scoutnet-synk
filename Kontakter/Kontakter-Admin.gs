@@ -760,7 +760,7 @@ function getUpdateForContactGroup_(selection, rad_nummer, radInfo, grd, forceUpd
   const scoutnet_list_id = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   const cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
 
-  const tmpMembersInAList = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
+  const membersMultipleMailinglists = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
   
   const contactGroupInfo = {
     name: name
@@ -769,8 +769,8 @@ function getUpdateForContactGroup_(selection, rad_nummer, radInfo, grd, forceUpd
   const membersInAList = [];
   membersInAList.push(contactGroupInfo);
 
-  for (let i = 0; i < tmpMembersInAList.length; i++) {
-    membersInAList.push(tmpMembersInAList[i].member_no);
+  for (let i = 0; i < membersMultipleMailinglists.length; i++) {
+    membersInAList.push(membersMultipleMailinglists[i].member_no);
   }
   return membersInAList;
 }
