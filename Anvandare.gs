@@ -4,7 +4,7 @@
  */
 
 
-/*
+/**
  * Huvudfunktion för att hantera synkronisering av användarkonton med Scoutnet
  */
 function Anvandare() {
@@ -34,10 +34,10 @@ function Anvandare() {
     
     if (userAccountConfig[p].orgUnitPath) {
       //Bara om man anger någon suborg så anger vi den, annars blir det knas med
-      //sista snedstrecket      
+      //sista snedstrecket
       orgUnitPath = orgUnitPath + "/" + userAccountConfig[p].orgUnitPath;
     }
-      
+    
     Logger.log("----------------------------------");
     Logger.log("orgUnitPath = %s", orgUnitPath);
     Logger.log("Beskrivning: %s", userAccountConfig[p].description);
@@ -53,9 +53,9 @@ function Anvandare() {
     }
     Logger.log("MembersInAlist antal personer= " + membersInAList.length);
 
-    for (let i = 0; i < membersInAList.length; i++) {  //Här processas alla medlemmar
+    for (let i = 0; i < membersInAList.length; i++) { //Här processas alla medlemmar
       Logger.log("**************");
-      if(membersProcessed.find(o => o === membersInAList[i].member_no)) { // Leta efter kontot i listan över redan processade konton
+      if (membersProcessed.find(o => o === membersInAList[i].member_no)) { // Leta efter kontot i listan över redan processade konton
         Logger.log("Användaren är redan processad: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
       }
       else {
@@ -71,14 +71,14 @@ function Anvandare() {
         }
 
         if (!obj) {
-          Logger.log("Användaren  " + membersInAList[i].first_name + " " + membersInAList[i].last_name + " finns inte i Scoutnet eller så saknas det behörighet för att se användare. Kontrollera medlemslistan.");
+          Logger.log("Användaren " + membersInAList[i].first_name + " " + membersInAList[i].last_name + " finns inte i Scoutnet eller så saknas det behörighet för att se användare. Kontrollera medlemslistan.");
           Logger.log("Hoppar över användaren.");
           // membersInAList-loop
           continue;
         }
 
         const googleUserAccount = useraccounts.find(u => u.externalIds !== undefined && u.externalIds.some(extid => extid.type === "organization" && extid.value === obj.member_no)); // leta upp befintligt Googlekonto som representerar rätt objekt
-        if(googleUserAccount) {
+        if (googleUserAccount) {
           // Användaren fanns i listan
           //const ia = useraccounts.length
           const indexOfList = useraccounts.findIndex(v => v.id === googleUserAccount.id);
@@ -96,9 +96,9 @@ function Anvandare() {
       }
     }
   }
-  Logger.log("Googlekonton som är kvar: %s",  useraccounts.length);
+  Logger.log("Googlekonton som är kvar: %s", useraccounts.length);
 
-  for (let googleUserAccount in  useraccounts) {
+  for (let googleUserAccount in useraccounts) {
     Logger.log("Stänger av konto, id: %s, %s",useraccounts[googleUserAccount].id, useraccounts[googleUserAccount].name.fullName);
     suspendAccount_(useraccounts[googleUserAccount], suspendedOrgUnitPath)
   }
@@ -142,7 +142,7 @@ function createSuborganisationIfNeeded_(orgUnitPath) {
     catch (e) {
       Logger.log("Misslyckades att skapa orgUnit " + orgUnitPath);
       Logger.log("Fel " + e);
-    }    
+    }
   }
 }
 
@@ -166,7 +166,7 @@ function checkIfOrgUnitExists_(orgUnitPath) {
   catch (e) {
     Logger.log("OrgUnit " + orgUnitPath + " finns ej, men borde skapas");
     return false;
-  }  
+  }
 }
 
 
@@ -206,15 +206,15 @@ function createAccount_(member, orgUnitPath) {
   
   let email = first_name_email + "." + last_name_email + "@" + domain; 
  
-  if (checkIfEmailExists_(email)) {    
+  if (checkIfEmailExists_(email)) {
      for (let t = 1; t < 5; t++) { //Ska inte vara fler personer med samma namn. Programmet kraschar då med mening då något antagligen gått fel
         email = first_name_email + "." + last_name_email + t + "@" + domain;
-       
+
         if (!checkIfEmailExists_(email)) { //Skapa denna e-postadress
-          break;          
-        }       
-     }    
-  }  
+          break;
+        }
+     }
+  }
    
   let user = {
     primaryEmail: email,
@@ -225,15 +225,15 @@ function createAccount_(member, orgUnitPath) {
     "externalIds": [
       {
         "value": member.member_no,
-        "type": "organization"      
+        "type": "organization"
       }
     ],
-    "orgUnitPath": orgUnitPath,    
+    "orgUnitPath": orgUnitPath,
     password: Math.random().toString(36) // Generera ett slumpat lösenord
   };
   user = AdminDirectory.Users.insert(user);
   
-  Logger.log('Användare %s skapad.', user.primaryEmail);  
+  Logger.log('Användare %s skapad.', user.primaryEmail);
 }
 
 
@@ -255,11 +255,11 @@ function checkIfEmailExists_(email) {
 
   if (page.users) {
     Logger.log("Denna adress finns redan " + email);
-    return true;      
+    return true;
   } else {
     Logger.log('Ingen användare hittades med ' + email);
     return false;
-  }  
+  }
 }
 
 
@@ -300,7 +300,7 @@ function getByteArrayOfAnImage_(url) {
     const data = Utilities.base64EncodeWebSafe(blob.getBytes());
     return data;
   }
-  catch(err)  {
+  catch(err) {
     Logger.log("--------------------------");
     Logger.log("Error: %s",err.message);
     Logger.log("--------------------------");
@@ -356,8 +356,8 @@ function getAvatarIdImageToUse_(avatar_updated, defaultAvatarId) {
  * @param {string} defaultUserAvatarId - Id för standardbilden
  */
 function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) {
-    
-  if ("district" === organisationType) {  //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
+  
+  if ("district" === organisationType) { //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
     member.contact_mobile_phone = member.mobile_phone;
   }
  
@@ -397,7 +397,7 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
   
   let shouldBeKeywordAvatarUpdated = member.avatar_updated;
   // Om ingen bild finns i Scoutnet eller att bild ej ska synkas
-  if (!shouldBeKeywordAvatarUpdated)  {
+  if (!shouldBeKeywordAvatarUpdated) {
 
     //Ett genererat id för standardbilden
     if (typeof defaultUserAvatar !== 'undefined' && defaultUserAvatar) {
@@ -405,7 +405,7 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
       Logger.log("Ska sätta standardbild på denna person");
     }
   }
-  else  {
+  else {
     Logger.log("Personen har en egen profilbild i Scoutnet som ska användas");
   }
 
@@ -417,56 +417,56 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
   }
   
   Logger.log("shouldBeKeywordAvatarUpdated " + shouldBeKeywordAvatarUpdated);
-  Logger.log("accountKeywordAvatarUpdated  " + accountKeywordAvatarUpdated);
+  Logger.log("accountKeywordAvatarUpdated " + accountKeywordAvatarUpdated);
   //Logger.log("Avatar updated " + member.avatar_updated);
   Logger.log("Avatar url " + member.avatar_url);
 
   
   if ( useraccount.name.givenName !== member.first_name 
-      || useraccount.name.familyName !== member.last_name 
-      || useraccount.suspended 
-      || useraccount.orgUnitPath !== orgUnitPath  
-      || ((useraccount.recoveryEmail !== member.email) && (!(!useraccount.recoveryEmail && member.email === "")))
-      || ((useraccount.recoveryPhone !== phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery === ""))) 
-      || (accountPrimaryPhoneNumber !== phnum)
-      || (accountKeywordAvatarUpdated !== shouldBeKeywordAvatarUpdated))  {
+    || useraccount.name.familyName !== member.last_name 
+    || useraccount.suspended 
+    || useraccount.orgUnitPath !== orgUnitPath
+    || ((useraccount.recoveryEmail !== member.email) && (!(!useraccount.recoveryEmail && member.email === "")))
+    || ((useraccount.recoveryPhone !== phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery === ""))) 
+    || (accountPrimaryPhoneNumber !== phnum)
+    || (accountKeywordAvatarUpdated !== shouldBeKeywordAvatarUpdated)) {
     // Något behöver uppdateras 
 
     let user = {} // skapa kontoobjekt med det som skall ändras
     
-    if(useraccount.name.givenName !== member.first_name) {
+    if (useraccount.name.givenName !== member.first_name) {
       if (!user.name)
       {user.name = {}}
       Logger.log("Nytt förnamn: %s", member.first_name);
       user.name.givenName = member.first_name;
     }
-    if(useraccount.name.familyName !== member.last_name) {
+    if (useraccount.name.familyName !== member.last_name) {
       if (!user.name)
       {user.name = {}}
       Logger.log("Nytt efternamn: %s", member.last_name);
       user.name.familyName = member.last_name;
     }
-    if(useraccount.orgUnitPath !== orgUnitPath)  {
+    if (useraccount.orgUnitPath !== orgUnitPath) {
       Logger.log("Ny OrganizationUnit: %s", orgUnitPath);
       user.orgUnitPath = orgUnitPath;
     }
 
     // Lägg till återställningsinformation på Googlekontot
     //Om de inte är lika && de inte är tomma båda två
-    if((useraccount.recoveryEmail !== member.email) && (!(!useraccount.recoveryEmail && member.email === "")))  {
+    if ((useraccount.recoveryEmail !== member.email) && (!(!useraccount.recoveryEmail && member.email === ""))) {
       Logger.log("Ny återställningse-post: %s", member.email);
       user.recoveryEmail = member.email;
-    };    
+    };
     
-    if  ((useraccount.recoveryPhone !== phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery === ""))) {
+    if ((useraccount.recoveryPhone !== phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery === ""))) {
       Logger.log("Nytt återställningsnummer: %s", phnum_recovery);
       user.recoveryPhone = phnum_recovery;
     }
     
-    if  (typeof syncUserContactInfo !== 'undefined' && syncUserContactInfo) {
-      if(accountPrimaryPhoneNumber !== phnum) {
+    if (typeof syncUserContactInfo !== 'undefined' && syncUserContactInfo) {
+      if (accountPrimaryPhoneNumber !== phnum) {
         Logger.log("Nytt mobilnummer: %s", phnum);
-        user.phones = findPhoneNumbersToBeForUser_(useraccount, phnum);       
+        user.phones = findPhoneNumbersToBeForUser_(useraccount, phnum);
       }
     } 
 
@@ -487,7 +487,7 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
       user = AdminDirectory.Users.update(user, useraccount.primaryEmail);
       //Logger.log("Användaren är nu i org " + orgUnitPath);
     }
-    catch(err)  {
+    catch(err) {
       Logger.log("--------------------------")
       Logger.log("Error: %s",err.message);
       Logger.log(user);
@@ -503,7 +503,7 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
  * @param {Object} useraccount - Ett Googlekontoobjekt
  * @param {string} phnum - Telefonnumret skrivet på internationellt sett
  */
-function findPhoneNumbersToBeForUser_(useraccount, phnum)  {
+function findPhoneNumbersToBeForUser_(useraccount, phnum) {
 
   let accountPhoneNumbersNotPrimaryOrTheSame = [];
   if (typeof useraccount.phones !== 'undefined' && useraccount.phones) {
@@ -512,7 +512,7 @@ function findPhoneNumbersToBeForUser_(useraccount, phnum)  {
     }
   }
   
-  if(phnum) {
+  if (phnum) {
     const newPrimaryPhoneNumber = {
       "value": phnum,
       "primary": true,
@@ -536,13 +536,13 @@ function findPhoneNumbersToBeForUser_(useraccount, phnum)  {
  * @param {string} defaultUserAvatarId - Id för standardbilden
  * @param {string} shouldBeKeywordAvatarUpdated - Data som sparas på användarkonto för profilbild
  */
-function updateUserPhoto_(member, useraccount, defaultUserAvatar, defaultUserAvatarId, shouldBeKeywordAvatarUpdated)  {
+function updateUserPhoto_(member, useraccount, defaultUserAvatar, defaultUserAvatarId, shouldBeKeywordAvatarUpdated) {
 
   let keywordAvatarUpdatedToUpdate = "";
-      
+  
   //Om tillgänglig Scoutnet- eller standardbild; uppdatera bild i Google Workspace
   if (shouldBeKeywordAvatarUpdated) {
-    Logger.log("Finns ny profilbild. Antingen i Scoutnet eller ny standardbild");        
+    Logger.log("Finns ny profilbild. Antingen i Scoutnet eller ny standardbild");
     
     let userPhoto;
 
@@ -550,20 +550,20 @@ function updateUserPhoto_(member, useraccount, defaultUserAvatar, defaultUserAva
       const data = getByteArrayImageToUse_(member.avatar_url, defaultUserAvatar);
       userPhoto = AdminDirectory.Users.Photos.update({photoData: data}, useraccount.primaryEmail);
     }
-    catch(err)  {
+    catch(err) {
       Logger.log("--------------------------");
       Logger.log("Error: %s",err.message);
       Logger.log("--------------------------");
     }
     
     try {
-      userPhoto = AdminDirectory.Users.get(useraccount.primaryEmail);          
+      userPhoto = AdminDirectory.Users.get(useraccount.primaryEmail);
       const avatarId = getAvatarIdImageToUse_(member.avatar_updated, defaultUserAvatarId);
 
       keywordAvatarUpdatedToUpdate = avatarId + userPhoto.thumbnailPhotoEtag;
       Logger.log("Uppdaterat profilbild");
     }
-    catch(err)  {
+    catch(err) {
       Logger.log("--------------------------");
       Logger.log("Error: %s",err.message);
       Logger.log("--------------------------");
@@ -579,7 +579,7 @@ function updateUserPhoto_(member, useraccount, defaultUserAvatar, defaultUserAva
   };
   keywordArray.push(avatarUpdated);
   
-  return keywordArray;  
+  return keywordArray;
 }
 
 
@@ -605,10 +605,10 @@ function suspendAccount_(userAccount, suspendedOrgUnitPath) {
     };
   
     user = AdminDirectory.Users.update(user, email);
-    Logger.log('Användare %s är nu avstängd', email);  
+    Logger.log('Användare %s är nu avstängd', email);
   }
   else {
-    Logger.log('Användare %s är redan avstängd', email);  
+    Logger.log('Användare %s är redan avstängd', email);
   }
 }
 
@@ -636,7 +636,7 @@ function getGoogleAccounts_(defaultOrgUnitPath) {
     if (users) {
       //for (let i = 0; i < users.length; i++) {
         //const user = users[i];
-        //Logger.log('%s (%s)', user.name.fullName, user.primaryEmail);                
+        //Logger.log('%s (%s)', user.name.fullName, user.primaryEmail);
       //}
     } else {
       Logger.log('Ingen användare hittades.');
@@ -646,7 +646,7 @@ function getGoogleAccounts_(defaultOrgUnitPath) {
     pageToken = page.nextPageToken;
   } while (pageToken);
 
-  return users;  
+  return users;
 }
 
 
@@ -669,9 +669,9 @@ function getScoutleaders_(allMembers) {
     
     if (group_role.length !== 0 || unit_role.length !== 0) {
      leaders.push(allMembers[i]);
-    }    
+    }
   }
-  return leaders;  
+  return leaders;
 }
 
 

@@ -77,7 +77,7 @@ function doGet(e) {
   Logger.log(e);
   const params = e.parameters;
 
-  if (Object.keys(params).length === 0)  {
+  if (Object.keys(params).length === 0) {
     Logger.log("Inga parametrar angivna. MVH " + groupName);
     return ContentService.createTextOutput("Inga parametrar angivna. MVH " + groupName)
     .setMimeType(ContentService.MimeType.TEXT);
@@ -92,7 +92,7 @@ function doGet(e) {
     Logger.log("Detta var en tvingad uppdatering");
     forceUpdate = true;
   }
-  else  {
+  else {
     forceUpdate = false;
   }
 
@@ -110,7 +110,7 @@ function doGet(e) {
 
     contactGroupsList = getContactGroupsData_(listOfGroupEmails, forceUpdate);
   }
-  else  {
+  else {
     contactGroupsList = "Du har angivet en felaktig kombination av e-postadress & lösenord. " +
                         "Om e-postadressen finns registrerad kommer det strax ett e-brev till " +
                         "dig med ditt lösenord.";
@@ -158,7 +158,7 @@ function testGetHtmlEmailBody() {
 /**
  * Uppdatera kalkylbladet med de användare som ska ha behörigheter
  */
-function updateContactGroupsAuthnSheetUsers()  {
+function updateContactGroupsAuthnSheetUsers() {
 
   const sheetDataKontakterAnvandare = getDataFromSheet_("Kontakter-Användare");
 
@@ -193,17 +193,17 @@ function updateContactGroupsAuthnSheetUsers()  {
     Logger.log('Rad: ' + rad_nummer + ' E-post: ' + email + ' Lösenord: ' + password + ' Senast använd: ' + last_authn);
 
     email = getGmailAdressWithoutDots_(email.toLowerCase());
-    if(!listOfEmailsShouldHaveAccess.includes(email))  {
+    if (!listOfEmailsShouldHaveAccess.includes(email)) {
       Logger.log("Användare har ej behörighet längre till en kontaktgrupp " + email);
       Logger.log("Försöker ta bort rad " + rad_nummer);
       delete_rows.push(rad_nummer);
       continue;
     }
-    else  {
+    else {
       Logger.log("Användare finns redan i listan " + email);
       listOfEmailsAlreadyAccess.push(email);
 
-      if (!password)  {
+      if (!password) {
         Logger.log("Lösenord saknas för denna användare");
         Logger.log("Skapar lösenord för denna användare");
 
@@ -219,10 +219,10 @@ function updateContactGroupsAuthnSheetUsers()  {
   for (let i = 0; i < listOfEmailsShouldHaveAccess.length; i++) {
     
     const email = listOfEmailsShouldHaveAccess[i];
-    if(!listOfEmailsAlreadyAccess.includes(email))  {
+    if (!listOfEmailsAlreadyAccess.includes(email)) {
       Logger.log(email);
       const password = createRandomPasswordForContactGroupsUser_();
-      sheet.appendRow([email, password]);      
+      sheet.appendRow([email, password]);
     }
   }  
 }
@@ -235,7 +235,7 @@ function updateContactGroupsAuthnSheetUsers()  {
  * 
  * @returns {boolean} - Gällande om versionen av användarens skript är ok eller ej
  */
-function checkIfVersionOk_(version_running)  {
+function checkIfVersionOk_(version_running) {
 
   if (!version_running) {
     Logger.log("Ej angiven version");
@@ -256,10 +256,10 @@ function checkIfVersionOk_(version_running)  {
       Logger.log("Denna nivå av underversion finns ej sedan tidigare");
       return false;
     }
-    if (version_running_split_list[i].length > version_oldest_ok_split_list[i].length)  {
+    if (version_running_split_list[i].length > version_oldest_ok_split_list[i].length) {
       Logger.log("Fler siffror i aktuell underversion än i äldsta tillåtna");
       return true;
-    }    
+    }
     if (version_running_split_list[i] > version_oldest_ok_split_list[i]) {
       Logger.log("Nyare underversion än äldsta tillåtna");
       return true;
@@ -298,7 +298,7 @@ function createRandomPasswordForContactGroupsUser_() {
  * 
  * @returns {string[]} - Lista över e-postadresser för Google-grupper
  */
-function getListOfAllGoogleGroupsShouldHaveAccess_()  {
+function getListOfAllGoogleGroupsShouldHaveAccess_() {
 
   updateListOfGroups_();
 
@@ -364,7 +364,7 @@ function getAllEmailsShouldHaveAccess_(listOfAllGoogleGroupsShouldHaveAccess) {
  * 
  * @returns {string[]} - Lista över e-postadresser för de angivna medlemsobjekten
  */
-function getListOfEmailsFromListOfGroupMembers_(groupMembers)  {
+function getListOfEmailsFromListOfGroupMembers_(groupMembers) {
 
   const listOfEmails = [];
 
@@ -383,7 +383,7 @@ function getListOfEmailsFromListOfGroupMembers_(groupMembers)  {
  * 
  * @returns {Object} - Objekt bestående av data från aktuellt kalkylblad
  */
-function getDataFromSheet_(nameOfSheet)  {
+function getDataFromSheet_(nameOfSheet) {
   const spreadsheetUrl_Kontakter = 'https://docs.google.com/spreadsheets/d/kjdskdjf32332/edit';
 
   for (let n = 0; n < 6; n++) {
@@ -422,7 +422,7 @@ function getDataFromSheet_(nameOfSheet)  {
  * 
  * @returns {Object[][]} - Lista med medlemsobjekt för aktuella kontaktgrupper
  */
-function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
+function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
 
   const sheetDataKontakter = getDataFromSheet_("Kontakter");
 
@@ -454,11 +454,11 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
     const email = data[i][grd["e-post"]];
     const scoutnet_list_id = data[i][grd["scoutnet_list_id"]];
     
-    if(!listOfGroupEmails.includes(email))  {
+    if (!listOfGroupEmails.includes(email)) {
       Logger.log("Användare ej med i Google Gruppen " + email);
       continue;
     }
-    else  {
+    else {
       Logger.log("Användare med i Google Gruppen " + email);
     }
 
@@ -495,7 +495,7 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
         cell.setBackground("white");
       }
     }
-    else  {
+    else {
       const cell = selection.getCell(rad_nummer,grd["e-post"]+1);
       Logger.log("Sätter cellen för e-post till röd");
       cell.setBackground("red");
@@ -507,7 +507,7 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
       Logger.log("memberNumbersInAList");
       Logger.log(memberNumbersInAList);
 
-      contactGroupsList.push(memberNumbersInAList);   
+      contactGroupsList.push(memberNumbersInAList);
     }
   }
   
@@ -530,7 +530,7 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
  *
  * @param {Object[]} allMembers - Lista av medlemsobjekt
  * @param {number[]} memberNumbers - Lista med medlemsnummer
- *  
+ *
  * @returns {Object[]} - Lista av medlemsobjekt för endast de med angivna
  * medlemsnummer samt tillagt attribut anpassat för Google Kontakter
  */
@@ -559,10 +559,10 @@ function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers) {
  * Ger lista med unika medlemsnummer för de som är med i någon kontaktgrupp
  *
  * @param {Object[][]} contactGroupsList - Lista av listor med kontaktgruppsinformation och medlemsnummer för de i respektive grupp
- *  
+ *
  * @returns {number[]} - Lista med unika medlemsnummer för de som är med i någon kontaktgrupp
  */
-function getMemberNumbersFromContactGroupsList_(contactGroupsList)  {
+function getMemberNumbersFromContactGroupsList_(contactGroupsList) {
 
   let memberNumbers = [];
 
@@ -587,7 +587,7 @@ function getMemberNumbersFromContactGroupsList_(contactGroupsList)  {
  * Ger lista av medlemsobjekt där vissa medlemsattribut tagits bort
  *
  * @param {Object[]} medlemmar - Lista av medlemsobjekt
- *  
+ *
  * @returns {Object[]} - Lista av medlemsobjekt med färre medlemsattribut
  */
 function filterMemberAttributes_(medlemmar) {
@@ -616,14 +616,14 @@ function filterMemberAttributes_(medlemmar) {
         if (medlemmar[i]['group_role'] && medlemmar[i]['unit_role']) {
           member['title'] = medlemmar[i]['group_role'] + ", " + medlemmar[i]['unit_role'];
         }
-        else if (medlemmar[i]['group_role'])  {
+        else if (medlemmar[i]['group_role']) {
           member['title'] = medlemmar[i]['group_role'];
         }
-        else if (medlemmar[i]['unit_role'])  {
+        else if (medlemmar[i]['unit_role']) {
           member['title'] = medlemmar[i]['unit_role'];
         }
       }
-      else if ('address_1' === nameOfAttribute)  {
+      else if ('address_1' === nameOfAttribute) {
         if (medlemmar[i]['address_co']) {
           member['streetAddress'] = "c/o " + medlemmar[i]['address_co'] + ", " + medlemmar[i]['address_1'];
         }
@@ -631,7 +631,7 @@ function filterMemberAttributes_(medlemmar) {
           member['streetAddress'] = medlemmar[i]['address_1'];
         }
       }
-      else if ('address_2' === nameOfAttribute)  {
+      else if ('address_2' === nameOfAttribute) {
         if (medlemmar[i]['address_2'] && medlemmar[i]['address_3']) {
           member['extendedAddress'] = medlemmar[i]['address_2'] + ", " + medlemmar[i]['address_3'];
         }
@@ -642,7 +642,7 @@ function filterMemberAttributes_(medlemmar) {
           member['extendedAddress'] = medlemmar[i]['address_3'];
         }
       }
-      else if ('unit' === nameOfAttribute)  {
+      else if ('unit' === nameOfAttribute) {
         if (medlemmar[i]['unit'] && medlemmar[i]['patrol']) {
           member['department'] = medlemmar[i]['unit'] + "/" + medlemmar[i]['patrol'];
         }
@@ -653,10 +653,10 @@ function filterMemberAttributes_(medlemmar) {
           member['department'] = medlemmar[i]['patrol'];
         }
       }
-      else if ('sex' === nameOfAttribute)  {
+      else if ('sex' === nameOfAttribute) {
          member['sex'] = translateGenderToEnglish_(medlemmar[i]['sex']);
       }
-      else if ('date_of_birth' === nameOfAttribute)  {
+      else if ('date_of_birth' === nameOfAttribute) {
         member['date_of_birth_year'] = medlemmar[i]['date_of_birth'].substr(0, 4);
         member['date_of_birth_month'] = medlemmar[i]['date_of_birth'].substr(5, 2);
         member['date_of_birth_day'] = medlemmar[i]['date_of_birth'].substr(8, 2);
@@ -664,10 +664,10 @@ function filterMemberAttributes_(medlemmar) {
       else if ('contact_leader_interest' === nameOfAttribute) {
         member['biographies'] += getTextIfContactLeaderInterest_(medlemmar[i]['contact_leader_interest']);
       }
-      else if ('note' === nameOfAttribute)  {  
+      else if ('note' === nameOfAttribute) {
         member['biographies'] += cleanNote_(medlemmar[i]['note']);
       }
-      else  {
+      else {
         member[nameOfAttribute] = medlemmar[i][nameOfAttribute];
       }
     }
@@ -686,7 +686,7 @@ function filterMemberAttributes_(medlemmar) {
  * 
  * @returns {string} - Sammanfattad info om given anteckning
  */
-function cleanNote_(note)  {
+function cleanNote_(note) {
   
   let cleanNoteString = "";
 
@@ -712,7 +712,7 @@ function cleanNote_(note)  {
  * 
  * @returns {string} - Mening om att hjälpa till eller ingen text beroende på indata
  */
-function getTextIfContactLeaderInterest_(contact_leader_interest)  {
+function getTextIfContactLeaderInterest_(contact_leader_interest) {
 
   if ("Ja" === contact_leader_interest) {
     return "Förälder kan hjälpa till i kåren. ";
@@ -782,7 +782,7 @@ function getUpdateForContactGroup_(selection, rad_nummer, radInfo, grd, forceUpd
  *
  * @returns {Object[]} - Textsträng för e-postadresser i Google Kontakter
  */
-function makeStringForGoogleContactGroup_(emailList)  {
+function makeStringForGoogleContactGroup_(emailList) {
 
   //Skapa lista med enbart korrekta e-postadresser
   let realEmailList = [];
@@ -806,10 +806,10 @@ function makeStringForGoogleContactGroup_(emailList)  {
         contactGroupList.push(realEmailList[i]);
         //Logger.log("Första och enda elementet " + realEmailList[i]);
       }
-      else  {
+      else {
         contactGroupList.push(realEmailList[i] + ">");
         //Logger.log("Första elementet " + realEmailList[i]);
-      }      
+      }
     }
     else if (realEmailList.length-1 === i) {
       contactGroupList.push("<" + realEmailList[i]);
@@ -912,17 +912,17 @@ function sendEmailWithContactsGroupsPassword_(userEmail, password) {
   const emailOptions = {};
 
   /***Avsändarnamn***/
-  if (contact_groups_email_sender_name)  {
+  if (contact_groups_email_sender_name) {
     emailOptions["name"] = contact_groups_email_sender_name;
   }
   /***Avsändarnamn - Slut***/
 
   /***Avsändaradress***/
-  if (contact_groups_email_sender_from)  {
+  if (contact_groups_email_sender_from) {
     if (isFromEmailAdressAllowed_(contact_groups_email_sender_from)) {
       emailOptions["from"] = contact_groups_email_sender_from;
     }
-    else  {
+    else {
       Logger.log("Angiven avsändaradress är ej godkänd");
       Logger.log("Avsändaradressen måste finnas upplagd som alias i din Gmail");
     }
@@ -966,7 +966,7 @@ function getListOfGroupsForAUser_(userKey) {
           userKey: userKey
         });
         const groups = page.groups;
-        if (groups) {   
+        if (groups) {
           for (let i = 0; i < groups.length; i++) {
 
             const group = {
@@ -976,10 +976,10 @@ function getListOfGroupsForAUser_(userKey) {
             };
             //Logger.log(group);
             listOfGroups.push(group);
-          }      
+          }
         }
         else {
-          Logger.log('Inga grupper hittades.');      
+          Logger.log('Inga grupper hittades.');
         }
         pageToken = page.nextPageToken;
       } while (pageToken);
@@ -1006,7 +1006,7 @@ function getListOfGroupsForAUser_(userKey) {
  *
  * @returns {string[]} - Lista med e-postadresser för alla angivna grupper
  */
-function getListOfGroupsEmails_(groups)  {
+function getListOfGroupsEmails_(groups) {
 
   const listOfGroupsEmails = [];
 

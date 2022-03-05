@@ -7,7 +7,7 @@
 /**
  * Kontrollerar om inställningarna i Konfiguration.gs verkar korrekta
  */
-function checkKonfigIsOk()  {
+function checkKonfigIsOk() {
   checkDataFromKonfig_();
 }
 

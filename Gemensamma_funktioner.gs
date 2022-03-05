@@ -40,7 +40,7 @@ function onOpen() {
 /**
  * Kontrollerar om inställningarna i Konfiguration.gs verkar korrekta
  */
-function checkDataFromKonfig_()  {
+function checkDataFromKonfig_() {
   Logger.log("Kontrollera data från Konfiguration.gs");
   
   Logger.log("*****************");
@@ -58,7 +58,7 @@ function checkDataFromKonfig_()  {
   const url_maillist = 'https://' + scoutnet_url + '/api/' + organisationType + '/customlists?list_id=';
   const mailinglist = urlFetch_(url_maillist, api_key_mailinglists);
 
-  if (allMembers || mailinglist)  {
+  if (allMembers || mailinglist) {
     Logger.log("*****************");
     Logger.log("Url till Scoutnet");
     Logger.log(scoutnet_url + " - KORREKT");
@@ -67,7 +67,7 @@ function checkDataFromKonfig_()  {
     Logger.log("Typ av enhet kår (group) eller distrikt (district)");
     Logger.log(organisationType + " - KORREKT");
   }
-  else  {
+  else {
     Logger.log("*****************");
     Logger.log("Url till Scoutnet");
     Logger.log(scoutnet_url + " - Eventuellt felaktig");
@@ -79,19 +79,19 @@ function checkDataFromKonfig_()  {
 
   Logger.log("*****************");
   Logger.log("API-nyckel för alla medlemmar (api_key_list_all)");
-  if (allMembers) {    
+  if (allMembers) {
     Logger.log(api_key_list_all + " - KORREKT");
   }
-  else {    
+  else {
     Logger.log(api_key_list_all + " - Eventuellt felaktig");
   }
 
   Logger.log("*****************");
   Logger.log("API-nyckel för e-postlistor (api_key_mailinglists)");
-  if (mailinglist) {    
+  if (mailinglist) {
     Logger.log(api_key_mailinglists + " - KORREKT");
   }
-  else {    
+  else {
     Logger.log(api_key_mailinglists + " - Eventuellt felaktig");
   }
 
@@ -100,7 +100,7 @@ function checkDataFromKonfig_()  {
   if (checkEmailFormat_(moderateContentEmail) && !checkIfGroupExists_(moderateContentEmail)) {
     Logger.log(moderateContentEmail + " - KORREKT");
   }
-  else  {
+  else {
     Logger.log(moderateContentEmail + " - Eventuellt felaktig. Får ej vara en googlegrupp");
   }
 }
@@ -118,7 +118,7 @@ function getGmailAdressWithoutDots_(email) {
   const regexGmailDots = /(?:\.|\+.*)(?=.*?@gmail\.com)/g;
   
   email = email.replace(regexGmailDots, "");
-  return email;  
+  return email;
 }
 
 
@@ -145,8 +145,8 @@ function getGroupMembers_(groupId) {
           pageToken: pageToken,
         });
         const members = page.members
-        if (members)  {
-          for (let i = 0; i < members.length; i++)  {
+        if (members) {
+          for (let i = 0; i < members.length; i++) {
             let member = members[i];
             
             const gmailAdressWithoutDots = getGmailAdressWithoutDots_(member.email.toLowerCase());
@@ -160,7 +160,7 @@ function getGroupMembers_(groupId) {
         }
         pageToken = page.nextPageToken;
       } while (pageToken);
-          
+      
       return group;
     
     } catch (e) {
@@ -199,7 +199,7 @@ function fetchScoutnetMemberFieldAsString_(medlem, nameOfField, lowerCase) {
   else {
     fieldName = "";
   } 
-  return fieldName;  
+  return fieldName;
 }
 
 
@@ -237,9 +237,9 @@ function fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutn
     if (checkIfEmail_(listOfScoutnetListIds[i])) { //Om e-postadress
       
       const member_manuell = {
-        manuell: listOfScoutnetListIds[i]       
-      };      
-      manuellEpostadress.push(member_manuell);      
+        manuell: listOfScoutnetListIds[i] 
+      };
+      manuellEpostadress.push(member_manuell);
     }
     else if ((listOfScoutnetListIds[i].length === 1) && (listOfScoutnetListIds[i].indexOf("@") === 0)) { //Om @ för kårens googlekonton
       
@@ -249,10 +249,10 @@ function fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutn
         const emailOfOneActiveAccount = listOfEmailAdressesOfActiveAccounts[k];
         
         const member_manuell = {
-          manuell: emailOfOneActiveAccount       
+          manuell: emailOfOneActiveAccount
         };
         manuellEpostadress.push(member_manuell);
-      }      
+      }
     }
     else { //Om e-postlista från Scoutnet angiven
       allMembers.push.apply(allMembers, fetchScoutnetMembersOneMailinglist_(listOfScoutnetListIds[i], cell_scoutnet_list_id, forceUpdate));
@@ -262,7 +262,7 @@ function fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutn
   const memberNumbers = getMemberNumbers_(allMembers); //Medlemmar med dessa medlemsnummer ska användas
   //Logger.log(memberNumbers);
   Logger.log("Fetch - getMemberNumbers klar");
-  const members = getMembersByMemberNumbers_(allMembers, memberNumbers);  
+  const members = getMembersByMemberNumbers_(allMembers, memberNumbers);
   Logger.log("Fetch - getMembersByMemberNumbers klar");
   Logger.log("Hämta medlemmar från flera e-postlistor");
  
@@ -270,7 +270,7 @@ function fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutn
     members.push.apply(members, manuellEpostadress);
     Logger.log("Identifierade mannuellt tillagd e-post i stället för lista från Scoutnet");
     Logger.log("Om detta är fel, kontrollera så att det inte finns något @ på fel ställe");
-    Logger.log("@ är ej ett tillåtet tecken för kommentarer");    
+    Logger.log("@ är ej ett tillåtet tecken för kommentarer");
   }
   
   Logger.log("Slut hämta medlemmar från flera e-postlistor");
@@ -318,7 +318,7 @@ function checkIfEmail_(email) {
     return true;
   }
   //Logger.log("Verkar EJ vara en e-postadress");
-  return false;  
+  return false;
 }
 
 
@@ -386,11 +386,11 @@ function fetchScoutnetMembersOneMailinglist_(scoutnet_list_id, cell_scoutnet_lis
         cache.put(scoutnet_list_id, json, cacheExpirationInSeconds);
         console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
       }
-      else  {
+      else {
         console.log("För stor mängd data för att skapa en kaka");
       }
     }
-    else  {
+    else {
       console.log("Kakan fanns redan");
       json = kaka;
     }
@@ -406,28 +406,28 @@ function fetchScoutnetMembersOneMailinglist_(scoutnet_list_id, cell_scoutnet_lis
       console.timeEnd(scoutnet_list_id);
       return allMembers;
     }
-    if (cell_scoutnet_list_id)  {
+    if (cell_scoutnet_list_id) {
       cell_scoutnet_list_id.setBackground("white");
     }
 
     const medlemmar = data.data;
-    //Logger.log(medlemmar);    
+    //Logger.log(medlemmar);
     const variabel_lista_not_lowercase = ['member_no', 'first_name', 'last_name', 'mobile_phone'];
     //Dessa attributvärden ska användas som gemener för bättre jämförelser
     const variabel_lista_lowercase = ['email', 'email_mum', 'email_dad', 'alt_email', 'extra_emails', 'contact_email_mum', 'contact_email_dad', 'contact_alt_email'];
 
     for (x in medlemmar) {
-      const medlem = medlemmar[x];      
+      const medlem = medlemmar[x];
       const member = setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
       allMembers.push(member);
     }
   }
-  else  {
+  else {
     cell_scoutnet_list_id.setBackground("yellow");
   }
   
   console.timeEnd(scoutnet_list_id);
-  return allMembers;  
+  return allMembers;
 }
 
 
@@ -454,7 +454,7 @@ function setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_l
 
     member[variabel_lista_lowercase[i]] = fetchScoutnetMemberFieldAsString_(medlem, variabel_lista_lowercase[i], true);
     //Logger.log(variabel_lista_lowercase[i] + " = " + member[variabel_lista_lowercase[i]]);
-  }    
+  }
   return member;
 }
 
@@ -468,6 +468,7 @@ function setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_l
  * @returns {members[]} - Lista med medlemmar som har specificerade medlemsnummer
  */ 
 function getMembersByMemberNumbers_(members, memberNumbers) {
+  
   Logger.log("Kör metoden getMembersByMemberNumbers");
   const memberList = [];
   
@@ -482,9 +483,9 @@ function getMembersByMemberNumbers_(members, memberNumbers) {
         Logger.log("Namn " + members[k].first_name + " " + members[k].last_name);
         memberList.push(members[k]);
         continue Loop1;
-      }      
-    }    
-  }  
+      }
+    }
+  }
   Logger.log("Unika medlemmar från e-postlistor " + memberList.length);
   return memberList;
 }
@@ -527,50 +528,50 @@ function getEmailListSyncOption_(member, synk_option, boolGoogleAccounts) {
     //Lägg bara till om personen har ett google-konto via kåren och lägg till deras google-konto
     if (googleAccountEmail) { //Denna medlem har ett Googlekonto
       member_emails.push(googleAccountEmail);
-    }      
-  }    
+    }
+  }
   
   else { //Lägg bara till Scoutnet e-post
     if (synk_option.includes("m") || synk_option.includes("e") || synk_option.includes("f") || synk_option.includes("a")) {
       
       if (synk_option.includes("m")) { //Lägg bara till medlemmar som har en personlig e-postadress
-        if (email) { //Lägg bara till personer med en egen e-postadress      
+        if (email) { //Lägg bara till personer med en egen e-postadress
           member_emails.push(email);
-        }      
-      }      
+        }
+      }
       if (synk_option.includes("e")) {
         //Lägg till medlemmars primära e-postadress + kopior enligt medlemsprofil
-        if (extra_emails) { //Lägg till extra e-postadresser om det finns några      
+        if (extra_emails) { //Lägg till extra e-postadresser om det finns några
           
           const extra_email_list = extra_emails.split(",");
           Logger.log(extra_email_list);
           member_emails.push.apply(member_emails, extra_email_list);
         }
-        if (email) { //Lägg till medlemmars primära e-postadress      
+        if (email) { //Lägg till medlemmars primära e-postadress
           member_emails.push(email);
-        }   
+        }
       }
       
       if (synk_option.includes("f")) { //Lägg bara tilll föräldrars e-postadress
-        if (email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress      
+        if (email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress
           member_emails.push(email_mum);
         }
-        if (contact_email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress      
+        if (contact_email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress
           member_emails.push(contact_email_mum);
         }
-        if (email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress      
+        if (email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress
           member_emails.push(email_dad);
         }
-        if (contact_email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress      
+        if (contact_email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress
           member_emails.push(contact_email_dad);
         }
       }
       
       if (synk_option.includes("a")) { //Lägg till alternativ e-postadress
-        if (email_alt) { //Lägg till alternativ e-postadress      
+        if (email_alt) { //Lägg till alternativ e-postadress
           member_emails.push(email_alt);
         }
-        if (contact_email_alt) { //Lägg till alternativ e-postadress      
+        if (contact_email_alt) { //Lägg till alternativ e-postadress
           member_emails.push(contact_email_alt);
         }
       }
@@ -578,36 +579,36 @@ function getEmailListSyncOption_(member, synk_option, boolGoogleAccounts) {
     else { //Lägg till alla e-postadresser funna i Scoutnet
       //Upprepningen med t.ex mamma och pappa nedan är för att det inte är lika mellan olika API:er,
       //så vi testar de olika versionerna och ser vad som nappar
-      if (email) { //Lägg till person med egen e-postadress      
+      if (email) { //Lägg till person med egen e-postadress
         member_emails.push(email);
       }
-      if (email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress        
-        member_emails.push(email_mum);         
+      if (email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress
+        member_emails.push(email_mum);
       }
-      if (contact_email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress      
+      if (contact_email_mum) { //Lägg till mammor (Anhörig 1) med en e-postadress
           member_emails.push(contact_email_mum);
       }
-      if (email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress      
-        member_emails.push(email_dad);         
+      if (email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress
+        member_emails.push(email_dad);
       }
-      if (contact_email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress      
+      if (contact_email_dad) { //Lägg till pappor (Anhörig 2) med en e-postadress
           member_emails.push(contact_email_dad);
         }
-      if (email_alt) { //Lägg till alternativ e-postadress      
+      if (email_alt) { //Lägg till alternativ e-postadress
         member_emails.push(email_alt);
       }
-      if (contact_email_alt) { //Lägg till alternativ e-postadress      
+      if (contact_email_alt) { //Lägg till alternativ e-postadress
         member_emails.push(contact_email_alt);
-      }       
-    }      
-  }  
+      }
+    }
+  }
   
   if (!synk_option.includes("-") && boolGoogleAccounts) { //Lägg till både Scoutnet e-post och Google-konto e-post
     if (googleAccountEmail) { //Denna medlem har ett Googlekonto
       member_emails.push(googleAccountEmail);
-    }      
+    }
   }
-    
+  
   //Logger.log("Namn " + member.first_name + " " + member.last_name); 
   //Logger.log("med följande e-postadresser " + member_emails);
   
@@ -647,16 +648,16 @@ function fetchScoutnetMembers_(forceUpdate) {
       cache.put("fetchScoutnetMembers", json, cacheExpirationInSeconds);
       console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
     }
-    else  {
+    else {
       console.log("För stor mängd data för att skapa en kaka");
     }
   }
-  else  {
+  else {
     console.log("Kakan fanns redan");
     json = kaka;
   }
   
-  const data = JSON.parse(json);  
+  const data = JSON.parse(json);
   const medlemmar = data.data;
   const allMembers = [];
   
@@ -666,7 +667,7 @@ function fetchScoutnetMembers_(forceUpdate) {
                                         'sex', 'address_co', 'address_1', 'address_2' , 'address_3', 'postcode', 'town',
                                         'country', 'contact_mobile_phone', 'contact_home_phone', 'contact_mothers_name',
                                         'contact_mobile_mum', 'contact_telephone_mum', 'contact_fathers_name', 'contact_mobile_dad',
-                                        'contact_telephone_dad', 'contact_leader_interest', 'prev_term', 'prev_term_due_date',  
+                                        'contact_telephone_dad', 'contact_leader_interest', 'prev_term', 'prev_term_due_date',
                                         'current_term', 'current_term_due_date', 'avatar_updated', 'avatar_url'];
   
   //Dessa attributvärden ska användas som gemener för bättre jämförelser
@@ -675,11 +676,11 @@ function fetchScoutnetMembers_(forceUpdate) {
   //Logger.log(medlemmar);
   for (x in medlemmar) {
     const medlem = medlemmar[x];
-    const member = setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);    
-    allMembers.push(member);    
+    const member = setMemberFields_(medlem, variabel_lista_not_lowercase, variabel_lista_lowercase);
+    allMembers.push(member);
   }
   console.timeEnd("fetchScoutnetMembers");
-  return allMembers;  
+  return allMembers;
 }
 
 
@@ -698,7 +699,7 @@ function getGoogleAccount_(member_no) {
 
   for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen getGoogleAcount körs " + n);
-    try {  
+    try {
       const page = AdminDirectory.Users.list({
         domain: domain,
         query: qry,
@@ -708,20 +709,20 @@ function getGoogleAccount_(member_no) {
       users = page.users;
       if (users) {
         Logger.log('%s (%s)', users[0].name.fullName, users[0].primaryEmail);
-        return users[0].primaryEmail;  
+        return users[0].primaryEmail;
       }
       else {
         Logger.log('Inget användarkonto hittades med medlemsnummer ' + member_no);
         return "";
-      }      
+      }
     } catch(e) {
       Logger.log("Problem med att anropa GoogleTjänst Users.list i funktionen getGoogleAccount");
       if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
-    }    
-  }  
+    }
+  }
 }
 
 
@@ -756,9 +757,9 @@ function checkEmailFormat_(email) {
   const domain_part = arr[1];
   
   if (domain_part === domain) {
-       return true;
+    return true;
   }
-  return false;  
+  return false;
 }
 
 
@@ -774,7 +775,7 @@ function checkIfGroupExists_(email) {
   const listOfGroupsToCheckIfGroupExists = getListOfGroups_();
   //Logger.log(listOfGroupsToCheckIfGroupExists);
 
-  if(listOfGroupsToCheckIfGroupExists.includes(email))  {
+  if (listOfGroupsToCheckIfGroupExists.includes(email)) {
     return true;
   }
   return false;
@@ -797,16 +798,16 @@ function setBackgroundColour_(cell, colour, force) {
   if ("white" === colourString) {
     colourCode = "#ffffff";
   }
-  else  {
+  else {
     colourCode = colour;
     Logger.log("Denna färg är ej definerad sedan tidigare");
   }
 
-  if (!force && colourCode !== cell.getBackground())  {
+  if (!force && colourCode !== cell.getBackground()) {
     Logger.log("FÄRG ej tvingad färgändring");
     cell.setBackground(colourCode);
   }
-  else if (force)  {
+  else if (force) {
     Logger.log("FÄRG tvingad färgändring");
     cell.setBackground(colourCode);
   }
@@ -820,7 +821,7 @@ function setBackgroundColour_(cell, colour, force) {
  * 
  * @returns {Object} - Objekt bestående av data från aktuellt kalkylblad
  */
-function getDataFromActiveSheet_(nameOfSheet)  {
+function getDataFromActiveSheet_(nameOfSheet) {
 
   for (let n = 0; n < 6; n++) {
     try {
@@ -856,7 +857,7 @@ let listOfGroups = [];
  *
  * @returns {string[]} - Lista över e-postadresser för grupper
  */
-function getListOfGroups_()  {
+function getListOfGroups_() {
   return listOfGroups;
 }
 
@@ -867,7 +868,7 @@ function getListOfGroups_()  {
 function updateListOfGroups_() {
 
   for (let n = 0; n < 6; n++) {
-    if (n !== 0)  {
+    if (n !== 0) {
       Logger.log("Funktionen updateListOfGroups körs " + n);
     }
     
@@ -882,13 +883,13 @@ function updateListOfGroups_() {
           pageToken: pageToken
         });
         const groups = page.groups;
-        if (groups) {      
+        if (groups) {
           for (let i = 0; i < groups.length; i++) {
-            listOfGroups.push(groups[i].email);        
-          }      
+            listOfGroups.push(groups[i].email);
+          }
         }
         else {
-          Logger.log('Inga grupper hittades.');      
+          Logger.log('Inga grupper hittades.');
         }
         pageToken = page.nextPageToken;
       } while (pageToken);
@@ -914,7 +915,7 @@ function updateListOfGroups_() {
  *
  * @returns {boolean} - Om avsändaradressen är tillåten
  */
-function isFromEmailAdressAllowed_(email) {  
+function isFromEmailAdressAllowed_(email) {
   return getAllowedFromEmailAdresses_().includes(email);
 }
 
@@ -942,7 +943,7 @@ function getAllowedFromEmailAdresses_() {
  *
  * @returns {Object} - Ett e-postutkast av typen GmailMessage
  */
-function getDraft_(subject)  {
+function getDraft_(subject) {
 
   subject = getComparableString_(subject);
 
@@ -952,7 +953,7 @@ function getDraft_(subject)  {
     let draftSubject = drafts[i].getSubject();
     draftSubject = getComparableString_(draftSubject);
 
-    if (draftSubject === subject)  {
+    if (draftSubject === subject) {
       Logger.log(draftSubject);
       return drafts[i];
     }
@@ -968,7 +969,7 @@ function getDraft_(subject)  {
  *
  * @returns {string} - Textsträng som är enklare att jämföra
  */
-function getComparableString_(text)  {
+function getComparableString_(text) {
 
   //Ta bort tomma mellanrum vid start och slut och konvertera till gemener
   text = text.toLowerCase().trim();
@@ -1002,7 +1003,7 @@ function findWhatRowsToSync_(start, slut, maxRowNumber) {
     "start": start,
     "slut": slut
   };
-  return rowsToSync;  
+  return rowsToSync;
 }
 
 
@@ -1014,7 +1015,7 @@ function findWhatRowsToSync_(start, slut, maxRowNumber) {
  *
  * @returns {string} - En textsträng utan kommentarer eller mellanrum
  */
-function getCleanString_(input)  {
+function getCleanString_(input) {
 
   input = input.toString(); //Vi gör om till string för att metoden replace ska fungera
   input = input.replace(/\(.*?\)/g, ''); //Ta bort kommentarer inom parentes så de inte kommer med
@@ -1039,7 +1040,7 @@ function getA1RangeOfColumns_(sheet, columnIndex, numColumns) {
   //Vi anger att det ska vara två rader så att vi får en start och slutkolumn
   const a1_cell_row_one = range.getA1Notation();
   
-  const a1Notation = a1_cell_row_one.replace(/[0-9]/g, '');  
+  const a1Notation = a1_cell_row_one.replace(/[0-9]/g, '');
   range = sheet.getRange(a1Notation);
   
   return range;
@@ -1059,7 +1060,7 @@ function deleteRowsFromSpreadsheet_(sheet, delete_rows) {
     const rowToDelete = delete_rows[k];
     Logger.log("Remove row " + rowToDelete);
     sheet.deleteRow(rowToDelete);
-  }  
+  }
 }
 
 
@@ -1074,8 +1075,8 @@ function removeDublicates_(list) {
   const listWithoutDuplicates = []
   console.log("Försöker radera dubletter");
   
-  for(let i = 0; i < list.length; i++){
-    if(!listWithoutDuplicates.includes(list[i])){
+  for (let i = 0; i < list.length; i++){
+    if (!listWithoutDuplicates.includes(list[i])){
       listWithoutDuplicates.push(list[i])
       //console.log("Denna är ny " + list[i]);
     }
@@ -1096,22 +1097,22 @@ function removeDublicates_(list) {
  */
 function intPhoneNumber_(phnum) {
 
-  let regex = /^\+/;      
-  //Logger.log('Telefonnummer före: %s', phnum);  
+  let regex = /^\+/;
+  //Logger.log('Telefonnummer före: %s', phnum);
   const res = phnum.match(regex);
-  if(res) {
+  if (res) {
     let countryCodeIsFound = false;
-    Logger.log('Match');  
+    Logger.log('Match');
  
     const countryCodes = [];
     countryCodes.push("43"); //
     countryCodes.push("44"); //
     countryCodes.push("45"); //Danmark
     countryCodes.push("46"); //Sverige
-    for(let k in countryCodes) {
-      regex = new RegExp('^\\+' + countryCodes[k], 'g');   
+    for (let k in countryCodes) {
+      regex = new RegExp('^\\+' + countryCodes[k], 'g');
       if (phnum.match(regex)) {
-        phnum = "+" +  countryCodes[k] + phnum.substr(3).replace(/[^0-9]/g, '');
+        phnum = "+" + countryCodes[k] + phnum.substr(3).replace(/[^0-9]/g, '');
         countryCodeIsFound = true;
       }
     }
@@ -1121,7 +1122,7 @@ function intPhoneNumber_(phnum) {
     //Logger.log('Efter landskod %s', phnum);
   }
   else {
-    //Logger.log('Börjar ej med landskod');  
+    //Logger.log('Börjar ej med landskod');
     if (phnum.replace(/[^0-9]/g, '').match(/^0/)) {
       phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1);
     }
@@ -1142,8 +1143,8 @@ function intPhoneNumber_(phnum) {
  * @returns {boolean} - Sant eller falskt om korrekt format
  */
 function validatePhonenumberForE164_(phnum) {
-    const regex = /^\+[1-9]\d{1,14}$/;
-    return regex.test(phnum);
+  const regex = /^\+[1-9]\d{1,14}$/;
+  return regex.test(phnum);
 }
 
 
