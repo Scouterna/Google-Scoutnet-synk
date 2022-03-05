@@ -1074,13 +1074,6 @@ function validatePhonenumberForE164_(phnum) {
 }
 
 
-String.prototype.endsWith = function(suffix) { 
-   if (this.length < suffix.length) 
-      return false; 
-   return this.lastIndexOf(suffix) === this.length - suffix.length; 
-}
-
-
 /**
  * Ersätt specialtecken med deras engelska bokstavsmotsvarigheter
  * https://stackoverflow.com/questions/18123501/replacing-accented-characters-with-plain-ascii-ones
