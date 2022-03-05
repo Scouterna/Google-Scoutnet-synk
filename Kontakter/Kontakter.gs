@@ -99,12 +99,12 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
 
     //Fel version
     if (nyaKontaktGrupper.includes("version"))  {
-      if ("#ff0000" != cells.version.getBackground()) {
+      if ("#ff0000" !== cells.version.getBackground()) {
         cells.version.setBackground("red");
       }
     }
     else  { //Fel e-postadress eller lösenord
-      if ("#ff0000" != cells.username.getBackground() || "#ff0000" != cells.password.getBackground()) {
+      if ("#ff0000" !== cells.username.getBackground() || "#ff0000" !== cells.password.getBackground()) {
         cells.username.setBackground("red");
         cells.password.setBackground("red");
       }
@@ -114,13 +114,13 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   else  {
     console.info("Riktig data från backend har hämtats");
 
-    if ("#d3d3d3" != cells.version.getBackground()) {
+    if ("#d3d3d3" !== cells.version.getBackground()) {
       cells.version.setBackground("LightGrey");
     }
-    if ("#d3d3d3" != cells.username.getBackground()) {
+    if ("#d3d3d3" !== cells.username.getBackground()) {
       cells.username.setBackground("LightGrey");
     }
-    if ("#d3d3d3" != cells.password.getBackground()) {
+    if ("#d3d3d3" !== cells.password.getBackground()) {
       cells.password.setBackground("LightGrey");
     }
   }
@@ -151,7 +151,7 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
 function protectSheet_() {
 
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
-  if (null == sheet) {
+  if (!sheet) {
     console.error("Bladet Kontakter finns ej i kalkylarket");
   }
 
@@ -209,14 +209,14 @@ function colourCellsIfEmpty_(cells, sdk) {
  */
 function colourCellIfEmpty_(cell, cellData, colour)  {
 
-  if ("" == cellData) { //Kolla om cellen är tom
+  if (!cellData) { //Kolla om cellen är tom
     cell.setBackground(colour);
-    if ("red" == colour)  {
+    if ("red" === colour)  {
       return false;
     }
   }
   else {
-    if ("#d3d3d3" != cell.getBackground()) {
+    if ("#d3d3d3" !== cell.getBackground()) {
       cell.setBackground("LightGrey");
     }
   }
@@ -260,7 +260,7 @@ function createTriggerIfNeeded_()  {
 function getSheetDataKontakter_()  {
 
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Kontakter");
-  if (null == sheet) {
+  if (!sheet) {
     console.error("Bladet Kontakter finns ej i kalkylarket");
   }
   const selection = sheet.getDataRange();
@@ -319,7 +319,8 @@ function fetchUrl_(url, cellWebappUrl) {
       const parsedResponse = JSON.parse(response);
       console.log(typeof parsedResponse);
       
-      if ("#d3d3d3" != cellWebappUrl.getBackground()) {
+      if ("#d3d3d3" !== cellWebappUrl.getBackground()) {
+        Logger.log("Sätter grey bakgrund");
         cellWebappUrl.setBackground("LightGrey");
       }
       console.timeEnd("Anropa url");
@@ -327,8 +328,9 @@ function fetchUrl_(url, cellWebappUrl) {
     }
     catch (e) {
       console.error("Problem med att anropa UrlFetchApp.fetch");
-      if (n == 5) {
-        if ("#ff0000" != cellWebappUrl.getBackground()) {
+      if (n === 5) {
+        if ("#ff0000" !== cellWebappUrl.getBackground()) {
+          Logger.log("Sätter grey bakgrund");
           cellWebappUrl.setBackground("red");
         }
         console.timeEnd("Anropa url");
@@ -704,7 +706,8 @@ function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd
   console.log("Följande ska tas bort från gruppen");
   console.log(resourceNamesToRemove);
 
-  if (0 == resourceNamesToAdd.length && 0 == resourceNamesToRemove.length)  {
+  if (0 === resourceNamesToAdd.length && 0 === resourceNamesToRemove.length)  {
+    Logger.log("Inga ska läggas till eller tas bort");
     return;
   }
 
@@ -722,7 +725,7 @@ function modifyContactGroupMembers_(contactGroupResourceName, resourceNamesToAdd
     }
     catch (e) {
       console.error("Problem med att anropa Members.modify i People.ContactGroups");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -743,13 +746,14 @@ function getMemberdataFromMemberNumber_(nyaKontakter, memberNumber)  {
 
   const allMembers = nyaKontakter[0];
 
-  if (null == allMembers) {
+  if (!allMembers) {
     return null;
   }
 
   for (let i = 0; i < allMembers.length; i++) {
 
-    if (allMembers[i].member_no == memberNumber)  {
+    if (allMembers[i].member_no === memberNumber)  {
+
       //console.log("medlemsdata");
       //console.log(allMembers[i]);
       return allMembers[i];
@@ -769,7 +773,7 @@ function getMemberdataFromMemberNumber_(nyaKontakter, memberNumber)  {
 function getConnectionByMemberNumber_(connections, memberNumber)  {
 
   for (let i = 0; i < connections.length; i++) {
-    if (connections[i].memberNumber == memberNumber)
+    if (connections[i].memberNumber === memberNumber)
       return connections[i];
   }
 }
@@ -813,9 +817,9 @@ function updateListOfConnections_(contactResourceKeys) {
               for (let k = 0; k < externalIds.length; k++) {
                 const externalId = externalIds[k];
                 
-                if ("Medlemsnummer" == externalIds[k].type) {
+                if ("Medlemsnummer" === externalIds[k].type) {
 
-                  if ("CONTACT" == externalId.metadata.source.type) {
+                  if ("CONTACT" === externalId.metadata.source.type) {
 
                     const connection = {
                       resourceName: connections[i].resourceName,
@@ -842,7 +846,7 @@ function updateListOfConnections_(contactResourceKeys) {
 
     } catch(e) {
       console.error("Problem med att anropa GoogleTjänst People.People.Connectionss i funktionen updateListOfConnections");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -907,7 +911,7 @@ function getMembersInfoFromPersonResponses_(personResponses) {
 
     if (externalIds !== undefined) {
       for (let k = 0; k < externalIds.length; k++) {
-        if ("Medlemsnummer" == externalIds[k].type) {
+        if ("Medlemsnummer" === externalIds[k].type) {
           
           const memberInfo = {
             memberNumber: externalIds[k].value,
@@ -941,7 +945,7 @@ function getMembersInfoFromPersonResponses_(personResponses) {
  */
 function getContactsByMemberResourceNames_(resourceNames)  {
 
-  if (!resourceNames || 0 == resourceNames.length) {
+  if (!resourceNames || 0 === resourceNames.length) {
     return [];
   }
 
@@ -957,7 +961,7 @@ function getContactsByMemberResourceNames_(resourceNames)  {
     }
     catch (e) {
       console.error("Problem med att anropa People.People");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -1065,7 +1069,7 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
   console.info(contactsToUpdate);
 
   console.info("Antal kontakter att uppdatera " + numbersOfContactsToUpdate);
-  if (0 != numbersOfContactsToUpdate) {
+  if (0 !== numbersOfContactsToUpdate) {
     batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate);
   }
 }
@@ -1093,7 +1097,7 @@ function batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate)  {
     }
     catch (e) {
       console.error("Problem med att anropa People.People");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -1109,7 +1113,7 @@ function batchUpdateContacts_(contactsToUpdate, personFieldsToUpdate)  {
  */
 function batchDeleteContacts_(resourceNames) {
 
-  if (!resourceNames || 0 == resourceNames.length) {
+  if (!resourceNames || 0 === resourceNames.length) {
     return;
   }
 
@@ -1130,7 +1134,7 @@ function batchDeleteContacts_(resourceNames) {
     }
     catch (e) {
       console.error("Problem med att anropa People.People");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -1304,8 +1308,8 @@ function checkDifferenceHelpfunction_(connectionObject, memberDataContactResourc
   console.log(connectionObject);
   console.log(memberData);
 
-  if (null == connectionObject) { //Inget inlagt på kontakten i Google
-    if (0 == memberData.length) { //Tomt med data för kontaktfältet från Scoutnet
+  if (!connectionObject) { //Inget inlagt på kontakten i Google
+    if (0 === memberData.length) { //Tomt med data för kontaktfältet från Scoutnet
       console.log("Ingen data nu heller för detta kontaktfält");
       return {"status": false};
     }
@@ -1358,7 +1362,7 @@ function checkDifferenceMemberInfo_(existingData, memberData, nameOfPersonField)
   console.log(existingData);
   console.log(memberData);
 
-  if (existingData.length != memberData.length) {
+  if (existingData.length !== memberData.length) {
     console.log("Olika många fält för detta kontaktattribut. Någon ändring har skett");
     return true;
   }
@@ -1379,7 +1383,7 @@ function checkDifferenceMemberInfo_(existingData, memberData, nameOfPersonField)
     
     for (let n = 0; n < keysOfExistingDataObject.length; n++) {
 
-      if (existingDataObject[keysOfExistingDataObject[n]] == memberDataObject[keysOfExistingDataObject[n]]) {
+      if (existingDataObject[keysOfExistingDataObject[n]] === memberDataObject[keysOfExistingDataObject[n]]) {
         console.log("Samma data " + keysOfExistingDataObject[n] + " = " + existingDataObject[keysOfExistingDataObject[n]]);
       }
       else  {
@@ -1520,7 +1524,7 @@ function createContact_(memberData, customEmailField)  {
     }
     catch (e) {
       console.error("Problem med att anropa People.People med:" + contactResource);
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -1543,7 +1547,7 @@ function getNewContactGroupInfo_(nyaKontakter, namn, prefixContactgroups)  {
   for (let i = 1; i < nyaKontakter.length; i++) {
 
     const nameOfActualContactGroup = prefixContactgroups + nyaKontakter[i][0].name;
-    if (nameOfActualContactGroup == namn)  {
+    if (nameOfActualContactGroup === namn)  {
       return nyaKontakter[i];
     }
   }
@@ -1632,7 +1636,7 @@ function deleteContactGroup_(contactGroup) {
     }
     catch (e) {
       console.error("Problem med att anropa People.ContactGroups med:" + contactGroup.name);
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -1666,7 +1670,7 @@ function createContactGroup_(namn) {
     }
     catch (e) {
       console.error("Problem med att anropa People.ContactGroups med:" + namn);
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -1697,7 +1701,7 @@ function getContactGroup_(contactGroup) {
     }
     catch (e) {
       console.error("Problem med att anropa People.ContactGroups med:" + contactGroup.name);
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -1740,7 +1744,7 @@ function getContactGroups_(prefixContactgroups) {
               memberCount: contactGroups[i].memberCount
             };
             
-            if ("USER_CONTACT_GROUP" == contactGroup.groupType) {
+            if ("USER_CONTACT_GROUP" === contactGroup.groupType) {
               if (contactGroup.name.startsWith(prefixContactgroups)) {
                 console.log(contactGroups[i]);
                 console.log(contactGroup);
@@ -1761,7 +1765,7 @@ function getContactGroups_(prefixContactgroups) {
 
     } catch(e) {
       console.error("Problem med att anropa GoogleTjänst People.ContactGroups i funktionen getContactGroups");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));

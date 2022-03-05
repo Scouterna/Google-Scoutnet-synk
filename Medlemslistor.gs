@@ -83,15 +83,15 @@ function synkroniseraMedlemslistor_(start, slut, shouldUpdate, shouldSend) {
     let update_memberlist = true;
     
     let cell = selection.getCell(rad_nummer, grd["namn"]+1);
-    if (name == "") { //Kolla om fältet för namn är angivet
+    if (!name) { //Kolla om fältet för namn är angivet
       cell.setBackground("yellow");
     }
     else {
       setBackgroundColour_(cell, "white", false);
     }
     
-    if (spreadsheetUrl == "") { //Inget kalkylark är angivet      
-      if (name == "" && scoutnet_list_id == "") { //Ta bort raden
+    if (!spreadsheetUrl) { //Inget kalkylark är angivet      
+      if (!name && !scoutnet_list_id) { //Ta bort raden
         Logger.log("Försöker ta bort rad " + rad_nummer);        
         delete_rows.push(rad_nummer);        
       }
@@ -108,11 +108,11 @@ function synkroniseraMedlemslistor_(start, slut, shouldUpdate, shouldSend) {
     }
     
     if (update_memberlist) {
-      if (null == shouldUpdate || shouldUpdate) {
+      if (null === shouldUpdate || shouldUpdate) {
         //Uppdatera aktuell medlemslista
         updateMemberlist_(selection, rad_nummer, data[i], grd, allMembers, rowSpreadsheet, forceUpdate);
       }
-      if (null == shouldSend || shouldSend) {
+      if (null === shouldSend || shouldSend) {
         //Skicka ut e-brev till de i medlemslistan
         skickaMedlemslista_(selection, rad_nummer, data[i], grd, rowSpreadsheet);
       }      
@@ -617,11 +617,11 @@ function getSender_(textInput, nameOfTheAttribute, attribut, dataArray, cell, em
   text = getCleanString_(text);
   text = text.toLowerCase();
 
-  if ("avsändaradress" == nameOfTheAttribute && isFromEmailAdressAllowed_(text)) {
+  if ("avsändaradress" === nameOfTheAttribute && isFromEmailAdressAllowed_(text)) {
     setBackgroundColour_(cell, "white", false);
     emailOptions["from"] = text;
   }
-  else if ("svarsadress" == nameOfTheAttribute && checkIfEmail_(text))  {
+  else if ("svarsadress" === nameOfTheAttribute && checkIfEmail_(text))  {
     setBackgroundColour_(cell, "white", false);
     emailOptions["replyTo"] = text;
   }
@@ -832,7 +832,7 @@ function updateMemberlist_(selection, rad_nummer, radInfo, grd, allMembers, spre
   const membersInAList = []
   for (let i = 0; i < membersMultipleMailinglists.length; i++) {
     //Leta upp medlemmen i listan övar alla medlemmar
-    const obj = allMembers.find(obj => obj.member_no == membersMultipleMailinglists[i].member_no);
+    const obj = allMembers.find(obj => obj.member_no === membersMultipleMailinglists[i].member_no);
     membersInAList.push(obj);
     Logger.log(obj);
   }

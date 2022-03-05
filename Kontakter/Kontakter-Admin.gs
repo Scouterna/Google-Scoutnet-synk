@@ -77,7 +77,7 @@ function doGet(e) {
   Logger.log(e);
   const params = e.parameters;
 
-  if (Object.keys(params).length == 0)  {
+  if (Object.keys(params).length === 0)  {
     Logger.log("Inga parametrar angivna. MVH " + groupName);
     return ContentService.createTextOutput("Inga parametrar angivna. MVH " + groupName)
     .setMimeType(ContentService.MimeType.TEXT);
@@ -88,7 +88,7 @@ function doGet(e) {
   const userVersion = params.version[0];
   let forceUpdate = params.forceupdate[0];
 
-  if ("true" == forceUpdate) {
+  if ("true" === forceUpdate) {
     Logger.log("Detta var en tvingad uppdatering");
     forceUpdate = true;
   }
@@ -389,7 +389,7 @@ function getDataFromSheet_(nameOfSheet)  {
   for (let n = 0; n < 6; n++) {
     try {
       const sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Kontakter).getSheetByName(nameOfSheet);
-      if (sheet == null) {
+      if (!sheet) {
         Logger.log("Bladet " + nameOfSheet + " finns ej i kalkylarket");
       }
       const selection = sheet.getDataRange();
@@ -405,7 +405,7 @@ function getDataFromSheet_(nameOfSheet)  {
 
     } catch(e) {
       console.error("Problem med att anropa GoogleTjänst SpreadsheetApp");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -468,29 +468,29 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate)  {
 
     let updateContactGroup = true;
 
-    if ("" == email && "" == scoutnet_list_id) { //Ta bort raden
+    if (!email && !scoutnet_list_id) { //Ta bort raden
       Logger.log("Försöker ta bort rad " + rad_nummer);
       
       delete_rows.push(rad_nummer);
       updateContactGroup = false;
     }
 
-    if ("" == name) {
+    if (!name) {
       const cell = selection.getCell(rad_nummer,grd["namn"]+1);
       Logger.log("Sätter cellen för namn till gul");
       cell.setBackground("yellow");
     }
-    else if ("" != name) {
+    else if (name) {
       const cell = selection.getCell(rad_nummer,grd["namn"]+1);
-      if ("#ffffff" != cell.getBackground()) {
+      if ("#ffffff" !== cell.getBackground()) {
         Logger.log("Sätter cellen för namn till vit");
         cell.setBackground("white");
       }
     }
     
-    if ("" != email && checkIfEmailIsAGroup_(email)) {
+    if (email && checkIfEmailIsAGroup_(email)) {
       const cell = selection.getCell(rad_nummer,grd["e-post"]+1);
-      if ("#ffffff" != cell.getBackground()) {
+      if ("#ffffff" !== cell.getBackground()) {
         Logger.log("Sätter cellen för e-post till vit");
         cell.setBackground("white");
       }
@@ -540,7 +540,7 @@ function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers) {
 
   for (let i = 0; i < memberNumbers.length; i++) {
 
-    const obj = allMembers.find(obj => obj.member_no == memberNumbers[i]);
+    const obj = allMembers.find(obj => obj.member_no === memberNumbers[i]);
 
     const emailList = getEmailListSyncOption(obj, "", false);
 
@@ -612,7 +612,7 @@ function filterMemberAttributes_(medlemmar) {
     for (let k = 0; k < attribut_lista.length; k++) {
       const nameOfAttribute = attribut_lista[k];
 
-      if ('group_role' == nameOfAttribute) {
+      if ('group_role' === nameOfAttribute) {
         if (medlemmar[i]['group_role'] && medlemmar[i]['unit_role']) {
           member['title'] = medlemmar[i]['group_role'] + ", " + medlemmar[i]['unit_role'];
         }
@@ -623,7 +623,7 @@ function filterMemberAttributes_(medlemmar) {
           member['title'] = medlemmar[i]['unit_role'];
         }
       }
-      else if ('address_1' == nameOfAttribute)  {
+      else if ('address_1' === nameOfAttribute)  {
         if (medlemmar[i]['address_co']) {
           member['streetAddress'] = "c/o " + medlemmar[i]['address_co'] + ", " + medlemmar[i]['address_1'];
         }
@@ -631,7 +631,7 @@ function filterMemberAttributes_(medlemmar) {
           member['streetAddress'] = medlemmar[i]['address_1'];
         }
       }
-      else if ('address_2' == nameOfAttribute)  {
+      else if ('address_2' === nameOfAttribute)  {
         if (medlemmar[i]['address_2'] && medlemmar[i]['address_3']) {
           member['extendedAddress'] = medlemmar[i]['address_2'] + ", " + medlemmar[i]['address_3'];
         }
@@ -642,7 +642,7 @@ function filterMemberAttributes_(medlemmar) {
           member['extendedAddress'] = medlemmar[i]['address_3'];
         }
       }
-      else if ('unit' == nameOfAttribute)  {
+      else if ('unit' === nameOfAttribute)  {
         if (medlemmar[i]['unit'] && medlemmar[i]['patrol']) {
           member['department'] = medlemmar[i]['unit'] + "/" + medlemmar[i]['patrol'];
         }
@@ -653,18 +653,18 @@ function filterMemberAttributes_(medlemmar) {
           member['department'] = medlemmar[i]['patrol'];
         }
       }
-      else if ('sex' == nameOfAttribute)  {
+      else if ('sex' === nameOfAttribute)  {
          member['sex'] = translateGenderToEnglish_(medlemmar[i]['sex']);
       }
-      else if ('date_of_birth' == nameOfAttribute)  {
+      else if ('date_of_birth' === nameOfAttribute)  {
         member['date_of_birth_year'] = medlemmar[i]['date_of_birth'].substr(0, 4);
         member['date_of_birth_month'] = medlemmar[i]['date_of_birth'].substr(5, 2);
         member['date_of_birth_day'] = medlemmar[i]['date_of_birth'].substr(8, 2);
       }
-      else if ('contact_leader_interest' == nameOfAttribute) {
+      else if ('contact_leader_interest' === nameOfAttribute) {
         member['biographies'] += getTextIfContactLeaderInterest_(medlemmar[i]['contact_leader_interest']);
       }
-      else if ('note' == nameOfAttribute)  {  
+      else if ('note' === nameOfAttribute)  {  
         member['biographies'] += cleanNote_(medlemmar[i]['note']);
       }
       else  {
@@ -679,7 +679,6 @@ function filterMemberAttributes_(medlemmar) {
 }
 
 
-
 /**
  * Ger rensad text för eventuell inlagd anteckning
  * 
@@ -691,7 +690,7 @@ function cleanNote_(note)  {
   
   let cleanNoteString = "";
 
-  if ("" == note) {
+  if (!note) {
     return "";
   }
 
@@ -715,7 +714,7 @@ function cleanNote_(note)  {
  */
 function getTextIfContactLeaderInterest_(contact_leader_interest)  {
 
-  if ("Ja" == contact_leader_interest) {
+  if ("Ja" === contact_leader_interest) {
     return "Förälder kan hjälpa till i kåren. ";
   }
   return "";
@@ -802,8 +801,8 @@ function makeStringForGoogleContactGroup_(emailList)  {
   let contactGroupList = [];
   for (let i = 0; i < realEmailList.length; i++) {
     
-    if (0 == i) {
-      if (realEmailList.length == 1) {
+    if (0 === i) {
+      if (realEmailList.length === 1) {
         contactGroupList.push(realEmailList[i]);
         //Logger.log("Första och enda elementet " + realEmailList[i]);
       }
@@ -812,7 +811,7 @@ function makeStringForGoogleContactGroup_(emailList)  {
         //Logger.log("Första elementet " + realEmailList[i]);
       }      
     }
-    else if (realEmailList.length-1 == i) {
+    else if (realEmailList.length-1 === i) {
       contactGroupList.push("<" + realEmailList[i]);
       //Logger.log("Sista elementet " + realEmailList[i]);
     }
@@ -868,7 +867,7 @@ function checkCredentials_(userEmail, userPassword, userVersion) {
 
     email = getGmailAdressWithoutDots_(email.toLowerCase());
 
-    if (email != userEmail) {
+    if (email !== userEmail) {
       continue;
     }
 
@@ -876,7 +875,7 @@ function checkCredentials_(userEmail, userPassword, userVersion) {
     
     Logger.log('Rad: ' + rad_nummer + ' E-post: ' + email + ' Lösenord: ' + password + ' Senast använd: ' + last_authn);
 
-    if (password != userPassword) {
+    if (password !== userPassword) {
       Logger.log("Felaktigt lösenord angivet " + userPassword);
       sendEmailWithContactsGroupsPassword_(userEmail, password);
       return false;
@@ -887,7 +886,7 @@ function checkCredentials_(userEmail, userPassword, userVersion) {
     cell.setValue(datum).setNumberFormat("yyyy-MM-dd hh:mm:ss");
     Logger.log("Uppdatera datum i kalkylblad för senast använd " + datum);
 
-    if (version != userVersion) {
+    if (version !== userVersion) {
       Logger.log("Ny version för denna användare " + userVersion);
       const cell_userVersion = selection.getCell(rad_nummer, grd["version"]+1);
       cell_userVersion.setValue(userVersion);
@@ -991,7 +990,7 @@ function getListOfGroupsForAUser_(userKey) {
 
     } catch(e) {
       console.error("Problem med att anropa GoogleTjänst AdminDirectory.Groups i funktionen getListOfGroupsForAUser");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));

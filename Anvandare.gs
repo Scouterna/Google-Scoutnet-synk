@@ -13,7 +13,7 @@ function Anvandare() {
   const suspendedOrgUnitPath = defaultOrgUnitPath + "/" + "Avstängda";
   
   let allMembers;
-  if ("group" == organisationType) {
+  if ("group" === organisationType) {
     allMembers = fetchScoutnetMembers_(true); //Hämta lista över alla medlemmar
     Logger.log("AllMembers.length by fetchScoutnetMembers = " + allMembers.length);
     Logger.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
@@ -48,29 +48,29 @@ function Anvandare() {
     if (scoutnetListId) {
       membersInAList = fetchScoutnetMembersMultipleMailinglists_(scoutnetListId, "", "", true);
     }
-    else if ("group" == organisationType) { //Om man ej anger listId för en e-postlista; endast för kårer, ej distrikt
+    else if ("group" === organisationType) { //Om man ej anger listId för en e-postlista; endast för kårer, ej distrikt
       membersInAList = getScoutleaders_(allMembers);
     }
     Logger.log("MembersInAlist antal personer= " + membersInAList.length);
 
     for (let i = 0; i < membersInAList.length; i++) {  //Här processas alla medlemmar
       Logger.log("**************");
-      if(membersProcessed.find(o => o == membersInAList[i].member_no)) { // Leta efter kontot i listan över redan processade konton
+      if(membersProcessed.find(o => o === membersInAList[i].member_no)) { // Leta efter kontot i listan över redan processade konton
         Logger.log("Användaren är redan processad: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
       }
       else {
         Logger.log("Användaren ska processas: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
         membersProcessed.push(membersInAList[i].member_no); //Lägg till kontot i listan över processade konton
         let obj = null;
-        if ("group" == organisationType) { //Alla attribut endast för kårer, ej distrikt
-          obj = allMembers.find(obj => obj.member_no == membersInAList[i].member_no); //Leta upp kontot i listan övar alla konton
+        if ("group" === organisationType) { //Alla attribut endast för kårer, ej distrikt
+          obj = allMembers.find(obj => obj.member_no === membersInAList[i].member_no); //Leta upp kontot i listan övar alla konton
           //anledningen till att inte använda objektet från epostlistan är att det finns bara begränsad information i det objektet
         }
         else { //För distrikt
           obj = membersInAList[i];
         }
 
-        if (obj == null) {
+        if (!obj) {
           Logger.log("Användaren  " + membersInAList[i].first_name + " " + membersInAList[i].last_name + " finns inte i Scoutnet eller så saknas det behörighet för att se användare. Kontrollera medlemslistan.");
           Logger.log("Hoppar över användaren.");
           // membersInAList-loop
@@ -357,7 +357,7 @@ function getAvatarIdImageToUse_(avatar_updated, defaultAvatarId) {
  */
 function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) {
     
-  if ("district" == organisationType) {  //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
+  if ("district" === organisationType) {  //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
     member.contact_mobile_phone = member.mobile_phone;
   }
  
@@ -373,7 +373,7 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
   
   let accountPrimaryPhoneNumber = "";
   if (typeof useraccount.phones !== 'undefined' && useraccount.phones) {
-    if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.type === "mobile" && phoneNumber.primary === true)) {
+    if (-1 !== useraccount.phones.findIndex(phoneNumber => phoneNumber.type === "mobile" && phoneNumber.primary === true)) {
       accountPrimaryPhoneNumber = useraccount.phones.find(phoneNumber => phoneNumber.type === "mobile" && phoneNumber.primary === true).value;
     }
   }
@@ -382,7 +382,7 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
   //user.keywords=innehåller bla i användarens konto keywordAvatarUpdatedToUpdate
   if (typeof useraccount.keywords !== 'undefined' && useraccount.keywords) {
     //Om det finns lagrad data på användarens konto
-    if (-1 != useraccount.keywords.findIndex(keyword => keyword.type === "custom" && keyword.customType === "avatar_updated")) {
+    if (-1 !== useraccount.keywords.findIndex(keyword => keyword.type === "custom" && keyword.customType === "avatar_updated")) {
       //Sätta det värde till accountKeywordAvatarUpdated
       accountKeywordAvatarUpdated = useraccount.keywords.find(keyword => keyword.type === "custom" && keyword.customType === "avatar_updated").value;
     }
@@ -422,55 +422,55 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
   Logger.log("Avatar url " + member.avatar_url);
 
   
-  if ( useraccount.name.givenName != member.first_name 
-      || useraccount.name.familyName != member.last_name 
+  if ( useraccount.name.givenName !== member.first_name 
+      || useraccount.name.familyName !== member.last_name 
       || useraccount.suspended 
-      || useraccount.orgUnitPath != orgUnitPath  
-      || ((useraccount.recoveryEmail != member.email) && (!(!useraccount.recoveryEmail && member.email==="")))
-      || ((useraccount.recoveryPhone != phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery===""))) 
-      || (accountPrimaryPhoneNumber != phnum)
-      || (accountKeywordAvatarUpdated != shouldBeKeywordAvatarUpdated))  {
+      || useraccount.orgUnitPath !== orgUnitPath  
+      || ((useraccount.recoveryEmail !== member.email) && (!(!useraccount.recoveryEmail && member.email === "")))
+      || ((useraccount.recoveryPhone !== phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery === ""))) 
+      || (accountPrimaryPhoneNumber !== phnum)
+      || (accountKeywordAvatarUpdated !== shouldBeKeywordAvatarUpdated))  {
     // Något behöver uppdateras 
 
     let user = {} // skapa kontoobjekt med det som skall ändras
     
-    if(useraccount.name.givenName != member.first_name) {
+    if(useraccount.name.givenName !== member.first_name) {
       if (!user.name)
       {user.name = {}}
       Logger.log("Nytt förnamn: %s", member.first_name);
       user.name.givenName = member.first_name;
     }
-    if(useraccount.name.familyName != member.last_name) {
+    if(useraccount.name.familyName !== member.last_name) {
       if (!user.name)
       {user.name = {}}
       Logger.log("Nytt efternamn: %s", member.last_name);
       user.name.familyName = member.last_name;
     }
-    if(useraccount.orgUnitPath != orgUnitPath)  {
+    if(useraccount.orgUnitPath !== orgUnitPath)  {
       Logger.log("Ny OrganizationUnit: %s", orgUnitPath);
       user.orgUnitPath = orgUnitPath;
     }
 
     // Lägg till återställningsinformation på Googlekontot
     //Om de inte är lika && de inte är tomma båda två
-    if((useraccount.recoveryEmail != member.email) && (!(!useraccount.recoveryEmail && member.email === "")))  {
+    if((useraccount.recoveryEmail !== member.email) && (!(!useraccount.recoveryEmail && member.email === "")))  {
       Logger.log("Ny återställningse-post: %s", member.email);
       user.recoveryEmail = member.email;
     };    
     
-    if  ((useraccount.recoveryPhone != phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery === ""))) {
+    if  ((useraccount.recoveryPhone !== phnum_recovery) && (!(!useraccount.recoveryPhone && phnum_recovery === ""))) {
       Logger.log("Nytt återställningsnummer: %s", phnum_recovery);
       user.recoveryPhone = phnum_recovery;
     }
     
     if  (typeof syncUserContactInfo !== 'undefined' && syncUserContactInfo) {
-      if(accountPrimaryPhoneNumber != phnum) {
+      if(accountPrimaryPhoneNumber !== phnum) {
         Logger.log("Nytt mobilnummer: %s", phnum);
         user.phones = findPhoneNumbersToBeForUser_(useraccount, phnum);       
       }
     } 
 
-    if (accountKeywordAvatarUpdated != shouldBeKeywordAvatarUpdated) {
+    if (accountKeywordAvatarUpdated !== shouldBeKeywordAvatarUpdated) {
       Logger.log("Profilbilden ska uppdateras");
       Logger.log("accountKeywordAvatarUpdated " + accountKeywordAvatarUpdated);
       Logger.log("shouldBeKeywordAvatarUpdated " + shouldBeKeywordAvatarUpdated);
@@ -507,7 +507,7 @@ function findPhoneNumbersToBeForUser_(useraccount, phnum)  {
 
   let accountPhoneNumbersNotPrimaryOrTheSame = [];
   if (typeof useraccount.phones !== 'undefined' && useraccount.phones) {
-    if (-1 != useraccount.phones.findIndex(phoneNumber => phoneNumber.primary !== true)) {
+    if (-1 !== useraccount.phones.findIndex(phoneNumber => phoneNumber.primary !== true)) {
       accountPhoneNumbersNotPrimaryOrTheSame = useraccount.phones.filter(phoneNumber => phoneNumber.primary !== true && phoneNumber.value !== phnum);
     }
   }
@@ -597,7 +597,7 @@ function suspendAccount_(userAccount, suspendedOrgUnitPath) {
   
   createSuborganisationIfNeeded_(suspendedOrgUnitPath);
   
-  if (!suspended || (orgUnitPath != suspendedOrgUnitPath)) {
+  if (!suspended || (orgUnitPath !== suspendedOrgUnitPath)) {
   
     let user = {
       suspended: true,
@@ -667,7 +667,7 @@ function getScoutleaders_(allMembers) {
     const group_role = allMembers[i].group_role;
     const unit_role = allMembers[i].unit_role;
     
-    if (group_role.length != 0 || unit_role.length != 0) {
+    if (group_role.length !== 0 || unit_role.length !== 0) {
      leaders.push(allMembers[i]);
     }    
   }

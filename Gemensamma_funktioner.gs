@@ -96,7 +96,7 @@ function getGroupMembers_(groupId) {
     
     } catch (e) {
       Logger.log("Problem med att anropa AdminDirectory.Members.list i getGroupMembers med:" + groupId);
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -172,7 +172,7 @@ function fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutn
       };      
       manuellEpostadress.push(member_manuell);      
     }
-    else if ((listOfScoutnetListIds[i].length == 1) && (listOfScoutnetListIds[i].indexOf("@") == 0)) { //Om @ för kårens googlekonton
+    else if ((listOfScoutnetListIds[i].length === 1) && (listOfScoutnetListIds[i].indexOf("@") === 0)) { //Om @ för kårens googlekonton
       
       Logger.log("lägg till kårens googlekonton");
       for (let k = 0; k < listOfEmailAdressesOfActiveAccounts.length; k++) {
@@ -197,7 +197,7 @@ function fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutn
   Logger.log("Fetch - getMembersByMemberNumbers klar");
   Logger.log("Hämta medlemmar från flera e-postlistor");
  
-  if (manuellEpostadress.length != 0) {
+  if (manuellEpostadress.length !== 0) {
     members.push.apply(members, manuellEpostadress);
     Logger.log("Identifierade mannuellt tillagd e-post i stället för lista från Scoutnet");
     Logger.log("Om detta är fel, kontrollera så att det inte finns något @ på fel ställe");
@@ -393,7 +393,7 @@ function getMembersByMemberNumbers_(members, memberNumbers) {
   
     for (let k = 0; k < members.length; k++) {
       
-      if (memberNumbers[i] == members[k].member_no){
+      if (memberNumbers[i] === members[k].member_no){
        
        // Logger.log("Medlemsnummer " + memberNumbers[i]);
         Logger.log("Namn " + members[k].first_name + " " + members[k].last_name);
@@ -624,7 +624,7 @@ function getGoogleAccount_(member_no) {
 
   for (let n = 0; n < 6; n++) {
     Logger.log("Funktionen getGoogleAcount körs " + n);
-    try {   
+    try {  
       const page = AdminDirectory.Users.list({
         domain: domain,
         query: qry,
@@ -642,7 +642,7 @@ function getGoogleAccount_(member_no) {
       }      
     } catch(e) {
       Logger.log("Problem med att anropa GoogleTjänst Users.list i funktionen getGoogleAccount");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -681,7 +681,7 @@ function checkEmailFormat_(email) {
   const arr = email.split("@");
   const domain_part = arr[1];
   
-  if (domain_part == domain) {
+  if (domain_part === domain) {
        return true;
   }
   return false;  
@@ -751,7 +751,7 @@ function getDataFromActiveSheet_(nameOfSheet)  {
   for (let n = 0; n < 6; n++) {
     try {
       const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nameOfSheet);
-      if (sheet == null) {
+      if (!sheet) {
         Logger.log("Bladet " + nameOfSheet + " finns ej i kalkylarket");
       }
       const selection = sheet.getDataRange();
@@ -767,7 +767,7 @@ function getDataFromActiveSheet_(nameOfSheet)  {
 
     } catch(e) {
       console.error("Problem med att anropa GoogleTjänst SpreadsheetApp");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -824,7 +824,7 @@ function updateListOfGroups_() {
     
     } catch (e) {
       Logger.log("Problem med att anropa AdminDirectory.Groups.list i updateListOfGroups");
-      if (n == 5) {
+      if (n === 5) {
         throw e;
       } 
       Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
@@ -879,7 +879,7 @@ function getDraft_(subject)  {
     let draftSubject = drafts[i].getSubject();
     draftSubject = getComparableString_(draftSubject);
 
-    if (draftSubject == subject)  {
+    if (draftSubject === subject)  {
       Logger.log(draftSubject);
       return drafts[i];
     }
