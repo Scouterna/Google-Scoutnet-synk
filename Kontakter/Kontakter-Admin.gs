@@ -156,51 +156,6 @@ function testGetHtmlEmailBody() {
 
 
 /**
- * Kontrollerar om användaren använder en ok version
- * 
- * @param {string} version_running - Användarens version av skript
- * 
- * @returns {boolean} - Gällande om versionen av användarens skript är ok eller ej
- */
-function checkIfVersionOk_(version_running)  {
-
-  if (!version_running) {
-    Logger.log("Ej angiven version");
-    return false;
-  }
-
-  Logger.log("Version som används av kåren " + version_running);
-  Logger.log("Äldsta tillåtna version " + version_oldest_ok);
-
-  const version_running_split_list = version_running.split(".");
-
-  const version_oldest_ok_split_list = version_oldest_ok.split(".");
-
-  //Gå igenom varje nivå av underversion
-  for (let i = 0; i < version_running_split_list.length; i++) {
-
-    if (!version_oldest_ok_split_list[i]) {
-      Logger.log("Denna nivå av underversion finns ej sedan tidigare");
-      return false;
-    }
-    if (version_running_split_list[i].length > version_oldest_ok_split_list[i].length)  {
-      Logger.log("Fler siffror i aktuell underversion än i äldsta tillåtna");
-      return true;
-    }    
-    if (version_running_split_list[i] > version_oldest_ok_split_list[i]) {
-      Logger.log("Nyare underversion än äldsta tillåtna");
-      return true;
-    }
-    if (version_running_split_list[i] < version_oldest_ok_split_list[i]) {
-      Logger.log("Äldre underversion än äldsta tillåtna");
-      return false;
-    }
-  }
-  return true;
-}
-
-
-/**
  * Uppdatera kalkylbladet med de användare som ska ha behörigheter
  */
 function updateContactGroupsAuthnSheetUsers()  {
@@ -270,6 +225,51 @@ function updateContactGroupsAuthnSheetUsers()  {
       sheet.appendRow([email, password]);      
     }
   }  
+}
+
+
+/**
+ * Kontrollerar om användaren använder en ok version
+ * 
+ * @param {string} version_running - Användarens version av skript
+ * 
+ * @returns {boolean} - Gällande om versionen av användarens skript är ok eller ej
+ */
+function checkIfVersionOk_(version_running)  {
+
+  if (!version_running) {
+    Logger.log("Ej angiven version");
+    return false;
+  }
+
+  Logger.log("Version som används av kåren " + version_running);
+  Logger.log("Äldsta tillåtna version " + version_oldest_ok);
+
+  const version_running_split_list = version_running.split(".");
+
+  const version_oldest_ok_split_list = version_oldest_ok.split(".");
+
+  //Gå igenom varje nivå av underversion
+  for (let i = 0; i < version_running_split_list.length; i++) {
+
+    if (!version_oldest_ok_split_list[i]) {
+      Logger.log("Denna nivå av underversion finns ej sedan tidigare");
+      return false;
+    }
+    if (version_running_split_list[i].length > version_oldest_ok_split_list[i].length)  {
+      Logger.log("Fler siffror i aktuell underversion än i äldsta tillåtna");
+      return true;
+    }    
+    if (version_running_split_list[i] > version_oldest_ok_split_list[i]) {
+      Logger.log("Nyare underversion än äldsta tillåtna");
+      return true;
+    }
+    if (version_running_split_list[i] < version_oldest_ok_split_list[i]) {
+      Logger.log("Äldre underversion än äldsta tillåtna");
+      return false;
+    }
+  }
+  return true;
 }
 
 
