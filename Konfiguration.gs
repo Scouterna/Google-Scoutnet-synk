@@ -3,6 +3,14 @@
  * @website https://github.com/Scouterna
  */
 
+
+/**
+ * Kontrollerar om inställningarna i Konfiguration.gs verkar korrekta
+ */
+function checkKonfigIsOk() {
+  checkDataFromKonfig_();
+}
+
 const domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan till kåren utan www och som används i Google Workspace
 
 const groupId = '12'; //Kårens id som kan hittas i Scoutnet om du har tillräcklig behörighet

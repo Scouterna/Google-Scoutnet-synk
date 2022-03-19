@@ -8,20 +8,13 @@
  * Anropa denna funktion om du vill synkronisera både användare och
  * grupper direkt efter varandra
  */
-function AnvandareOchGrupper() {  
+function AnvandareOchGrupper() {
   Anvandare();
   Grupper();
 }
 
 
 /***Grupper***/
-/**
- * Anropar funktion för att skapa kolumnrubriker för kalkylarket
- * för grupper
- */
-function skapaRubrikerGrupper() {
-  createHeaders_Grupper();
-}
 /**
  * Funktion för att alla rader i kalkylarket för grupper
  * ska synkroniseras och e-brev skickas ut
@@ -63,21 +56,6 @@ function GrupperVissEtikett1() {
 
 /***Medlemslistor***/
 /**
- * Anropar funktion för att skapa kolumnrubriker för kalkylarket
- * för medlemslistor konfig
- */
-function skapaRubrikerMedlemslistor() {
-  skapaRubrikerML();
-}
-/**
- * Funktion för att alla rader i kalkylarket för medlemslistor
- * ska synkroniseras och e-brev skickas ut
- */
-function MedlemslistorAllaRader() {
-  Medlemslistor();
-}
-
-/**
  * Funktioner för att ange att enbart vissa radintervall i kalkylarket
  * för medlemslistor ska synkroniseras och e-brev skickas ut.
  * Samt ställa in om medlemslistor enbart ska uppdateras alternativt om
@@ -86,23 +64,23 @@ function MedlemslistorAllaRader() {
  * Exempelvis rad 0 till 10. Helt fritt att ändra själv
  */
 function MedlemslistorVissaRaderUppdateraOchSkicka1() {
-  Medlemslistor(0, 10, true, true);
+  synkroniseraMedlemslistor_(0, 10, true, true);
 }
 
 function MedlemslistorVissaRaderUppdateraOchSkicka2() {
-  Medlemslistor(11, 20, true, true);
+  synkroniseraMedlemslistor_(11, 20, true, true);
 }
 
 function MedlemslistorVissaRaderUppdateraOchSkicka3() {
-  Medlemslistor(21, 30, true, true);
+  synkroniseraMedlemslistor_(21, 30, true, true);
 }
 
 function MedlemslistorVissaRaderUppdateraEnbart1() {
-  Medlemslistor(0, 10, true, false);
+  synkroniseraMedlemslistor_(0, 10, true, false);
 }
 
 function MedlemslistorVissaRaderSkickaEnbart1() {
-  Medlemslistor(0, 10, false, true);
+  synkroniseraMedlemslistor_(0, 10, false, true);
 }
 
 
@@ -121,7 +99,7 @@ function MedlemslistorVissaRaderSkickaEnbart1() {
  * tar bort någon funktion nedan då den kanske används i någon annan lista.
  */
 const medlemslista_egna_attribut_funktioner = [
-    {'namn': 'Ålder', 'formel': '=DATEDIF(R[0]C[-37]; TODAY(); "Y")'},   
+    {'namn': 'Ålder', 'formel': '=DATEDIF(R[0]C[-37]; TODAY(); "Y")'},
     {'namn': 'Dagar till nästa födelsedag', 'formel': '=DATE(YEAR(R[0]C[-38])+DATEDIF(R[0]C[-38];TODAY();"Y")+1;MONTH(R[0]C[-38]);DAY(R[0]C[-38]))-TODAY()'},
     {'namn': 'Antal dagar som medlem i kåren', 'formel': '=DATEDIF(R[0]C[-36];TODAY(); "D")'},
     {'namn': 'Primär e-post som anhörigs e-post', 'formel': '=IF(AND(ISTEXT(R[0]C[-23]);OR(R[0]C[-23]=R[0]C[-18];R[0]C[-23]=R[0]C[-14])); "LIKA"; "OLIKA")'}
