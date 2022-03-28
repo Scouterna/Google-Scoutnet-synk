@@ -855,7 +855,7 @@ function getListOfGroups_() {
 function updateListOfGroups_() {
 
   for (let n = 0; n < 6; n++) {
-    if (n !== 0) {
+    if (0 !== n) {
       console.warn("Funktionen updateListOfGroups körs " + n);
     }
     try {
@@ -894,35 +894,6 @@ function updateListOfGroups_() {
 
 
 /**
- * Ger sant eller falskt om angiven e-postadress är tillåten
- * som avsändareadress
- * 
- * @param {string} email - En e-postadress
- *
- * @returns {boolean} - Om avsändaradressen är tillåten
- */
-function isFromEmailAdressAllowed_(email) {
-  return getAllowedFromEmailAdresses_().includes(email);
-}
-
-
-/**
- * Ger vilka e-postadresser som det går att ange som avsändare
- *
- * @returns {string[]} - En lista med e-postadresser
- */
-function getAllowedFromEmailAdresses_() {
-  
-  const aliases = GmailApp.getAliases();
-  const my_email = Session.getEffectiveUser().getEmail();
-  
-  aliases.push(my_email);
-  /**/Logger.log(aliases);
-  return aliases;
-}
-
-
-/**
  * Ger ett e-postutkast om det finns givet ämnesraden på det
  * 
  * @param {string} subject - Ämnesrad på e-postutkast
@@ -940,7 +911,7 @@ function getDraft_(subject) {
     draftSubject = getComparableString_(draftSubject);
 
     if (draftSubject === subject) {
-      Logger.log(draftSubject);
+      //console.log(draftSubject);
       return drafts[i];
     }
   }
