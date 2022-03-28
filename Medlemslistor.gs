@@ -55,10 +55,12 @@ function synkroniseraMedlemslistor_(start, slut, shouldUpdate, shouldSend) {
   
   const forceUpdate = true;
 
+  console.time("Medlemslistor");
   const sheetDataMedlemslistor = getDataFromActiveSheet_("Medlemslistor");
   const grd = getMedlemslistorKonfigRubrikData_();
   //Hämta lista med alla medlemmar i kåren och alla deras attribut
   const allMembers = fetchScoutnetMembers_(true);
+  console.info("Antal medlemmar i kåren " + allMembers.length);
 
   const sheet = sheetDataMedlemslistor["sheet"];
   const selection = sheetDataMedlemslistor["selection"];
@@ -69,7 +71,7 @@ function synkroniseraMedlemslistor_(start, slut, shouldUpdate, shouldSend) {
   const rowsToSync = findWhatRowsToSync_(start, slut, data.length);
   start = rowsToSync.start;
   slut = rowsToSync.slut;
-  Logger.log("Startrad " + start + " slutrad " + slut);
+  console.info("Rader att synkronisera - startrad " + start + " slutrad " + slut);
   
   for (let i = start-1; i < slut; i++) {
     
@@ -78,7 +80,9 @@ function synkroniseraMedlemslistor_(start, slut, shouldUpdate, shouldSend) {
     const spreadsheetUrl = data[i][grd["spreadsheetUrl"]];
     
     const rad_nummer = i + 1;
-    Logger.log('Rad: ' + rad_nummer + ' Namn: ' + name + ' Scoutnet: ' + scoutnet_list_id + ' spreadsheetUrl: ' + spreadsheetUrl);
+    console.time("Rad: " + rad_nummer + " - " + name); //Detta då namnfältet skulle kunna vara tomt
+    console.info("----------------------------------");
+    console.info('Rad: ' + rad_nummer + ' Namn: ' + name + ' Scoutnet: ' + scoutnet_list_id + ' spreadsheetUrl: ' + spreadsheetUrl);
 
     let update_memberlist = true;
     
@@ -92,7 +96,7 @@ function synkroniseraMedlemslistor_(start, slut, shouldUpdate, shouldSend) {
     
     if (!spreadsheetUrl) { //Inget kalkylark är angivet
       if (!name && !scoutnet_list_id) { //Ta bort raden
-        Logger.log("Försöker ta bort rad " + rad_nummer);
+        console.log("Försöker ta bort rad " + rad_nummer);
         delete_rows.push(rad_nummer);
       }
       else {
@@ -117,9 +121,11 @@ function synkroniseraMedlemslistor_(start, slut, shouldUpdate, shouldSend) {
         skickaMedlemslista_(selection, rad_nummer, data[i], grd, rowSpreadsheet);
       }
     }
+    console.timeEnd("Rad: " + rad_nummer + " - " + name);
   }
   //Ta bort tomma rader i kalkylarket
   deleteRowsFromSpreadsheet_(sheet, delete_rows);
+  console.timeEnd("Medlemslistor");
 }
 
 
@@ -143,7 +149,7 @@ function openSpreadsheetUrlForMemberlist_(selection, rad_nummer, grd, spreadshee
     return rowSpreadsheet;
   }
   catch (e) { //Om url är fel
-    Logger.log(e);
+    console.error(e);
     cell.setBackground("red");
     return false;
   }
@@ -168,16 +174,16 @@ function skickaMedlemslista_(selection, rad_nummer, radInfo, grd, rowSpreadsheet
   const sheet = rowSpreadsheet.getSheets()[0];
   const lastRow = sheet.getLastRow();
   const lastColumn = sheet.getLastColumn();
-  Logger.log("lastColumn ska vara " + lastColumn);
-  Logger.log("lastRow ska vara " + lastRow);
+  console.log("lastColumn ska vara " + lastColumn);
+  console.log("lastRow ska vara " + lastRow);
 
   /***Dessa data hämta från utkastet och är lika för alla vid giltighetskontrollen***/
-  Logger.log("Ämne på e-post i utkast " + email_draft_subject);
+  console.info("Ämne på e-post i utkast: " + email_draft_subject);
   const draft = getDraft_(email_draft_subject);
 
   let cell = selection.getCell(rad_nummer, grd["email_draft_subject"]+1);
   if (!draft) { //Kolla om ämnesraden är korrekt
-    Logger.log("Ogiltig ämmnesrad " + email_draft_subject);
+    console.error("Ogiltig ämmnesrad " + email_draft_subject);
     cell.setBackground("red");
     return;
   }
@@ -190,7 +196,7 @@ function skickaMedlemslista_(selection, rad_nummer, radInfo, grd, rowSpreadsheet
     setBackgroundColour_(cell, "white", false);
   }
   else {
-    Logger.log("Inget avsändarnamn angivet");
+    console.warn("Inget avsändarnamn angivet");
     cell.setBackground("yellow");
   }
   
@@ -200,19 +206,17 @@ function skickaMedlemslista_(selection, rad_nummer, radInfo, grd, rowSpreadsheet
     
     documentToMerge = getDocumentToMerge(email_document_merge);
     
-    if (documentToMerge) {
-      Logger.log("Lyckades hitta dokument att koppla");
-      Logger.log(documentToMerge);
+    if (documentToMerge) { //Lyckades hitta dokument att koppla
       setBackgroundColour_(cell, "white", false);
     }
     else {
-      Logger.log("Fel på något dokument-id");
+      console.error("Fel på något dokument-id");
       cell.setBackground("red");
       return;
     }
   }
   else {
-    Logger.log("Inget koppla dokument angivet");
+    console.log("Inget koppla dokument angivet");
     cell.setBackground("yellow");
   }
   /**************************************************************************/
@@ -244,21 +248,27 @@ function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet
   const plainBody = draft.getPlainBody();
   const attachments = draft.getAttachments();
 
+  const allowedFromEmailAdresses = getAllowedFromEmailAdresses_();
+
   for (let i = 0; i < data.length; i++) {
-    Logger.log("Rad i kalkylarket " + i);
+    const rowNumber = i+2;
+    console.time("Rad: " + rowNumber + " - " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
+
+    console.log("******************************");
+    console.log("Rad %d i kalkylarket för denna medlemslista", rowNumber);
 
     /***Villkor***/
     const actual_email_condition = replaceTemplate_(email_condition, attribut, data[i]);
     if (actual_email_condition) {
       if (!eval(actual_email_condition)) {
-        Logger.log("Uppfyller INTE villkoren " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
-        Logger.log(actual_email_condition);
+        console.log("Uppfyller INTE villkoren " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
+        console.log(actual_email_condition);
         continue;
       }
     }
     
-    Logger.log("Uppfyller villkoren " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
-    Logger.log(actual_email_condition);
+    console.log("Uppfyller villkoren för " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
+    console.log(actual_email_condition);
     /***Villkor - Slut***/
 
     const emailOptions = {};
@@ -269,7 +279,7 @@ function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet
     /***Ämnesrad - Slut***/
 
     /***Mottagare e-post***/
-    const email_recipient = getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, attribut, data[i], emailOptions);
+    const email_recipient = getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, attribut, data[i], emailOptions, allowedFromEmailAdresses);
     if (!email_recipient) {
       continue;
     }
@@ -285,14 +295,17 @@ function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet
     emailOptions["attachments"] = getAndMakeAttachments_(attachments, documentToMerge, attribut, data[i]);
     /***Bilagor - Slut***/
     
-    Logger.log("email_recipient " + email_recipient);
-    Logger.log("actual_subject " + actual_subject);
-    Logger.log("actual_plainBody " + actual_plainBody);
-    Logger.log("Bilagor " + attachments);
-    Logger.log("emailOptions");
-    Logger.log(emailOptions);
+    //console.log("email_recipient " + email_recipient);
+    //console.log("actual_subject " + actual_subject);
+    //console.log("actual_plainBody " + actual_plainBody);
+    //console.log("Bilagor " + attachments);
+    //console.log("emailOptions");
+    //console.log(emailOptions);
 
     GmailApp.sendEmail(email_recipient, actual_subject, actual_plainBody, emailOptions);
+
+    console.timeEnd("Rad: " + rowNumber + " - " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
+    console.info("Hittills mejlat %d av %d personer i denna medlemslista", i+1, data.length);
   }
 }
 
@@ -310,10 +323,11 @@ function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet
  * @param {Object} attribut - Ett objekt med kolumnrubriker och dess placeringar
  * @param {string[]} dataArray - En lista innehållande persondata för en person
  * @param {Object} emailOptions - Objekt med inställningar för e-brevet
+ * @param {string[]} allowedFromEmailAdresses - Lista med godkända som avsändaradresser
  * 
  * @param {string | boolean} - Falskt eller e-postadress för mottagare
  */
-function getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, attribut, dataArray, emailOptions) {
+function getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, attribut, dataArray, emailOptions, allowedFromEmailAdresses) {
 
   const email_sender_name = radInfo[grd["email_sender_name"]];
   const email_sender_email = radInfo[grd["email_sender_email"]];
@@ -337,14 +351,14 @@ function getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, a
   /***Avsändarnamn - Slut***/
 
   /***Avsändaradress***/
-  const actual_email_sender_email = getSender_(email_sender_email, "avsändaradress", attribut, dataArray, cell_email_sender_email, emailOptions);
+  const actual_email_sender_email = getSender_(email_sender_email, "avsändaradress", attribut, dataArray, cell_email_sender_email, emailOptions, allowedFromEmailAdresses);
   if (!actual_email_sender_email) {
     return false;
   }
   /***Avsändaradress - Slut***/
 
   /***Svarsadress e-post***/
-  const actual_email_replyto = getSender_(email_replyto, "svarsadress", attribut, dataArray, cell_email_replyto, emailOptions);
+  const actual_email_replyto = getSender_(email_replyto, "svarsadress", attribut, dataArray, cell_email_replyto, emailOptions, allowedFromEmailAdresses);
   if (!actual_email_replyto) {
     return false;
   }
@@ -376,7 +390,7 @@ function getEmailDataSenderAndRecipients_(selection, rad_nummer, radInfo, grd, a
   /***Blindkopia e-post - Slut***/
 
   if (!(actual_email_recipient || actual_email_cc || actual_email_bcc)) {
-    Logger.log("Ingen mottagare är angiven på något sätt. Vi hoppar över denna person");
+    console.error("Ingen mottagare är angiven på något sätt. Vi hoppar över denna person");
     return false;
   }
   return actual_email_recipient;
@@ -401,12 +415,12 @@ function checkIfNoReplyOption_(textInput, attribut, dataArray, cell) {
   }
   if (text) {
     cell.setValue(true);
-    Logger.log("Svara-ej är påslagen " + text);
+    //console.log("Svara-ej är påslagen " + text);
     return true;
   }
   else {
     cell.setValue(false);
-    Logger.log("Svara-ej är avstängd " + text);
+    //console.log("Svara-ej är avstängd " + text);
     return false;
   }
 }
@@ -430,7 +444,7 @@ function getAndMakeAttachments_(attachmentsInput, documentToMerge, attribut, dat
 
   for (let i = 0; i < attachmentsInput.length; i++) {
     attachments.push(attachmentsInput[i]);
-    Logger.log("Lägger till bilagan " + attachmentsInput[i].getName());
+    console.log("Lägger till bilagan " + attachmentsInput[i].getName());
   }
 
   for (let i = 0; documentToMerge && i < documentToMerge.length; i++) {
@@ -451,16 +465,16 @@ function getAndMakeAttachments_(attachmentsInput, documentToMerge, attribut, dat
       const footer = copy_file.getFooter();
       replaceContentOfDocument_(footer, attribut, dataArray);
 
-      Logger.log("URL för temporärt skapad fil är");
-      Logger.log(copy_file.getUrl());
+      console.log("URL för temporärt skapad fil är");
+      console.log(copy_file.getUrl());
       copy_file.saveAndClose();
 
       const pdf = DocumentApp.openById(copy_id).getAs('application/pdf');
       attachments.push(pdf);
-      Logger.log("Lägger till den personliga bilagan " + pdf.getName());
+      console.log("Lägger till den personliga bilagan " + pdf.getName());
     }
     catch (e) {
-      Logger.log(e);
+      console.error(e);
     }
     finally {
       try {
@@ -468,7 +482,7 @@ function getAndMakeAttachments_(attachmentsInput, documentToMerge, attribut, dat
         DriveApp.getFileById(copy_id).setTrashed(true);
       }
       catch (e) {
-        Logger.log(e);
+        console.error(e);
       }
     }
   }
@@ -525,7 +539,7 @@ function replaceTemplate_(textInput, attribut, dataArray) {
     //Ersätt koden med personlig data
     text = text.replace(textMatches[i], replaceData || '');
   }
-  //Logger.log(text);
+  //console.log(text);
   return text;
 }
 
@@ -548,9 +562,9 @@ function getReplaceDataForShortcode_(textMatch, attribut, dataArray) {
   //Ny data = den som finns i kolumn textColMatch för denna person
   const replaceData = dataArray[textColMatch];
 
-  //Logger.log(textMatch);
-  //Logger.log(textColMatch);
-  //Logger.log(replaceData);
+  //console.log("Kortkoder som hittades " + textMatch);
+  //console.log(textColMatch);
+  //console.log(replaceData);
   return replaceData;
 }
 
@@ -580,6 +594,7 @@ function getDocumentToMerge(ids) {
   
   const idList = ids.split(",");
   const docs = [];
+  const nameOfDocuments = [];
   
   for (let i = 0; i < idList.length; i++) {
     const id = idList[i].trim();
@@ -587,11 +602,14 @@ function getDocumentToMerge(ids) {
     try {
       const doc = DriveApp.getFileById(id);
       docs.push(doc);
+      nameOfDocuments.push(doc.getName());
     } catch (e) {
-      Logger.log(e);
+      console.error(e);
       return false;
     }
   }
+  console.log("Lyckades hitta dokument att koppla");
+  console.log(nameOfDocuments);
   return docs;
 }
 
@@ -608,16 +626,17 @@ function getDocumentToMerge(ids) {
  * @param {string[]} dataArray - En lista innehållande persondata för en person
  * @param {Object} cell - Ett objekt av typen Range
  * @param {Object} emailOptions - Ett objekt där extra data för att skicka e-posten finns
+ * @param {string[]} allowedFromEmailAdresses - Lista med godkända som avsändaradresser
  *
  * @returns {boolean} - Sant eller falskt om adressen är tillåten att använda
  */
-function getSender_(textInput, nameOfTheAttribute, attribut, dataArray, cell, emailOptions) {
+function getSender_(textInput, nameOfTheAttribute, attribut, dataArray, cell, emailOptions, allowedFromEmailAdresses) {
 
   let text = replaceTemplate_(textInput, attribut, dataArray);
   text = getCleanString_(text);
   text = text.toLowerCase();
 
-  if ("avsändaradress" === nameOfTheAttribute && isFromEmailAdressAllowed_(text)) {
+  if ("avsändaradress" === nameOfTheAttribute && allowedFromEmailAdresses.includes(text)) {
     setBackgroundColour_(cell, "white", false);
     emailOptions["from"] = text;
   }
@@ -626,15 +645,31 @@ function getSender_(textInput, nameOfTheAttribute, attribut, dataArray, cell, em
     emailOptions["replyTo"] = text;
   }
   else if (!text) {
-    Logger.log("Ingen " + nameOfTheAttribute + " angiven");
+    console.warn("Ingen " + nameOfTheAttribute + " angiven");
     cell.setBackground("yellow");
   }
   else {
-    Logger.log("Ogiltig " + nameOfTheAttribute + " angiven " + text +". Vi hoppar över denna person");
+    console.error("Ogiltig " + nameOfTheAttribute + " angiven " + text +". Vi hoppar över denna person");
     cell.setBackground("red");
     return false;
   }
   return true;
+}
+
+
+/**
+ * Ger vilka e-postadresser som det går att ange som avsändare
+ *
+ * @returns {string[]} - En lista med e-postadresser
+ */
+function getAllowedFromEmailAdresses_() {
+  
+  const aliases = GmailApp.getAliases();
+  const my_email = Session.getEffectiveUser().getEmail();
+  
+  aliases.push(my_email);
+  console.log("Tillåtna avsändaradresser " + aliases);
+  return aliases;
 }
 
 
@@ -653,14 +688,12 @@ function getRecipient_(textInput, nameOfTheAttribute, attribut, dataArray) {
 
   let text = replaceTemplate_(textInput, attribut, dataArray);
   text = getCleanEmailArray_(text).toString();
-  Logger.log(nameOfTheAttribute);
-  Logger.log(text);
   
   if (text) {
-    Logger.log(nameOfTheAttribute + " är angiven " + text);
+    console.log(nameOfTheAttribute + " är angiven " + text);
   }
   else {
-    Logger.log("Ingen " + nameOfTheAttribute + " är angiven " + text);
+    //console.log("Ingen " + nameOfTheAttribute + " är angiven " + text);
   }
   return text;
 }
@@ -704,8 +737,8 @@ function getVerkligMedlemslista_(sheet) {
 
   const values = range.getDisplayValues();
 
-  Logger.log("Data i kalkylarket för medlemslista");
-  Logger.log(values);
+  //console.log("Data i kalkylarket för medlemslista");
+  //console.log(values);
   return values;
 }
 
@@ -725,8 +758,8 @@ function getVerkligaRubriker_(sheet) {
 
   const values = range.getDisplayValues()[0];
 
-  Logger.log("Rubriker i kalkylarket");
-  Logger.log(values);
+  //console.log("Rubriker i kalkylarket");
+  //console.log(values);
 
   const data = {};
   for (let i = 0; i < values.length; i++) {
@@ -758,13 +791,13 @@ function skapaRubrikerML() {
   //Inga angivna celler på rad 1 är sammanfogade
   if (! (range1_rad1.isPartOfMerge() || range2_rad1.isPartOfMerge())) { 
     
-    Logger.log("Inga av de angivna cellerna på rad 1 är sammanfogade");
+    console.log("Inga av de angivna cellerna på rad 1 är sammanfogade");
     range1_rad1.merge();
     range2_rad1.merge();
-    Logger.log("Vi har nu sammanfogat dem");
+    console.log("Vi har nu sammanfogat dem");
   }
   else {
-    Logger.log("Några celler är sedan tidigare sammanfogade på rad 1, så vi gör inget åt just det");
+    console.log("Några celler är sedan tidigare sammanfogade på rad 1, så vi gör inget åt just det");
   }
 
   const values_rad1 = [
@@ -824,9 +857,9 @@ function updateMemberlist_(selection, rad_nummer, radInfo, grd, allMembers, spre
   /************************/
   const scoutnet_list_id = radInfo[grd["scoutnet_list_id"]]; //Själva datan
   const cell_scoutnet_list_id = selection.getCell(rad_nummer, grd["scoutnet_list_id"]+1); //Range
-  Logger.log(".......Synkronisering - hämta data............");
+  console.log("********** Synkronisering - hämta data **********");
   const membersMultipleMailinglists = fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutnet_list_id, "", forceUpdate);
-  Logger.log(".......Slut Synkronisering - hämta data.......");
+  console.log("********** Synkronisering - hämta data - Slut **********");
   /***********************/ 
 
   const membersInAList = []
@@ -834,13 +867,13 @@ function updateMemberlist_(selection, rad_nummer, radInfo, grd, allMembers, spre
     //Leta upp medlemmen i listan övar alla medlemmar
     const obj = allMembers.find(obj => obj.member_no === membersMultipleMailinglists[i].member_no);
     membersInAList.push(obj);
-    Logger.log(obj);
+    //console.log(obj);
   }
 
   const mlrd = getMedlemslistorRubrikData_();
-  Logger.log(mlrd);
+  //console.log(mlrd);
   const numAttrMembers = mlrd.length;
-  Logger.log("Antal medlemsattribut att använda " + numAttrMembers);
+  console.log("Antal medlemsattribut att använda " + numAttrMembers);
 
   const sheet = spreadsheet.getSheets()[0];
 
@@ -861,7 +894,7 @@ function updateMemberlist_(selection, rad_nummer, radInfo, grd, allMembers, spre
     /****Storlek på den nya datan som ska in*****/
     const range_medlemmar = sheet.getRange(2, 1, membersInAList.length, numAttrMembers);
     const memberMatrix = createMemberlistMatrix_(membersInAList, mlrd);
-    Logger.log(memberMatrix);
+    //console.log(memberMatrix);
     range_medlemmar.setValues(memberMatrix);
     /********************************************/
 
@@ -892,8 +925,8 @@ function clearOldSpreadsheetData_(sheet, membersInAList, numAttrMembers) {
     //Vi ska rensa om det blir fler kolumner i nya också
     lastColumn = numAttrMembers;
   }
-  Logger.log("lastColumn ska vara " + lastColumn);
-  Logger.log("lastRow ska vara " + lastRow);
+  console.log("lastColumn ska vara " + lastColumn);
+  console.log("lastRow ska vara " + lastRow);
   
   //Storlek på den gamla datan som ska bort
   const range_allt = sheet.getRange(1, 1, numRows, lastColumn);
@@ -915,7 +948,8 @@ function createMemberlistRubrikRow_(mlrd) {
     const svName = mlrd[i].svName;
     row.push(svName);
   }
-  Logger.log("Rubriknamn " + row);
+  //console.log("Rubriker för medlemsattribut");
+  //console.log(row);
   return row;
 }
 
@@ -953,7 +987,7 @@ function createMemberlistRow_(member, mlrd) {
   for (let i = 0; i < mlrd.length; i++) {
     const name = mlrd[i].apiName;
     value = member[name];
-    //Logger.log("Attribut " + name + " värde " + value);
+    //console.log("Attribut " + name + " värde " + value);
     row.push(value);
   }
   return row;
@@ -1014,7 +1048,7 @@ function getMedlemslistorKonfigRubrikData_() {
   
   medlemslistaKonfigRubrikData["email_recipient"] = 10;
   medlemslistaKonfigRubrikData["email_cc"] = 11;
-  medlemslistaKonfigRubrikData["email_bcc"] = 11;
+  medlemslistaKonfigRubrikData["email_bcc"] = 12;
 
   return medlemslistaKonfigRubrikData;
 }
