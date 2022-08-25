@@ -22,6 +22,9 @@ const scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
 //Scoutkårens namn
 const groupName = "Testmall Scoutkår";
 
+//Max antal tvingade uppdatering per användare tills det nollställs
+const MAX_NUMBER_OF_CONTACTS_FORCE_UPDATE = 10;
+
 const contact_groups_email_subject = "Användaruppgifter - Google kontaktgrupper synkning";
 
 const contact_groups_email_sender_name = "";
@@ -101,7 +104,7 @@ function doGet(e) {
   if (!checkIfVersionOk_(userVersion)) {
     contactGroupsList = "Du använder en version av skriptet som inte stöds längre.";
   }
-  else if (userEmail && checkCredentials_(userEmail, userPassword, userVersion)) {
+  else if (userEmail && checkCredentials_(userEmail, userPassword, userVersion, forceUpdate)) {
     //Hämta en lista över alla Google Grupper som denna person är med i
     const groups = getListOfGroupsForAUser_(userEmail);
     const listOfGroupEmails = getListOfGroupsEmails_(groups);
@@ -109,8 +112,8 @@ function doGet(e) {
     contactGroupsList = getContactGroupsData_(listOfGroupEmails, forceUpdate);
   }
   else {
-    contactGroupsList = "Du har angivet en felaktig kombination av e-postadress & lösenord. " +
-                        "Om e-postadressen finns registrerad kommer det strax ett e-brev till " +
+    contactGroupsList = "Du har angivet en felaktig kombination av e-postadress & lösenord eller försökt köra programmet för ofta. " +
+                        "Om e-postadressen finns registrerad och var fel kommer det strax ett e-brev till " +
                         "dig med ditt lösenord.";
   }
 
@@ -185,10 +188,11 @@ function updateContactGroupsAuthnSheetUsers() {
     let email = data[i][grd["e-post"]];
     let password = data[i][grd["lösenord"]];
     const last_authn = data[i][grd["senast_använd"]];
+    const num_of_forced_updates = data[i][grd["tvingade_uppdateringar"]];
 
     const rad_nummer = i+1;
     
-    //console.log('Rad: ' + rad_nummer + ' E-post: ' + email + ' Lösenord: ' + password + ' Senast använd: ' + last_authn);
+    //console.log('Rad: ' + rad_nummer + ' E-post: ' + email + ' Lösenord: ' + password + ' Senast använd: ' + last_authn + ' Antal tvingade uppdateringar: ' + num_of_forced_updates);
 
     email = getGmailAdressWithoutDots_(email.toLowerCase());
     if (!listOfEmailsShouldHaveAccess.includes(email)) {
@@ -212,6 +216,10 @@ function updateContactGroupsAuthnSheetUsers() {
     }
   }
   deleteRowsFromSpreadsheet_(sheet, delete_rows);
+
+  //Radera det som står i kolumnen för antal tvingade uppdateringar
+  const range_tvingade_uppdateringar = sheet.getRange(start, grd["tvingade_uppdateringar"]+1, slut-start+1);
+  range_tvingade_uppdateringar.clear();
 
   console.info("Lägga till eventuella nedanstående e-postadresser så att de får behörighet");
   for (let i = 0; i < listOfEmailsShouldHaveAccess.length; i++) {
@@ -344,6 +352,8 @@ function getAllEmailsShouldHaveAccess_(listOfAllGoogleGroupsShouldHaveAccess) {
     const groupMembers = getGroupMembers_(email);
 
     const listOfEmails = getListOfEmailsFromListOfGroupMembers_(groupMembers);
+    //console.log("Google-grupp " + email);
+    //console.log(listOfEmails);
     listOfAllEmails.push.apply(listOfAllEmails, listOfEmails);
   }
 
@@ -823,10 +833,11 @@ function makeStringForGoogleContactGroup_(emailList) {
  * @param {string} userEmail - E-postadress för en användare
  * @param {string} userPassword - Lösenord för en användare för synkning av kontaktgrupper
  * @param {string} userVersion - Version av skript för en användare
+ * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
  * 
  * @returns {boolean} - Gällande om inskickade autentiseringsuppgifter är giltiga
  */
-function checkCredentials_(userEmail, userPassword, userVersion) {
+function checkCredentials_(userEmail, userPassword, userVersion, forceUpdate) {
   
   console.info("Kontrollerar om inskickade autentiseringsuppgifter är giltiga")
   
@@ -854,6 +865,7 @@ function checkCredentials_(userEmail, userPassword, userVersion) {
     const password = data[i][grd["lösenord"]];
     const last_authn = data[i][grd["senast_använd"]];
     const version = data[i][grd["version"]];
+    let num_of_forced_updates = data[i][grd["tvingade_uppdateringar"]];
 
     email = getGmailAdressWithoutDots_(email.toLowerCase());
 
@@ -880,6 +892,21 @@ function checkCredentials_(userEmail, userPassword, userVersion) {
       const cell_userVersion = selection.getCell(rad_nummer, grd["version"]+1);
       cell_userVersion.setValue(userVersion);
     }
+
+    if (typeof num_of_forced_updates !== "number")  {
+      num_of_forced_updates = 0;
+    }
+    if (forceUpdate)  {
+      if (num_of_forced_updates < MAX_NUMBER_OF_CONTACTS_FORCE_UPDATE) {
+        const cell = selection.getCell(rad_nummer, grd["tvingade_uppdateringar"]+1);
+        num_of_forced_updates++;
+        cell.setValue(num_of_forced_updates);
+      }
+      else {
+        console.error("Användaren försökt köra tvingad uppdatering för ofta");
+        return false;
+      }
+    }    
 
     return true;
   }
@@ -1018,6 +1045,7 @@ function getKontaktGruppAuthnRubrikData_() {
 
   kontaktgruppAuthnRubrikData["senast_använd"] = 2;
   kontaktgruppAuthnRubrikData["version"] = 3;
+  kontaktgruppAuthnRubrikData["tvingade_uppdateringar"] = 4;
 
   return kontaktgruppAuthnRubrikData;
 }
