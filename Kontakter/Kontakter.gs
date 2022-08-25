@@ -1423,6 +1423,7 @@ function checkDifferenceMemberInfo_(existingData, memberData, nameOfPersonField)
  * @returns {Object} - Ett objekt av typen Person med kontaktinfo för en person
  */
 function makeContactResource_(memberData, customEmailField) {
+  //memberData.first_name = "Test";
   
   //const avatar_updated = "avatar_updated";
   //const avatar_url = "avatar_url";
