@@ -544,7 +544,13 @@ function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers) {
 
     const obj = allMembers.find(obj => obj.member_no === memberNumbers[i]);
 
-    const emailList = getEmailListSyncOption_(obj, "", false);
+    let emailList;
+    if (checkIfAgeIsOver18_(obj)) {
+      emailList = getEmailListSyncOption_(obj, "-m", false);
+    }
+    else  {
+      emailList = getEmailListSyncOption_(obj, "", false);
+    }    
 
     obj.google_contact_group = makeStringForGoogleContactGroup_(emailList);
     memberList.push(obj);
@@ -554,6 +560,53 @@ function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers) {
   }
 
   return memberList;
+}
+
+
+/**
+ * Ger sant eller falskt om en medlem är minst 18 år gammal
+ * 
+ * @param {Object} memberData - Persondata för en medlem
+ * 
+ * @returns {boolean} - Om medlemen är minst 18 år gammal eller ej
+ */
+function checkIfAgeIsOver18_(memberData)  {
+
+  const ageToCheck = 18;
+  const today = new Date();
+  
+  const date_of_birth_year = Number(memberData.date_of_birth_year);
+  const year = today.getFullYear();
+
+  if (date_of_birth_year + ageToCheck > year)  {
+    //console.log("Personen är under " + ageToCheck);
+    return false;
+  }
+  else if (date_of_birth_year + ageToCheck < year)  {
+    //console.log("Personen är över " + ageToCheck);
+    return true;
+  }
+  
+  const date_of_birth_month = Number(memberData.date_of_birth_month);
+  const month = today.getMonth()+1;
+  if (date_of_birth_month > month)  {
+    //console.log("Personen fyller " + ageToCheck + " en senare månad");
+    return false;
+  }
+  else if (date_of_birth_month < month)  {
+    //console.log("Personen har fyllt " + ageToCheck + " en tidigare månad");
+    return true;
+  }
+
+  const date_of_birth_day = Number(memberData.date_of_birth_day);
+  const dayOfMonth = today.getDate();
+  if (date_of_birth_day > dayOfMonth)  {
+    //console.log("Personen fyller " + ageToCheck + " en senare dag i månaden");
+    return false;
+  }
+  
+  //console.log("Personen har fyllt " + ageToCheck);
+  return true;
 }
 
 
