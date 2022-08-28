@@ -73,3 +73,37 @@ const userAccountConfig = [
     description: "Ledare, Utmanare, Rover, Kårfunktionärer"
   }
 ];
+
+
+/**
+ * Inställningar för Kontaktgrupper
+ */
+//Scoutkårens namn
+const groupName = "Testmall Scoutkår";
+
+//Max antal tvingade uppdatering per användare tills det nollställs
+const MAX_NUMBER_OF_CONTACTS_FORCE_UPDATE = 10;
+
+const contact_groups_email_subject = "Användaruppgifter - Google kontaktgrupper synkning";
+
+const contact_groups_email_sender_name = "";
+
+const contact_groups_email_sender_from = "";
+
+//Skapa din egen med hjälp av funktionen testGetHtmlEmailBody
+/***Brödtext enkel***/
+const contact_groups_email_plainBody = "Hej, Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper. Vänligen använd följande uppgifter i stället: E-postadress: {{userEmail}} Lösenord: {{password}} Mvh " + groupName;
+/***Brödtext enkel - Slut***/
+
+/***Brödtext Html***/
+const contact_groups_email_htmlBody = '<div dir="ltr">Hej,<div><br></div><div>Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper.</div><div><br></div><div>Vänligen använd följande uppgifter i stället:</div><div><br></div><div>E-postadress: {{userEmail}}</div><div>Lösenord: {{password}}</div><div><br></div><div>Mvh</div><div>' + groupName + '</div></div>';
+/***Brödtext Html - Slut***/
+
+//Du på kåren kan ändra denna om du vill tvinga dina egna användare att uppdatera sina skript
+const version_oldest_ok = "2.0.0";
+
+//Ord som står i en medlems anteckningar som ska med i synkning men bytas ut mot något annat
+const noteKeysToReplace = [
+    ["lEdare", "Förälder har ledarintresse"],
+    ["Rabatt", "Rabatter i butiker av intresse"]
+  ];
