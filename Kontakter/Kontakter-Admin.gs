@@ -4,52 +4,6 @@
  */
 
 
-const domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan www till kåren och som används i Google Workspace
-
-const groupId = '12'; //Kårens id som kan hittas i Scoutnet om du har tillräcklig behörighet
-
-
-const api_key_list_all = 'jkdf949348948'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
-
-const api_key_mailinglists = 'jhshdfh98489498'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
-
-//Typ av organisationsenhet
-const organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
-
-//Adressen till Scoutnet. Ska ej ändras
-const scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
-
-//Scoutkårens namn
-const groupName = "Testmall Scoutkår";
-
-//Max antal tvingade uppdatering per användare tills det nollställs
-const MAX_NUMBER_OF_CONTACTS_FORCE_UPDATE = 10;
-
-const contact_groups_email_subject = "Användaruppgifter - Google kontaktgrupper synkning";
-
-const contact_groups_email_sender_name = "";
-
-const contact_groups_email_sender_from = "";
-
-//Skapa din egen med hjälp av funktionen testGetHtmlEmailBody
-/***Brödtext enkel***/
-const contact_groups_email_plainBody = "Hej, Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper. Vänligen använd följande uppgifter i stället: E-postadress: {{userEmail}} Lösenord: {{password}} Mvh " + groupName;
-/***Brödtext enkel - Slut***/
-
-/***Brödtext Html***/
-const contact_groups_email_htmlBody = '<div dir="ltr">Hej,<div><br></div><div>Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper.</div><div><br></div><div>Vänligen använd följande uppgifter i stället:</div><div><br></div><div>E-postadress: {{userEmail}}</div><div>Lösenord: {{password}}</div><div><br></div><div>Mvh</div><div>' + groupName + '</div></div>';
-/***Brödtext Html - Slut***/
-
-//Du på kåren kan ändra denna om du vill tvinga dina egna användare att uppdatera sina skript
-const version_oldest_ok = "2.0.0";
-
-//Ord som står i en medlems anteckningar som ska med i synkning men bytas ut mot något annat
-const noteKeysToReplace = [
-    ["lEdare", "Förälder har ledarintresse"],
-    ["Rabatt", "Rabatter i butiker av intresse"]
-  ];
-
-
 /**
  * Testfunktion för att testa anrop med olika
  * användarnamn/lösenord
@@ -161,7 +115,7 @@ function testGetHtmlEmailBody() {
  */
 function updateContactGroupsAuthnSheetUsers() {
 
-  const sheetDataKontakterAnvandare = getDataFromSheet_("Kontakter-Användare");
+  const sheetDataKontakterAnvandare = getDataFromActiveSheet_("Kontakter-Användare");
 
   const sheet = sheetDataKontakterAnvandare["sheet"];
   const selection = sheetDataKontakterAnvandare["selection"];
@@ -307,7 +261,7 @@ function getListOfAllGoogleGroupsShouldHaveAccess_() {
 
   updateListOfGroups_();
 
-  const sheetDataKontakter = getDataFromSheet_("Kontakter");
+  const sheetDataKontakter = getDataFromActiveSheet_("Kontakter");
 
   const data = sheetDataKontakter["data"];
 
@@ -384,44 +338,6 @@ function getListOfEmailsFromListOfGroupMembers_(groupMembers) {
 
 
 /**
- * Hämta data från ett kalkylblad
- *
- * @param {string} nameOfSheet - Namn på kalkylbladet
- * 
- * @returns {Object} - Objekt bestående av data från aktuellt kalkylblad
- */
-function getDataFromSheet_(nameOfSheet) {
-  const spreadsheetUrl_Kontakter = 'https://docs.google.com/spreadsheets/d/kjdskdjf32332/edit';
-
-  for (let n = 0; n < 6; n++) {
-    try {
-      const sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Kontakter).getSheetByName(nameOfSheet);
-      if (!sheet) {
-        console.error("Bladet " + nameOfSheet + " finns ej i kalkylarket");
-      }
-      const selection = sheet.getDataRange();
-      const data = selection.getValues();
-
-      const sheetData = {};
-      sheetData["sheet"] = sheet;
-      sheetData["selection"] = selection;
-      sheetData["data"] = data;
-
-      //console.log(sheetData["data"]);
-      return sheetData;
-
-    } catch(e) {
-      console.error("Problem med att anropa GoogleTjänst SpreadsheetApp");
-      if (n === 5) {
-        throw e;
-      } 
-      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
-    }
-  }
-}
-
-
-/**
  * Hämta data över alla kontaktgrupper aktuella för angivna Google Grupper
  *
  * @param {string[]} listOfGroupEmails - Lista över e-postadresser för Google Grupper
@@ -431,7 +347,7 @@ function getDataFromSheet_(nameOfSheet) {
  */
 function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
 
-  const sheetDataKontakter = getDataFromSheet_("Kontakter");
+  const sheetDataKontakter = getDataFromActiveSheet_("Kontakter");
 
   const sheet = sheetDataKontakter["sheet"];
   const selection = sheetDataKontakter["selection"];
@@ -898,7 +814,7 @@ function checkCredentials_(userEmail, userPassword, userVersion, forceUpdate) {
 
   console.info("userEmail: " + userEmail + " userPassword: " + userPassword);
 
-  const sheetDataKontakterAnvandare = getDataFromSheet_("Kontakter-Användare");
+  const sheetDataKontakterAnvandare = getDataFromActiveSheet_("Kontakter-Användare");
 
   //const sheet = sheetDataKontakterAnvandare["sheet"];
   const selection = sheetDataKontakterAnvandare["selection"];
