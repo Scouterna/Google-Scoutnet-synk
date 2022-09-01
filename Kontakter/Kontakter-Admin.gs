@@ -115,7 +115,7 @@ function testGetHtmlEmailBody() {
  */
 function updateContactGroupsAuthnSheetUsers() {
 
-  const sheetDataKontakterAnvandare = getDataFromSheet_("Kontakter-Användare");
+  const sheetDataKontakterAnvandare = getDataFromActiveSheet_("Kontakter-Användare");
 
   const sheet = sheetDataKontakterAnvandare["sheet"];
   const selection = sheetDataKontakterAnvandare["selection"];
@@ -261,7 +261,7 @@ function getListOfAllGoogleGroupsShouldHaveAccess_() {
 
   updateListOfGroups_();
 
-  const sheetDataKontakter = getDataFromSheet_("Kontakter");
+  const sheetDataKontakter = getDataFromActiveSheet_("Kontakter");
 
   const data = sheetDataKontakter["data"];
 
@@ -338,44 +338,6 @@ function getListOfEmailsFromListOfGroupMembers_(groupMembers) {
 
 
 /**
- * Hämta data från ett kalkylblad
- *
- * @param {string} nameOfSheet - Namn på kalkylbladet
- * 
- * @returns {Object} - Objekt bestående av data från aktuellt kalkylblad
- */
-function getDataFromSheet_(nameOfSheet) {
-  const spreadsheetUrl_Kontakter = 'https://docs.google.com/spreadsheets/d/kjdskdjf32332/edit';
-
-  for (let n = 0; n < 6; n++) {
-    try {
-      const sheet = SpreadsheetApp.openByUrl(spreadsheetUrl_Kontakter).getSheetByName(nameOfSheet);
-      if (!sheet) {
-        console.error("Bladet " + nameOfSheet + " finns ej i kalkylarket");
-      }
-      const selection = sheet.getDataRange();
-      const data = selection.getValues();
-
-      const sheetData = {};
-      sheetData["sheet"] = sheet;
-      sheetData["selection"] = selection;
-      sheetData["data"] = data;
-
-      //console.log(sheetData["data"]);
-      return sheetData;
-
-    } catch(e) {
-      console.error("Problem med att anropa GoogleTjänst SpreadsheetApp");
-      if (n === 5) {
-        throw e;
-      } 
-      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
-    }
-  }
-}
-
-
-/**
  * Hämta data över alla kontaktgrupper aktuella för angivna Google Grupper
  *
  * @param {string[]} listOfGroupEmails - Lista över e-postadresser för Google Grupper
@@ -385,7 +347,7 @@ function getDataFromSheet_(nameOfSheet) {
  */
 function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
 
-  const sheetDataKontakter = getDataFromSheet_("Kontakter");
+  const sheetDataKontakter = getDataFromActiveSheet_("Kontakter");
 
   const sheet = sheetDataKontakter["sheet"];
   const selection = sheetDataKontakter["selection"];
@@ -852,7 +814,7 @@ function checkCredentials_(userEmail, userPassword, userVersion, forceUpdate) {
 
   console.info("userEmail: " + userEmail + " userPassword: " + userPassword);
 
-  const sheetDataKontakterAnvandare = getDataFromSheet_("Kontakter-Användare");
+  const sheetDataKontakterAnvandare = getDataFromActiveSheet_("Kontakter-Användare");
 
   //const sheet = sheetDataKontakterAnvandare["sheet"];
   const selection = sheetDataKontakterAnvandare["selection"];
