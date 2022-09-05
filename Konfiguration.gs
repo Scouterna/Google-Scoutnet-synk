@@ -8,7 +8,8 @@
  * Kontrollerar om inställningarna i Konfiguration.gs verkar korrekta
  */
 function checkKonfigIsOk() {
-  checkDataFromKonfig_();
+  const konfigObject = makeKonfigObject();
+  ScoutnetSynkLib.checkDataFromKonfig(konfigObject);
 }
 
 const domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan till kåren utan www och som används i Google Workspace
