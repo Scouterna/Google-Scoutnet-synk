@@ -7,14 +7,12 @@
 /**
  * Huvudfunktion för att hantera synkronisering av användarkonton med Scoutnet
  */
-function Anvandare() {
+function synkroniseraAnvandare() {
   
-  const konfigObject = makeKonfigObject();
-
   const defaultOrgUnitPath = "/Scoutnet";
   const suspendedOrgUnitPath = defaultOrgUnitPath + "/" + "Avstängda";
   
-  ScoutnetSynkLib.Anvandare(konfigObject, defaultOrgUnitPath, suspendedOrgUnitPath);
+  ScoutnetSynkLib.synkroniseraAnvandare(KONFIG_OBJECT, defaultOrgUnitPath, suspendedOrgUnitPath);
 }
 
 
@@ -22,6 +20,5 @@ function Anvandare() {
  * Testfunktion för att lista alla Googlekonton som finns i underorganisationen "Scoutnet"
  */
 function listaAllaGooglekonton() {
-  const konfigObject = makeKonfigObject();
-  ScoutnetSynkLib.listaAllaGooglekonton(konfigObject);
+  ScoutnetSynkLib.listaAllaGooglekonton(KONFIG_OBJECT);
 }

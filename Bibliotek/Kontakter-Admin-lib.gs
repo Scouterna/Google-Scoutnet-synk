@@ -148,6 +148,35 @@ function updateContactGroupsAuthnSheetUsers(inputKonfig) {
 
 
 /**
+ * En testfunktion för att själv kunna få fram oformaterad brödtext för e-brev
+ * samt html-formaterad brödtext för e-brev.
+ * 
+ * Skapa ett utkast i din Gmail med ämne satt till Kontaktgrupper och kör sen
+ * denna funktion så skrivs brödtexten ut i körningsloggen. 
+ */
+function testGetHtmlEmailBody(inputKonfig, subject) {
+
+  konfig = inputKonfig;
+
+  const draft = getDraft_(subject);
+
+  if (!draft) { //Kolla om ämnesraden är korrekt
+    console.error("Finns ej ett utkast i Gmail med korrekt ämnesrad");
+    return;
+  }
+
+  const plainBody = draft.getPlainBody();
+  const body = draft.getBody();
+
+  console.info("plainBody");
+  console.info(plainBody);
+
+  console.info("body");
+  console.info(body);
+}
+
+
+/**
  * Returnerar lista med vilket index som olika rubriker har i kalkylarket
  * för bladet Kontakter-Användare
  *

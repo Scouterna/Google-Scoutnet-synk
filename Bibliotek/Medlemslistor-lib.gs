@@ -94,6 +94,22 @@ function synkroniseraMedlemslistor(inputKonfig, start, slut, shouldUpdate, shoul
 
 
 /**
+ * Funktion att använda för att ställa in att start- och slutrad
+ * är lika
+ * 
+ * @param {number} radNummer - Rad att synkronisera
+ * @param {boolean} shouldUpdate - Om medlemslistan ska uppdateras
+ * @param {boolean} shouldSend - Om e-brev ska skickas ut till medlemlemslistan
+ */
+function synkroniseraMedlemslistorEnRad(inputKonfig, radNummer, shouldUpdate, shouldSend) {
+
+  konfig = inputKonfig;
+
+  synkroniseraMedlemslistor(konfig, radNummer, radNummer, shouldUpdate, shouldSend);
+}
+
+
+/**
  * Returnerar lista med vilket index som olika rubriker har i kalkylbladet
  *
  * @returns {number[]} - Lista med rubrikindex för respektive rubrik

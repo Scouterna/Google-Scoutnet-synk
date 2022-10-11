@@ -29,9 +29,7 @@ function testaDoGet() {
  * @returns {Object} - Ett objekt av typen TextOutput
  */
 function doGet(e) {
-
-  const konfigObject = makeKonfigObject();
-  return ScoutnetSynkLib.synkroniseraKontakter(konfigObject, e);
+  return ScoutnetSynkLib.synkroniseraKontakter(KONFIG_OBJECT, e);
 }
 
 
@@ -46,21 +44,7 @@ function testGetHtmlEmailBody() {
   
   const subject = "Kontaktgrupper";
 
-  const draft = getDraft_(subject);
-
-  if (!draft) { //Kolla om ämnesraden är korrekt
-    console.error("Finns ej ett utkast i Gmail med korrekt ämnesrad");
-    return;
-  }
-
-  const plainBody = draft.getPlainBody();
-  const body = draft.getBody();
-
-  console.info("plainBody");
-  console.info(plainBody);
-
-  console.info("body");
-  console.info(body);
+  ScoutnetSynkLib.testGetHtmlEmailBody(KONFIG_OBJECT, subject);
 }
 
 
@@ -68,6 +52,5 @@ function testGetHtmlEmailBody() {
  * Uppdatera kalkylbladet med de användare som ska ha behörigheter
  */
 function updateContactGroupsAuthnSheetUsers() {
-  const konfigObject = makeKonfigObject();
-  ScoutnetSynkLib.updateContactGroupsAuthnSheetUsers(konfigObject);
+  ScoutnetSynkLib.updateContactGroupsAuthnSheetUsers(KONFIG_OBJECT);
 }

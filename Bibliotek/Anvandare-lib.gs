@@ -7,7 +7,7 @@
 /**
  * Huvudfunktion för att hantera synkronisering av användarkonton med Scoutnet
  */
-function Anvandare(inputKonfig, defaultOrgUnitPath, suspendedOrgUnitPath) {
+function synkroniseraAnvandare(inputKonfig, defaultOrgUnitPath, suspendedOrgUnitPath) {
   
   konfig = inputKonfig;
 
