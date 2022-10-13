@@ -7,6 +7,7 @@
 /**
  * Körs vid GET-anrop till webbappen
  * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
  * @param {Object} e - Query-parametrar vid GET-anrop till webbappen
  *
  * @returns {Object} - Ett objekt av typen TextOutput
@@ -69,6 +70,8 @@ function synkroniseraKontakter(inputKonfig, e) {
 
 /**
  * Uppdatera kalkylbladet med de användare som ska ha behörigheter
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
  */
 function updateContactGroupsAuthnSheetUsers(inputKonfig) {
 
@@ -151,8 +154,8 @@ function updateContactGroupsAuthnSheetUsers(inputKonfig) {
  * En testfunktion för att själv kunna få fram oformaterad brödtext för e-brev
  * samt html-formaterad brödtext för e-brev.
  * 
- * Skapa ett utkast i din Gmail med ämne satt till Kontaktgrupper och kör sen
- * denna funktion så skrivs brödtexten ut i körningsloggen. 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {string} subject - Ämnesrad på e-postutkast
  */
 function testGetHtmlEmailBody(inputKonfig, subject) {
 

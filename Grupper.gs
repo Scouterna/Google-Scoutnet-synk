@@ -4,6 +4,12 @@
  */
 
 
+/**
+ * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
+ * Anropas antingen med (startrad, slutrad)
+ * (startrad, slutrad, etikett)
+ * (etikett)
+ */
 function synkroniseraGrupper(...args)  {
   ScoutnetSynkLib.synkroniseraGrupper(KONFIG_OBJECT, args);
 }

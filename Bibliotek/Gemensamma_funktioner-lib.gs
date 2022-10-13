@@ -32,6 +32,8 @@ function addMenuForSpreadsheet() {
 
 /**
  * Kontrollerar om inställningarna i Konfiguration.gs verkar korrekta
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
  */
 function checkDataFromKonfig(inputKonfig) {
   console.info("Kontrollera data från Konfiguration.gs");

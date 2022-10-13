@@ -7,6 +7,7 @@
 /**
  * Huvudfunktion för att hantera synkronisering av medlemslistor med Scoutnet
  * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
  * @param {number} start - Rad att börja synkronisera på
  * @param {number} slut - Rad att sluta synkronisera på
  * @param {boolean} shouldUpdate - Om medlemslistan ska uppdateras
@@ -97,6 +98,7 @@ function synkroniseraMedlemslistor(inputKonfig, start, slut, shouldUpdate, shoul
  * Funktion att använda för att ställa in att start- och slutrad
  * är lika
  * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
  * @param {number} radNummer - Rad att synkronisera
  * @param {boolean} shouldUpdate - Om medlemslistan ska uppdateras
  * @param {boolean} shouldSend - Om e-brev ska skickas ut till medlemlemslistan
@@ -140,6 +142,8 @@ function getMedlemslistorKonfigRubrikData_() {
 
 /**
  * Skapa kolumnrubriker i kalkylarket för medlemslistor konfig
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
  */
 function skapaRubrikerML(inputKonfig) {
 

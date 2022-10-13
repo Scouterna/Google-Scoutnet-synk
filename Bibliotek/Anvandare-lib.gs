@@ -6,6 +6,10 @@
 
 /**
  * Huvudfunktion för att hantera synkronisering av användarkonton med Scoutnet
+ *
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {string} deafultOrgUnitPath - Sökväg för underorganisation där alla användarekonton ska synkas
+ * @param {string} suspendedOrgUnitPath - Sökväg för underorganisationen för avstängda användarkonton
  */
 function synkroniseraAnvandare(inputKonfig, defaultOrgUnitPath, suspendedOrgUnitPath) {
   
@@ -685,6 +689,8 @@ function getScoutleaders_(allMembers) {
 
 /**
  * Testfunktion för att lista alla Googlekonton som finns i underorganisationen "Scoutnet"
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
  */
 function listaAllaGooglekonton(inputKonfig) {
 

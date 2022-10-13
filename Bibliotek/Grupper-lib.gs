@@ -9,6 +9,9 @@
  * Anropas antingen med (startrad, slutrad)
  * (startrad, slutrad, etikett)
  * (etikett)
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {string[]} args - Lista med indata
  */
 function synkroniseraGrupper(inputKonfig, args) {
   
@@ -115,6 +118,8 @@ function grupperRubrikData_() {
 
 /**
  * Skapa kolumnrubriker i kalkylarket och dölj kolumnen med Grupp-ID
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
  */
 function skapaRubrikerGrupper(inputKonfig) {
   
@@ -250,6 +255,8 @@ function visaAvanceradLayoutGrupper() {
 
 /**
  * Testfunktion för att lista alla grupper
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
  */
 function listaAllaGrupperGoogle(inputKonfig) {
   
@@ -278,6 +285,8 @@ function listaAllaGrupperGoogle(inputKonfig) {
 
 /**
  * Testfunktion för att läsa kalkylbladet med alla grupper
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
  */
 function listaAllaGrupperKalkylblad(inputKonfig) {
 
