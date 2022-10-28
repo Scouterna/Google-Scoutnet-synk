@@ -59,28 +59,21 @@ function synkroniseraGrupperVissEtikett1() {
  * Funktioner för att ange att enbart vissa radintervall i kalkylarket
  * för medlemslistor ska synkroniseras och e-brev skickas ut.
  * Samt ställa in om medlemslistor enbart ska uppdateras alternativt om
- * gällande om e-brev ska skickas ut till listan
+ * det enbart ska skickas ut till listan
  *
  * Exempelvis rad 0 till 10. Helt fritt att ändra själv
  */
 function synkroniseraMedlemslistorVissaRaderUppdateraOchSkicka1() {
-  ScoutnetSynkLib.synkroniseraMedlemslistor(KONFIG_OBJECT, 1, 1, true, true);
-}
-
-function synkroniseraMedlemslistorVissaRaderUppdateraOchSkicka2() {
-  ScoutnetSynkLib.synkroniseraMedlemslistor(KONFIG_OBJECT, 11, 20, true, true);
-}
-
-function synkroniseraMedlemslistorVissaRaderUppdateraOchSkicka3() {
-  ScoutnetSynkLib.synkroniseraMedlemslistor(KONFIG_OBJECT, 21, 30, true, true);
+  ScoutnetSynkLib.uppdateraMedlemslistor(KONFIG_OBJECT, 1, 1);
+  ScoutnetSynkLib.skickaUtTillMedlemslistor(KONFIG_OBJECT, 1, 1);
 }
 
 function synkroniseraMedlemslistorVissaRaderUppdateraEnbart1() {
-  ScoutnetSynkLib.synkroniseraMedlemslistor(KONFIG_OBJECT, 5, 5, true, false);
+  ScoutnetSynkLib.uppdateraMedlemslistor(KONFIG_OBJECT, 5, 5);
 }
 
 function synkroniseraMedlemslistorVissaRaderSkickaEnbart1() {
-  ScoutnetSynkLib.synkroniseraMedlemslistor(KONFIG_OBJECT, 1, 1, false, true);
+  ScoutnetSynkLib.skickaUtTillMedlemslistor(KONFIG_OBJECT, 1, 1);
 }
 
 

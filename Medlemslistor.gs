@@ -9,7 +9,7 @@
  * medlemslista på en specifik rad
  */
 function medlemslistorVissaRaderUppdateraEnbartTmp() {
-  ScoutnetSynkLib.synkroniseraMedlemslistorEnRad(KONFIG_OBJECT, 1, true, false);
+  ScoutnetSynkLib.uppdateraMedlemslistor(KONFIG_OBJECT, 5, 5);
 }
 
 
@@ -18,15 +18,15 @@ function medlemslistorVissaRaderUppdateraEnbartTmp() {
  * en specifik medlemslista på en specifik rad
  */
 function medlemslistorVissaRaderSkickaEnbartTmp() {
-  ScoutnetSynkLib.synkroniseraMedlemslistorEnRad(KONFIG_OBJECT, 1, false, true);
+  ScoutnetSynkLib.skickaUtTillMedlemslistor(KONFIG_OBJECT, 1, 1);
 }
 
 
 /**
- * Funktion att använda för att uppdatera samtliga medlemslistor
+ * Funktion att använda för att uppdatera medlemslistor
  */
 function medlemslistorUppdateraEnbart() {
-  ScoutnetSynkLib.synkroniseraMedlemslistor(KONFIG_OBJECT, 0, 100, true, false);
+  ScoutnetSynkLib.uppdateraMedlemslistor(KONFIG_OBJECT, 1, 100);
 }
 
 

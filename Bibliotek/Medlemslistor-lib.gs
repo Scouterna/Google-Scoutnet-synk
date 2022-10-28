@@ -5,6 +5,43 @@
 
 
 /**
+ * Uppdatera medlemslistor för aktuella rader i kalkylarket
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {number} start - Rad att börja uppdatera på
+ * @param {number} slut - Rad att sluta uppdatera på
+ */
+function uppdateraMedlemslistor(inputKonfig, start, slut) {
+  synkroniseraMedlemslistor(inputKonfig, start, slut, true, false);
+}
+
+
+/**
+ * Skicka ut e-brev till de som ska få det för angivna medlemlistor
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {number} start - Rad att börja gå igenom för att skicka ut e-brev på
+ * @param {number} slut - Rad att sluta gå igenom för att skicka ut e-brev på
+ */
+function skickaUtTillMedlemslistor(inputKonfig, start, slut)  {
+  synkroniseraMedlemslistor(inputKonfig, start, slut, false, true);
+}
+
+
+/**
+ * Funktion att använda för att synkronisera en medlemlista
+ * 
+ * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {number} radNummer - Rad att synkronisera
+ * @param {boolean} shouldUpdate - Om medlemslistan ska uppdateras
+ * @param {boolean} shouldSend - Om e-brev ska skickas ut till medlemlemslistan
+ */
+function synkroniseraMedlemslistorEnRad(inputKonfig, radNummer, shouldUpdate, shouldSend) {
+  synkroniseraMedlemslistor(inputKonfig, radNummer, radNummer, shouldUpdate, shouldSend);
+}
+
+
+/**
  * Huvudfunktion för att hantera synkronisering av medlemslistor med Scoutnet
  * 
  * @param {Object} inputKonfig - Objekt med kårens konfiguration
@@ -91,23 +128,6 @@ function synkroniseraMedlemslistor(inputKonfig, start, slut, shouldUpdate, shoul
   //Ta bort tomma rader i kalkylarket
   deleteRowsFromSpreadsheet_(sheet, delete_rows);
   console.timeEnd("Medlemslistor");
-}
-
-
-/**
- * Funktion att använda för att ställa in att start- och slutrad
- * är lika
- * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
- * @param {number} radNummer - Rad att synkronisera
- * @param {boolean} shouldUpdate - Om medlemslistan ska uppdateras
- * @param {boolean} shouldSend - Om e-brev ska skickas ut till medlemlemslistan
- */
-function synkroniseraMedlemslistorEnRad(inputKonfig, radNummer, shouldUpdate, shouldSend) {
-
-  konfig = inputKonfig;
-
-  synkroniseraMedlemslistor(konfig, radNummer, radNummer, shouldUpdate, shouldSend);
 }
 
 
