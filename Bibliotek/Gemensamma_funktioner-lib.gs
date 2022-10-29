@@ -1050,7 +1050,7 @@ function removeDublicates_(list) {
 function intPhoneNumber_(phnum) {
 
   let regex = /^\+/;
-  console.log('Telefonnummer före: %s', phnum);
+  //console.log('Telefonnummer före: %s', phnum);
   const res = phnum.match(regex);
   if (res) {
     let countryCodeIsFound = false;
@@ -1081,7 +1081,7 @@ function intPhoneNumber_(phnum) {
       //phnum = null
     }
   }
-  console.log('Klarformaterat telefonnummer %s', phnum);
+  //console.log('Klarformaterat telefonnummer %s', phnum);
   return phnum
 }
 
