@@ -475,7 +475,7 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
 
 
 /**
- * Ger lista med unika medlemsnummer för de som är med i någon kontaktgrupp
+ * Ger lista med medlemsobjekt för de med angivna medlemsnummer
  *
  * @param {Object[]} allMembers - Lista av medlemsobjekt
  * @param {number[]} memberNumbers - Lista med medlemsnummer
@@ -494,10 +494,11 @@ function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers) {
     let emailList;
     if (checkIfAgeIsOver18_(obj)) {
       emailList = getEmailListSyncOption_(obj, "-m", false);
+      moveRelativesContactInfoToBiographies(obj);
     }
     else  {
       emailList = getEmailListSyncOption_(obj, "", false);
-    }    
+    }
 
     obj.google_contact_group = makeStringForGoogleContactGroup_(emailList);
     memberList.push(obj);
@@ -507,6 +508,58 @@ function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers) {
   }
 
   return memberList;
+}
+
+
+/**
+ * Flytta kontaktinfo för anhöriga till anmärkningsfältet för kontakten
+ * 
+ * @param {Object} memberData - Persondata för en medlem
+ */
+function moveRelativesContactInfoToBiographies(memberData)  {
+
+  let bioContacts = [];
+
+  if (memberData.contact_mothers_name)  {
+    bioContacts.push("Anhörig 1: " + memberData.contact_mothers_name);
+    memberData.contact_mothers_name = "";
+  }
+  if (memberData.contact_email_mum)  {
+    bioContacts.push("Anhörig 1 e-post: " + memberData.contact_email_mum);
+    memberData.contact_email_mum = "";
+  }
+  if (memberData.contact_mobile_mum)  {
+    bioContacts.push("Anhörig 1 mobil: " + memberData.contact_mobile_mum);
+    memberData.contact_mobile_mum = "";
+  }
+  if (memberData.contact_telephone_mum)  {
+    bioContacts.push("Anhörig 1 hem: " + memberData.contact_telephone_mum);
+    memberData.contact_telephone_mum = "";
+  }
+
+
+  if (memberData.contact_fathers_name)  {
+    bioContacts.push("Anhörig 2: " + memberData.contact_fathers_name);
+    memberData.contact_fathers_name = "";
+  }
+  if (memberData.contact_email_dad)  {
+    bioContacts.push("Anhörig 2 e-post: " + memberData.contact_email_dad);
+    memberData.contact_email_dad = "";
+  }
+  if (memberData.contact_mobile_dad)  {
+    bioContacts.push("Anhörig 2 mobil: " + memberData.contact_mobile_dad);
+    memberData.contact_mobile_dad = "";
+  }
+  if (memberData.contact_telephone_dad)  {
+    bioContacts.push("Anhörig 2 hem: " + memberData.contact_telephone_dad);
+    memberData.contact_telephone_dad = "";
+  }
+
+  let tmpBioContactsString = "";
+  for (let i = 0; i < bioContacts.length; i++) {
+    tmpBioContactsString += bioContacts[i] + "\n";
+  }
+  memberData.biographies += tmpBioContactsString;
 }
 
 
@@ -700,7 +753,7 @@ function cleanNote_(note) {
 
   for (let i = 0; i < konfig.noteKeysToReplace.length; i++) {
     if (note.includes(konfig.noteKeysToReplace[i][0].toLowerCase())) {
-      cleanNoteString += konfig.noteKeysToReplace[i][1] + ". ";
+      cleanNoteString += konfig.noteKeysToReplace[i][1] + "\n";
     }
   }
   return cleanNoteString;
@@ -717,7 +770,7 @@ function cleanNote_(note) {
 function getTextIfContactLeaderInterest_(contact_leader_interest) {
 
   if ("Ja" === contact_leader_interest) {
-    return "Förälder kan hjälpa till i kåren. ";
+    return "Förälder kan hjälpa till i kåren\n";
   }
   return "";
 }
