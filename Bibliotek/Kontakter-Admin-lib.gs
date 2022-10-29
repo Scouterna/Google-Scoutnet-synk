@@ -494,7 +494,12 @@ function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers) {
     let emailList;
     if (checkIfAgeIsOver18_(obj)) {
       emailList = getEmailListSyncOption_(obj, "-m", false);
-      moveRelativesContactInfoToBiographies(obj);
+      if (konfig.STORE_CONTACTS_RELATIVES_FOR_ADULTS) {
+        moveRelativesContactInfoToBiographies(obj);
+      }
+      else  {
+        removeRelativesContactInfo(obj);
+      }
     }
     else  {
       emailList = getEmailListSyncOption_(obj, "", false);
@@ -560,6 +565,25 @@ function moveRelativesContactInfoToBiographies(memberData)  {
     tmpBioContactsString += bioContacts[i] + "\n";
   }
   memberData.biographies += tmpBioContactsString;
+}
+
+
+/**
+ * Ta bort kontaktinfo för anhöriga för kontakten
+ * 
+ * @param {Object} memberData - Persondata för en medlem
+ */
+function removeRelativesContactInfo(memberData) {
+
+  memberData.contact_mothers_name = "";
+  memberData.contact_email_mum = "";
+  memberData.contact_mobile_mum = "";
+  memberData.contact_telephone_mum = "";
+
+  memberData.contact_fathers_name = "";
+  memberData.contact_email_dad = "";
+  memberData.contact_mobile_dad = "";
+  memberData.contact_telephone_dad = "";
 }
 
 

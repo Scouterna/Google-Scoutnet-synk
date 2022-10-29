@@ -86,6 +86,8 @@ KONFIG_OBJECT.groupName = "Testmall Scoutkår";
 //Max antal tvingade uppdatering per användare tills det nollställs
 KONFIG_OBJECT.MAX_NUMBER_OF_CONTACTS_FORCE_UPDATE = 10;
 
+//Om information om vuxnas anhöriga ska synkroniseras eller ej. Om de synkroniseras hamnar de i noteringsfältet
+KONFIG_OBJECT.STORE_CONTACTS_RELATIVES_FOR_ADULTS = false;
 
 KONFIG_OBJECT.contact_groups_email_subject = "Användaruppgifter - Google kontaktgrupper synkning";
 
