@@ -1242,6 +1242,7 @@ function checkDifferenceBirthdays_(connection, memberDataContactResource) {
   
   const connectionObject = connection[nameOfPersonField];
   const statusAndDataObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, false);
+  
   if ('status' in statusAndDataObject) {
     console.log("status är definerad i objektet som " + statusAndDataObject.status);
     //En första koll om det är någon förändring true eller false. T.ex nytt attribut
@@ -1317,7 +1318,7 @@ function checkDifferenceHelpfunction_(connectionObject, memberDataContactResourc
   let memberData = memberDataContactResource[nameOfPersonField];
   if (removeValueEmpty) {
     memberData = removeElementsWithValueOrPersonEmpty_(memberData);
-  }  
+  }
 
   if (!connectionObject) { //Inget inlagt på kontakten i Google
     if (0 === memberData.length) { //Tomt med data för kontaktfältet från Scoutnet
@@ -1472,11 +1473,11 @@ function makeContactResource_(memberData, customEmailField) {
         "type" : "Anhörig 2 e-post"
     }],
     "externalIds": [{
-        "value": memberData.member_no,
-        "type": "Medlemsnummer"
+      "value": memberData.member_no,
+      "type": "Medlemsnummer"
     }],
     "genders": [{
-        "value" : memberData.sex
+      "value" : memberData.sex
     }],
     "organizations": [{
       "type": "Scoutkår",
@@ -1533,7 +1534,7 @@ function createContact_(memberData, customEmailField) {
   for (let n = 0; n < 6; n++) {
     if (0 !== n) {
       console.log("Funktionen createContact körs " + n);
-    }    
+    }
     try {
       const peopleResource = People.People.createContact(contactResource);
       console.log(peopleResource);

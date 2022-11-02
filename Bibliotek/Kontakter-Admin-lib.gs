@@ -63,6 +63,7 @@ function synkroniseraKontakter(inputKonfig, e) {
   console.timeEnd("Kontakter-Admin");
 
   const response = JSON.stringify(contactGroupsList);
+  //console.log(response);
   return ContentService.createTextOutput(response)
     .setMimeType(ContentService.MimeType.JSON);
 }
@@ -392,10 +393,10 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
 
   //Hämta lista med alla medlemmar i kåren och alla deras attribut
   let allMembers = fetchScoutnetMembers_(forceUpdate);
-  allMembers = filterMemberAttributes_(allMembers);
+  let filteredMembers = filterMemberAttributes_(allMembers);  
 
   //Skapa en lista med telefonnummer och e-postadress för alla vuxna medlemmar för att sen kunna se vilka som har barn i kåren
-  const phoneAndEmailForAllAdults = getComparablePhoneAndEmailForAllAdults_(allMembers);
+  const phoneAndEmailForAllAdults = getComparablePhoneAndEmailForAllAdults_(filteredMembers);
 
   const rowsToSync = findWhatRowsToSync_(0, data.length, data.length);
   const start = rowsToSync.start;
@@ -460,13 +461,18 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
       const memberNumbersInAList = getUpdateForContactGroup_(selection, rad_nummer, data[i], grd, forceUpdate);
       console.info("Namn på kontaktlista och medlemmar i den");
       console.info(memberNumbersInAList);
-
       contactGroupsList.push(memberNumbersInAList);
     }
   }
   
   const memberNumbersList = getMemberNumbersFromContactGroupsList_(contactGroupsList);
-  const memberList = getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbersList, phoneAndEmailForAllAdults);
+  const memberListAndTrimmedMemberNumbers = getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbersList, phoneAndEmailForAllAdults);
+  
+  const memberList = memberListAndTrimmedMemberNumbers[0];
+
+  const trimmedMemberNumbers = memberListAndTrimmedMemberNumbers[1];  //De medlemsnummer som inte ska användas
+  //Här ska vi rensa bort alla medlemsnummer som faktiskt inte ska användas
+  contactGroupsList = removeTrimmedMemberNumbersFromContactGroupsList_(contactGroupsList, trimmedMemberNumbers);
 
   //Lägga memberList först i en listan
   contactGroupsList.unshift(memberList);
@@ -480,27 +486,60 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
 /**
  * Ger en lista med jämförbara telefonnummer och e-postadress för alla vuxna medlemmar
  *
- * @param {Object[]} allMembers - Lista av medlemsobjekt
+ * @param {Object[][]} contactGroupsList - Lista av listor med kontaktgruppsinformation och medlemsnummer för de i respektive grupp
+ * @param {number[]} trimmedMemberNumbers - Lista med medlemsnummer som inte finns
+ *
+ * @returns {Object[][]} - Lista av listor med kontaktgruppsinformation och medlemsnummer
+ * för de i respektive grupp där medlemsnummer som inte finns på riktigt har tagits bort
+ */
+function removeTrimmedMemberNumbersFromContactGroupsList_(contactGroupsList, trimmedMemberNumbers) {
+
+  const tmpContactGroupsList = [];
+
+  for (let i = 0; i < contactGroupsList.length; i++) {
+
+    const contactGroupList = contactGroupsList[i];
+    const tmpContactGroupList = [];
+    tmpContactGroupList.push(contactGroupList[0]);
+    for (let k = 1; k < contactGroupList.length; k++) {
+      if (!trimmedMemberNumbers.includes(contactGroupList[k])) {
+        tmpContactGroupList.push(contactGroupList[k]);
+      }
+      else  {
+        console.log("Trimmat medlemsnummer " + contactGroupList[k]);
+      }
+    }
+    tmpContactGroupsList.push(tmpContactGroupList);
+  }
+
+  return tmpContactGroupsList;
+}
+
+
+/**
+ * Ger en lista med jämförbara telefonnummer och e-postadress för alla vuxna medlemmar
+ *
+ * @param {Object[]} filteredMembers - Lista av medlemsobjekt
  *
  * @returns {string[]} - Lista med jämförbara telefonnummer och e-postadresser
  */
-function getComparablePhoneAndEmailForAllAdults_(allMembers) {
+function getComparablePhoneAndEmailForAllAdults_(filteredMembers) {
 
   const comparablePhoneAndEmails = [];
 
-  for (let i = 0; i < allMembers.length; i++) {
+  for (let i = 0; i < filteredMembers.length; i++) {
 
-    if  (checkIfAgeIsOver18_(allMembers[i]))  {
-      console.log(allMembers[i].first_name + " " + allMembers[i].last_name);
+    if  (checkIfAgeIsOver18_(filteredMembers[i]))  {
+      console.log(filteredMembers[i].first_name + " " + filteredMembers[i].last_name);
 
-      if (allMembers[i].email)  {
-        comparablePhoneAndEmails.push(getComparableEmail_(allMembers[i].email));
+      if (filteredMembers[i].email)  {
+        comparablePhoneAndEmails.push(getComparableEmail_(filteredMembers[i].email));
       }
-      if (allMembers[i].contact_mobile_phone) {
-        comparablePhoneAndEmails.push(intPhoneNumber_(allMembers[i].contact_mobile_phone));
+      if (filteredMembers[i].contact_mobile_phone) {
+        comparablePhoneAndEmails.push(intPhoneNumber_(filteredMembers[i].contact_mobile_phone));
       }
-      if (allMembers[i].contact_home_phone) {
-        comparablePhoneAndEmails.push(intPhoneNumber_(allMembers[i].contact_home_phone));
+      if (filteredMembers[i].contact_home_phone) {
+        comparablePhoneAndEmails.push(intPhoneNumber_(filteredMembers[i].contact_home_phone));
       }
     }
   }
@@ -531,24 +570,36 @@ function getComparableEmail_(email)  {
 /**
  * Ger lista med medlemsobjekt för de med angivna medlemsnummer
  *
- * @param {Object[]} allMembers - Lista av medlemsobjekt
+ * @param {Object[]} filteredMembers - Lista av medlemsobjekt
  * @param {number[]} memberNumbers - Lista med medlemsnummer
  * @param {string[]} phoneAndEmailForAllAdults - Lista med jämförbara telefonnummer och e-postadresser för alla vuxna medlemmar
  *
- * @returns {Object[]} - Lista av medlemsobjekt för endast de med angivna
- * medlemsnummer samt tillagt attribut anpassat för Google Kontakter
+ * @returns {Object[][]} - Lista av medlemsobjekt för endast de med angivna
+ * medlemsnummer samt medlemsnummer som ej ska användas
  */
-function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers, phoneAndEmailForAllAdults) {
+function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbers, phoneAndEmailForAllAdults) {
 
   const memberList = [];
+  const trimmedMemberNumbers = []; //För att få bort anhörigas medlemsnummer för vuxna
 
   for (let i = 0; i < memberNumbers.length; i++) {
 
-    const obj = allMembers.find(obj => obj.member_no === memberNumbers[i]);
+    const obj = filteredMembers.find(obj => obj.member_no === memberNumbers[i]);
+
+    //console.log("obj");
+    //console.log(obj);
     
-    let emailList;
-    if (checkIfAgeIsOver18_(obj)) {
-      emailList = getEmailListSyncOption_(obj, "-m", false);
+    //Är undefined om det inte ska skapas kontaktkort för en anhörig
+    if (typeof obj === "undefined") {
+      trimmedMemberNumbers.push(memberNumbers[i]);
+      continue;
+    }    
+    
+    if (obj.isRelativeContact) { //Om en anhörigs kontaktkort
+      //console.log("Detta kontaktkort tillhör en anhörig till en medlem");
+    }
+    else if (checkIfAgeIsOver18_(obj)) { //Om medlem över 18 år
+
       if (konfig.STORE_CONTACTS_RELATIVES_FOR_ADULTS) {
         moveRelativesContactInfoToBiographies_(obj);
       }
@@ -556,24 +607,26 @@ function getMembersForContactGroupsByMemberNumbers_(allMembers, memberNumbers, p
         removeRelativesContactInfo_(obj);
       }
     }
-    else  {
-      emailList = getEmailListSyncOption_(obj, "", false);
+    else  { //Om medlem under 18 år
 
       if (checkIfSomeContactInfoBelongsToAdultMember_(obj, phoneAndEmailForAllAdults))  {
         console.log(obj.first_name + " " + obj.last_name + " har kontaktinformation som tillhör en vuxen medlem");
+
+      }
+      else  {
+        //console.log("Denna medlem har inte någon anhöriginfo som tillhör en vuxen medlem");
         obj.email = "";
         moveRelativesContactInfoToBiographies_(obj);
       }
     }
-
-    obj.google_contact_group = makeStringForGoogleContactGroup_(emailList);
+    
     memberList.push(obj);
 
     //console.log("Kontaktdata");
     //console.log(obj);
   }
-
-  return memberList;
+  
+  return [memberList, trimmedMemberNumbers];
 }
 
 
@@ -762,6 +815,7 @@ function getMemberNumbersFromContactGroupsList_(contactGroupsList) {
   console.info("********************");
   console.info("Dessa medlemmar är med i någon kontaktgrupp för denna användare");
   console.info(memberNumbers);
+
   return memberNumbers;
 }
 
@@ -787,77 +841,154 @@ function filterMemberAttributes_(medlemmar) {
 
   for (let i = 0; i < medlemmar.length; i++) {
     
-    //console.log(medlemmar[i]);
-    const member = {};
+    const medlem = medlemmar[i];
 
-    member['biographies'] = "";
+    //console.log(medlem);
+    const tmpMember = {};
+
+    tmpMember['biographies'] = "";
 
     for (let k = 0; k < attribut_lista.length; k++) {
       const nameOfAttribute = attribut_lista[k];
 
       if ('group_role' === nameOfAttribute) {
-        if (medlemmar[i]['group_role'] && medlemmar[i]['unit_role']) {
-          member['title'] = medlemmar[i]['group_role'] + ", " + medlemmar[i]['unit_role'];
+        if (medlem['group_role'] && medlem['unit_role']) {
+          tmpMember['title'] = medlem['group_role'] + ", " + medlem['unit_role'];
         }
-        else if (medlemmar[i]['group_role']) {
-          member['title'] = medlemmar[i]['group_role'];
+        else if (medlem['group_role']) {
+          tmpMember['title'] = medlem['group_role'];
         }
-        else if (medlemmar[i]['unit_role']) {
-          member['title'] = medlemmar[i]['unit_role'];
+        else if (medlem['unit_role']) {
+          tmpMember['title'] = medlem['unit_role'];
         }
       }
       else if ('address_1' === nameOfAttribute) {
-        if (medlemmar[i]['address_co']) {
-          member['streetAddress'] = "c/o " + medlemmar[i]['address_co'] + ", " + medlemmar[i]['address_1'];
+        if (medlem['address_co']) {
+          tmpMember['streetAddress'] = "c/o " + medlem['address_co'] + ", " + medlem['address_1'];
         }
         else {
-          member['streetAddress'] = medlemmar[i]['address_1'];
+          tmpMember['streetAddress'] = medlem['address_1'];
         }
       }
       else if ('address_2' === nameOfAttribute) {
-        if (medlemmar[i]['address_2'] && medlemmar[i]['address_3']) {
-          member['extendedAddress'] = medlemmar[i]['address_2'] + ", " + medlemmar[i]['address_3'];
+        if (medlem['address_2'] && medlem['address_3']) {
+          tmpMember['extendedAddress'] = medlem['address_2'] + ", " + medlem['address_3'];
         }
-        else if (medlemmar[i]['address_2']) {
-          member['extendedAddress'] = medlemmar[i]['address_2'];
+        else if (medlem['address_2']) {
+          tmpMember['extendedAddress'] = medlem['address_2'];
         }
-        else if (medlemmar[i]['address_3']) {
-          member['extendedAddress'] = medlemmar[i]['address_3'];
+        else if (medlem['address_3']) {
+          tmpMember['extendedAddress'] = medlem['address_3'];
         }
       }
       else if ('unit' === nameOfAttribute) {
-        if (medlemmar[i]['unit'] && medlemmar[i]['patrol']) {
-          member['department'] = medlemmar[i]['unit'] + "/" + medlemmar[i]['patrol'];
+        if (medlem['unit'] && medlem['patrol']) {
+          tmpMember['department'] = medlem['unit'] + "/" + medlem['patrol'];
         }
-        else if (medlemmar[i]['unit']) {
-          member['department'] = medlemmar[i]['unit'];
+        else if (medlem['unit']) {
+          tmpMember['department'] = medlem['unit'];
         }
-        else if (medlemmar[i]['patrol']) {
-          member['department'] = medlemmar[i]['patrol'];
+        else if (medlem['patrol']) {
+          tmpMember['department'] = medlem['patrol'];
         }
       }
       else if ('sex' === nameOfAttribute) {
-         member['sex'] = translateGenderToEnglish_(medlemmar[i]['sex']);
+         tmpMember['sex'] = translateGenderToEnglish_(medlem['sex']);
       }
       else if ('date_of_birth' === nameOfAttribute) {
-        member['date_of_birth_year'] = medlemmar[i]['date_of_birth'].substr(0, 4);
-        member['date_of_birth_month'] = medlemmar[i]['date_of_birth'].substr(5, 2);
-        member['date_of_birth_day'] = medlemmar[i]['date_of_birth'].substr(8, 2);
+        tmpMember['date_of_birth_year'] = medlem['date_of_birth'].substr(0, 4);
+        tmpMember['date_of_birth_month'] = medlem['date_of_birth'].substr(5, 2);
+        tmpMember['date_of_birth_day'] = medlem['date_of_birth'].substr(8, 2);
       }
       else if ('contact_leader_interest' === nameOfAttribute) {
-        member['biographies'] += getTextIfContactLeaderInterest_(medlemmar[i]['contact_leader_interest']);
+        tmpMember['biographies'] += getTextIfContactLeaderInterest_(medlem['contact_leader_interest']);
       }
       else if ('note' === nameOfAttribute) {
-        member['biographies'] += cleanNote_(medlemmar[i]['note']);
+        tmpMember['biographies'] += cleanNote_(medlem['note']);
       }
       else {
-        member[nameOfAttribute] = medlemmar[i][nameOfAttribute];
+        tmpMember[nameOfAttribute] = medlem[nameOfAttribute];
       }
     }
+    tmpMember['isRelativeContact'] = false;
 
-    filteredMembers.push(member);
+    filteredMembers.push(tmpMember);
+
+    if (!checkIfAgeIsOver18_(tmpMember)) {
+      if (tmpMember['contact_mobile_mum'] || tmpMember['contact_telephone_mum'] || tmpMember['contact_email_mum']) {
+        const tmpMemberRelative = getContactForMemberRelative_(tmpMember, 'contact_mothers_name', 'mum', 1);
+        filteredMembers.push(tmpMemberRelative);
+      }
+      if (tmpMember['contact_mobile_dad'] || tmpMember['contact_telephone_dad'] || tmpMember['contact_email_dad']) {
+        const tmpMemberRelative = getContactForMemberRelative_(tmpMember, 'contact_fathers_name', 'dad', 2);
+        filteredMembers.push(tmpMemberRelative);
+      }
+    }
   }
   return filteredMembers;
+}
+
+
+/**
+ * Skapa ett medlemsobjekt för en anhörig till en medlem
+ * 
+ * @param {Object} medlem - Ett medlemsobjekt
+ * @param {string} relativeNameAttribute - Namn på medlemsattribut för namn för en anhörig
+ * @param {string} relativeRelation - Namn på medlemsattribut för relation till anhörig
+ * @param {number} relativeNumber - Vilket anhörignummer för en medlem
+ * 
+ * @returns {Object} - Ett medlemsobjekt skapat för en anhörig till en medlem
+ */
+function getContactForMemberRelative_(medlem, relativeNameAttribute, relativeRelation, relativeNumber)  {
+
+  const tmpMemberRelative = {};
+
+  const relativeMobileAttribute = "contact_mobile_" + relativeRelation;
+  const relativeTelephoneAttribute = "contact_telephone_" + relativeRelation;
+  const relativeEmailAttribute = "contact_email_" + relativeRelation;
+
+  if (medlem[relativeNameAttribute]) {
+    tmpMemberRelative['first_name'] = medlem[relativeNameAttribute];
+  }
+  else {
+    tmpMemberRelative['first_name'] = medlem['first_name'];
+    tmpMemberRelative['last_name'] = medlem['last_name'] + " - Anhörig " + relativeNumber;
+  }
+
+  tmpMemberRelative['member_no'] = medlem['member_no'] + "-" + relativeNumber;
+  //Denna relation kommer sen bli Anhörig 1 hos förälderns kontaktkort
+  tmpMemberRelative['contact_mothers_name'] = medlem['first_name'] + " " + medlem['last_name'];
+
+  
+  tmpMemberRelative['contact_mobile_phone'] = medlem[relativeMobileAttribute];
+
+  tmpMemberRelative['contact_home_phone'] = medlem[relativeTelephoneAttribute];
+
+  tmpMemberRelative['email'] = medlem[relativeEmailAttribute];
+
+  tmpMemberRelative['streetAddress'] = medlem['streetAddress'];
+  
+  tmpMemberRelative['extendedAddress'] = medlem['extendedAddress'];
+
+  tmpMemberRelative['postcode'] = medlem['postcode'];
+
+  tmpMemberRelative['town'] = medlem['town'];
+
+  tmpMemberRelative['country'] = medlem['country'];
+
+  tmpMemberRelative['group'] = medlem['group'];
+
+  tmpMemberRelative['department'] = "Test department"; //FIXME
+
+  tmpMemberRelative['date_of_birth_year'] = 2015; //FIXME
+  tmpMemberRelative['date_of_birth_month'] = 11;  //FIXME
+  tmpMemberRelative['date_of_birth_day'] = 6; //FIXME
+
+  tmpMemberRelative['title'] = "Anhörig " + relativeNumber;
+
+  tmpMemberRelative['isRelativeContact'] = true;
+
+  return tmpMemberRelative;
 }
 
 
@@ -952,58 +1083,10 @@ function getUpdateForContactGroup_(selection, rad_nummer, radInfo, grd, forceUpd
 
   for (let i = 0; i < membersMultipleMailinglists.length; i++) {
     membersInAList.push(membersMultipleMailinglists[i].member_no);
+    membersInAList.push(membersMultipleMailinglists[i].member_no + "-1");
+    membersInAList.push(membersMultipleMailinglists[i].member_no + "-2");
   }
   return membersInAList;
-}
-
-
-/**
- * Ger en textsträng med e-postadresser anpassad för Google Kontakter
- * 
- * @param {string[]} - Lista över e-postadresser enligt specificerade attribut
- *
- * @returns {Object[]} - Textsträng för e-postadresser i Google Kontakter
- */
-function makeStringForGoogleContactGroup_(emailList) {
-
-  //Skapa lista med enbart korrekta e-postadresser
-  let realEmailList = [];
-  for (let i = 0; i < emailList.length; i++) {
-    if (checkIfEmail_(emailList[i])) {
-      realEmailList.push(emailList[i]);
-    }
-    else {
-      console.warn("Ogiltig e-postadress " + emailList[i]);
-    }
-  }
-
-  //Ta bort dubletter
-  realEmailList = removeDublicates_(realEmailList);
-
-  let contactGroupList = [];
-  for (let i = 0; i < realEmailList.length; i++) {
-    
-    if (0 === i) {
-      if (realEmailList.length === 1) {
-        contactGroupList.push(realEmailList[i]);
-        //console.log("Första och enda elementet " + realEmailList[i]);
-      }
-      else {
-        contactGroupList.push(realEmailList[i] + ">");
-        //console.log("Första elementet " + realEmailList[i]);
-      }
-    }
-    else if (realEmailList.length-1 === i) {
-      contactGroupList.push("<" + realEmailList[i]);
-      //console.log("Sista elementet " + realEmailList[i]);
-    }
-    else {
-      contactGroupList.push("<" + realEmailList[i] + ">");
-      //console.log("Ett element i mitten någonstans " + realEmailList[i]);
-    }
-  }
-  contactGroupList = contactGroupList.toString();
-  return contactGroupList;
 }
 
 
