@@ -753,6 +753,11 @@ function removeRelativesContactInfo_(memberData) {
 function checkIfAgeIsOver18_(memberData)  {
 
   const ageToCheck = 18;
+
+  if (!memberData.date_of_birth_year || !memberData.date_of_birth_month || !memberData.date_of_birth_day)  {
+    return false;
+  }
+
   const today = new Date();
   
   const date_of_birth_year = Number(memberData.date_of_birth_year);
@@ -978,11 +983,11 @@ function getContactForMemberRelative_(medlem, relativeNameAttribute, relativeRel
 
   tmpMemberRelative['group'] = medlem['group'];
 
-  tmpMemberRelative['department'] = "Test department"; //FIXME
+  tmpMemberRelative['department'] = medlem['department'];
 
-  tmpMemberRelative['date_of_birth_year'] = 2015; //FIXME
-  tmpMemberRelative['date_of_birth_month'] = 11;  //FIXME
-  tmpMemberRelative['date_of_birth_day'] = 6; //FIXME
+  tmpMemberRelative['date_of_birth_year'];
+  tmpMemberRelative['date_of_birth_month'];
+  tmpMemberRelative['date_of_birth_day'];
 
   tmpMemberRelative['title'] = "Anhörig " + relativeNumber;
 

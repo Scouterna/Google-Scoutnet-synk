@@ -1242,9 +1242,9 @@ function checkDifferenceBirthdays_(connection, memberDataContactResource) {
   
   const connectionObject = connection[nameOfPersonField];
   const statusAndDataObject = checkDifferenceHelpfunction_(connectionObject, memberDataContactResource, nameOfPersonField, false);
-  
+
   if ('status' in statusAndDataObject) {
-    console.log("status är definerad i objektet som " + statusAndDataObject.status);
+    //console.log("status är definerad i objektet som " + statusAndDataObject.status);
     //En första koll om det är någon förändring true eller false. T.ex nytt attribut
     return statusAndDataObject.status;
   }
@@ -1321,7 +1321,28 @@ function checkDifferenceHelpfunction_(connectionObject, memberDataContactResourc
   }
 
   if (!connectionObject) { //Inget inlagt på kontakten i Google
-    if (0 === memberData.length) { //Tomt med data för kontaktfältet från Scoutnet
+
+    if ("birthdays" === nameOfPersonField)  {
+
+      const memberDataBirthdaysList = [];
+      for (let i = 0; i < memberData.length; i++) {
+        if (memberData[i].date.year && memberData[i].date.month && memberData[i].date.day)  {
+        
+          const birthdayObject = {
+            "year": memberData[i].date.year,
+            "month": memberData[i].date.month,
+            "day": memberData[i].date.day
+          };
+          memberDataBirthdaysList.push(birthdayObject);
+        }
+      }
+
+      //console.log("memberDataBirthdaysList");
+      //console.log(memberDataBirthdaysList);
+      memberData = memberDataBirthdaysList;
+    }
+
+    if (typeof memberData === "undefined" || 0 === memberData.length) { //Tomt med data för kontaktfältet från Scoutnet
       //console.log("Ingen data nu heller för detta kontaktfält");
       return {"status": false};
     }
@@ -1513,6 +1534,7 @@ function makeContactResource_(memberData, customEmailField) {
       "type": "Anhörig 2",
     }]
   };
+
   return contactResource;
 }
 
