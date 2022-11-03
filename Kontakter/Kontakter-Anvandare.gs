@@ -69,10 +69,8 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   const webappUrl = sdk["webappUrl"];
   
   const prefixContactgroups = sdk["prefixContactgroups"];
-  const customEmailField = sdk["customEmailField"];
   const groupName = sdk["groupName"];
 
-  console.log("E-postfält för alla e-postadresser för en kontakt " + customEmailField);
   console.log("Kår " + groupName);
 
   //Kolla om användarfälten är tomma
@@ -133,12 +131,12 @@ function synkroniseraKontakter_(forceUpdate, deleteContacts) {
   //console.log("kontaktgrupper");
   //console.log(kontaktgrupper);
 
-  const emptyContactResource = makeContactResource_({}, customEmailField);
+  const emptyContactResource = makeContactResource_({});
   const contactResourceKeys = Object.keys(emptyContactResource);
   //console.log("Nycklar som används");
   //console.log(contactResourceKeys);
 
-  const resourceNamesRemovedFromContactGroups = createAndUpdateContacts_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, customEmailField, contactResourceKeys);
+  const resourceNamesRemovedFromContactGroups = createAndUpdateContacts_(kontaktgrupper, nyaKontaktGrupper, prefixContactgroups, contactResourceKeys);
   
   console.log("Kontakter som är borttagna från kontaktgrupper");
   console.log(resourceNamesRemovedFromContactGroups);
@@ -184,14 +182,12 @@ function colourCellsIfEmpty_(cells, sdk) {
   const colourCellVersion = colourCellIfEmpty_(cells.version, sdk["version"], "red");
   const colourCellWebappUrl = colourCellIfEmpty_(cells.webappUrl, sdk["webappUrl"], "red");
   const colourCellPrefixContactgroups = colourCellIfEmpty_(cells.prefixContactgroups, sdk["prefixContactgroups"], "red");
-  const colourCellCustomEmailField = colourCellIfEmpty_(cells.customEmailField, sdk["customEmailField"], "red");
   colourCellIfEmpty_(cells.groupName, sdk["groupName"], "yellow");
 
   if (colourCellUsername &&
       colourCellVersion &&
       colourCellWebappUrl &&
-      colourCellPrefixContactgroups &&
-      colourCellCustomEmailField) {
+      colourCellPrefixContactgroups) {
 
     return true;
   }
@@ -279,7 +275,6 @@ function getSheetDataKontakter_() {
   userInputData["password"] = data[grd["password"][0]][grd["password"][1]];
 
   userInputData["prefixContactgroups"] = data[grd["prefixContactgroups"][0]][grd["prefixContactgroups"][1]];
-  userInputData["customEmailField"] = data[grd["customEmailField"][0]][grd["customEmailField"][1]];
   userInputData["groupName"] = data[grd["groupName"][0]][grd["groupName"][1]];
   userInputData["webappUrl"] = data[grd["webappUrl"][0]][grd["webappUrl"][1]];
   userInputData["version"] = data[grd["version"][0]][grd["version"][1]];
@@ -288,7 +283,6 @@ function getSheetDataKontakter_() {
     username: selection.getCell(grd["username"][0]+1, grd["username"][1]+1),
     password: selection.getCell(grd["password"][0]+1, grd["password"][1]+1),
     prefixContactgroups: selection.getCell(grd["prefixContactgroups"][0]+1, grd["prefixContactgroups"][1]+1),
-    customEmailField: selection.getCell(grd["customEmailField"][0]+1, grd["customEmailField"][1]+1),
     groupName: selection.getCell(grd["groupName"][0]+1, grd["groupName"][1]+1),
     webappUrl: selection.getCell(grd["webappUrl"][0]+1, grd["webappUrl"][1]+1),
     version: selection.getCell(grd["version"][0]+1, grd["version"][1]+1)
@@ -361,10 +355,9 @@ function getKontakterUserInputData_() {
   kuid["password"] = [5, column];
 
   kuid["prefixContactgroups"] = [8, column];
-  kuid["customEmailField"] = [9, column];
-  kuid["groupName"] = [10, column];
-  kuid["webappUrl"] = [11, column];
-  kuid["version"] = [12, column];
+  kuid["groupName"] = [9, column];
+  kuid["webappUrl"] = [10, column];
+  kuid["version"] = [11, column];
 
   return kuid;
 }
@@ -548,12 +541,11 @@ function checkIfContactInAnyNonSystemContactGroup_(kontaktgrupperResourceNames, 
  * @param {Object[]} kontaktGrupper - Lista av Objekt med kontaktgruppsinformation
  * @param {Object[]} nyaKontakter - Lista av listor med information över de kontaktgrupper som ska finnas
  * @param {string} prefixContactgroups - Prefix för kontaktgrupper som synkroniseras
- * @param {string} customEmailField - Namn på eget kontaktfält för e-post att använda
  * @param {string[]} contactResourceKeys - Attribut för en kontakt
  * 
  * @returns {string[]} - Lista med resursnamn för de kontakter som har tagits bort från någon kontaktgrupp
  */
-function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgroups, customEmailField, contactResourceKeys) {
+function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgroups, contactResourceKeys) {
 
   //Alla kontakter som tidigare har synkats
   const connections = updateListOfConnections_(contactResourceKeys);
@@ -648,7 +640,7 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
           console.log("Skapa kontakten " + memberNumbersShouldBeInContactGroup[n] + " och lägg till i gruppen");
           const memberData = getMemberdataFromMemberNumber_(nyaKontakter, memberNumbersShouldBeInContactGroup[n]);
 
-          connection = createContact_(memberData, customEmailField);
+          connection = createContact_(memberData);
           resourceNamesToAdd.push(connection.resourceName);
           resourceNamesAlreadyProcessed.push(connection.resourceName);
 
@@ -668,7 +660,7 @@ function createAndUpdateContacts_(kontaktGrupper, nyaKontakter, prefixContactgro
   console.info("----------------------------------");
   console.log("Följande resursnamn är redan processade och behöver ej uppdateras senare");
   console.log(resourceNamesAlreadyProcessed);
-  updateContacts_(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField);
+  updateContacts_(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed);
 
   return contactsRemovedFromContactGroups; 
 }
@@ -991,9 +983,8 @@ function getContactsByMemberResourceNames_(resourceNames) {
  * @param {Object[]} connections - Lista med objekt för kontakter
  * @param {string[]} contactResourceKeys - Attribut för en kontakt
  * @param {string[]} resourceNamesAlreadyProcessed - Resursnamn för kontakter som ej behöver uppdateras
- * @param {string} customEmailField - Namn på eget kontaktfält för e-post att använda
  */
-function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed, customEmailField) {
+function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourceNamesAlreadyProcessed) {
 
   //Den hinner inte uppdatera alla nya kontakter, så de nya kommer sen kollas för uppdateringar också
   connections = updateListOfConnections_(contactResourceKeys);
@@ -1037,7 +1028,7 @@ function updateContacts_(nyaKontakter, connections, contactResourceKeys, resourc
       console.log("Denna kontakt ska ej vara kvar längre " + connections[i].memberNumber);
       continue;
     }
-    const memberDataContactResource = makeContactResource_(memberData, customEmailField);
+    const memberDataContactResource = makeContactResource_(memberData);
     //console.log("Medlemsinfo som ska vara inlagd på kontakten");
     //console.log(memberDataContactResource);
 
@@ -1440,11 +1431,10 @@ function checkDifferenceMemberInfo_(existingData, memberData, nameOfPersonField)
  * Ger ett objekt för en kontaktresurs givet medlemsdata
  * 
  * @param {Object} memberData - Persondata för en medlem
- * @param {string} customEmailField - Namn på eget kontaktfält för e-post att använda
  * 
  * @returns {Object} - Ett objekt av typen Person med kontaktinfo för en person
  */
-function makeContactResource_(memberData, customEmailField) {
+function makeContactResource_(memberData) {
   //memberData.first_name = "Test";
   
   //const avatar_updated = "avatar_updated";
@@ -1478,9 +1468,6 @@ function makeContactResource_(memberData, customEmailField) {
       "value": memberData.nickname
     }],
     "emailAddresses": [{
-        "value": memberData.google_contact_group,
-        "type" : customEmailField
-      }, {
         "value": memberData.email,
         "type" : "Primär e-postadress"
       }, {
@@ -1543,13 +1530,12 @@ function makeContactResource_(memberData, customEmailField) {
  * Skapar en kontakt givet medlemsdata
  * 
  * @param {Object} memberData - Persondata för en medlem
- * @param {string} customEmailField - Namn på eget kontaktfält för e-post att använda
  * 
  * @returns {Object} - Ett objekt av typen Person med kontaktinfo för en person
  */
-function createContact_(memberData, customEmailField) {
+function createContact_(memberData) {
 
-  const contactResource = makeContactResource_(memberData, customEmailField);
+  const contactResource = makeContactResource_(memberData);
   //console.log("contactResource");
   //console.log(contactResource);
 
