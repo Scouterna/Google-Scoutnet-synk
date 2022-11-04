@@ -395,8 +395,9 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
   let allMembers = fetchScoutnetMembers_(forceUpdate);
   let filteredMembers = filterMemberAttributes_(allMembers);  
 
-  //Skapa en lista med telefonnummer och e-postadress för alla vuxna medlemmar för att sen kunna se vilka som har barn i kåren
-  const phoneAndEmailForAllAdults = getComparablePhoneAndEmailForAllAdults_(filteredMembers);
+  //Listor med telefonnummer, e-postadress och medlemsnummer för alla vuxna medlemmar för att
+  //sen kunna se vilka som har barn i kåren
+  const comparableAdultMembers = getComparableAdultmembersContactInformation_(filteredMembers);
 
   const rowsToSync = findWhatRowsToSync_(0, data.length, data.length);
   const start = rowsToSync.start;
@@ -466,7 +467,7 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
   }
   
   const memberNumbersList = getMemberNumbersFromContactGroupsList_(contactGroupsList);
-  const memberListAndTrimmedMemberNumbers = getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbersList, phoneAndEmailForAllAdults);
+  const memberListAndTrimmedMemberNumbers = getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbersList, comparableAdultMembers);
   
   const memberList = memberListAndTrimmedMemberNumbers[0];
 
@@ -506,7 +507,7 @@ function removeTrimmedMemberNumbersFromContactGroupsList_(contactGroupsList, tri
         tmpContactGroupList.push(contactGroupList[k]);
       }
       else  {
-        console.log("Trimmat medlemsnummer " + contactGroupList[k]);
+        //console.log("Trimmat medlemsnummer " + contactGroupList[k]);
       }
     }
     tmpContactGroupsList.push(tmpContactGroupList);
@@ -517,34 +518,42 @@ function removeTrimmedMemberNumbersFromContactGroupsList_(contactGroupsList, tri
 
 
 /**
- * Ger en lista med jämförbara telefonnummer och e-postadress för alla vuxna medlemmar
+ * Ger ett objekt bestående av listor med e-post, mobilnummer samt medlemsnummer
+ * för alla vuxna medlemmar
  *
  * @param {Object[]} filteredMembers - Lista av medlemsobjekt
  *
- * @returns {string[]} - Lista med jämförbara telefonnummer och e-postadresser
+ * @returns {Object[]} - Objekt med listor över medlemsinfo för vuxna medlemmar
  */
-function getComparablePhoneAndEmailForAllAdults_(filteredMembers) {
+function getComparableAdultmembersContactInformation_(filteredMembers) {
 
-  const comparablePhoneAndEmails = [];
+  const email = [];
+  const contact_mobile_phone = [];
+  const member_no = [];
 
   for (let i = 0; i < filteredMembers.length; i++) {
+    const filteredMember = filteredMembers[i];
 
-    if  (checkIfAgeIsOver18_(filteredMembers[i]))  {
-      console.log(filteredMembers[i].first_name + " " + filteredMembers[i].last_name);
+    if  (checkIfAgeIsOver18_(filteredMember))  {
+      //console.log(filteredMember.first_name + " " + filteredMember.last_name);
 
-      if (filteredMembers[i].email)  {
-        comparablePhoneAndEmails.push(getComparableEmail_(filteredMembers[i].email));
+      if (filteredMember.email || filteredMember.contact_mobile_phone || filteredMember.contact_home_phone)  {
+        email.push(getComparableEmail_(filteredMember.email));
+        contact_mobile_phone.push(intPhoneNumber_(filteredMember.contact_mobile_phone));
+        member_no.push(filteredMember.member_no);
       }
-      if (filteredMembers[i].contact_mobile_phone) {
-        comparablePhoneAndEmails.push(intPhoneNumber_(filteredMembers[i].contact_mobile_phone));
-      }
-      if (filteredMembers[i].contact_home_phone) {
-        comparablePhoneAndEmails.push(intPhoneNumber_(filteredMembers[i].contact_home_phone));
+      else  {
+        const fullName = filteredMember.first_name + " " + filteredMember.last_name;
+        console.warn("Denna medlem (" + fullName + ") över 18 år har varken e-post eller telefonnummer registrerat");
       }
     }
   }
-  //console.log(comparablePhoneAndEmails);
-  return comparablePhoneAndEmails;
+
+  const comparableMembers = {email, contact_mobile_phone, member_no};
+  //console.log("comparableMembers");
+  //console.log(comparableMembers);
+
+  return comparableMembers;
 }
 
 
@@ -572,15 +581,16 @@ function getComparableEmail_(email)  {
  *
  * @param {Object[]} filteredMembers - Lista av medlemsobjekt
  * @param {number[]} memberNumbers - Lista med medlemsnummer
- * @param {string[]} phoneAndEmailForAllAdults - Lista med jämförbara telefonnummer och e-postadresser för alla vuxna medlemmar
- *
+ * @param {Object[]} comparableAdultMembers - Objekt med listor över medlemsinfo för vuxna medlemmar
+ * 
  * @returns {Object[][]} - Lista av medlemsobjekt för endast de med angivna
  * medlemsnummer samt medlemsnummer som ej ska användas
  */
-function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbers, phoneAndEmailForAllAdults) {
+function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbers, comparableAdultMembers) {
 
   const memberList = [];
   const trimmedMemberNumbers = []; //För att få bort anhörigas medlemsnummer för vuxna
+  const memberNumbersToReplace = {}; //Anhörig medlemsnummer som ska bytas till vuxen medlems medlemsnummer
 
   for (let i = 0; i < memberNumbers.length; i++) {
 
@@ -608,10 +618,14 @@ function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbe
       }
     }
     else  { //Om medlem under 18 år
+      const memberNumberMum = checkIfSomeContactInfoBelongsToAdultMember_(obj, comparableAdultMembers, "mum", 1);
+      const memberNumberDad = checkIfSomeContactInfoBelongsToAdultMember_(obj, comparableAdultMembers, "dad", 2);
 
-      if (checkIfSomeContactInfoBelongsToAdultMember_(obj, phoneAndEmailForAllAdults))  {
-        console.log(obj.first_name + " " + obj.last_name + " har kontaktinformation som tillhör en vuxen medlem");
-
+      if (memberNumberMum) {
+        memberNumbersToReplace[memberNumbers[i]+"-1"] = memberNumberMum;
+      }
+      if (memberNumberDad) {
+        memberNumbersToReplace[memberNumbers[i]+"-2"] = memberNumberDad;
       }
       else  {
         //console.log("Denna medlem har inte någon anhöriginfo som tillhör en vuxen medlem");
@@ -621,12 +635,14 @@ function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbe
     }
     
     memberList.push(obj);
-
     //console.log("Kontaktdata");
     //console.log(obj);
   }
+
+  console.log("memberNumbersToReplace");
+  console.log(memberNumbersToReplace);
   
-  return [memberList, trimmedMemberNumbers];
+  return [memberList, trimmedMemberNumbers, memberNumbersToReplace];
 }
 
 
@@ -634,41 +650,77 @@ function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbe
  * Kollar om kontaktinfo för en medlem tillhör en vuxen medlem
  * 
  * @param {Object} memberData - Persondata för en medlem
- * @param {string[]} phoneAndEmailForAllAdults - Lista med jämförbara telefonnummer och e-postadresser för alla vuxna medlemmar
+ * @param {Object[]} comparableAdultMembers - Objekt med listor över medlemsinfo för vuxna medlemmar
+ * @param {string} relativeRelation - Namn på medlemsattribut för relation till anhörig
+ * @param {number} relativeNumber - Vilket anhörignummer för en medlem
  * 
  * @returns {boolean} - Om kontaktinfo för medlemmen tillhör en vuxen medlem eller ej
  */
-function checkIfSomeContactInfoBelongsToAdultMember_(memberData, phoneAndEmailForAllAdults) {
+function checkIfSomeContactInfoBelongsToAdultMember_(memberData, comparableAdultMembers, relativeRelation, relativeNumber) {
 
-  if (memberData.email && phoneAndEmailForAllAdults.includes(getComparableEmail_(memberData.email))) {
-    //console.log("Medlemmens e-post är också registrerad på en vuxen medlems profil");
-    return true;
+  let indexesMatchesEmail = [];
+  let indexesMatchesMobile = [];
+
+  const relativeMobileAttribute = "contact_mobile_" + relativeRelation;
+  const relativeEmailAttribute = "contact_email_" + relativeRelation;
+
+  const memberFullname = memberData.first_name + " " + memberData.last_name;
+
+  if (memberData[relativeEmailAttribute]) {
+    const comparableEmail = getComparableEmail_(memberData[relativeEmailAttribute]);
+
+    if (comparableAdultMembers.email.includes(comparableEmail)) {
+      indexesMatchesEmail = getAllIndexes_(comparableAdultMembers.email, comparableEmail);
+      //console.log(memberFullname + " e-post för Anhörig #" + relativeNumber + " är också registrerad på en vuxen medlems profil");
+      //console.log("Indexmatchar e-post " + indexesMatchesEmail);
+    }
   }
-  if (memberData.contact_email_mum && phoneAndEmailForAllAdults.includes(getComparableEmail_(memberData.contact_email_mum))) {
-    //console.log("Medlemmens e-post för Anhörig #1 är också registrerad på en vuxen medlems profil");
-    return true;
+
+  if (memberData[relativeMobileAttribute]) {
+    const comparableMobile = intPhoneNumber_(memberData[relativeMobileAttribute]);
+
+    if (comparableAdultMembers.contact_mobile_phone.includes(comparableMobile)) {
+      indexesMatchesMobile = getAllIndexes_(comparableAdultMembers.contact_mobile_phone, comparableMobile);
+      //console.log(memberFullname + " mobilnummer för Anhörig #" + relativeNumber + " är också registrerad på en vuxen medlems profil");
+      //console.log("Indexmatchar mobilnummer " + indexesMatchesMobile);
+    }
   }
-  if (memberData.contact_email_dad && phoneAndEmailForAllAdults.includes(getComparableEmail_(memberData.contact_email_dad))) {
-    //console.log("Medlemmens e-post för Anhörig #2 är också registrerad på en vuxen medlems profil");
-    return true;
+
+  if (0 !== indexesMatchesEmail.length && 0 !== indexesMatchesMobile.length)  {
+
+    for (let i = 0; i < indexesMatchesEmail.length; i++) {
+      if (indexesMatchesMobile.includes(indexesMatchesEmail[i]))  {
+        console.log("En fullständig matchning för en vuxen medlem har hittats hos " + memberFullname + " Anhörig #" + relativeNumber);
+        //console.log("E-post på föräldern " + comparableAdultMembers.email[indexesMatchesEmail[i]]);
+        return comparableAdultMembers.member_no[indexesMatchesEmail[i]];
+      }
+    }
   }
-  if (memberData.contact_mobile_mum && phoneAndEmailForAllAdults.includes(intPhoneNumber_(memberData.contact_mobile_mum))) {
-    //console.log("Medlemmens mobilnummer för Anhörig #1  är också registrerad på en vuxen medlems profil");
-    return true;
+  else if (0 !== indexesMatchesEmail.length || 0 !== indexesMatchesMobile.length)  {
+    console.warn("En partiell matchning för en vuxen medlem har hittats hos " + memberFullname + " Anhörig #" + relativeNumber);
   }
-  if (memberData.contact_mobile_dad && phoneAndEmailForAllAdults.includes(intPhoneNumber_(memberData.contact_mobile_dad))) {
-    //console.log("Medlemmens mobilnummer för Anhörig #2  är också registrerad på en vuxen medlems profil");
-    return true;
-  }
-  if (memberData.contact_telephone_mum && phoneAndEmailForAllAdults.includes(intPhoneNumber_(memberData.contact_telephone_mum))) {
-    //console.log("Medlemmens hemnummer för Anhörig #1  är också registrerad på en vuxen medlems profil");
-    return true;
-  }
-  if (memberData.contact_telephone_dad && phoneAndEmailForAllAdults.includes(intPhoneNumber_(memberData.contact_telephone_dad))) {
-    //console.log("Medlemmens hemnummer för Anhörig #2  är också registrerad på en vuxen medlems profil");
-    return true;
-  }
+  
   return false;
+}
+
+
+/**
+ * Ger en lista med alla index för en textsträng i en lista
+ * 
+ * @param {string[]} list - En lista
+ * @param {string} text - En textsträng
+ * 
+ * @returns {string[]} - En lista med index för alla matchande förekomster
+ */
+function getAllIndexes_(list, text)  {
+
+  const indexes = [];
+  for (let i = 0; i < list.length; i++) {
+    if (text === list[i]) {
+      indexes.push(i);
+    }
+  }
+  return indexes;
 }
 
 
