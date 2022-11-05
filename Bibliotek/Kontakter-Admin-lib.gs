@@ -634,7 +634,10 @@ function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbe
       else  {
         //console.log("Denna medlem har inte någon anhöriginfo som tillhör en vuxen medlem");
       }
-      obj.email = "";
+      
+      if (!checkIfEmailBelongsToMemberAndNotRelative_(obj))  {
+        obj.email = "";
+      }
       moveRelativesContactInfoToBiographies_(obj);
     }
     
@@ -661,6 +664,29 @@ function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbe
   console.log(memberNumbersToReplace);
   
   return [memberList, trimmedMemberNumbers, memberNumbersToReplace];
+}
+
+
+/**
+ * Kollar om en medlems primära e-postadress tillhör medlemmen eller en anhörig
+ * 
+ * @param {Object} memberData - Persondata för en medlem
+ * 
+ * @returns {boolean} - Om primär e-post tillhör medlemmen själv
+ */
+function checkIfEmailBelongsToMemberAndNotRelative_(memberData)  {
+  
+  const comparableEmail = getComparableEmail_(memberData.email);
+
+  if (comparableEmail === getComparableEmail_(memberData.contact_email_mum)) {
+    return false;
+  }
+  if (comparableEmail === getComparableEmail_(memberData.contact_email_dad)) {
+    return false;
+  }
+  //const memberFullname = memberData.first_name + " " + memberData.last_name;
+  //console.log("Denna medlem under 18 år har en egen personlig e-postadress registrerad " + memberFullname);
+  return true;
 }
 
 
