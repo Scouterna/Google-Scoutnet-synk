@@ -472,8 +472,9 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
   const memberList = memberListAndTrimmedMemberNumbers[0];
 
   const trimmedMemberNumbers = memberListAndTrimmedMemberNumbers[1];  //De medlemsnummer som inte ska användas
+  const memberNumbersToReplace = memberListAndTrimmedMemberNumbers[2];
   //Här ska vi rensa bort alla medlemsnummer som faktiskt inte ska användas
-  contactGroupsList = removeTrimmedMemberNumbersFromContactGroupsList_(contactGroupsList, trimmedMemberNumbers);
+  contactGroupsList = removeTrimmedMemberNumbersFromContactGroupsList_(contactGroupsList, trimmedMemberNumbers, memberNumbersToReplace);
 
   //Lägga memberList först i en listan
   contactGroupsList.unshift(memberList);
@@ -489,11 +490,12 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
  *
  * @param {Object[][]} contactGroupsList - Lista av listor med kontaktgruppsinformation och medlemsnummer för de i respektive grupp
  * @param {number[]} trimmedMemberNumbers - Lista med medlemsnummer som inte finns
+ * @param {Object} memberNumbersToReplace - Objekt med medlemsnummer som ska ersättas med något annat
  *
  * @returns {Object[][]} - Lista av listor med kontaktgruppsinformation och medlemsnummer
  * för de i respektive grupp där medlemsnummer som inte finns på riktigt har tagits bort
  */
-function removeTrimmedMemberNumbersFromContactGroupsList_(contactGroupsList, trimmedMemberNumbers) {
+function removeTrimmedMemberNumbersFromContactGroupsList_(contactGroupsList, trimmedMemberNumbers, memberNumbersToReplace) {
 
   const tmpContactGroupsList = [];
 
@@ -503,7 +505,12 @@ function removeTrimmedMemberNumbersFromContactGroupsList_(contactGroupsList, tri
     const tmpContactGroupList = [];
     tmpContactGroupList.push(contactGroupList[0]);
     for (let k = 1; k < contactGroupList.length; k++) {
-      if (!trimmedMemberNumbers.includes(contactGroupList[k])) {
+
+      if (typeof memberNumbersToReplace[contactGroupList[k]] !== "undefined") {
+        //console.log("Vi ska byta ut medlemsnummer " + contactGroupList[k] + " mot " + memberNumbersToReplace[contactGroupList[k]]);
+        tmpContactGroupList.push(memberNumbersToReplace[contactGroupList[k]]);
+      }
+      else if (!trimmedMemberNumbers.includes(contactGroupList[k])) {
         tmpContactGroupList.push(contactGroupList[k]);
       }
       else  {
@@ -591,11 +598,11 @@ function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbe
   const memberList = [];
   const trimmedMemberNumbers = []; //För att få bort anhörigas medlemsnummer för vuxna
   const memberNumbersToReplace = {}; //Anhörig medlemsnummer som ska bytas till vuxen medlems medlemsnummer
+  const memberNumbersProcessed = [];
 
   for (let i = 0; i < memberNumbers.length; i++) {
 
     const obj = filteredMembers.find(obj => obj.member_no === memberNumbers[i]);
-
     //console.log("obj");
     //console.log(obj);
     
@@ -609,15 +616,12 @@ function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbe
       //console.log("Detta kontaktkort tillhör en anhörig till en medlem");
     }
     else if (checkIfAgeIsOver18_(obj)) { //Om medlem över 18 år
-
-      if (konfig.STORE_CONTACTS_RELATIVES_FOR_ADULTS) {
-        moveRelativesContactInfoToBiographies_(obj);
-      }
-      else  {
-        removeRelativesContactInfo_(obj);
-      }
+      changeContactRelativeForAdults_(obj);
+      memberNumbersProcessed.push(memberNumbers[i]);
     }
     else  { //Om medlem under 18 år
+      memberNumbersProcessed.push(memberNumbers[i]);
+
       const memberNumberMum = checkIfSomeContactInfoBelongsToAdultMember_(obj, comparableAdultMembers, "mum", 1);
       const memberNumberDad = checkIfSomeContactInfoBelongsToAdultMember_(obj, comparableAdultMembers, "dad", 2);
 
@@ -629,9 +633,9 @@ function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbe
       }
       else  {
         //console.log("Denna medlem har inte någon anhöriginfo som tillhör en vuxen medlem");
-        obj.email = "";
-        moveRelativesContactInfoToBiographies_(obj);
       }
+      obj.email = "";
+      moveRelativesContactInfoToBiographies_(obj);
     }
     
     memberList.push(obj);
@@ -639,10 +643,40 @@ function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbe
     //console.log(obj);
   }
 
+  //Dessa medlemsnummer ersätter påhittade anhörigmedlemsnummer för någon medlem
+  const memberNumbersToReplaceWith = removeDublicates_(Object.values(memberNumbersToReplace));
+
+  for (let i = 0; i < memberNumbersToReplaceWith.length; i++) {
+    if (!memberNumbersProcessed.includes(memberNumbersToReplaceWith[i]))  {
+      //console.log("Denna medlem " + memberNumbersToReplaceWith[i] + " läggs till då den står som anhörig till någon som ska med");
+
+      const obj = filteredMembers.find(obj => obj.member_no === memberNumbersToReplaceWith[i]);
+      //Här kan vi rensa bort anhöriginfo för vuxna medlemmar då vi antar att denna medlem är vuxen
+      changeContactRelativeForAdults_(obj);
+      memberList.push(obj);
+    }
+  }
+
   console.log("memberNumbersToReplace");
   console.log(memberNumbersToReplace);
   
   return [memberList, trimmedMemberNumbers, memberNumbersToReplace];
+}
+
+
+/**
+ * Ändra anhöriginfo för för vuxna medlemmar
+ * 
+ * @param {Object} memberData - Persondata för en medlem
+ */
+function changeContactRelativeForAdults_(memberData) {
+
+  if (konfig.STORE_CONTACTS_RELATIVES_FOR_ADULTS) {
+    moveRelativesContactInfoToBiographies_(memberData);
+  }
+  else  {
+    removeRelativesContactInfo_(memberData);
+  }
 }
 
 
