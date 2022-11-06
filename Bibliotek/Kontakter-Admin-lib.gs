@@ -1064,13 +1064,9 @@ function getContactForMemberRelative_(medlem, relativeNameAttribute, relativeRel
   const relativeTelephoneAttribute = "contact_telephone_" + relativeRelation;
   const relativeEmailAttribute = "contact_email_" + relativeRelation;
 
-  if (medlem[relativeNameAttribute]) {
-    tmpMemberRelative['first_name'] = medlem[relativeNameAttribute];
-  }
-  else {
-    tmpMemberRelative['first_name'] = medlem['first_name'];
-    tmpMemberRelative['last_name'] = medlem['last_name'] + " - Anhörig " + relativeNumber;
-  }
+  const nameOfRelative = getNameOfRelative_(medlem, relativeNameAttribute, relativeNumber);
+  tmpMemberRelative['first_name'] = nameOfRelative['first_name'];
+  tmpMemberRelative['last_name'] = nameOfRelative['last_name'];
 
   tmpMemberRelative['member_no'] = medlem['member_no'] + "-" + relativeNumber;
   //Denna relation kommer sen bli Anhörig 1 hos förälderns kontaktkort
@@ -1106,6 +1102,41 @@ function getContactForMemberRelative_(medlem, relativeNameAttribute, relativeRel
   tmpMemberRelative['isRelativeContact'] = true;
 
   return tmpMemberRelative;
+}
+
+
+/**
+ * Skapa ett medlemsobjekt för en anhörigs namn för en medlem
+ * 
+ * @param {Object} medlem - Ett medlemsobjekt
+ * @param {string} relativeNameAttribute - Namn på medlemsattribut för namn för en anhörig
+ * @param {number} relativeNumber - Vilket anhörignummer för en medlem
+ * 
+ * @returns {Object} - Ett medlemsobjekt för en medlem med endast attribut för namn
+ */
+function getNameOfRelative_(medlem, relativeNameAttribute, relativeNumber) {
+
+  const nameOfRelative = {};
+
+  if (medlem[relativeNameAttribute]) {  //Om något angivet
+    
+    let [huvud, ...rest] = medlem[relativeNameAttribute].split(" ");
+    rest = rest.join(" ");  //Om dubbla efternamn för anhörig
+
+    nameOfRelative['first_name'] = huvud;
+    if (rest) {
+      nameOfRelative['last_name'] = rest;
+    }
+    else  {
+      nameOfRelative['last_name'] = medlem.last_name;
+    }
+  }
+  else {  //Om namn saknas på anhörig
+    nameOfRelative['first_name'] = medlem['first_name'];
+    nameOfRelative['last_name'] = medlem['last_name'] + " - Anhörig " + relativeNumber;
+  }
+
+  return nameOfRelative;
 }
 
 
