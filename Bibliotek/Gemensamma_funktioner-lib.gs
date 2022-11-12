@@ -62,11 +62,19 @@ function checkDataFromKonfig(INPUT_KONFIG_OBJECT) {
     console.info(KONFIG.SCOUTNET_URL + " - KORREKT");
 
     console.info("*****************");
+    console.info("Kår-ID för webbtjänster (KONFIG.SCOUTNET_GROUP_ID)");
+    console.info(KONFIG.SCOUTNET_GROUP_ID + " - KORREKT");
+
+    console.info("*****************");
     console.info("Typ av enhet kår (group) eller distrikt (district)");
     console.info(KONFIG.ORGANISATION_TYPE + " - KORREKT");
   }
   else {
     console.warn(KONFIG.SCOUTNET_URL + " - Eventuellt felaktig");
+
+    console.info("*****************");
+    console.info("Kår-ID för webbtjänster (KONFIG.SCOUTNET_GROUP_ID)");
+    console.warn(KONFIG.SCOUTNET_GROUP_ID + " - Eventuellt felaktig");
 
     console.info("*****************");
     console.info("Typ av enhet kår (group) eller distrikt (district)");
@@ -107,6 +115,18 @@ function checkDataFromKonfig(INPUT_KONFIG_OBJECT) {
   }
   else {
     console.warn(KONFIG.DEFAULT_USER_AVATAR_URL + " - Eventuellt felaktig");
+  }
+
+  console.info("*****************");
+  console.info("Avsändaradress för e-post som skickar användaruppgifter för kontaktsynkronisering (KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_FROM)"); 
+  if (getAllowedFromEmailAdresses_().includes(KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_FROM)) {
+    console.info(KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_FROM + " - KORREKT");
+  }
+  else if ("" === KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_FROM)  {
+    console.info(KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_FROM + " - KORREKT");
+  }
+  else  {
+    console.warn(KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_FROM + " - Eventuellt felaktig");
   }
 }
 
