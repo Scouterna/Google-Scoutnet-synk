@@ -917,6 +917,22 @@ function getDraft_(subject) {
 
 
 /**
+ * Ger vilka e-postadresser som det går att ange som avsändare
+ *
+ * @returns {string[]} - En lista med e-postadresser
+ */
+function getAllowedFromEmailAdresses_() {
+  
+  const aliases = GmailApp.getAliases();
+  const my_email = Session.getEffectiveUser().getEmail();
+  
+  aliases.push(my_email);
+  console.log("Tillåtna avsändaradresser " + aliases);
+  return aliases;
+}
+
+
+/**
  * Gör om en textsträng till gemener och tar bort tomrum
  * 
  * @param {string} text - Textsträng

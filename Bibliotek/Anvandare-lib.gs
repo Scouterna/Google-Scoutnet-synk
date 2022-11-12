@@ -28,20 +28,21 @@ function synkroniseraAnvandare(INPUT_KONFIG_OBJECT, defaultOrgUnitPath, suspende
   
   const membersProcessed = [];
   
-  for (let p = 0; p < KONFIG.userAccountConfig.length; p++) { //Gå igenom Listorna som är definierade i Konfiguration.gs, avsnitt "userAccountConfig"
+  for (let p = 0; p < KONFIG.USER_ACCOUNT_CONFIG.length; p++) {
+  //Går igenom Listorna som är definierade i Konfiguration.gs, avsnitt "USER_ACCOUNT_CONFIG"
     
-    let scoutnetListId = KONFIG.userAccountConfig[p].scoutnetListId;
+    let scoutnetListId = KONFIG.USER_ACCOUNT_CONFIG[p].scoutnetListId;
     let orgUnitPath = defaultOrgUnitPath;
     
-    if (KONFIG.userAccountConfig[p].orgUnitPath) {
+    if (KONFIG.USER_ACCOUNT_CONFIG[p].orgUnitPath) {
       //Bara om man anger någon suborg så anger vi den, annars blir det knas med
       //sista snedstrecket
-      orgUnitPath = orgUnitPath + "/" + KONFIG.userAccountConfig[p].orgUnitPath;
+      orgUnitPath = orgUnitPath + "/" + KONFIG.USER_ACCOUNT_CONFIG[p].orgUnitPath;
     }
     
     console.info("----------------------------------");
     console.info("orgUnitPath = %s", orgUnitPath);
-    console.info("Beskrivning: %s", KONFIG.userAccountConfig[p].description);
+    console.info("Beskrivning: %s", KONFIG.USER_ACCOUNT_CONFIG[p].description);
     
     createSuborganisationIfNeeded_(orgUnitPath);
     

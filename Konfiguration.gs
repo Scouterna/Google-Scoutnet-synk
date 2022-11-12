@@ -58,7 +58,7 @@ KONFIG_OBJECT.SCOUTNET_URL = "www.scoutnet.se"; //Scoutnets webbadress
  * Det går att ha flera nivår på underorgansiationer. T.ex /Scoutnet/Kårfunktionärer/Ledare/Spårarledare vilket då skrivs
  * som Kårfunktionärer/Ledare/Spårarledare nedan
  */
-KONFIG_OBJECT.userAccountConfig = [
+KONFIG_OBJECT.USER_ACCOUNT_CONFIG = [
   {
     scoutnetListId: "1234",  //
     orgUnitPath: "Styrelsen",  //om du skriver Ledare så är det egentligen underorganisationen /Scoutnet/Ledare
@@ -81,7 +81,7 @@ KONFIG_OBJECT.userAccountConfig = [
  * Inställningar för Kontaktgrupper
  */
 //Scoutkårens namn
-KONFIG_OBJECT.groupName = "Testmall Scoutkår";
+KONFIG_OBJECT.GROUP_NAME = "Testmall Scoutkår";
 
 //Max antal tvingade uppdatering per användare tills det nollställs
 KONFIG_OBJECT.MAX_NUMBER_OF_CONTACTS_FORCE_UPDATE = 10;
@@ -89,26 +89,31 @@ KONFIG_OBJECT.MAX_NUMBER_OF_CONTACTS_FORCE_UPDATE = 10;
 //Om information om vuxnas anhöriga ska synkroniseras eller ej. Om de synkroniseras hamnar de i noteringsfältet
 KONFIG_OBJECT.STORE_CONTACTS_RELATIVES_FOR_ADULTS = false;
 
-KONFIG_OBJECT.contact_groups_email_subject = "Användaruppgifter - Google kontaktgrupper synkning";
+//Ämne på e-post som skickar användaruppgifter för kontaktsynkronisering
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_CREDENTIALS_SUBJECT = "Användaruppgifter - Google kontaktgrupper synkning";
 
-KONFIG_OBJECT.contact_groups_email_sender_name = "";
+//Avsändarnamn på e-post som skickar användaruppgifter för kontaktsynkronisering
+//Om inget sätts används namnet på användarkontot som kör skriptet
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_NAME = "";
 
-KONFIG_OBJECT.contact_groups_email_sender_from = "";
+//Avsändare-post på e-post som skickar användaruppgifter för kontaktsynkronisering
+//Avsändaradressen måste finnas upplagd som alias i din Gmail
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_FROM = "";
 
 //Skapa din egen med hjälp av funktionen testGetHtmlEmailBody
 /***Brödtext enkel***/
-KONFIG_OBJECT.contact_groups_email_plainBody = "Hej, Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper. Vänligen använd följande uppgifter i stället: E-postadress: {{userEmail}} Lösenord: {{password}} Mvh " + KONFIG_OBJECT.groupName;
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_CREDENTIALS_PLAINBODY = "Hej, Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper. Vänligen använd följande uppgifter i stället: E-postadress: {{userEmail}} Lösenord: {{password}} Mvh " + KONFIG_OBJECT.GROUP_NAME;
 /***Brödtext enkel - Slut***/
 
 /***Brödtext Html***/
-KONFIG_OBJECT.contact_groups_email_htmlBody = '<div dir="ltr">Hej,<div><br></div><div>Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper.</div><div><br></div><div>Vänligen använd följande uppgifter i stället:</div><div><br></div><div>E-postadress: {{userEmail}}</div><div>Lösenord: {{password}}</div><div><br></div><div>Mvh</div><div>' + KONFIG_OBJECT.groupName + '</div></div>';
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_CREDENTIALS_HTMLBODY = '<div dir="ltr">Hej,<div><br></div><div>Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper.</div><div><br></div><div>Vänligen använd följande uppgifter i stället:</div><div><br></div><div>E-postadress: {{userEmail}}</div><div>Lösenord: {{password}}</div><div><br></div><div>Mvh</div><div>' + KONFIG_OBJECT.GROUP_NAME + '</div></div>';
 /***Brödtext Html - Slut***/
 
 //Du på kåren kan ändra denna om du vill tvinga dina egna användare att uppdatera sina skript
 KONFIG_OBJECT.version_oldest_ok = "2.0.0";
 
 //Ord som står i en medlems anteckningar som ska med i synkning men bytas ut mot något annat
-KONFIG_OBJECT.noteKeysToReplace = [
+KONFIG_OBJECT.NOTE_KEYS_TO_REPLACE = [
     ["lEdare", "Förälder har ledarintresse"],
     ["Rabatt", "Rabatter i butiker av intresse"]
   ];

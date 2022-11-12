@@ -765,22 +765,6 @@ function getSender_(textInput, nameOfTheAttribute, attribut, dataArray, cell, em
 
 
 /**
- * Ger vilka e-postadresser som det går att ange som avsändare
- *
- * @returns {string[]} - En lista med e-postadresser
- */
-function getAllowedFromEmailAdresses_() {
-  
-  const aliases = GmailApp.getAliases();
-  const my_email = Session.getEffectiveUser().getEmail();
-  
-  aliases.push(my_email);
-  console.log("Tillåtna avsändaradresser " + aliases);
-  return aliases;
-}
-
-
-/**
  * Givet en mall returnerar funktionen en personlig gjord kommaseparerad
  * textsträng
  * 

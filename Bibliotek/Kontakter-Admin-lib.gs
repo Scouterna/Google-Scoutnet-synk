@@ -22,8 +22,8 @@ function synkroniseraKontakter(INPUT_KONFIG_OBJECT, e) {
   const params = e.parameters;
 
   if (Object.keys(params).length === 0) {
-    console.warn("Inga parametrar angivna. MVH " + KONFIG.groupName);
-    return ContentService.createTextOutput("Inga parametrar angivna. MVH " + KONFIG.groupName)
+    console.warn("Inga parametrar angivna. MVH " + KONFIG.GROUP_NAME);
+    return ContentService.createTextOutput("Inga parametrar angivna. MVH " + KONFIG.GROUP_NAME)
     .setMimeType(ContentService.MimeType.TEXT);
   }
   
@@ -420,7 +420,7 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
     }
 
     const rad_nummer = i + 1;
-    console.info("********************");   
+    console.info("********************"); 
     console.info('Rad: ' + rad_nummer + ' Namn: ' + name + ' E-post: ' + email + ' Scoutnet: ' + scoutnet_list_id);
 
     let updateContactGroup = true;
@@ -1157,9 +1157,9 @@ function cleanNote_(note) {
 
   note = note.toLowerCase();
 
-  for (let i = 0; i < KONFIG.noteKeysToReplace.length; i++) {
-    if (note.includes(KONFIG.noteKeysToReplace[i][0].toLowerCase())) {
-      cleanNoteString += KONFIG.noteKeysToReplace[i][1] + "\n";
+  for (let i = 0; i < KONFIG.NOTE_KEYS_TO_REPLACE.length; i++) {
+    if (note.includes(KONFIG.NOTE_KEYS_TO_REPLACE[i][0].toLowerCase())) {
+      cleanNoteString += KONFIG.NOTE_KEYS_TO_REPLACE[i][1] + "\n";
     }
   }
   return cleanNoteString;
@@ -1339,15 +1339,15 @@ function sendEmailWithContactsGroupsPassword_(userEmail, password) {
   const emailOptions = {};
 
   /***Avsändarnamn***/
-  if (KONFIG.contact_groups_email_sender_name) {
-    emailOptions["name"] = KONFIG.contact_groups_email_sender_name;
+  if (KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_NAME) {
+    emailOptions["name"] = KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_NAME;
   }
   /***Avsändarnamn - Slut***/
 
   /***Avsändaradress***/
-  if (KONFIG.contact_groups_email_sender_from) {
-    if (isFromEmailAdressAllowed_(KONFIG.contact_groups_email_sender_from)) {
-      emailOptions["from"] = KONFIG.contact_groups_email_sender_from;
+  if (KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_FROM) {
+    if (getAllowedFromEmailAdresses_().includes(KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_FROM)) {
+      emailOptions["from"] = KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SENDER_FROM;
     }
     else {
       console.error("Angiven avsändaradress är ej godkänd");
@@ -1356,16 +1356,16 @@ function sendEmailWithContactsGroupsPassword_(userEmail, password) {
   }
   /***Avsändaradress - Slut***/
 
-  let contact_groups_email_plainBody_credentials = KONFIG.contact_groups_email_plainBody.replace("{{userEmail}}", userEmail);
+  let contact_groups_email_plainBody_credentials = KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_PLAINBODY.replace("{{userEmail}}", userEmail);
   contact_groups_email_plainBody_credentials = contact_groups_email_plainBody_credentials.replace("{{password}}", password);
 
-  let contact_groups_email_htmlBody_credentials = KONFIG.contact_groups_email_htmlBody.replace("{{userEmail}}", userEmail);
+  let contact_groups_email_htmlBody_credentials = KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_HTMLBODY.replace("{{userEmail}}", userEmail);
   contact_groups_email_htmlBody_credentials = contact_groups_email_htmlBody_credentials.replace("{{password}}", password);
 
   emailOptions["htmlBody"] = contact_groups_email_htmlBody_credentials;
 
   console.info("Skickar e-post till " + userEmail);
-  GmailApp.sendEmail(userEmail, KONFIG.contact_groups_email_subject, contact_groups_email_plainBody_credentials, emailOptions);
+  GmailApp.sendEmail(userEmail, KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SUBJECT, contact_groups_email_plainBody_credentials, emailOptions);
 }
 
 
