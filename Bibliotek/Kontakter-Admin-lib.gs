@@ -7,23 +7,23 @@
 /**
  * Körs vid GET-anrop till webbappen
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  * @param {Object} e - Query-parametrar vid GET-anrop till webbappen
  *
  * @returns {Object} - Ett objekt av typen TextOutput
  */
-function synkroniseraKontakter(inputKonfig, e) {
+function synkroniseraKontakter(INPUT_KONFIG_OBJECT, e) {
 
   console.time("Kontakter-Admin");
 
-  konfig = inputKonfig;
+  KONFIG = INPUT_KONFIG_OBJECT;
 
   console.log(e);
   const params = e.parameters;
 
   if (Object.keys(params).length === 0) {
-    console.warn("Inga parametrar angivna. MVH " + konfig.groupName);
-    return ContentService.createTextOutput("Inga parametrar angivna. MVH " + konfig.groupName)
+    console.warn("Inga parametrar angivna. MVH " + KONFIG.groupName);
+    return ContentService.createTextOutput("Inga parametrar angivna. MVH " + KONFIG.groupName)
     .setMimeType(ContentService.MimeType.TEXT);
   }
   
@@ -72,11 +72,11 @@ function synkroniseraKontakter(inputKonfig, e) {
 /**
  * Uppdatera kalkylbladet med de användare som ska ha behörigheter
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  */
-function updateContactGroupsAuthnSheetUsers(inputKonfig) {
+function updateContactGroupsAuthnSheetUsers(INPUT_KONFIG_OBJECT) {
 
-  konfig = inputKonfig;
+  KONFIG = INPUT_KONFIG_OBJECT;
 
   const sheetDataKontakterAnvandare = getDataFromActiveSheet_("Kontakter-Användare");
 
@@ -155,12 +155,12 @@ function updateContactGroupsAuthnSheetUsers(inputKonfig) {
  * En testfunktion för att själv kunna få fram oformaterad brödtext för e-brev
  * samt html-formaterad brödtext för e-brev.
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  * @param {string} subject - Ämnesrad på e-postutkast
  */
-function testGetHtmlEmailBody(inputKonfig, subject) {
+function testGetHtmlEmailBody(INPUT_KONFIG_OBJECT, subject) {
 
-  konfig = inputKonfig;
+  KONFIG = INPUT_KONFIG_OBJECT;
 
   const draft = getDraft_(subject);
 
@@ -235,11 +235,11 @@ function checkIfVersionOk_(version_running) {
   }
 
   console.info("Version som används av användaren " + version_running);
-  console.info("Äldsta tillåtna version " + konfig.version_oldest_ok);
+  console.info("Äldsta tillåtna version " + KONFIG.version_oldest_ok);
 
   const version_running_split_list = version_running.split(".");
 
-  const version_oldest_ok_split_list = konfig.version_oldest_ok.split(".");
+  const version_oldest_ok_split_list = KONFIG.version_oldest_ok.split(".");
 
   //Gå igenom varje nivå av underversion
   for (let i = 0; i < version_running_split_list.length; i++) {
@@ -698,7 +698,7 @@ function checkIfEmailBelongsToMemberAndNotRelative_(memberData)  {
  */
 function changeContactRelativeForAdults_(memberData) {
 
-  if (konfig.STORE_CONTACTS_RELATIVES_FOR_ADULTS) {
+  if (KONFIG.STORE_CONTACTS_RELATIVES_FOR_ADULTS) {
     moveRelativesContactInfoToBiographies_(memberData);
   }
   else  {
@@ -1157,9 +1157,9 @@ function cleanNote_(note) {
 
   note = note.toLowerCase();
 
-  for (let i = 0; i < konfig.noteKeysToReplace.length; i++) {
-    if (note.includes(konfig.noteKeysToReplace[i][0].toLowerCase())) {
-      cleanNoteString += konfig.noteKeysToReplace[i][1] + "\n";
+  for (let i = 0; i < KONFIG.noteKeysToReplace.length; i++) {
+    if (note.includes(KONFIG.noteKeysToReplace[i][0].toLowerCase())) {
+      cleanNoteString += KONFIG.noteKeysToReplace[i][1] + "\n";
     }
   }
   return cleanNoteString;
@@ -1308,7 +1308,7 @@ function checkCredentials_(userEmail, userPassword, userVersion, forceUpdate) {
       num_of_forced_updates = 0;
     }
     if (forceUpdate)  {
-      if (num_of_forced_updates < konfig.MAX_NUMBER_OF_CONTACTS_FORCE_UPDATE) {
+      if (num_of_forced_updates < KONFIG.MAX_NUMBER_OF_CONTACTS_FORCE_UPDATE) {
         const cell = selection.getCell(rad_nummer, grd["tvingade_uppdateringar"]+1);
         num_of_forced_updates++;
         cell.setValue(num_of_forced_updates);
@@ -1339,15 +1339,15 @@ function sendEmailWithContactsGroupsPassword_(userEmail, password) {
   const emailOptions = {};
 
   /***Avsändarnamn***/
-  if (konfig.contact_groups_email_sender_name) {
-    emailOptions["name"] = konfig.contact_groups_email_sender_name;
+  if (KONFIG.contact_groups_email_sender_name) {
+    emailOptions["name"] = KONFIG.contact_groups_email_sender_name;
   }
   /***Avsändarnamn - Slut***/
 
   /***Avsändaradress***/
-  if (konfig.contact_groups_email_sender_from) {
-    if (isFromEmailAdressAllowed_(konfig.contact_groups_email_sender_from)) {
-      emailOptions["from"] = konfig.contact_groups_email_sender_from;
+  if (KONFIG.contact_groups_email_sender_from) {
+    if (isFromEmailAdressAllowed_(KONFIG.contact_groups_email_sender_from)) {
+      emailOptions["from"] = KONFIG.contact_groups_email_sender_from;
     }
     else {
       console.error("Angiven avsändaradress är ej godkänd");
@@ -1356,16 +1356,16 @@ function sendEmailWithContactsGroupsPassword_(userEmail, password) {
   }
   /***Avsändaradress - Slut***/
 
-  let contact_groups_email_plainBody_credentials = konfig.contact_groups_email_plainBody.replace("{{userEmail}}", userEmail);
+  let contact_groups_email_plainBody_credentials = KONFIG.contact_groups_email_plainBody.replace("{{userEmail}}", userEmail);
   contact_groups_email_plainBody_credentials = contact_groups_email_plainBody_credentials.replace("{{password}}", password);
 
-  let contact_groups_email_htmlBody_credentials = konfig.contact_groups_email_htmlBody.replace("{{userEmail}}", userEmail);
+  let contact_groups_email_htmlBody_credentials = KONFIG.contact_groups_email_htmlBody.replace("{{userEmail}}", userEmail);
   contact_groups_email_htmlBody_credentials = contact_groups_email_htmlBody_credentials.replace("{{password}}", password);
 
   emailOptions["htmlBody"] = contact_groups_email_htmlBody_credentials;
 
   console.info("Skickar e-post till " + userEmail);
-  GmailApp.sendEmail(userEmail, konfig.contact_groups_email_subject, contact_groups_email_plainBody_credentials, emailOptions);
+  GmailApp.sendEmail(userEmail, KONFIG.contact_groups_email_subject, contact_groups_email_plainBody_credentials, emailOptions);
 }
 
 
@@ -1385,7 +1385,7 @@ function getListOfGroupsForAUser_(userKey) {
       let pageToken, page;
       do {
         page = AdminDirectory.Groups.list({
-          domain: konfig.domain,
+          domain: KONFIG.domain,
           maxResults: 150,
           pageToken: pageToken,
           userKey: userKey
