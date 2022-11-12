@@ -8,9 +8,9 @@
  * Anropa denna funktion om du vill synkronisera både användare och
  * grupper direkt efter varandra
  */
-function AnvandareOchGrupper() {
-  Anvandare();
-  Grupper();
+function synkroniseraAnvandareOchGrupper() {
+  synkroniseraAnvandare();
+  synkroniseraGrupper();
 }
 
 
@@ -19,8 +19,8 @@ function AnvandareOchGrupper() {
  * Funktion för att alla rader i kalkylarket för grupper
  * ska synkroniseras och e-brev skickas ut
  */
-function GrupperAllaRader() {
-  Grupper();
+function synkroniseraGrupperAllaRader() {
+  synkroniseraGrupper();
 }
 
 /**
@@ -32,24 +32,24 @@ function GrupperAllaRader() {
  * radintervallet med en viss etikett ska synkas.
  * Går att ange enbart etikett om så önskas.
  */
-function GrupperVissaRader1() {
-  Grupper(0, 10);
+function synkroniseraGrupperVissaRader1() {
+  synkroniseraGrupper(0, 10);
 }
 
-function GrupperVissaRader2() {
-  Grupper(11, 20);
+function synkroniseraGrupperVissaRader2() {
+  synkroniseraGrupper(11, 20);
 }
 
-function GrupperVissaRader3() {
-  Grupper(21, 30);
+function synkroniseraGrupperVissaRader3() {
+  synkroniseraGrupper(21, 30);
 }
 
-function GrupperVissaRaderOchEtikett1() {
-  Grupper(0, 10, "Avdelningar");
+function synkroniseraGrupperVissaRaderOchEtikett1() {
+  synkroniseraGrupper(0, 10, "Avdelningar");
 }
 
-function GrupperVissEtikett1() {
-  Grupper("Avdelningar");
+function synkroniseraGrupperVissEtikett1() {
+  synkroniseraGrupper("Avdelningar");
 }
 /***Grupper - Slut***/
 
@@ -59,28 +59,21 @@ function GrupperVissEtikett1() {
  * Funktioner för att ange att enbart vissa radintervall i kalkylarket
  * för medlemslistor ska synkroniseras och e-brev skickas ut.
  * Samt ställa in om medlemslistor enbart ska uppdateras alternativt om
- * gällande om e-brev ska skickas ut till listan
+ * det enbart ska skickas ut till listan
  *
  * Exempelvis rad 0 till 10. Helt fritt att ändra själv
  */
-function MedlemslistorVissaRaderUppdateraOchSkicka1() {
-  synkroniseraMedlemslistor_(0, 10, true, true);
+function synkroniseraMedlemslistorVissaRaderUppdateraOchSkicka1() {
+  ScoutnetSynkLib.uppdateraMedlemslistor(KONFIG_OBJECT, 1, 1);
+  ScoutnetSynkLib.skickaUtTillMedlemslistor(KONFIG_OBJECT, 1, 1);
 }
 
-function MedlemslistorVissaRaderUppdateraOchSkicka2() {
-  synkroniseraMedlemslistor_(11, 20, true, true);
+function synkroniseraMedlemslistorVissaRaderUppdateraEnbart1() {
+  ScoutnetSynkLib.uppdateraMedlemslistor(KONFIG_OBJECT, 5, 5);
 }
 
-function MedlemslistorVissaRaderUppdateraOchSkicka3() {
-  synkroniseraMedlemslistor_(21, 30, true, true);
-}
-
-function MedlemslistorVissaRaderUppdateraEnbart1() {
-  synkroniseraMedlemslistor_(0, 10, true, false);
-}
-
-function MedlemslistorVissaRaderSkickaEnbart1() {
-  synkroniseraMedlemslistor_(0, 10, false, true);
+function synkroniseraMedlemslistorVissaRaderSkickaEnbart1() {
+  ScoutnetSynkLib.skickaUtTillMedlemslistor(KONFIG_OBJECT, 1, 1);
 }
 
 
@@ -98,7 +91,7 @@ function MedlemslistorVissaRaderSkickaEnbart1() {
  * Observera att dessa påverkar alla medlemslistor som används, så var försiktig om du
  * tar bort någon funktion nedan då den kanske används i någon annan lista.
  */
-const medlemslista_egna_attribut_funktioner = [
+KONFIG_OBJECT.medlemslista_egna_attribut_funktioner = [
     {'namn': 'Ålder', 'formel': '=DATEDIF(R[0]C[-37]; TODAY(); "Y")'},
     {'namn': 'Dagar till nästa födelsedag', 'formel': '=DATE(YEAR(R[0]C[-38])+DATEDIF(R[0]C[-38];TODAY();"Y")+1;MONTH(R[0]C[-38]);DAY(R[0]C[-38]))-TODAY()'},
     {'namn': 'Antal dagar som medlem i kåren', 'formel': '=DATEDIF(R[0]C[-36];TODAY(); "D")'},
