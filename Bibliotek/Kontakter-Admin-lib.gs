@@ -1385,7 +1385,7 @@ function getListOfGroupsForAUser_(userKey) {
       let pageToken, page;
       do {
         page = AdminDirectory.Groups.list({
-          domain: KONFIG.domain,
+          domain: KONFIG.DOMAIN,
           maxResults: 150,
           pageToken: pageToken,
           userKey: userKey

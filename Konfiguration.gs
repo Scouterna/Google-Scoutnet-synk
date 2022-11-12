@@ -13,39 +13,39 @@ function checkKonfigIsOk() {
 
 const KONFIG_OBJECT = {};
 
-KONFIG_OBJECT.domain = 'hasselbyscout.se'; //Domänen/Webbsideadressen utan till kåren utan www och som används i Google Workspace
+KONFIG_OBJECT.DOMAIN = "hasselbyscout.se"; //Domänen/Webbsideadressen utan till kåren utan www och som används i Google Workspace
 
-KONFIG_OBJECT.scoutnetGroupId = '12'; //Kårens id som kan hittas i Scoutnet om du har tillräcklig behörighet
+KONFIG_OBJECT.SCOUTNET_GROUP_ID = "12"; //Kår-ID för webbtjänster som kan hittas i Scoutnet om du har tillräcklig behörighet
 
 
 //Get a detailed csv/xls/json list of all members
 //Används bland annat för att synkronisera användarkonton med Scoutnet
 //Används vid synkronisering för kårer, ej distrikt
-KONFIG_OBJECT.api_key_list_all = '999888777315979a2a864664695671c7dfe7'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
+KONFIG_OBJECT.API_KEY_LIST_ALL = "999888777315979a2a864664695671c7dfe7"; //Kan hittas i Scoutnet om du har tillräcklig behörighet
 
 //Get a csv/xls/json list of members, based on mailing lists you have set up
 //Används bland annat för att synkronisera Google grupper med Scoutnet
-KONFIG_OBJECT.api_key_mailinglists = '11122233356454d0dce624'; //Kan hittas i Scoutnet om du har tillräcklig behörighet
+KONFIG_OBJECT.API_KEY_MAILINGLISTS = "11122233356454d0dce624"; //Kan hittas i Scoutnet om du har tillräcklig behörighet
 
 //E-post eller scoutnetListId för vart mejl om misstänkt spam till grupper ska skickas till
 //För e-postlistor som anges skickas endast till primär e-postadress listad i Scoutnet
-//T.ex 'webmaster@minscoutkår.se, 1234'
-KONFIG_OBJECT.moderateContentEmail = '';
+//T.ex "webmaster@minscoutkår.se, 1234"
+KONFIG_OBJECT.MODERATE_CONTENT_EMAIL = "";
 
 //Inställning om viss kontaktinformation ska synkroniseras till användares Google Workspace-konto
-KONFIG_OBJECT.syncUserContactInfo = true;
+KONFIG_OBJECT.SYNC_USER_CONTACT_INFO = true;
 
 //Inställning om medlems profilbild ska synkroniseras till användares Google Workspace-konto
-KONFIG_OBJECT.syncUserAvatar = true;
+KONFIG_OBJECT.SYNC_USER_AVATAR = true;
 
 //Adress till profilbild att använda för Googlekonton om ingen finns i Scoutnet
-KONFIG_OBJECT.defaultUserAvatarUrl = "https://web.cdn.scouterna.net/uploads/sites/57/2021/05/avatar.png";
+KONFIG_OBJECT.DEFAULT_USER_AVATAR_URL = "https://web.cdn.scouterna.net/uploads/sites/57/2021/05/avatar.png";
 
 //Typ av organisationsenhet
-KONFIG_OBJECT.organisationType = 'group'; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
+KONFIG_OBJECT.ORGANISATION_TYPE = "group"; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
 
 //Adressen till Scoutnet. Ska ej ändras
-KONFIG_OBJECT.scoutnet_url = 'www.scoutnet.se'; //Scoutnets webbadress
+KONFIG_OBJECT.SCOUTNET_URL = "www.scoutnet.se"; //Scoutnets webbadress
 
 
 /**

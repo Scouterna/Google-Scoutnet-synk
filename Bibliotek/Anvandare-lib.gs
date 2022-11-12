@@ -16,7 +16,7 @@ function synkroniseraAnvandare(INPUT_KONFIG_OBJECT, defaultOrgUnitPath, suspende
   KONFIG = INPUT_KONFIG_OBJECT;
 
   let allMembers;
-  if ("group" === KONFIG.organisationType) {
+  if ("group" === KONFIG.ORGANISATION_TYPE) {
     allMembers = fetchScoutnetMembers_(true); //Hämta lista över alla medlemmar
     console.info("Antal medlemmar i kåren " + allMembers.length);
   }
@@ -49,7 +49,7 @@ function synkroniseraAnvandare(INPUT_KONFIG_OBJECT, defaultOrgUnitPath, suspende
     if (scoutnetListId) {
       membersInAList = fetchScoutnetMembersMultipleMailinglists_(scoutnetListId, "", "", true);
     }
-    else if ("group" === KONFIG.organisationType) { //Om man ej anger listId för en e-postlista; endast för kårer, ej distrikt
+    else if ("group" === KONFIG.ORGANISATION_TYPE) { //Om man ej anger listId för en e-postlista; endast för kårer, ej distrikt
       membersInAList = getScoutleaders_(allMembers);
     }
     console.info("Antal personer för denna typ av användarkonto = " + membersInAList.length);
@@ -65,7 +65,7 @@ function synkroniseraAnvandare(INPUT_KONFIG_OBJECT, defaultOrgUnitPath, suspende
         console.log("Användaren ska processas: " + membersInAList[i].first_name + " " + membersInAList[i].last_name);
         membersProcessed.push(membersInAList[i].member_no); //Lägg till kontot i listan över processade konton
         let obj = null;
-        if ("group" === KONFIG.organisationType) { //Alla attribut endast för kårer, ej distrikt
+        if ("group" === KONFIG.ORGANISATION_TYPE) { //Alla attribut endast för kårer, ej distrikt
           obj = allMembers.find(obj => obj.member_no === membersInAList[i].member_no); //Leta upp kontot i listan övar alla konton
           //anledningen till att inte använda objektet från epostlistan är att det finns bara begränsad information i det objektet
         }
@@ -203,11 +203,11 @@ function createAccount_(member, orgUnitPath) {
   const last_name = member.last_name;
   const last_name_email = makeNameReadyForEmailAdress_(last_name);
   
-  let email = first_name_email + "." + last_name_email + "@" + KONFIG.domain; 
+  let email = first_name_email + "." + last_name_email + "@" + KONFIG.DOMAIN; 
  
   if (checkIfEmailExists_(email)) {
      for (let t = 1; t < 5; t++) { //Ska inte vara fler personer med samma namn. Programmet kraschar då med mening då något antagligen gått fel
-        email = first_name_email + "." + last_name_email + t + "@" + KONFIG.domain;
+        email = first_name_email + "." + last_name_email + t + "@" + KONFIG.DOMAIN;
 
         if (!checkIfEmailExists_(email)) { //Skapa denna e-postadress
           break;
@@ -246,7 +246,7 @@ function createAccount_(member, orgUnitPath) {
 function checkIfEmailExists_(email) {
 
   const page = AdminDirectory.Users.list({
-    domain: KONFIG.domain,
+    domain: KONFIG.DOMAIN,
     query: email=email,
     orderBy: 'givenName',
     maxResults: 1
@@ -268,7 +268,7 @@ function checkIfEmailExists_(email) {
  * @returns {byte[] | string} - Byte array för standardprofilbild eller tom sträng
  */
 function getByteArrayOfDefaultImage_() {
-  return getByteArrayOfAnImage_(KONFIG.defaultUserAvatarUrl);
+  return getByteArrayOfAnImage_(KONFIG.DEFAULT_USER_AVATAR_URL);
 }
 
 
@@ -356,7 +356,7 @@ function getAvatarIdImageToUse_(avatar_updated, defaultAvatarId) {
  */
 function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, defaultUserAvatarId) {
   
-  if ("district" === KONFIG.organisationType) { //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
+  if ("district" === KONFIG.ORGANISATION_TYPE) { //För distrikt som hämtar attribut via e-postlist-api:et då det är annat namn där
     member.contact_mobile_phone = member.mobile_phone;
   }
  
@@ -388,7 +388,7 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
   }
   
   //Om inställningen är att inte synkronisera profilbilder
-  if (typeof KONFIG.syncUserAvatar === 'undefined' || !KONFIG.syncUserAvatar) {
+  if (typeof KONFIG.SYNC_USER_AVATAR === 'undefined' || !KONFIG.SYNC_USER_AVATAR) {
     console.log("Ska ej synkronisera profilbild");
     member.avatar_updated = "";
     member.avatar_url = "";
@@ -462,7 +462,7 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
       user.recoveryPhone = phnum_recovery;
     }
     
-    if (typeof KONFIG.syncUserContactInfo !== 'undefined' && KONFIG.syncUserContactInfo) {
+    if (typeof KONFIG.SYNC_USER_CONTACT_INFO !== 'undefined' && KONFIG.SYNC_USER_CONTACT_INFO) {
       if (accountPrimaryPhoneNumber !== phnum) {
         console.log("Nytt mobilnummer: %s", phnum);
         user.phones = findPhoneNumbersToBeForUser_(useraccount, phnum);
@@ -628,7 +628,7 @@ function getGoogleAccounts_(defaultOrgUnitPath) {
       let pageToken, page;
       do {
         page = AdminDirectory.Users.list({
-          domain: KONFIG.domain,
+          domain: KONFIG.DOMAIN,
           query: "orgUnitPath='" + defaultOrgUnitPath + "'",
           orderBy: 'givenName',
           maxResults: 150,
@@ -699,7 +699,7 @@ function listaAllaGooglekonton(INPUT_KONFIG_OBJECT) {
   let pageToken, page;
   do {
     page = AdminDirectory.Users.list({
-      domain: KONFIG.domain,
+      domain: KONFIG.DOMAIN,
       query: "orgUnitPath='/Scoutnet'",
       orderBy: 'givenName',
       maxResults: 150,

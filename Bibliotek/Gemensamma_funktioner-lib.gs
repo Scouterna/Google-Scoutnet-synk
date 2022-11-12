@@ -44,69 +44,69 @@ function checkDataFromKonfig(INPUT_KONFIG_OBJECT) {
   console.info("Kårens domännamn");
   try {
     updateListOfGroups_();
-    console.info(KONFIG.domain + " - KORREKT");
+    console.info(KONFIG.DOMAIN + " - KORREKT");
   } catch (e) {
-    console.warn(KONFIG.domain + " - Eventuellt felaktig");
+    console.warn(KONFIG.DOMAIN + " - Eventuellt felaktig");
   }
 
-  const url_all_members = 'https://' + KONFIG.scoutnet_url + '/api/' + KONFIG.organisationType + '/memberlist';
-  const allMembers = urlFetch_(url_all_members, KONFIG.api_key_list_all);
+  const url_all_members = 'https://' + KONFIG.SCOUTNET_URL + '/api/' + KONFIG.ORGANISATION_TYPE + '/memberlist';
+  const allMembers = urlFetch_(url_all_members, KONFIG.API_KEY_LIST_ALL);
 
-  const url_maillist = 'https://' + KONFIG.scoutnet_url + '/api/' + KONFIG.organisationType + '/customlists?list_id=';
-  const mailinglist = urlFetch_(url_maillist, KONFIG.api_key_mailinglists);
+  const url_maillist = 'https://' + KONFIG.SCOUTNET_URL + '/api/' + KONFIG.ORGANISATION_TYPE + '/customlists?list_id=';
+  const mailinglist = urlFetch_(url_maillist, KONFIG.API_KEY_MAILINGLISTS);
 
   console.info("*****************");
   console.info("Url till Scoutnet");
 
   if (allMembers || mailinglist) {
-    console.info(KONFIG.scoutnet_url + " - KORREKT");
+    console.info(KONFIG.SCOUTNET_URL + " - KORREKT");
 
     console.info("*****************");
     console.info("Typ av enhet kår (group) eller distrikt (district)");
-    console.info(KONFIG.organisationType + " - KORREKT");
+    console.info(KONFIG.ORGANISATION_TYPE + " - KORREKT");
   }
   else {
-    console.warn(KONFIG.scoutnet_url + " - Eventuellt felaktig");
+    console.warn(KONFIG.SCOUTNET_URL + " - Eventuellt felaktig");
 
     console.info("*****************");
     console.info("Typ av enhet kår (group) eller distrikt (district)");
-    console.warn(KONFIG.organisationType + " - Eventuellt felaktig");
+    console.warn(KONFIG.ORGANISATION_TYPE + " - Eventuellt felaktig");
   }
 
   console.info("*****************");
-  console.info("API-nyckel för alla medlemmar (KONFIG.api_key_list_all)");
+  console.info("API-nyckel för alla medlemmar (KONFIG.API_KEY_LIST_ALL)");
   if (allMembers) {
-    console.info(KONFIG.api_key_list_all + " - KORREKT");
+    console.info(KONFIG.API_KEY_LIST_ALL + " - KORREKT");
   }
   else {
-    console.warn(KONFIG.api_key_list_all + " - Eventuellt felaktig");
+    console.warn(KONFIG.API_KEY_LIST_ALL + " - Eventuellt felaktig");
   }
 
   console.info("*****************");
-  console.info("API-nyckel för e-postlistor (KONFIG.api_key_mailinglists)");
+  console.info("API-nyckel för e-postlistor (KONFIG.API_KEY_MAILINGLISTS)");
   if (mailinglist) {
-    console.info(KONFIG.api_key_mailinglists + " - KORREKT");
+    console.info(KONFIG.API_KEY_MAILINGLISTS + " - KORREKT");
   }
   else {
-    console.warn(KONFIG.api_key_mailinglists + " - Eventuellt felaktig");
+    console.warn(KONFIG.API_KEY_MAILINGLISTS + " - Eventuellt felaktig");
   }
 
   console.info("*****************");
-  console.info("E-post för skräppostmoderering (KONFIGv.moderateContentEmail)");
-  if (checkEmailFormat_(KONFIG.moderateContentEmail) && !checkIfGroupExists_(KONFIG.moderateContentEmail)) {
-    console.info(KONFIG.moderateContentEmail + " - KORREKT");
+  console.info("E-post för skräppostmoderering (KONFIG.MODERATE_CONTENT_EMAIL)");
+  if (checkEmailFormat_(KONFIG.MODERATE_CONTENT_EMAIL) && !checkIfGroupExists_(KONFIG.MODERATE_CONTENT_EMAIL)) {
+    console.info(KONFIG.MODERATE_CONTENT_EMAIL + " - KORREKT");
   }
   else {
-    console.warn(KONFIG.moderateContentEmail + " - Eventuellt felaktig. Får ej vara en googlegrupp");
+    console.warn(KONFIG.MODERATE_CONTENT_EMAIL + " - Eventuellt felaktig. Får ej vara en googlegrupp");
   }
 
   console.info("*****************");
-  console.info("Adress till standardprofilbild (KONFIG.defaultUserAvatarUrl)");
+  console.info("Adress till standardprofilbild (KONFIG.DEFAULT_USER_AVATAR_URL)");
   if (getByteArrayOfDefaultImage_()) {
-    console.info(KONFIG.defaultUserAvatarUrl + " - KORREKT");
+    console.info(KONFIG.DEFAULT_USER_AVATAR_URL + " - KORREKT");
   }
   else {
-    console.warn(KONFIG.defaultUserAvatarUrl + " - Eventuellt felaktig");
+    console.warn(KONFIG.DEFAULT_USER_AVATAR_URL + " - Eventuellt felaktig");
   }
 }
 
@@ -146,7 +146,7 @@ function getGroupMembers_(groupId) {
       let pageToken, page;
       do {
         page = AdminDirectory.Members.list(groupId,{
-          domainName: KONFIG.domain,
+          domainName: KONFIG.DOMAIN,
           maxResults: 150,
           pageToken: pageToken,
         });
@@ -322,7 +322,7 @@ function checkIfEmail_(email) {
  */
 function urlFetch_(url, apiKey) {
 
-  const authHeader = 'Basic ' + Utilities.base64Encode(KONFIG.scoutnetGroupId + ':' + apiKey);
+  const authHeader = 'Basic ' + Utilities.base64Encode(KONFIG.SCOUTNET_GROUP_ID + ':' + apiKey);
   const response = UrlFetchApp.fetch(
     url, {
       'muteHttpExceptions': true,
@@ -361,8 +361,8 @@ function fetchScoutnetMembersOneMailinglist_(scoutnet_list_id, cell_scoutnet_lis
     if (forceUpdate || !(kaka = cache.get(scoutnet_list_id))) {
 
       const email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
-      const url = 'https://' + KONFIG.scoutnet_url + '/api/' + KONFIG.organisationType + '/customlists?list_id=' + scoutnet_list_id + email_fields;
-      json = urlFetch_(url, KONFIG.api_key_mailinglists);
+      const url = 'https://' + KONFIG.SCOUTNET_URL + '/api/' + KONFIG.ORGANISATION_TYPE + '/customlists?list_id=' + scoutnet_list_id + email_fields;
+      json = urlFetch_(url, KONFIG.API_KEY_MAILINGLISTS);
       //console.log("Json.length " + json.length);
 
       //Kolla så att inte större än 100kb per kaka och sätt i så fall cache; om ej skippa det.
@@ -617,8 +617,8 @@ function fetchScoutnetMembers_(forceUpdate) {
   //kaka sätts här för att spara ca 70ms då anropet inte behövs vid forceUpdate
   if (forceUpdate || !(kaka = cache.get("fetchScoutnetMembers"))) {
 
-    const url = 'https://' + KONFIG.scoutnet_url + '/api/' + KONFIG.organisationType + '/memberlist';
-    json = urlFetch_(url, KONFIG.api_key_list_all);
+    const url = 'https://' + KONFIG.SCOUTNET_URL + '/api/' + KONFIG.ORGANISATION_TYPE + '/memberlist';
+    json = urlFetch_(url, KONFIG.API_KEY_LIST_ALL);
     //console.log("Json.length " + json.length);
 
     //Kolla så att inte större än 100kb per kaka och sätt i så fall cache; om ej skippa det.
@@ -685,7 +685,7 @@ function getGoogleAccount_(member_no) {
     }
     try {
       const page = AdminDirectory.Users.list({
-        domain: KONFIG.domain,
+        domain: KONFIG.DOMAIN,
         query: qry,
         orderBy: 'givenName',
         maxResults: 1
@@ -739,7 +739,7 @@ function checkEmailFormat_(email) {
   const arr = email.split("@");
   const domain_part = arr[1];
   
-  if (domain_part === KONFIG.domain) {
+  if (domain_part === KONFIG.DOMAIN) {
     return true;
   }
   return false;
@@ -861,7 +861,7 @@ function updateListOfGroups_() {
       let pageToken, page;
       do {
         page = AdminDirectory.Groups.list({
-          domain: KONFIG.domain,
+          domain: KONFIG.DOMAIN,
           maxResults: 150,
           pageToken: pageToken
         });

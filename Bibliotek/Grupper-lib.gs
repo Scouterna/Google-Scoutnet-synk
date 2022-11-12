@@ -265,7 +265,7 @@ function listaAllaGrupperGoogle(INPUT_KONFIG_OBJECT) {
   let pageToken, page;
   do {
     page = AdminDirectory.Groups.list({
-      domain: KONFIG.domain,
+      domain: KONFIG.DOMAIN,
       maxResults: 150,
       pageToken: pageToken
     });
@@ -655,7 +655,7 @@ function setCellValueCellUrl_(selection, rad_nummer, column, email) {
   const arr = email.split("@");
   const list_name = arr[0];
   
-  const cell_url = '=HYPERLINK("https://groups.google.com/a/' + KONFIG.domain + '/g/' + list_name + '/members";"Länk")';
+  const cell_url = '=HYPERLINK("https://groups.google.com/a/' + KONFIG.DOMAIN + '/g/' + list_name + '/members";"Länk")';
   
   cell.setValue(cell_url);
 }
@@ -989,10 +989,10 @@ function getEmailAdressesofAllActiveGoogleAccounts_() {
   const emailAddresses = [];
   let users;
   let pageToken, page;
-  const catchAllAddress = "*@" + KONFIG.domain;
+  const catchAllAddress = "*@" + KONFIG.DOMAIN;
   do {
     page = AdminDirectory.Users.list({
-      domain: KONFIG.domain,
+      domain: KONFIG.DOMAIN,
       orderBy: 'givenName',
       maxResults: 150,
       pageToken: pageToken
@@ -1007,7 +1007,7 @@ function getEmailAdressesofAllActiveGoogleAccounts_() {
           for (let k = 0; k < user.emails.length; k++) { //Varje användare kan ha alias också
             
             const email = user.emails[k].address;
-            if (email.endsWith(KONFIG.domain)) { //Endast adresser för huvuddomänen
+            if (email.endsWith(KONFIG.DOMAIN)) { //Endast adresser för huvuddomänen
               if (email !== catchAllAddress) {
                 emailAddresses.push(email);
                 //console.log(email);
@@ -1429,8 +1429,8 @@ function getEmailadressesToSendSpamNotification_(group_moderate_content_email, c
     console.log("E-post för skräppostmoderator är angiven");
     boolModerateGroupEmail = true;
   }
-  else if (typeof KONFIG.moderateContentEmail !== 'undefined' && KONFIG.moderateContentEmail) {
-    emailAdresses = fetchScoutnetMembersMultipleMailinglists_(KONFIG.moderateContentEmail, "", "", forceUpdate);
+  else if (typeof KONFIG.MODERATE_CONTENT_EMAIL !== 'undefined' && KONFIG.MODERATE_CONTENT_EMAIL) {
+    emailAdresses = fetchScoutnetMembersMultipleMailinglists_(KONFIG.MODERATE_CONTENT_EMAIL, "", "", forceUpdate);
   }
   else { //Om man ej anger listId för en e-postlista ska användaren som kör detta program bli notifierad
     const activeUser = {
