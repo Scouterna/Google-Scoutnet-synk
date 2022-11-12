@@ -10,16 +10,16 @@
  * (startrad, slutrad, etikett)
  * (etikett)
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  * @param {string[]} args - Lista med indata
  */
-function synkroniseraGrupper(inputKonfig, args) {
+function synkroniseraGrupper(INPUT_KONFIG_OBJECT, args) {
   
   let forceUpdate = false;
 
   console.time("Grupper");
 
-  konfig = inputKonfig;
+  KONFIG = INPUT_KONFIG_OBJECT;
   const sheetDataGrupper = getDataFromActiveSheet_("Grupper");
   const sheet = sheetDataGrupper["sheet"];
   const selection = sheetDataGrupper["selection"];
@@ -119,11 +119,11 @@ function grupperRubrikData_() {
 /**
  * Skapa kolumnrubriker i kalkylarket och dölj kolumnen med Grupp-ID
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  */
-function skapaRubrikerGrupper(inputKonfig) {
+function skapaRubrikerGrupper(INPUT_KONFIG_OBJECT) {
   
-  konfig = inputKonfig;
+  KONFIG = INPUT_KONFIG_OBJECT;
   
   const sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
@@ -256,16 +256,16 @@ function visaAvanceradLayoutGrupper() {
 /**
  * Testfunktion för att lista alla grupper
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  */
-function listaAllaGrupperGoogle(inputKonfig) {
+function listaAllaGrupperGoogle(INPUT_KONFIG_OBJECT) {
   
-  konfig = inputKonfig;
+  KONFIG = INPUT_KONFIG_OBJECT;
 
   let pageToken, page;
   do {
     page = AdminDirectory.Groups.list({
-      domain: konfig.domain,
+      domain: KONFIG.DOMAIN,
       maxResults: 150,
       pageToken: pageToken
     });
@@ -286,11 +286,11 @@ function listaAllaGrupperGoogle(inputKonfig) {
 /**
  * Testfunktion för att läsa kalkylbladet med alla grupper
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  */
-function listaAllaGrupperKalkylblad(inputKonfig) {
+function listaAllaGrupperKalkylblad(INPUT_KONFIG_OBJECT) {
 
-  konfig = inputKonfig;
+  KONFIG = INPUT_KONFIG_OBJECT;
   
   const sheetDataGrupper = getDataFromActiveSheet_("Grupper");
 
@@ -655,7 +655,7 @@ function setCellValueCellUrl_(selection, rad_nummer, column, email) {
   const arr = email.split("@");
   const list_name = arr[0];
   
-  const cell_url = '=HYPERLINK("https://groups.google.com/a/' + konfig.domain + '/g/' + list_name + '/members";"Länk")';
+  const cell_url = '=HYPERLINK("https://groups.google.com/a/' + KONFIG.DOMAIN + '/g/' + list_name + '/members";"Länk")';
   
   cell.setValue(cell_url);
 }
@@ -989,10 +989,10 @@ function getEmailAdressesofAllActiveGoogleAccounts_() {
   const emailAddresses = [];
   let users;
   let pageToken, page;
-  const catchAllAddress = "*@" + konfig.domain;
+  const catchAllAddress = "*@" + KONFIG.DOMAIN;
   do {
     page = AdminDirectory.Users.list({
-      domain: konfig.domain,
+      domain: KONFIG.DOMAIN,
       orderBy: 'givenName',
       maxResults: 150,
       pageToken: pageToken
@@ -1007,7 +1007,7 @@ function getEmailAdressesofAllActiveGoogleAccounts_() {
           for (let k = 0; k < user.emails.length; k++) { //Varje användare kan ha alias också
             
             const email = user.emails[k].address;
-            if (email.endsWith(konfig.domain)) { //Endast adresser för huvuddomänen
+            if (email.endsWith(KONFIG.DOMAIN)) { //Endast adresser för huvuddomänen
               if (email !== catchAllAddress) {
                 emailAddresses.push(email);
                 //console.log(email);
@@ -1429,8 +1429,8 @@ function getEmailadressesToSendSpamNotification_(group_moderate_content_email, c
     console.log("E-post för skräppostmoderator är angiven");
     boolModerateGroupEmail = true;
   }
-  else if (typeof konfig.moderateContentEmail !== 'undefined' && konfig.moderateContentEmail) {
-    emailAdresses = fetchScoutnetMembersMultipleMailinglists_(konfig.moderateContentEmail, "", "", forceUpdate);
+  else if (typeof KONFIG.MODERATE_CONTENT_EMAIL !== 'undefined' && KONFIG.MODERATE_CONTENT_EMAIL) {
+    emailAdresses = fetchScoutnetMembersMultipleMailinglists_(KONFIG.MODERATE_CONTENT_EMAIL, "", "", forceUpdate);
   }
   else { //Om man ej anger listId för en e-postlista ska användaren som kör detta program bli notifierad
     const activeUser = {

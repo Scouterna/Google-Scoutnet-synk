@@ -7,56 +7,56 @@
 /**
  * Uppdatera medlemslistor för aktuella rader i kalkylarket
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  * @param {number} start - Rad att börja uppdatera på
  * @param {number} slut - Rad att sluta uppdatera på
  */
-function uppdateraMedlemslistor(inputKonfig, start, slut) {
-  synkroniseraMedlemslistor(inputKonfig, start, slut, true, false);
+function uppdateraMedlemslistor(INPUT_KONFIG_OBJECT, start, slut) {
+  synkroniseraMedlemslistor(INPUT_KONFIG_OBJECT, start, slut, true, false);
 }
 
 
 /**
  * Skicka ut e-brev till de som ska få det för angivna medlemlistor
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  * @param {number} start - Rad att börja gå igenom för att skicka ut e-brev på
  * @param {number} slut - Rad att sluta gå igenom för att skicka ut e-brev på
  */
-function skickaUtTillMedlemslistor(inputKonfig, start, slut)  {
-  synkroniseraMedlemslistor(inputKonfig, start, slut, false, true);
+function skickaUtTillMedlemslistor(INPUT_KONFIG_OBJECT, start, slut)  {
+  synkroniseraMedlemslistor(INPUT_KONFIG_OBJECT, start, slut, false, true);
 }
 
 
 /**
  * Funktion att använda för att synkronisera en medlemlista
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  * @param {number} radNummer - Rad att synkronisera
  * @param {boolean} shouldUpdate - Om medlemslistan ska uppdateras
  * @param {boolean} shouldSend - Om e-brev ska skickas ut till medlemlemslistan
  */
-function synkroniseraMedlemslistorEnRad(inputKonfig, radNummer, shouldUpdate, shouldSend) {
-  synkroniseraMedlemslistor(inputKonfig, radNummer, radNummer, shouldUpdate, shouldSend);
+function synkroniseraMedlemslistorEnRad(INPUT_KONFIG_OBJECT, radNummer, shouldUpdate, shouldSend) {
+  synkroniseraMedlemslistor(INPUT_KONFIG_OBJECT, radNummer, radNummer, shouldUpdate, shouldSend);
 }
 
 
 /**
  * Huvudfunktion för att hantera synkronisering av medlemslistor med Scoutnet
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  * @param {number} start - Rad att börja synkronisera på
  * @param {number} slut - Rad att sluta synkronisera på
  * @param {boolean} shouldUpdate - Om medlemslistan ska uppdateras
  * @param {boolean} shouldSend - Om e-brev ska skickas ut till medlemlemslistan
  */
-function synkroniseraMedlemslistor(inputKonfig, start, slut, shouldUpdate, shouldSend) {
+function synkroniseraMedlemslistor(INPUT_KONFIG_OBJECT, start, slut, shouldUpdate, shouldSend) {
   
   const forceUpdate = true;
 
   console.time("Medlemslistor");
 
-  konfig = inputKonfig;
+  KONFIG = INPUT_KONFIG_OBJECT;
 
   const sheetDataMedlemslistor = getDataFromActiveSheet_("Medlemslistor");
   const grd = getMedlemslistorKonfigRubrikData_();
@@ -161,13 +161,13 @@ function getMedlemslistorKonfigRubrikData_() {
 
 
 /**
- * Skapa kolumnrubriker i kalkylarket för medlemslistor konfig
+ * Skapa kolumnrubriker i kalkylarket för medlemslistor konfiguration
  * 
- * @param {Object} inputKonfig - Objekt med kårens konfiguration
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  */
-function skapaRubrikerML(inputKonfig) {
+function skapaRubrikerML(INPUT_KONFIG_OBJECT) {
 
-  konfig = inputKonfig;
+  KONFIG = INPUT_KONFIG_OBJECT;
 
   const sheetDataMedlemslistor = getDataFromActiveSheet_("Medlemslistor");
 
@@ -765,22 +765,6 @@ function getSender_(textInput, nameOfTheAttribute, attribut, dataArray, cell, em
 
 
 /**
- * Ger vilka e-postadresser som det går att ange som avsändare
- *
- * @returns {string[]} - En lista med e-postadresser
- */
-function getAllowedFromEmailAdresses_() {
-  
-  const aliases = GmailApp.getAliases();
-  const my_email = Session.getEffectiveUser().getEmail();
-  
-  aliases.push(my_email);
-  console.log("Tillåtna avsändaradresser " + aliases);
-  return aliases;
-}
-
-
-/**
  * Givet en mall returnerar funktionen en personlig gjord kommaseparerad
  * textsträng
  * 
@@ -1038,7 +1022,7 @@ function createMemberlistRow_(member, mlrd) {
  */
 function setCustomColumns_(sheet, startCol, numRow) {
 
-  const cf = konfig.medlemslista_egna_attribut_funktioner;
+  const cf = KONFIG.medlemslista_egna_attribut_funktioner;
   const num_cf = cf.length;
 
   /***********Rubriker**********/
