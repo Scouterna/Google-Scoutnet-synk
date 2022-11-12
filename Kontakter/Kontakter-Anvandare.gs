@@ -1473,12 +1473,6 @@ function makeContactResource_(memberData) {
       }, {
         "value": memberData.contact_alt_email,
         "type" : "Alternativ e-post"
-      }, {
-        "value": memberData.contact_email_mum,
-        "type" : "Anhörig 1 e-post"
-      }, {
-        "value": memberData.contact_email_dad,
-        "type" : "Anhörig 2 e-post"
     }],
     "externalIds": [{
       "value": memberData.member_no,
@@ -1514,10 +1508,10 @@ function makeContactResource_(memberData) {
       "type": "Anhörig 2 hem"
     }],
     "relations": [{
-      "person": memberData.contact_mothers_name,
+      "person": memberData.contact_email_mum,
       "type": "Anhörig 1",
     },{
-      "person": memberData.contact_fathers_name,
+      "person": memberData.contact_email_dad,
       "type": "Anhörig 2",
     }]
   };

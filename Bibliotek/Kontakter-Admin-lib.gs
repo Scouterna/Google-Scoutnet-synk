@@ -614,6 +614,7 @@ function getMembersForContactGroupsByMemberNumbers_(filteredMembers, memberNumbe
     
     if (obj.isRelativeContact) { //Om en anhörigs kontaktkort
       //console.log("Detta kontaktkort tillhör en anhörig till en medlem");
+      moveRelativesContactInfoToBiographies_(obj);
     }
     else if (checkIfAgeIsOver18_(obj)) { //Om medlem över 18 år
       changeContactRelativeForAdults_(obj);
@@ -799,7 +800,6 @@ function moveRelativesContactInfoToBiographies_(memberData)  {
   }
   if (memberData.contact_email_mum)  {
     bioContacts.push("Anhörig 1 e-post: " + memberData.contact_email_mum);
-    memberData.contact_email_mum = "";
   }
   if (memberData.contact_mobile_mum)  {
     bioContacts.push("Anhörig 1 mobil: " + memberData.contact_mobile_mum);
@@ -810,14 +810,12 @@ function moveRelativesContactInfoToBiographies_(memberData)  {
     memberData.contact_telephone_mum = "";
   }
 
-
   if (memberData.contact_fathers_name)  {
     bioContacts.push("Anhörig 2: " + memberData.contact_fathers_name);
     memberData.contact_fathers_name = "";
   }
   if (memberData.contact_email_dad)  {
     bioContacts.push("Anhörig 2 e-post: " + memberData.contact_email_dad);
-    memberData.contact_email_dad = "";
   }
   if (memberData.contact_mobile_dad)  {
     bioContacts.push("Anhörig 2 mobil: " + memberData.contact_mobile_dad);
@@ -1098,6 +1096,8 @@ function getContactForMemberRelative_(medlem, relativeNameAttribute, relativeRel
   tmpMemberRelative['date_of_birth_day'];
 
   tmpMemberRelative['title'] = "Anhörig " + relativeNumber;
+
+  tmpMemberRelative['biographies'] = "";
 
   tmpMemberRelative['isRelativeContact'] = true;
 
