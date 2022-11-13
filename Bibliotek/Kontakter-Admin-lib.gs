@@ -133,6 +133,10 @@ function updateContactGroupsAuthnSheetUsers(INPUT_KONFIG_OBJECT) {
     }
   }
   deleteRowsFromSpreadsheet_(sheet, delete_rows);
+  
+  if (delete_rows.length > 0) {
+    sheet.insertRows(slut, delete_rows.length);
+  }
 
   //Radera det som står i kolumnen för antal tvingade uppdateringar
   const range_tvingade_uppdateringar = sheet.getRange(start, grd["tvingade_uppdateringar"]+1, slut-start+1);
@@ -147,7 +151,20 @@ function updateContactGroupsAuthnSheetUsers(INPUT_KONFIG_OBJECT) {
       const password = createRandomPasswordForContactGroupsUser_();
       sheet.appendRow([email, password]);
     }
-  }  
+  }
+
+  const range_kontakter_anvandare = sheet.getRange(start, grd["e-post"]+1, slut-start+1, 5);
+  
+  //Vi tar bort alla skyddade områden
+  const protections = sheet.getProtections(SpreadsheetApp.ProtectionType.RANGE);
+  for (let i = 0; i < protections.length; i++) {
+    const protection = protections[i];
+    if (protection.canEdit()) {
+      protection.remove();
+    }
+  }
+  //Vi skyddar kalkylarket för Kontakter-Användare så man inte råkar ändra av misstag
+  range_kontakter_anvandare.protect().setWarningOnly(true); 
 }
 
 
