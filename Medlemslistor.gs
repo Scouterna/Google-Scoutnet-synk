@@ -31,8 +31,8 @@ function medlemslistorUppdateraEnbart() {
 
 
 /**
- * Skapa kolumnrubriker i kalkylarket för medlemslistor konfig
+ * Skapa kolumnrubriker i kalkylarket för konfiguration av Medlemslistor
  */
-function skapaRubrikerML() {
-  ScoutnetSynkLib.skapaRubrikerML(KONFIG_OBJECT);
+function skapaRubrikerMedlemslistor() {
+  ScoutnetSynkLib.skapaRubrikerMedlemslistor(KONFIG_OBJECT);
 }

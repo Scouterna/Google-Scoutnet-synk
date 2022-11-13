@@ -183,6 +183,7 @@ function skapaRubrikerGrupper(INPUT_KONFIG_OBJECT) {
 
   // Sätter våra rubriker på vårt område med kursiv text
   range_rad2.setValues(values_rad2);
+  range_rad2.setFontWeight("bold");
   range_rad2.setFontStyle("italic");
   
   /*******************************/

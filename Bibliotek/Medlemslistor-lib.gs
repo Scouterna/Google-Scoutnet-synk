@@ -165,7 +165,7 @@ function getMedlemslistorKonfigRubrikData_() {
  * 
  * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
  */
-function skapaRubrikerML(INPUT_KONFIG_OBJECT) {
+function skapaRubrikerMedlemslistor(INPUT_KONFIG_OBJECT) {
 
   KONFIG = INPUT_KONFIG_OBJECT;
 

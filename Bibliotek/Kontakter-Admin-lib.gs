@@ -221,6 +221,96 @@ function getKontaktGruppKonfigRubrikData_() {
 
 
 /**
+ * Skapa kolumnrubriker i kalkylarket för Kontakter konfiguration
+ * 
+ * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
+ */
+function skapaRubrikerKontakter(INPUT_KONFIG_OBJECT) {
+
+  KONFIG = INPUT_KONFIG_OBJECT;
+
+  /********Kalkylarket - Kontakter********************/
+  const sheetDataKontakter = getDataFromActiveSheet_("Kontakter");
+
+  const sheet = sheetDataKontakter["sheet"];
+  //const selection = sheetDataKontakter["selection"];
+  //const data = sheetDataKontakter["data"];
+  const konfigRubrikDataKontakter = getKontaktGruppKonfigRubrikData_();
+
+  // Frys de två översta raderna på arket så att rubrikerna alltid syns
+  sheet.setFrozenRows(2);
+
+  /********Rad 1********************/ 
+  const values_rad1 = [
+    ["Vilka kontakter att synkronisera"]
+  ];
+
+  // Sätter området för cellerna som vi ska ändra
+  const range_rad1 = sheet.getRange(1, konfigRubrikDataKontakter["scoutnet_list_id"]+1, 1, 1);
+  range_rad1.setHorizontalAlignment("center");
+  range_rad1.setFontWeight("bold");
+
+  // Sätter våra rubriker på vårt område
+  range_rad1.setValues(values_rad1);
+
+  /*******Rad 2********************/
+  // Våra värden vi vill ha som rubriker för de olika kolumnerna på rad 2
+  const values_rad2 = [
+    ["Namn", "Medlem i Google grupp som ska ges behörighet", "Scoutnet-id"]
+  ];
+
+  // Sätter området för cellerna på rad 2 som vi ska ändra
+  const range_rad2 = sheet.getRange(2, 1, 1, values_rad2[0].length);
+
+  // Sätter våra rubriker på vårt område
+  range_rad2.setValues(values_rad2);
+  range_rad2.setFontWeight("bold");
+  range_rad2.setFontStyle("italic");
+  /*******************************/
+
+
+  /********Kalkylarket - Kontakter-Användare********************/
+  const sheetDataKontakterAnvandare = getDataFromActiveSheet_("Kontakter-Användare");
+
+  const sheetKontakterAnvandare = sheetDataKontakterAnvandare["sheet"];
+  //const selection = sheetDataKontakterAnvandare["selection"];
+  //const data = sheetDataKontakterAnvandare["data"];
+  const konfigRubrikDataKontakterAnvandare = getKontaktGruppAuthnRubrikData_();
+
+  // Frys de två översta raderna på arket så att rubrikerna alltid syns
+  sheetKontakterAnvandare.setFrozenRows(2);
+
+  /********Rad 1********************/ 
+  const values_rad1KontakterAnvandare = [
+    ["Äldsta godkända version:"]
+  ];
+
+  // Sätter området för cellerna som vi ska ändra
+  const range_rad1KontakterAnvandare = sheetKontakterAnvandare.getRange(1, konfigRubrikDataKontakterAnvandare["senast_använd"]+1, 1, 1);
+  range_rad1KontakterAnvandare.setHorizontalAlignment("center");
+  range_rad1KontakterAnvandare.setFontWeight("bold");
+
+  // Sätter våra rubriker på vårt område
+  range_rad1KontakterAnvandare.setValues(values_rad1KontakterAnvandare);
+
+  /*******Rad 2********************/
+  // Våra värden vi vill ha som rubriker för de olika kolumnerna på rad 2
+  const values_rad2KontakterAnvandare = [
+    ["E-post", "Lösenord", "Senast använd", "Version som körs", "Antal tvingade uppdateringar"]
+  ];
+
+  // Sätter området för cellerna på rad 2 som vi ska ändra
+  const range_rad2KontakterAnvandare = sheetKontakterAnvandare.getRange(2, 1, 1, values_rad2KontakterAnvandare[0].length);
+
+  // Sätter våra rubriker på vårt område
+  range_rad2KontakterAnvandare.setValues(values_rad2KontakterAnvandare);
+  range_rad2KontakterAnvandare.setFontWeight("bold");
+  range_rad2KontakterAnvandare.setFontStyle("italic");
+  /*******************************/
+}
+
+
+/**
  * Kontrollerar om användaren använder en ok version
  * 
  * @param {string} version_running - Användarens version av skript

@@ -54,3 +54,11 @@ function testGetHtmlEmailBody() {
 function updateContactGroupsAuthnSheetUsers() {
   ScoutnetSynkLib.updateContactGroupsAuthnSheetUsers(KONFIG_OBJECT);
 }
+
+
+/**
+ * Skapa kolumnrubriker i kalkylarket för konfiguration av Kontakter
+ */
+function skapaRubrikerKontakter() {
+  ScoutnetSynkLib.skapaRubrikerKontakter(KONFIG_OBJECT);
+}
