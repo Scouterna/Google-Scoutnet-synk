@@ -402,7 +402,7 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
     //Ett genererat id för standardbilden
     if (typeof defaultUserAvatar !== 'undefined' && defaultUserAvatar) {
       shouldBeKeywordAvatarUpdated = defaultUserAvatarId;
-      console.log("Ska sätta standardbild på denna person");
+      console.log("Ska använda standardbild för denna person");
     }
   }
   else {
@@ -416,10 +416,10 @@ function updateAccount_(member, useraccount, orgUnitPath, defaultUserAvatar, def
     shouldBeKeywordAvatarUpdated += useraccount.thumbnailPhotoEtag;
   }
   
-  console.log("accountKeywordAvatarUpdated " + accountKeywordAvatarUpdated);
-  console.log("shouldBeKeywordAvatarUpdated " + shouldBeKeywordAvatarUpdated);
-  console.log("Avatar updated " + member.avatar_updated);
-  console.log("Avatar url " + member.avatar_url);
+  //console.log("accountKeywordAvatarUpdated " + accountKeywordAvatarUpdated);
+  //console.log("shouldBeKeywordAvatarUpdated " + shouldBeKeywordAvatarUpdated);
+  //console.log("Avatar updated " + member.avatar_updated);
+  //console.log("Avatar url " + member.avatar_url);
 
   
   if ( useraccount.name.givenName !== member.first_name 
