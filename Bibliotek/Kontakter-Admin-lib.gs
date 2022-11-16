@@ -29,7 +29,7 @@ function synkroniseraKontakter(INPUT_KONFIG_OBJECT, e) {
   
   const userEmail = params.username[0];
   const userPassword = params.password[0];
-  const userVersion = params.version[0];
+  const userVersion = params.version[0].replace(/,/g, ".");
   let forceUpdate = params.forceupdate[0];
 
   if ("true" === forceUpdate) {
@@ -42,10 +42,12 @@ function synkroniseraKontakter(INPUT_KONFIG_OBJECT, e) {
 
   let contactGroupsList;
 
-  if (!checkIfVersionOk_(userVersion)) {
+  const sheetDataKontakterAnvandare = getDataFromActiveSheet_("Kontakter-Användare");
+
+  if (!checkIfVersionOk_(sheetDataKontakterAnvandare, userVersion)) {
     contactGroupsList = "Du använder en version av skriptet som inte stöds längre.";
   }
-  else if (userEmail && checkCredentials_(userEmail, userPassword, userVersion, forceUpdate)) {
+  else if (userEmail && checkCredentials_(sheetDataKontakterAnvandare, userEmail, userPassword, userVersion, forceUpdate)) {
     //Hämta en lista över alla Google Grupper som denna person är med i
     const groups = getListOfGroupsForAUser_(userEmail);
     const listOfGroupEmails = getListOfGroupsEmails_(groups);
@@ -330,23 +332,28 @@ function skapaRubrikerKontakter(INPUT_KONFIG_OBJECT) {
 /**
  * Kontrollerar om användaren använder en ok version
  * 
+ * @param {Object} sheetDataKontakterAnvandare - Objekt bestående av data från aktuellt kalkylblad
  * @param {string} version_running - Användarens version av skript
  * 
  * @returns {boolean} - Gällande om versionen av användarens skript är ok eller ej
  */
-function checkIfVersionOk_(version_running) {
+function checkIfVersionOk_(sheetDataKontakterAnvandare, version_running) {
 
   if (!version_running) {
     console.error("Ej angiven version");
     return false;
   }
 
+  const data = sheetDataKontakterAnvandare["data"];
+  const grd = getKontaktGruppAuthnRubrikData_();
+  const version_oldest_ok = data[0][grd["version"]].replace(/,/g, ".");
+
   console.info("Version som används av användaren " + version_running);
-  console.info("Äldsta tillåtna version " + KONFIG.version_oldest_ok);
+  console.info("Äldsta tillåtna version " + version_oldest_ok);
 
   const version_running_split_list = version_running.split(".");
 
-  const version_oldest_ok_split_list = KONFIG.version_oldest_ok.split(".");
+  const version_oldest_ok_split_list = version_oldest_ok.split(".");
 
   //Gå igenom varje nivå av underversion
   for (let i = 0; i < version_running_split_list.length; i++) {
@@ -1348,6 +1355,7 @@ function getUpdateForContactGroup_(selection, rad_nummer, radInfo, grd, forceUpd
 /**
  * Kontrollerar om inskickade autentiseringsuppgifter är giltiga
  * 
+ * @param {Object} sheetDataKontakterAnvandare - Objekt bestående av data från aktuellt kalkylblad
  * @param {string} userEmail - E-postadress för en användare
  * @param {string} userPassword - Lösenord för en användare för synkning av kontaktgrupper
  * @param {string} userVersion - Version av skript för en användare
@@ -1355,15 +1363,13 @@ function getUpdateForContactGroup_(selection, rad_nummer, radInfo, grd, forceUpd
  * 
  * @returns {boolean} - Gällande om inskickade autentiseringsuppgifter är giltiga
  */
-function checkCredentials_(userEmail, userPassword, userVersion, forceUpdate) {
+function checkCredentials_(sheetDataKontakterAnvandare, userEmail, userPassword, userVersion, forceUpdate) {
   
   console.info("Kontrollerar om inskickade autentiseringsuppgifter är giltiga")
   
   userEmail = getGmailAdressWithoutDots_(userEmail.toLowerCase());
 
   console.info("userEmail: " + userEmail + " userPassword: " + userPassword);
-
-  const sheetDataKontakterAnvandare = getDataFromActiveSheet_("Kontakter-Användare");
 
   //const sheet = sheetDataKontakterAnvandare["sheet"];
   const selection = sheetDataKontakterAnvandare["selection"];

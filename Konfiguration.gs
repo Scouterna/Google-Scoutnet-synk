@@ -109,9 +109,6 @@ KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_CREDENTIALS_PLAINBODY = "Hej, Du har nyss fö
 KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_CREDENTIALS_HTMLBODY = '<div dir="ltr">Hej,<div><br></div><div>Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper.</div><div><br></div><div>Vänligen använd följande uppgifter i stället:</div><div><br></div><div>E-postadress: {{userEmail}}</div><div>Lösenord: {{password}}</div><div><br></div><div>Mvh</div><div>' + KONFIG_OBJECT.GROUP_NAME + '</div></div>';
 /***Brödtext Html - Slut***/
 
-//Du på kåren kan ändra denna om du vill tvinga dina egna användare att uppdatera sina skript
-KONFIG_OBJECT.version_oldest_ok = "2.0.0";
-
 //Ord som står i en medlems anteckningar som ska med i synkning men bytas ut mot något annat
 KONFIG_OBJECT.NOTE_KEYS_TO_REPLACE = [
     ["lEdare", "Förälder har ledarintresse"],
