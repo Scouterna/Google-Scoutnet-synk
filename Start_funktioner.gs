@@ -10,18 +10,11 @@
  */
 function synkroniseraAnvandareOchGrupper() {
   synkroniseraAnvandare();
-  synkroniseraGrupper();
+  synkroniseraGrupperAllaRader();
 }
 
 
 /***Grupper***/
-/**
- * Funktion för att alla rader i kalkylarket för grupper
- * ska synkroniseras och e-brev skickas ut
- */
-function synkroniseraGrupperAllaRader() {
-  synkroniseraGrupper();
-}
 
 /**
  * Funktioner för att ange att enbart vissa radintervall och
@@ -33,23 +26,23 @@ function synkroniseraGrupperAllaRader() {
  * Går att ange enbart etikett om så önskas.
  */
 function synkroniseraGrupperVissaRader1() {
-  synkroniseraGrupper(0, 10);
+  synkroniseraGrupper_(0, 10);
 }
 
 function synkroniseraGrupperVissaRader2() {
-  synkroniseraGrupper(11, 20);
+  synkroniseraGrupper_(11, 20);
 }
 
 function synkroniseraGrupperVissaRader3() {
-  synkroniseraGrupper(21, 30);
+  synkroniseraGrupper_(21, 30);
 }
 
 function synkroniseraGrupperVissaRaderOchEtikett1() {
-  synkroniseraGrupper(0, 10, "Avdelningar");
+  synkroniseraGrupper_(0, 10, "Avdelningar");
 }
 
 function synkroniseraGrupperVissEtikett1() {
-  synkroniseraGrupper("Avdelningar");
+  synkroniseraGrupper_("Avdelningar");
 }
 /***Grupper - Slut***/
 

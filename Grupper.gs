@@ -5,13 +5,11 @@
 
 
 /**
- * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
- * Anropas antingen med (startrad, slutrad)
- * (startrad, slutrad, etikett)
- * (etikett)
+ * Funktion för att alla rader i kalkylarket för grupper
+ * ska synkroniseras och e-brev skickas ut
  */
-function synkroniseraGrupper(...args)  {
-  ScoutnetSynkLib.synkroniseraGrupper(KONFIG_OBJECT, args);
+function synkroniseraGrupperAllaRader() {
+  synkroniseraGrupper_();
 }
 
 
@@ -19,7 +17,18 @@ function synkroniseraGrupper(...args)  {
  * Testfunktion för att synkronisera några rader med grupper
  */
 function synkroniseraGrupperTestsynk() {
-  synkroniseraGrupper(0, 10);
+  synkroniseraGrupper_(0, 10);
+}
+
+
+/**
+ * Huvudfunktion för att hantera synkronisering av googlegrupper med Scoutnet
+ * Anropas antingen med (startrad, slutrad)
+ * (startrad, slutrad, etikett)
+ * (etikett)
+ */
+function synkroniseraGrupper_(...args)  {
+  ScoutnetSynkLib.synkroniseraGrupper(KONFIG_OBJECT, args);
 }
 
 
