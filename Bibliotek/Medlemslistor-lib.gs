@@ -537,7 +537,7 @@ function checkIfNoReplyOption_(textInput, attribut, dataArray, cell) {
  * Givet en kommaseparerad sträng med id för filer på Google drive
  * ges en lista med objekten av filerna
  * 
- * @param {string} ids - En kommaseparerad sträng av id:n för filer
+ * @param {string} ids - En kommaseparerad sträng av id:n eller URL för filer
  *
  * @returns {Object[]} - En lista av objekt av typen File
  */
@@ -548,15 +548,22 @@ function getDocumentToMerge(ids) {
   const nameOfDocuments = [];
   
   for (let i = 0; i < idList.length; i++) {
-    const id = idList[i].trim();
+    const idOrUrl = idList[i].trim();
 
     try {
-      const doc = DriveApp.getFileById(id);
+      const doc = DriveApp.getFileById(idOrUrl);
       docs.push(doc);
       nameOfDocuments.push(doc.getName());
     } catch (e) {
-      console.error(e);
-      return false;
+      try {
+        const docId = DocumentApp.openByUrl(idOrUrl).getId();
+        const doc = DriveApp.getFileById(docId);
+        docs.push(doc);
+        nameOfDocuments.push(doc.getName());
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
     }
   }
   console.log("Lyckades hitta dokument att koppla");
