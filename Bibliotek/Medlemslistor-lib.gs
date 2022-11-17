@@ -1029,7 +1029,7 @@ function createMemberlistRow_(member, mlrd) {
  */
 function setCustomColumns_(sheet, startCol, numRow) {
 
-  const cf = KONFIG.medlemslista_egna_attribut_funktioner;
+  const cf = MEDLEMSLISTA_EGNA_ATTRIBUT_FUNKTIONER;
   const num_cf = cf.length;
 
   /***********Rubriker**********/
