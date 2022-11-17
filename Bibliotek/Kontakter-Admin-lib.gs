@@ -873,11 +873,56 @@ function checkIfSomeContactInfoBelongsToAdultMember_(memberData, comparableAdult
   }
   else if (0 !== indexesMatchesEmail.length || 0 !== indexesMatchesMobile.length)  {
     console.warn("En inkomplett matchning för en vuxen medlem har hittats hos " + memberFullname + " Anhörig #" + relativeNumber);
+
     if (KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_TO) {
-      sendEmailPartialMemberMatch_(memberData, memberFullname, relativeNumber);
+      if (checkIfFirstContactUpdateSinceReset()) {
+        sendEmailPartialMemberMatch_(memberData, memberFullname, relativeNumber);
+      }
     }
   }
   
+  return false;
+}
+
+
+/**
+ * Kollar om användaren som synkroniserar kontakter är den första sedan
+ * senaste nollställning
+ * 
+ * @returns {boolean} - Om första användaren som synkroniserar kontakter
+ */
+function checkIfFirstContactUpdateSinceReset()  {
+
+  const sheetDataKontakterAnvandare = getDataFromActiveSheet_("Kontakter-Användare");
+  const sheet = sheetDataKontakterAnvandare["sheet"];
+  const data = sheetDataKontakterAnvandare["data"];
+  
+  const grd = getKontaktGruppAuthnRubrikData_();
+  
+  const rowsToSync = findWhatRowsToSync_(0, data.length, data.length);
+  const start = rowsToSync.start;
+  const slut = rowsToSync.slut;
+  
+  
+  const range_tvingade_uppdateringar = sheet.getRange(start, grd["tvingade_uppdateringar"]+1, slut-start+1);
+  const tvingade_uppdateringar = range_tvingade_uppdateringar.getDisplayValues();
+
+  let userUpdates = [];
+  for (let i = 0; i < tvingade_uppdateringar.length; i++) {
+
+    if (tvingade_uppdateringar[i][0].length !== 0)  {
+      userUpdates.push(tvingade_uppdateringar[i][0]);
+    }
+  }
+  console.log("Antal användare som synkroniserat kontakter sedan senaste nollställning " + userUpdates.length);
+
+  if (1 === userUpdates.length) {
+    if (0 == userUpdates[0] || 1 == userUpdates[0]) {
+      //console.log("Första användaren");
+      return true;
+    }
+  }
+  //console.log("Ej första användaren");
   return false;
 }
 
@@ -1409,7 +1454,7 @@ function checkCredentials_(sheetDataKontakterAnvandare, userEmail, userPassword,
       return false;
     }
     console.info("Korrekt angivet lösenord för angiven e-postadress");
-    const cell = selection.getCell(rad_nummer, grd["senast_använd"]+1);
+    let cell = selection.getCell(rad_nummer, grd["senast_använd"]+1);
     const datum = new Date();
     cell.setValue(datum).setNumberFormat("yyyy-MM-dd hh:mm:ss");
     console.log("Uppdatera datum i kalkylblad för senast använd " + datum);
@@ -1423,9 +1468,10 @@ function checkCredentials_(sheetDataKontakterAnvandare, userEmail, userPassword,
     if (typeof num_of_forced_updates !== "number")  {
       num_of_forced_updates = 0;
     }
+
+    cell = selection.getCell(rad_nummer, grd["tvingade_uppdateringar"]+1);
     if (forceUpdate)  {
       if (num_of_forced_updates < KONFIG.MAX_NUMBER_OF_CONTACTS_FORCE_UPDATE) {
-        const cell = selection.getCell(rad_nummer, grd["tvingade_uppdateringar"]+1);
         num_of_forced_updates++;
         cell.setValue(num_of_forced_updates);
       }
@@ -1433,6 +1479,9 @@ function checkCredentials_(sheetDataKontakterAnvandare, userEmail, userPassword,
         console.error("Användaren försökt köra tvingad uppdatering för ofta");
         return false;
       }
+    }
+    else  { //Sätter siffran noll om ej tvingad och ej några räknade heller
+      cell.setValue(num_of_forced_updates);
     }    
 
     return true;
