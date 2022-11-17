@@ -872,7 +872,10 @@ function checkIfSomeContactInfoBelongsToAdultMember_(memberData, comparableAdult
     }
   }
   else if (0 !== indexesMatchesEmail.length || 0 !== indexesMatchesMobile.length)  {
-    console.warn("En partiell matchning för en vuxen medlem har hittats hos " + memberFullname + " Anhörig #" + relativeNumber);
+    console.warn("En inkomplett matchning för en vuxen medlem har hittats hos " + memberFullname + " Anhörig #" + relativeNumber);
+    if (KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_TO) {
+      sendEmailPartialMemberMatch_(memberData, memberFullname, relativeNumber);
+    }
   }
   
   return false;
@@ -1479,6 +1482,53 @@ function sendEmailWithContactsGroupsPassword_(userEmail, password) {
 
   console.info("Skickar e-post till " + userEmail);
   GmailApp.sendEmail(userEmail, KONFIG.CONTACT_GROUPS_EMAIL_CREDENTIALS_SUBJECT, contact_groups_email_plainBody_credentials, emailOptions);
+}
+
+
+/**
+ * Skicka e-brev till angiven e-postadress med information
+ * om inkomplett matchning mellan två medlemmar
+ * 
+ * @param {Object} memberData - Persondata för en medlem
+ * @param {string} memberFullname - Fullständigt namn för en medlem
+ * @param {number} relativeNumber - Vilket anhörignummer för en medlem
+ */
+function sendEmailPartialMemberMatch_(memberData, memberFullname, relativeNumber) {
+
+  const emailOptions = {};
+
+  /***Avsändarnamn***/
+  if (KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_SENDER_NAME) {
+    emailOptions["name"] = KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_SENDER_NAME;
+  }
+  /***Avsändarnamn - Slut***/
+
+  /***Avsändaradress***/
+  if (KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_SENDER_FROM) {
+    if (getAllowedFromEmailAdresses_().includes(KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_SENDER_FROM)) {
+      emailOptions["from"] = KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_SENDER_FROM;
+    }
+    else {
+      console.error("Angiven avsändaradress är ej godkänd");
+      console.error("Avsändaradressen måste finnas upplagd som alias i din Gmail");
+    }
+  }
+  /***Avsändaradress - Slut***/
+
+  let subject = KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_SUBJECT.replace("{{memberFullname}}", memberFullname);
+
+  let email_plainBody = KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_PLAINBODY.replace("{{memberFullname}}", memberFullname);
+  email_plainBody = email_plainBody.replace("{{relativeNumber}}", relativeNumber);
+  email_plainBody = email_plainBody.replace("{{member_no}}", memberData.member_no);
+
+  let email_htmlBody = KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_HTMLBODY.replace("{{memberFullname}}", memberFullname);
+  email_htmlBody = email_htmlBody.replace("{{relativeNumber}}", relativeNumber);
+  email_htmlBody = email_htmlBody.replace("{{member_no}}", memberData.member_no);
+
+  emailOptions["htmlBody"] = email_htmlBody;
+
+  console.info("Skickar e-post till " + KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_TO);
+  GmailApp.sendEmail(KONFIG.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_TO, subject, email_plainBody, emailOptions);
 }
 
 

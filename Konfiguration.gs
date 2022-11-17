@@ -109,6 +109,35 @@ KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_CREDENTIALS_PLAINBODY = "Hej, Du har nyss fö
 KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_CREDENTIALS_HTMLBODY = '<div dir="ltr">Hej,<div><br></div><div>Du har nyss försökt autentisera dig med en felaktig kombination av e-postadress och lösenord för att synkronisera kontaktgrupper.</div><div><br></div><div>Vänligen använd följande uppgifter i stället:</div><div><br></div><div>E-postadress: {{userEmail}}</div><div>Lösenord: {{password}}</div><div><br></div><div>Mvh</div><div>' + KONFIG_OBJECT.GROUP_NAME + '</div></div>';
 /***Brödtext Html - Slut***/
 
+
+/**
+ * Inställningar för Kontaktgrupper - skicka e-brev vid inkomplett medlemsmatchning
+ */
+//Ämne på e-post som upplyser om inkomplett matchning mellan två medlemmar (ett barn och en vuxen)
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_SUBJECT = "Inkomplett medlemsprofil i Scoutnet funnen - {{memberFullname}}";
+
+//Mottagaradress för vart e-brev som upplyser om inkomplett matchning mellan två medlemmar (ett barn och en vuxen) ska skickas
+//Vanligtvis e-postadressen till kårens medlemsansvarig
+//Om inget sätt kommer inte några e-brev skickas som upplyser om inkomplett matchning
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_TO = "";
+
+//Avsändarnamn på e-post som upplyser om inkomplett matchning mellan två medlemmar (ett barn och en vuxen)
+//Om inget sätts används namnet på användarkontot som kör skriptet
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_SENDER_NAME = "";
+
+//Avsändare-post som upplyser om inkomplett matchning mellan två medlemmar (ett barn och en vuxen)
+//Avsändaradressen måste finnas upplagd som alias i din Gmail
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_SENDER_FROM = "";
+
+//Skapa din egen med hjälp av funktionen testGetHtmlEmailBody
+/***Brödtext enkel***/
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_PLAINBODY = "Hej, En inkomplett matchning har hittats mellan två medlemmar (ett barn och en vuxen) i Scoutnet. Vänligen komplettera uppgifterna med e-post/telefonnummer för medlem {{memberFullname}} i fältet Anhörig {{relativeNumber}} hos denna medlem. Direktlänk för denna medlem är https://" + KONFIG_OBJECT.SCOUTNET_URL + "/organisation/user/{{member_no}} Mvh " + KONFIG_OBJECT.GROUP_NAME;
+/***Brödtext enkel - Slut***/
+
+/***Brödtext Html***/
+KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_HTMLBODY = '<div dir="ltr">Hej,<div><br></div><div>En inkomplett matchning har hittats mellan två medlemmar (ett barn och en vuxen) i Scoutnet. </div><div><br></div><div>Vänligen komplettera uppgifterna med e-post/telefonnummer för medlem {{memberFullname}} i fältet Anhörig {{relativeNumber}} hos denna medlem.</div><div><br></div><div>Direktlänk för denna medlem är https://' + KONFIG_OBJECT.SCOUTNET_URL + '/organisation/user/{{member_no}}</div><div><br></div><div>Mvh</div><div>' + KONFIG_OBJECT.GROUP_NAME + '</div></div>';
+/***Brödtext Html - Slut***/
+
 //Ord som står i en medlems anteckningar som ska med i synkning men bytas ut mot något annat
 KONFIG_OBJECT.NOTE_KEYS_TO_REPLACE = [
     ["lEdare", "Förälder har ledarintresse"],
