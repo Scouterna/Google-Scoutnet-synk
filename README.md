@@ -6,6 +6,7 @@ Du kan med dessa program göra följande
    **Delad enhet** på Google drive för Spårare.
 1. Synkronisera medlemslistor enligt dina urval från Scoutnet samt skicka ut personliga
    e-brev enligt dina inställningar till medlemmar.
+1. Synkronisera kontaktbok och kontaktgrupper hos kårens ledare med personer från Scoutnet.
 
 - Denna lösning använder Google Apps Script.
 
@@ -17,7 +18,7 @@ Du kan med dessa program göra följande
 
 - Du kan ladda ner den senaste versionen 
   [här](https://github.com/Scouterna/Google-Scoutnet-synk/releases/latest) och där kan 
-  du också se vilken funktionalitet som är ny i respektive version. Läs filen **README.md**
+  du också se vilken funktionalitet som är ny i respektive version. Läs i dokumentationen
   för instruktion om installation och funktionalitet.
 
 ## [Dokumentation - läs mer här](https://github.com/Scouterna/Google-Scoutnet-synk/wiki)
