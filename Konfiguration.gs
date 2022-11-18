@@ -38,6 +38,9 @@ KONFIG_OBJECT.SYNC_USER_CONTACT_INFO = true;
 //Inställning om medlems profilbild ska synkroniseras till användares Google Workspace-konto
 KONFIG_OBJECT.SYNC_USER_AVATAR = true;
 
+//Inställning om statistik över funktioner som körs och kontaktinformation till kåren ska delas med utvecklaren
+KONFIG_OBJECT.SHARE_STATISTICS_OF_RUNNING_SCRIPTS_AND_GROUP_INFORMATION = false; //Ändra till true om du vill dela statistik
+
 //Adress till profilbild att använda för Googlekonton om ingen finns i Scoutnet
 KONFIG_OBJECT.DEFAULT_USER_AVATAR_URL = "https://web.cdn.scouterna.net/uploads/sites/57/2021/05/avatar.png";
 
@@ -140,6 +143,6 @@ KONFIG_OBJECT.CONTACT_GROUPS_EMAIL_PARTIAL_MEMBER_MATCH_HTMLBODY = '<div dir="lt
 
 //Ord som står i en medlems anteckningar som ska med i synkning men bytas ut mot något annat
 KONFIG_OBJECT.NOTE_KEYS_TO_REPLACE = [
-    ["lEdare", "Förälder har ledarintresse"],
-    ["Rabatt", "Rabatter i butiker av intresse"]
-  ];
+  ["lEdare", "Förälder har ledarintresse"],
+  ["Rabatt", "Rabatter i butiker av intresse"]
+];
