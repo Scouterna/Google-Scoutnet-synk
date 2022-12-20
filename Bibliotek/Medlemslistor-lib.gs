@@ -603,13 +603,19 @@ function getAndMakeAttachments_(attachmentsInput, documentToMerge, attribut, dat
       const copy_file = DocumentApp.openById(copy_id);
 
       const body = copy_file.getBody();
-      replaceContentOfDocument_(body, attribut, dataArray);
+      if (body) {
+        replaceContentOfDocument_(body, attribut, dataArray);
+      }
 
       const header = copy_file.getHeader();
-      replaceContentOfDocument_(header, attribut, dataArray);
+      if (header) {
+        replaceContentOfDocument_(header, attribut, dataArray);
+      }
 
       const footer = copy_file.getFooter();
-      replaceContentOfDocument_(footer, attribut, dataArray);
+      if (footer) {
+        replaceContentOfDocument_(footer, attribut, dataArray);
+      }
 
       console.log("URL för temporärt skapad fil är");
       console.log(copy_file.getUrl());
