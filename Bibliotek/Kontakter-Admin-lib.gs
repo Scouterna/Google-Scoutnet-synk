@@ -506,7 +506,9 @@ function getContactGroupsData_(listOfGroupEmails, forceUpdate) {
   let contactGroupsList = [];
 
   //Hämta lista med alla medlemmar i kåren och alla deras attribut
-  let allMembers = fetchScoutnetMembers_(forceUpdate);
+  const allActiveMembers = fetchScoutnetMembers_(true, false);
+  const allWaitingMembers = fetchScoutnetMembers_(true, true);
+  let allMembers = [...allActiveMembers, ...allWaitingMembers];
   let filteredMembers = filterMemberAttributes_(allMembers);  
 
   //Listor med telefonnummer, e-postadress och medlemsnummer för alla vuxna medlemmar för att

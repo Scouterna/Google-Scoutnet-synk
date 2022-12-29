@@ -647,20 +647,26 @@ function getEmailListSyncOption_(member, synk_option, boolGoogleAccounts) {
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
  */
-function fetchScoutnetMembers_(forceUpdate) {
+function fetchScoutnetMembers_(forceUpdate, fetchWaitingMembers) {
 
   const cacheExpirationInSeconds = 21600; //6 timmar
-  console.time("Hämta kårens alla medlemmar");
+  console.time("Hämta kårens alla medlemmar fetchWaitingMembers-" + fetchWaitingMembers);
   
   const cache = CacheService.getScriptCache();
   
   let kaka;
   let json;
+  let extraUrlParam = "";
 
+  if (fetchWaitingMembers)  {
+    extraUrlParam = "?waiting=1";
+  }
+
+  const nameOfCache = "fetchScoutnetMembers-fetchWaitingMembers-" + fetchWaitingMembers;
   //kaka sätts här för att spara ca 70ms då anropet inte behövs vid forceUpdate
-  if (forceUpdate || !(kaka = cache.get("fetchScoutnetMembers"))) {
+  if (forceUpdate || !(kaka = cache.get(nameOfCache))) {
 
-    const url = 'https://' + KONFIG.SCOUTNET_URL + '/api/' + KONFIG.ORGANISATION_TYPE + '/memberlist';
+    const url = 'https://' + KONFIG.SCOUTNET_URL + '/api/' + KONFIG.ORGANISATION_TYPE + '/memberlist' + extraUrlParam;
     json = urlFetch_(url, KONFIG.API_KEY_LIST_ALL);
     //console.log("Json.length " + json.length);
 
@@ -669,7 +675,7 @@ function fetchScoutnetMembers_(forceUpdate) {
     //100KB ~ 102400 tecken från variabeln json
     //Motsvarar ca 78 medlemmar
     if (json.length < 100000) {
-      cache.put("fetchScoutnetMembers", json, cacheExpirationInSeconds);
+      cache.put(nameOfCache, json, cacheExpirationInSeconds);
       //console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
     }
     else {
@@ -677,7 +683,7 @@ function fetchScoutnetMembers_(forceUpdate) {
     }
   }
   else {
-    console.log("Kakan för att hämta alla medlemmar fanns redan");
+    console.log("Kakan för att hämta alla medlemmar fanns redan fetchWaitingMembers-" + fetchWaitingMembers);
     json = kaka;
   }
   
@@ -704,7 +710,8 @@ function fetchScoutnetMembers_(forceUpdate) {
     //console.log(member);
     allMembers.push(member);
   }
-  console.timeEnd("Hämta kårens alla medlemmar");
+  console.log("Antal medlemmar " + allMembers.length + " fetchWaitingMembers-" + fetchWaitingMembers)
+  console.timeEnd("Hämta kårens alla medlemmar fetchWaitingMembers-" + fetchWaitingMembers);
   return allMembers;
 }
 

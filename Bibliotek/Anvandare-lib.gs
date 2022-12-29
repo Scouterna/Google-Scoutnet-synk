@@ -17,7 +17,7 @@ function synkroniseraAnvandare(INPUT_KONFIG_OBJECT, defaultOrgUnitPath, suspende
 
   let allMembers;
   if ("group" === KONFIG.ORGANISATION_TYPE) {
-    allMembers = fetchScoutnetMembers_(true); //Hämta lista över alla medlemmar
+    allMembers = fetchScoutnetMembers_(true, false); //Hämta lista över alla medlemmar
     console.info("Antal medlemmar i kåren " + allMembers.length);
   }
   

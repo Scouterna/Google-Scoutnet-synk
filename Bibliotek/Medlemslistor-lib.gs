@@ -61,8 +61,10 @@ function synkroniseraMedlemslistor(INPUT_KONFIG_OBJECT, start, slut, shouldUpdat
   const sheetDataMedlemslistor = getDataFromActiveSheet_("Medlemslistor");
   const grd = getMedlemslistorKonfigRubrikData_();
   //Hämta lista med alla medlemmar i kåren och alla deras attribut
-  const allMembers = fetchScoutnetMembers_(true);
-  console.info("Antal medlemmar i kåren " + allMembers.length);
+  const allActiveMembers = fetchScoutnetMembers_(true, false);
+  const allWaitingMembers = fetchScoutnetMembers_(true, true);
+  const allMembers = [...allActiveMembers, ...allWaitingMembers];
+  console.info("Antal medlemmar i kåren samt väntelistan " + allMembers.length);
 
   const sheet = sheetDataMedlemslistor["sheet"];
   const selection = sheetDataMedlemslistor["selection"];
