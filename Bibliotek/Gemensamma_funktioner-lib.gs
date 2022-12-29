@@ -1087,7 +1087,7 @@ function deleteRowsFromSpreadsheet_(sheet, delete_rows) {
 function removeDublicates_(list) {
   const listWithoutDuplicates = []
   
-  for (let i = 0; i < list.length; i++){
+  for (let i = 0; i < list.length; i++) {
     if (!listWithoutDuplicates.includes(list[i])){
       listWithoutDuplicates.push(list[i])
     }
@@ -1108,40 +1108,31 @@ function removeDublicates_(list) {
  */
 function intPhoneNumber_(phnum) {
 
-  let regex = /^\+/;
-  //console.log('Telefonnummer före: %s', phnum);
-  const res = phnum.match(regex);
-  if (res) {
-    let countryCodeIsFound = false;
- 
-    const countryCodes = [];
-    countryCodes.push("43"); //
-    countryCodes.push("44"); //
-    countryCodes.push("45"); //Danmark
-    countryCodes.push("46"); //Sverige
-    for (let k in countryCodes) {
-      regex = new RegExp('^\\+' + countryCodes[k], 'g');
-      if (phnum.match(regex)) {
-        phnum = "+" + countryCodes[k] + phnum.substr(3).replace(/[^0-9]/g, '');
-        countryCodeIsFound = true;
-      }
-    }
-    if (!countryCodeIsFound) {
-      phnum = null;
-    }
-    //console.log('Efter landskod %s', phnum);
-  }
-  else {
-    //console.log('Telefonnummer börjar ej med landskod');
-    if (phnum.replace(/[^0-9]/g, '').match(/^0/)) {
-      phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1);
-    }
-    else {
-      //phnum = null
+  const numPatternOnlyDigits = /[^0-9]+/g;
+  phnum = phnum.replace(numPatternOnlyDigits, '');
+  //Ta bort alla ickesiffror, mellanslag
+  
+  const numPatternNoLeadingZeros = /[0]*/;
+  phnum = phnum.replace(numPatternNoLeadingZeros, '');
+  //Ta bort inledande nollor
+
+  const countryCodes = [];
+  countryCodes.push("44"); //Storbritannien
+  countryCodes.push("45"); //Danmark
+  countryCodes.push("46"); //Sverige
+  countryCodes.push("47"); //Norge
+  countryCodes.push("358"); //Finland
+
+  for (let i = 0; i < countryCodes.length; i++) {
+
+    if (phnum.startsWith(countryCodes[i]))  {
+      //console.log("Telefonnumret tillhör land " + countryCodes[i]);
+      return "+" + phnum;
     }
   }
-  //console.log('Klarformaterat telefonnummer %s', phnum);
-  return phnum
+
+  //Lägg till landskod om ingen finns innan
+  return "+46" + phnum;
 }
 
 
