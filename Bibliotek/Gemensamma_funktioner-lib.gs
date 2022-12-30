@@ -644,6 +644,7 @@ function getEmailListSyncOption_(member, synk_option, boolGoogleAccounts) {
  * Hämta lista över alla medlemmar
  * 
  * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
+ * @param {boolean} fetchWaitingMembers - Om "medlemmar" från väntelistan ska hämtas i stället för riktiga medlemmar
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
  */
