@@ -644,23 +644,30 @@ function getEmailListSyncOption_(member, synk_option, boolGoogleAccounts) {
  * Hämta lista över alla medlemmar
  * 
  * @param {boolean} forceUpdate - Tvinga uppdatering av data eller ej från Scoutnet
+ * @param {boolean} fetchWaitingMembers - Om "medlemmar" från väntelistan ska hämtas i stället för riktiga medlemmar
  *
  * @returns {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren
  */
-function fetchScoutnetMembers_(forceUpdate) {
+function fetchScoutnetMembers_(forceUpdate, fetchWaitingMembers) {
 
   const cacheExpirationInSeconds = 21600; //6 timmar
-  console.time("Hämta kårens alla medlemmar");
+  console.time("Hämta kårens alla medlemmar fetchWaitingMembers-" + fetchWaitingMembers);
   
   const cache = CacheService.getScriptCache();
   
   let kaka;
   let json;
+  let extraUrlParam = "";
 
+  if (fetchWaitingMembers)  {
+    extraUrlParam = "?waiting=1";
+  }
+
+  const nameOfCache = "fetchScoutnetMembers-fetchWaitingMembers-" + fetchWaitingMembers;
   //kaka sätts här för att spara ca 70ms då anropet inte behövs vid forceUpdate
-  if (forceUpdate || !(kaka = cache.get("fetchScoutnetMembers"))) {
+  if (forceUpdate || !(kaka = cache.get(nameOfCache))) {
 
-    const url = 'https://' + KONFIG.SCOUTNET_URL + '/api/' + KONFIG.ORGANISATION_TYPE + '/memberlist';
+    const url = 'https://' + KONFIG.SCOUTNET_URL + '/api/' + KONFIG.ORGANISATION_TYPE + '/memberlist' + extraUrlParam;
     json = urlFetch_(url, KONFIG.API_KEY_LIST_ALL);
     //console.log("Json.length " + json.length);
 
@@ -669,7 +676,7 @@ function fetchScoutnetMembers_(forceUpdate) {
     //100KB ~ 102400 tecken från variabeln json
     //Motsvarar ca 78 medlemmar
     if (json.length < 100000) {
-      cache.put("fetchScoutnetMembers", json, cacheExpirationInSeconds);
+      cache.put(nameOfCache, json, cacheExpirationInSeconds);
       //console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
     }
     else {
@@ -677,7 +684,7 @@ function fetchScoutnetMembers_(forceUpdate) {
     }
   }
   else {
-    console.log("Kakan för att hämta alla medlemmar fanns redan");
+    console.log("Kakan för att hämta alla medlemmar fanns redan fetchWaitingMembers-" + fetchWaitingMembers);
     json = kaka;
   }
   
@@ -704,7 +711,8 @@ function fetchScoutnetMembers_(forceUpdate) {
     //console.log(member);
     allMembers.push(member);
   }
-  console.timeEnd("Hämta kårens alla medlemmar");
+  console.log("Antal medlemmar " + allMembers.length + " fetchWaitingMembers-" + fetchWaitingMembers)
+  console.timeEnd("Hämta kårens alla medlemmar fetchWaitingMembers-" + fetchWaitingMembers);
   return allMembers;
 }
 
@@ -1087,7 +1095,7 @@ function deleteRowsFromSpreadsheet_(sheet, delete_rows) {
 function removeDublicates_(list) {
   const listWithoutDuplicates = []
   
-  for (let i = 0; i < list.length; i++){
+  for (let i = 0; i < list.length; i++) {
     if (!listWithoutDuplicates.includes(list[i])){
       listWithoutDuplicates.push(list[i])
     }
@@ -1108,40 +1116,35 @@ function removeDublicates_(list) {
  */
 function intPhoneNumber_(phnum) {
 
-  let regex = /^\+/;
-  //console.log('Telefonnummer före: %s', phnum);
-  const res = phnum.match(regex);
-  if (res) {
-    let countryCodeIsFound = false;
- 
-    const countryCodes = [];
-    countryCodes.push("43"); //
-    countryCodes.push("44"); //
-    countryCodes.push("45"); //Danmark
-    countryCodes.push("46"); //Sverige
-    for (let k in countryCodes) {
-      regex = new RegExp('^\\+' + countryCodes[k], 'g');
-      if (phnum.match(regex)) {
-        phnum = "+" + countryCodes[k] + phnum.substr(3).replace(/[^0-9]/g, '');
-        countryCodeIsFound = true;
-      }
-    }
-    if (!countryCodeIsFound) {
-      phnum = null;
-    }
-    //console.log('Efter landskod %s', phnum);
+  if ("" === phnum) {
+    return "";
   }
-  else {
-    //console.log('Telefonnummer börjar ej med landskod');
-    if (phnum.replace(/[^0-9]/g, '').match(/^0/)) {
-      phnum = "+46" + phnum.replace(/[^0-9]/g, '').substr(1);
-    }
-    else {
-      //phnum = null
+
+  const numPatternOnlyDigits = /[^0-9]+/g;
+  phnum = phnum.replace(numPatternOnlyDigits, '');
+  //Ta bort alla ickesiffror, mellanslag
+  
+  const numPatternNoLeadingZeros = /[0]*/;
+  phnum = phnum.replace(numPatternNoLeadingZeros, '');
+  //Ta bort inledande nollor
+
+  const countryCodes = [];
+  countryCodes.push("44"); //Storbritannien
+  countryCodes.push("45"); //Danmark
+  countryCodes.push("46"); //Sverige
+  countryCodes.push("47"); //Norge
+  countryCodes.push("358"); //Finland
+
+  for (let i = 0; i < countryCodes.length; i++) {
+
+    if (phnum.startsWith(countryCodes[i]))  {
+      //console.log("Telefonnumret tillhör land " + countryCodes[i]);
+      return "+" + phnum;
     }
   }
-  //console.log('Klarformaterat telefonnummer %s', phnum);
-  return phnum
+
+  //Lägg till landskod om ingen finns innan
+  return "+46" + phnum;
 }
 
 
@@ -1153,7 +1156,7 @@ function intPhoneNumber_(phnum) {
  * @returns {boolean} - Sant eller falskt om korrekt format
  */
 function validatePhonenumberForE164_(phnum) {
-  const regex = /^\+[1-9]\d{1,14}$/;
+  const regex = /^\+[1-9]\d{5,14}$/;
   return regex.test(phnum);
 }
 
