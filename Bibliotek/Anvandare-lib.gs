@@ -619,7 +619,7 @@ function suspendAccount_(userAccount, suspendedOrgUnitPath) {
  */
 function getGoogleAccounts_(defaultOrgUnitPath) {
 
-  let users;
+  let listOfUsers = [];
 
   for (let n = 0; n < 6; n++) {
     if (0 !== n) {
@@ -635,12 +635,13 @@ function getGoogleAccounts_(defaultOrgUnitPath) {
           maxResults: 150,
           pageToken: pageToken
         });
-        users = page.users;
+        const users = page.users;
         if (users) {
-          //for (let i = 0; i < users.length; i++) {
-            //const user = users[i];
+          for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+            listOfUsers.push(user);
             //console.log('%s (%s)', user.name.fullName, user.primaryEmail);
-          //}
+          }
         } else {
           console.warn('Ingen användare hittades i denna underoganisation.');
           const empty = [];
@@ -649,7 +650,7 @@ function getGoogleAccounts_(defaultOrgUnitPath) {
         pageToken = page.nextPageToken;
       } while (pageToken);
 
-      return users;
+      return listOfUsers;
     
     } catch(e) {
       console.error("Problem med att anropa GoogleTjänst Users.list i funktionen getGoogleAccounts");
