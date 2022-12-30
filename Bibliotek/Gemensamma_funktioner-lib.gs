@@ -1115,6 +1115,10 @@ function removeDublicates_(list) {
  */
 function intPhoneNumber_(phnum) {
 
+  if ("" === phnum) {
+    return "";
+  }
+
   const numPatternOnlyDigits = /[^0-9]+/g;
   phnum = phnum.replace(numPatternOnlyDigits, '');
   //Ta bort alla ickesiffror, mellanslag
