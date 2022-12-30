@@ -1151,7 +1151,7 @@ function intPhoneNumber_(phnum) {
  * @returns {boolean} - Sant eller falskt om korrekt format
  */
 function validatePhonenumberForE164_(phnum) {
-  const regex = /^\+[1-9]\d{1,14}$/;
+  const regex = /^\+[1-9]\d{5,14}$/;
   return regex.test(phnum);
 }
 
