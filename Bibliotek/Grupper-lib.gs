@@ -980,17 +980,46 @@ function updateGroupEmailThatAlreadyExists_(groupId, group_members, member_email
 
 
 /**
- * Ger lista över alla aktiva Google-konton i denna domän
- * om det finns flera domänen tillåter vi bara huvuddomänen
+ * Ger lista över alla aktiva Google-kontons e-postadresser i denna domän
+ * Om det finns flera domäner tillåter vi bara huvuddomänen
  *
  * @returns {string[]} - E-postadresser för aktiva Googlekonton
  */
 function getEmailAdressesofAllActiveGoogleAccounts_() {
-  
+
   const emailAddresses = [];
+  
+  const catchAllAddress = "*@" + KONFIG.DOMAIN;
+  const activeGoogleAccounts = getAllActiveGoogleAccounts_();
+
+  for (let i = 0; i < activeGoogleAccounts.length; i++) {
+    const user = activeGoogleAccounts[i];
+    //console.log('%s (%s)', user.name.fullName, user.primaryEmail);    
+    for (let k = 0; k < user.emails.length; k++) { //Varje användare kan ha alias också
+
+      const email = user.emails[k].address;
+      if (email.endsWith(KONFIG.DOMAIN)) { //Endast adresser för huvuddomänen
+        if (email !== catchAllAddress) {
+          emailAddresses.push(email);
+          //console.log(email);
+        }
+      }
+    }
+  }
+  return emailAddresses;
+}
+
+
+/**
+ * Ger lista över alla Googlekonton som inte är avstängda
+ * 
+ * @param {Object} - Lista med googlekonton som inte är avstängda
+ */
+function getAllActiveGoogleAccounts_() {
+
+  const activeAccounts = [];
   let users;
   let pageToken, page;
-  const catchAllAddress = "*@" + KONFIG.DOMAIN;
   do {
     page = AdminDirectory.Users.list({
       domain: KONFIG.DOMAIN,
@@ -1002,30 +1031,19 @@ function getEmailAdressesofAllActiveGoogleAccounts_() {
     if (users) {
       for (let i = 0; i < users.length; i++) {
         const user = users[i];
-        //console.log('%s (%s)', user.name.fullName, user.primaryEmail);
-        
+        //console.log('%s (%s)', user.name.fullName, user.primaryEmail);        
         if (!user.suspended) {
-          for (let k = 0; k < user.emails.length; k++) { //Varje användare kan ha alias också
-            
-            const email = user.emails[k].address;
-            if (email.endsWith(KONFIG.DOMAIN)) { //Endast adresser för huvuddomänen
-              if (email !== catchAllAddress) {
-                emailAddresses.push(email);
-                //console.log(email);
-              }
-            }
-          }
+          activeAccounts.push(user);
         }
       }
     } else {
       console.warn('Inget Google-konto hittades.');
-      const empty = [];
-      return empty;
+      return [];
     }
     pageToken = page.nextPageToken;
   } while (pageToken);
   
-  return emailAddresses;
+  return activeAccounts;
 }
 
 
