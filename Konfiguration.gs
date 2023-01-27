@@ -1,7 +1,7 @@
 /**
  * @author Emil Öhman <emil.ohman@scouterna.se>
  * @website https://github.com/Scouterna
- * @version 2022-12-30
+ * @version 2023-01-27
  */
 
 
@@ -44,6 +44,12 @@ KONFIG_OBJECT.SHARE_STATISTICS_OF_RUNNING_SCRIPTS_AND_GROUP_INFORMATION = false;
 
 //Adress till profilbild att använda för Googlekonton om ingen finns i Scoutnet
 KONFIG_OBJECT.DEFAULT_USER_AVATAR_URL = "https://web.cdn.scouterna.net/uploads/sites/57/2021/05/avatar.png";
+
+//Sökväg för underorganisation där alla användarekonton ska synkas
+KONFIG_OBJECT.DEFAULT_ORG_UNIT_PATH = "/Scoutnet";
+
+//Sökväg för underorganisationen för avstängda användarkonton
+KONFIG_OBJECT.SUSPENDED_ORG_UNIT_PATH = KONFIG_OBJECT.DEFAULT_ORG_UNIT_PATH + "/" + "Avstängda";
 
 //Typ av organisationsenhet
 KONFIG_OBJECT.ORGANISATION_TYPE = "group"; //Ska enbart ändras om du kör programmet för ett distrikt. Ska då bytas till district
