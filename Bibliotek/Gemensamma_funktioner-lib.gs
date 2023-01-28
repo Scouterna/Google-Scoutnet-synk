@@ -45,10 +45,10 @@ function addMenuForSpreadsheet() {
  * tar bort någon funktion nedan då den kanske används i någon annan lista.
  */
 MEDLEMSLISTA_EGNA_ATTRIBUT_FUNKTIONER = [
-    {'namn': 'Ålder', 'formel': '=DATEDIF(R[0]C[-37]; TODAY(); "Y")'},
-    {'namn': 'Dagar till nästa födelsedag', 'formel': '=DATE(YEAR(R[0]C[-38])+DATEDIF(R[0]C[-38];TODAY();"Y")+1;MONTH(R[0]C[-38]);DAY(R[0]C[-38]))-TODAY()'},
-    {'namn': 'Antal dagar som medlem i kåren', 'formel': '=DATEDIF(R[0]C[-36];TODAY(); "D")'},
-    {'namn': 'Primär e-post som anhörigs e-post', 'formel': '=IF(AND(ISTEXT(R[0]C[-23]);OR(R[0]C[-23]=R[0]C[-18];R[0]C[-23]=R[0]C[-14])); "LIKA"; "OLIKA")'}
+    {'namn': 'Ålder', 'formel': '=DATEDIF(R[0]C[-43]; TODAY(); "Y")'},
+    {'namn': 'Dagar till nästa födelsedag', 'formel': '=DATE(YEAR(R[0]C[-44])+DATEDIF(R[0]C[-44];TODAY();"Y")+1;MONTH(R[0]C[-44]);DAY(R[0]C[-44]))-TODAY()'},
+    {'namn': 'Antal dagar som medlem i kåren', 'formel': '=DATEDIF(R[0]C[-42];TODAY(); "D")'},
+    {'namn': 'Primär e-post som anhörigs e-post', 'formel': '=IF(AND(ISTEXT(R[0]C[-29]);OR(R[0]C[-29]=R[0]C[-24];R[0]C[-29]=R[0]C[-20])); "LIKA"; "OLIKA")'}
   ];
 
 

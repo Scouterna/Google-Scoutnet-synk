@@ -608,58 +608,6 @@ function suspendAccount_(userAccount) {
 
 
 /**
- * Returnerar en lista över alla Googlekonton för underorganisationen som synkroniserar med Scoutnet
- *
- * @returns {Object[]} - Lista med objekt av Googlekonton i denna underorganisation
- */
-function getGoogleAccounts_() {
-
-  let listOfUsers = [];
-
-  for (let n = 0; n < 6; n++) {
-    if (0 !== n) {
-      console.warn("Funktionen getGoogleAcounts körs " + n);
-    }
-    try {
-      let pageToken, page;
-      do {
-        page = AdminDirectory.Users.list({
-          domain: KONFIG.DOMAIN,
-          query: "orgUnitPath='" + KONFIG.DEFAULT_ORG_UNIT_PATH + "'",
-          orderBy: 'givenName',
-          maxResults: 150,
-          pageToken: pageToken
-        });
-        const users = page.users;
-        if (users) {
-          for (let i = 0; i < users.length; i++) {
-            const user = users[i];
-            listOfUsers.push(user);
-            //console.log('%s (%s)', user.name.fullName, user.primaryEmail);
-          }
-        } else {
-          console.warn('Ingen användare hittades i denna underoganisation.');
-          const empty = [];
-          return empty;
-        }
-        pageToken = page.nextPageToken;
-      } while (pageToken);
-
-      return listOfUsers;
-    
-    } catch(e) {
-      console.error("Problem med att anropa GoogleTjänst Users.list i funktionen getGoogleAccounts");
-      if (n === 5) {
-        throw e;
-      } 
-      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
-    }
-  }
-  
-}
-
-
-/**
  * Hämta en lista över alla aktiva scoutledare och andra funktionärer
  * genom att kontrollera om de har en avdelningsroll (unit_role) eller kårroll (group_role)
  *

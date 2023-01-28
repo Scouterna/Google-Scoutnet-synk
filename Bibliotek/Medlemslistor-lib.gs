@@ -64,6 +64,7 @@ function synkroniseraMedlemslistor(INPUT_KONFIG_OBJECT, start, slut, shouldUpdat
   const allActiveMembers = fetchScoutnetMembers_(true, false);
   const allWaitingMembers = fetchScoutnetMembers_(true, true);
   const allMembers = [...allActiveMembers, ...allWaitingMembers];
+  addExtraMemberAttributes_(allMembers);
   console.info("Antal medlemmar i kåren samt väntelistan " + allMembers.length);
 
   const sheet = sheetDataMedlemslistor["sheet"];
@@ -239,6 +240,94 @@ function skapaRubrikerMedlemslistor(INPUT_KONFIG_OBJECT) {
 
 
 /**
+ * Lägger till extra medlemsattribut till kårens medlemmar
+ * 
+ * @param {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren & väntelistan
+ */
+function addExtraMemberAttributes_(allMembers) {
+
+  const date = new Date();
+  const todayDate = date.toISOString(); 
+
+  let useraccounts = getGoogleAccounts_();
+
+  for (let i = 0; i < allMembers.length; i++) {
+    const member = allMembers[i];
+    
+    addExtraMemberAttributeUserAccount_(useraccounts, member, todayDate);
+  }
+}
+
+
+/**
+ * Lägga till extra medlemsattribut hämtat från personens kårkonto om det finns
+ * 
+ * @param {Object[]} useraccounts - Lista med objekt av Googlekonton
+ * @param {Object} member - Medlemsobjekt för en medlem
+ * @param {string} todayDate - Dagens datum
+ */
+function addExtraMemberAttributeUserAccount_(useraccounts, member, todayDate) {
+
+  const googleUserAccount = useraccounts.find(u => u.externalIds !== undefined && u.externalIds.some(extid => extid.type === "organization" && extid.value === member.member_no)); // leta upp befintligt Googlekonto som representerar rätt objekt
+  
+  if (googleUserAccount)  {
+    member.kar_konto = googleUserAccount.primaryEmail;
+    member.kar_konto_dagar_sedan_skapat = dateDiff_(googleUserAccount.creationTime, todayDate);
+
+    if (googleUserAccount.suspended) {
+      member.kar_konto_status = "Nej";
+    }
+    else {
+      member.kar_konto_status = "Ja";
+    }
+
+    if (googleUserAccount.lastLoginTime.startsWith("1970-01-01")) {
+      member.kar_konto_har_loggat_in = "Nej";
+    }
+    else {
+      member.kar_konto_har_loggat_in = "Ja";
+    }
+    member.kar_konto_dagar_sedan_loggat_in = dateDiff_(googleUserAccount.lastLoginTime, todayDate);
+
+    if (googleUserAccount.primaryEmail === member.email) {
+      member.kar_konto_samma_primar = "Ja";
+    }
+    else {
+      member.kar_konto_samma_primar = "Nej";
+    }
+  }
+}
+
+
+/**
+ * Ger antalet dagar mellan två datum
+ * 
+ * @param {string}-{string}-{string} dateInputOne - Ett första datum ÅÅÅÅ-MM-DD
+ * @param {string}-{string}-{string} dateInputTwo - Ett första datum ÅÅÅÅ-MM-DD
+ * 
+ * @return {number} - Antalet dagar mellan twå datum
+ */
+function dateDiff_(dateInputOne, dateInputTwo) {
+
+  const dateOneYear = dateInputOne.substr(0, 4);
+  const dateOneMonth = dateInputOne.substr(5, 2) - 1;
+  const dateOneDay = dateInputOne.substr(8, 2);
+  const dateOne = new Date(dateOneYear, dateOneMonth, dateOneDay);
+
+  const dateTwoYear = dateInputTwo.substr(0, 4);
+  const dateTwoMonth = dateInputTwo.substr(5, 2) - 1;
+  const dateTwoDay = dateInputTwo.substr(8, 2);
+
+  const dateTwo = new Date(dateTwoYear, dateTwoMonth, dateTwoDay);
+
+  const diffTime = dateTwo.getTime() - dateOne.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+
+  return diffDays;
+}
+
+
+/**
  * Ger ett kalkylark för en medlemslista givet URL
  * 
  * @param {Object} selection - Området på kalkylarket för alla listor som används just nu
@@ -247,7 +336,7 @@ function skapaRubrikerMedlemslistor(INPUT_KONFIG_OBJECT) {
  * @param {Object[]} rowSpreadsheet - Ett googleobjekt av typen Spreadsheet där listan finns
  * @param {string} spreadsheetUrl - URL för ett kalkylark för en medlemslista
  * 
- * @param {Object | boolean} - Ett Google-kalkylark eller falskt
+ * @returns {Object | boolean} - Ett Google-kalkylark eller falskt
  */
 function openSpreadsheetUrlForMemberlist_(selection, rad_nummer, grd, spreadsheetUrl) {
 
@@ -313,7 +402,7 @@ function skickaMedlemslista_(selection, rad_nummer, radInfo, grd, rowSpreadsheet
   let documentToMerge;
   if (email_document_merge) { //Kolla om fältet för koppla dokument är angivet
     
-    documentToMerge = getDocumentToMerge(email_document_merge);
+    documentToMerge = getDocumentToMerge_(email_document_merge);
     
     if (documentToMerge) { //Lyckades hitta dokument att koppla
       setBackgroundColour_(cell, "white", false);
@@ -543,7 +632,7 @@ function checkIfNoReplyOption_(textInput, attribut, dataArray, cell) {
  *
  * @returns {Object[]} - En lista av objekt av typen File
  */
-function getDocumentToMerge(ids) {
+function getDocumentToMerge_(ids) {
   
   const idList = ids.split(",");
   const docs = [];
@@ -1110,7 +1199,13 @@ function getMedlemslistorRubrikData_() {
     {"apiName": "current_term", "svName": "Aktuell termin"},
     {"apiName": "current_term_due_date", "svName": "Aktuell termin förfallodatum"},
     {"apiName": "avatar_updated", "svName": "Profilbild uppdaterad"},
-    {"apiName": "avatar_url", "svName": "Profilbild url"}
+    {"apiName": "avatar_url", "svName": "Profilbild url"},
+    {"apiName": "kar_konto", "svName": "Kårkonto"},
+    {"apiName": "kar_konto_status", "svName": "Kårkonto aktivt"},
+    {"apiName": "kar_konto_dagar_sedan_skapat", "svName": "Kårkonto dagar sedan skapat"},
+    {"apiName": "kar_konto_har_loggat_in", "svName": "Kårkonto har loggat in"},
+    {"apiName": "kar_konto_dagar_sedan_loggat_in", "svName": "Kårkonto dagar sedan inloggad"},
+    {"apiName": "kar_konto_samma_primar", "svName": "Kårkonto samma som primär e-post"}
   ];
 
   return mlrd;
