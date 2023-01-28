@@ -254,12 +254,8 @@ function skapaRubrikerMedlemslistor(INPUT_KONFIG_OBJECT) {
  * tar bort någon funktion nedan då den kanske används i någon annan lista.
  */
 MEDLEMSLISTA_EGNA_ATTRIBUT_FUNKTIONER = [
-    {'namn': 'Ålder', 'formel': '=DATEDIF(R[0]C[-43]; TODAY(); "Y")'},
-    {'namn': 'Dagar till nästa födelsedag', 'formel': '=DATE(YEAR(R[0]C[-44])+DATEDIF(R[0]C[-44];TODAY();"Y")+1;MONTH(R[0]C[-44]);DAY(R[0]C[-44]))-TODAY()'},
-    {'namn': 'Antal dagar som medlem i kåren', 'formel': '=DATEDIF(R[0]C[-42];TODAY(); "D")'},
-    {'namn': 'Primär e-post som anhörigs e-post', 'formel': '=IF(AND(ISTEXT(R[0]C[-29]);OR(R[0]C[-29]=R[0]C[-24];R[0]C[-29]=R[0]C[-20])); "LIKA"; "OLIKA")'}
   ];
-  
+
 
 /**
  * Lägger till extra medlemsattribut till kårens medlemmar
@@ -269,20 +265,89 @@ MEDLEMSLISTA_EGNA_ATTRIBUT_FUNKTIONER = [
 function addExtraMemberAttributes_(allMembers) {
 
   const date = new Date();
-  const todayDate = date.toISOString(); 
+  const todayDate = date.toLocaleString('sv-SE', { timeZone: "Europe/Paris"});
 
   let useraccounts = getGoogleAccounts_();
 
   for (let i = 0; i < allMembers.length; i++) {
     const member = allMembers[i];
     
+    addExtraMemberAttributeAge_(member, todayDate);
+    addExtraMemberAttributeDaysUntilBirthday_(member, todayDate);
+    addExtraMemberAttributeNumberOfDaysAsMember_(member, todayDate);
+    addExtraMemberAttributeEmailSameAsParents_(member)
     addExtraMemberAttributeUserAccount_(useraccounts, member, todayDate);
   }
 }
 
 
 /**
- * Lägga till extra medlemsattribut hämtat från personens kårkonto om det finns
+ * Lägger till extra medlemsattribut gällande ålder på medlem
+ * 
+ * @param {Object} member - Medlemsobjekt för en medlem
+ * @param {string} todayDate - Dagens datum
+ */
+function addExtraMemberAttributeAge_(member, todayDate)  {
+  member.alder = dateDiff_(member.date_of_birth, todayDate, "Y");
+}
+
+
+/**
+ * Lägger till extra medlemsattribut gällande antal dagar till nästa födelsedag
+ * 
+ * @param {Object} member - Medlemsobjekt för en medlem
+ * @param {string} todayDate - Dagens datum
+ */
+function addExtraMemberAttributeDaysUntilBirthday_(member, todayDate)  {
+
+  const birthYear = member.date_of_birth.substr(0, 4);
+  const birthMonth = member.date_of_birth.substr(5, 2) - 1;
+  const birthDay = member.date_of_birth.substr(8, 2);
+
+  const nextBirthYear = Number(birthYear) + Number(member.alder) + 1;
+
+  const nextBirthDate = new Date(nextBirthYear, birthMonth, birthDay);
+  const nextBirthDay = nextBirthDate.toLocaleString('sv-SE', { timeZone: "Europe/Paris"});
+
+  member.dagar_till_fodelsedag = dateDiff_(todayDate, nextBirthDay, "D");
+}
+
+
+/**
+ * Lägger till extra medlemsattribut gällande antal dagar som medlem i kåren
+ * 
+ * @param {Object} member - Medlemsobjekt för en medlem
+ * @param {string} todayDate - Dagens datum
+ */
+function addExtraMemberAttributeNumberOfDaysAsMember_(member, todayDate) {
+  member.dagar_som_medlem = dateDiff_(member.confirmed_at, todayDate, "D");
+}
+
+
+/**
+ * Lägger till extra medlemsattribut gällande om primär e-postadress
+ * är samma som antingen anhörig 1 e-post eller anhörig 2 e-post
+ * 
+ * @param {Object} member - Medlemsobjekt för en medlem
+ */
+function addExtraMemberAttributeEmailSameAsParents_(member) {
+  
+  if (member.email) {
+    if (member.email === member.contact_email_mum)  {
+      member.primar_samma_anhorig_epost = "LIKA";
+      return;
+    }
+    else if (member.email === member.contact_email_dad) {
+      member.primar_samma_anhorig_epost = "LIKA";
+      return;
+    }
+  }
+  member.primar_samma_anhorig_epost = "OLIKA";
+}
+
+
+/**
+ * Lägger till extra medlemsattribut hämtat från personens kårkonto om det finns
  * 
  * @param {Object[]} useraccounts - Lista med objekt av Googlekonton
  * @param {Object} member - Medlemsobjekt för en medlem
@@ -294,7 +359,7 @@ function addExtraMemberAttributeUserAccount_(useraccounts, member, todayDate) {
   
   if (googleUserAccount)  {
     member.kar_konto = googleUserAccount.primaryEmail;
-    member.kar_konto_dagar_sedan_skapat = dateDiff_(googleUserAccount.creationTime, todayDate);
+    member.kar_konto_dagar_sedan_skapat = dateDiff_(googleUserAccount.creationTime, todayDate, "D");
 
     if (googleUserAccount.suspended) {
       member.kar_konto_status = "Nej";
@@ -308,8 +373,8 @@ function addExtraMemberAttributeUserAccount_(useraccounts, member, todayDate) {
     }
     else {
       member.kar_konto_har_loggat_in = "Ja";
-    }
-    member.kar_konto_dagar_sedan_loggat_in = dateDiff_(googleUserAccount.lastLoginTime, todayDate);
+      member.kar_konto_dagar_sedan_loggat_in = dateDiff_(googleUserAccount.lastLoginTime, todayDate, "D");
+    }    
 
     if (googleUserAccount.primaryEmail === member.email) {
       member.kar_konto_samma_primar = "Ja";
@@ -322,14 +387,19 @@ function addExtraMemberAttributeUserAccount_(useraccounts, member, todayDate) {
 
 
 /**
- * Ger antalet dagar mellan två datum
+ * Ger antalet dagar eller år mellan två datum
  * 
  * @param {string}-{string}-{string} dateInputOne - Ett första datum ÅÅÅÅ-MM-DD
  * @param {string}-{string}-{string} dateInputTwo - Ett första datum ÅÅÅÅ-MM-DD
+ * @param {string} format - Format Y=År eller D=Dagar
  * 
- * @return {number} - Antalet dagar mellan twå datum
+ * @return {number} - Antalet dagar eller år mellan två datum
  */
-function dateDiff_(dateInputOne, dateInputTwo) {
+function dateDiff_(dateInputOne, dateInputTwo, format) {
+
+  if (dateInputOne.length < 10) {
+    return "";
+  }
 
   const dateOneYear = dateInputOne.substr(0, 4);
   const dateOneMonth = dateInputOne.substr(5, 2) - 1;
@@ -340,12 +410,32 @@ function dateDiff_(dateInputOne, dateInputTwo) {
   const dateTwoMonth = dateInputTwo.substr(5, 2) - 1;
   const dateTwoDay = dateInputTwo.substr(8, 2);
 
-  const dateTwo = new Date(dateTwoYear, dateTwoMonth, dateTwoDay);
+  if ("D" === format) {
+    const dateTwo = new Date(dateTwoYear, dateTwoMonth, dateTwoDay);
 
-  const diffTime = dateTwo.getTime() - dateOne.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+    const diffTime = dateTwo.getTime() - dateOne.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+    return diffDays;
+  }
 
-  return diffDays;
+  if ("Y" === format) {
+    
+    let diffYear = dateTwoYear - dateOneYear;
+    
+    if (dateOneMonth > dateTwoMonth) {
+      return diffYear-1;
+      
+    }
+    if (dateOneMonth == dateTwoMonth) {
+      if (dateOneDay > dateTwoDay) {
+        return diffYear-1;
+      }
+      if (dateOneDay == dateTwoDay) {
+        return diffYear;
+      }
+    }
+    return diffYear;
+  }  
 }
 
 
@@ -1150,6 +1240,9 @@ function setCustomColumns_(sheet, startCol, numRow) {
 
   const cf = MEDLEMSLISTA_EGNA_ATTRIBUT_FUNKTIONER;
   const num_cf = cf.length;
+  if (0 === num_cf) {
+    return;
+  }
 
   /***********Rubriker**********/
   const row = [];
@@ -1227,7 +1320,11 @@ function getMedlemslistorRubrikData_() {
     {"apiName": "kar_konto_dagar_sedan_skapat", "svName": "Kårkonto dagar sedan skapat"},
     {"apiName": "kar_konto_har_loggat_in", "svName": "Kårkonto har loggat in"},
     {"apiName": "kar_konto_dagar_sedan_loggat_in", "svName": "Kårkonto dagar sedan inloggad"},
-    {"apiName": "kar_konto_samma_primar", "svName": "Kårkonto samma som primär e-post"}
+    {"apiName": "kar_konto_samma_primar", "svName": "Kårkonto samma som primär e-post"},
+    {"apiName": "alder", "svName": "Ålder"},
+    {"apiName": "dagar_till_fodelsedag", "svName": "Dagar till nästa födelsedag"},
+    {"apiName": "dagar_som_medlem", "svName": "Antal dagar som medlem i kåren"},
+    {"apiName": "primar_samma_anhorig_epost", "svName": "Primär e-post som anhörigs e-post"}
   ];
 
   return mlrd;
