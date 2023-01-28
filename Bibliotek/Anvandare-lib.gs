@@ -8,10 +8,8 @@
  * Huvudfunktion för att hantera synkronisering av användarkonton med Scoutnet
  *
  * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
- * @param {string} deafultOrgUnitPath - Sökväg för underorganisation där alla användarekonton ska synkas
- * @param {string} suspendedOrgUnitPath - Sökväg för underorganisationen för avstängda användarkonton
  */
-function synkroniseraAnvandare(INPUT_KONFIG_OBJECT, defaultOrgUnitPath, suspendedOrgUnitPath) {
+function synkroniseraAnvandare(INPUT_KONFIG_OBJECT) {
   
   KONFIG = INPUT_KONFIG_OBJECT;
 
@@ -21,7 +19,7 @@ function synkroniseraAnvandare(INPUT_KONFIG_OBJECT, defaultOrgUnitPath, suspende
     console.info("Antal medlemmar i kåren " + allMembers.length);
   }
   
-  let useraccounts = getGoogleAccounts_(defaultOrgUnitPath);
+  let useraccounts = getGoogleAccounts_();
 
   const defaultUserAvatar = getByteArrayOfDefaultImage_();
   const defaultUserAvatarId = getAvatarId_(defaultUserAvatar);
@@ -32,7 +30,7 @@ function synkroniseraAnvandare(INPUT_KONFIG_OBJECT, defaultOrgUnitPath, suspende
   //Går igenom Listorna som är definierade i Konfiguration.gs, avsnitt "USER_ACCOUNT_CONFIG"
     
     let scoutnetListId = KONFIG.USER_ACCOUNT_CONFIG[p].scoutnetListId;
-    let orgUnitPath = defaultOrgUnitPath;
+    let orgUnitPath = KONFIG.DEFAULT_ORG_UNIT_PATH;
     
     if (KONFIG.USER_ACCOUNT_CONFIG[p].orgUnitPath) {
       //Bara om man anger någon suborg så anger vi den, annars blir det knas med
@@ -103,7 +101,7 @@ function synkroniseraAnvandare(INPUT_KONFIG_OBJECT, defaultOrgUnitPath, suspende
   console.info("Googlekonton som är eller ska vara avstänga: %s", useraccounts.length);
 
   for (let googleUserAccount in useraccounts) {    
-    suspendAccount_(useraccounts[googleUserAccount], suspendedOrgUnitPath)
+    suspendAccount_(useraccounts[googleUserAccount])
   }
 }
 
@@ -584,21 +582,20 @@ function updateUserPhoto_(member, useraccount, defaultUserAvatar, defaultUserAva
  * Stäng av användarkonto om det inte redan är avstängt
  *
  * @param {Object} userAccount - Ett objekt av ett Googlekonto
- * @param {string} suspendedOrgUnitPath - Sökväg för underorganisationen för avstängda konton
  */
-function suspendAccount_(userAccount, suspendedOrgUnitPath) {
+function suspendAccount_(userAccount) {
   
   const email = userAccount.primaryEmail;
   const suspended = userAccount.suspended;
   const orgUnitPath = userAccount.orgUnitPath;
 
-  createSuborganisationIfNeeded_(suspendedOrgUnitPath);  
+  createSuborganisationIfNeeded_(KONFIG.SUSPENDED_ORG_UNIT_PATH);  
   
-  if (!suspended || (orgUnitPath !== suspendedOrgUnitPath)) {
+  if (!suspended || (orgUnitPath !== KONFIG.SUSPENDED_ORG_UNIT_PATH)) {
   
     let user = {
       suspended: true,
-      "orgUnitPath": suspendedOrgUnitPath
+      "orgUnitPath": KONFIG.SUSPENDED_ORG_UNIT_PATH
     };
   
     user = AdminDirectory.Users.update(user, email);
@@ -607,60 +604,6 @@ function suspendAccount_(userAccount, suspendedOrgUnitPath) {
   else {
     console.info('Användare %s är redan avstängd. Senast inloggad %s', email, userAccount.lastLoginTime);
   }
-}
-
-
-/**
- * Returnerar en lista över alla Googlekonton för underorganisationen som synkroniserar med Scoutnet
- *
- * @param {string} defaultOrgUnitPath - Sökväg för en underorganisation
- *
- * @returns {Object[]} - Lista med objekt av Googlekonton i denna underorganisation
- */
-function getGoogleAccounts_(defaultOrgUnitPath) {
-
-  let listOfUsers = [];
-
-  for (let n = 0; n < 6; n++) {
-    if (0 !== n) {
-      console.warn("Funktionen getGoogleAcounts körs " + n);
-    }
-    try {
-      let pageToken, page;
-      do {
-        page = AdminDirectory.Users.list({
-          domain: KONFIG.DOMAIN,
-          query: "orgUnitPath='" + defaultOrgUnitPath + "'",
-          orderBy: 'givenName',
-          maxResults: 150,
-          pageToken: pageToken
-        });
-        const users = page.users;
-        if (users) {
-          for (let i = 0; i < users.length; i++) {
-            const user = users[i];
-            listOfUsers.push(user);
-            //console.log('%s (%s)', user.name.fullName, user.primaryEmail);
-          }
-        } else {
-          console.warn('Ingen användare hittades i denna underoganisation.');
-          const empty = [];
-          return empty;
-        }
-        pageToken = page.nextPageToken;
-      } while (pageToken);
-
-      return listOfUsers;
-    
-    } catch(e) {
-      console.error("Problem med att anropa GoogleTjänst Users.list i funktionen getGoogleAccounts");
-      if (n === 5) {
-        throw e;
-      } 
-      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
-    }
-  }
-  
 }
 
 

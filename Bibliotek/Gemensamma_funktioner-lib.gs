@@ -31,29 +31,6 @@ function addMenuForSpreadsheet() {
 
 
 /**
- * Ställer in egna attribut och de funktioner som körs för att räkna ut
- * värdet på attributet för respektive person.
- * Funktionerna använder R1C1 notation för att skriva formeln i google kalkylark
- * och hänvisar då relativt aktuell kolumn till en rad R eller kolumn C från denna
- * R[0]C[-37] betyder därmed att man hänvisar till samma rad (0 rader förändring) och
- * till värdet i cellen 37 kolumner till vänster.
- * 
- * Vilken plats som varje eget attribut får är att först sätts alla standardattribut
- * ut och sedan nedanstående i ordning. Enklast är att testa för att se till att det
- * blir korrekt.
- * Observera att dessa påverkar alla medlemslistor som används, så var försiktig om du
- * tar bort någon funktion nedan då den kanske används i någon annan lista.
- */
-MEDLEMSLISTA_EGNA_ATTRIBUT_FUNKTIONER = [
-    {'namn': 'Ålder', 'formel': '=DATEDIF(R[0]C[-37]; TODAY(); "Y")'},
-    {'namn': 'Dagar till nästa födelsedag', 'formel': '=DATE(YEAR(R[0]C[-38])+DATEDIF(R[0]C[-38];TODAY();"Y")+1;MONTH(R[0]C[-38]);DAY(R[0]C[-38]))-TODAY()'},
-    {'namn': 'Antal dagar som medlem i kåren', 'formel': '=DATEDIF(R[0]C[-36];TODAY(); "D")'},
-    {'namn': 'Primär e-post som anhörigs e-post', 'formel': '=IF(AND(ISTEXT(R[0]C[-23]);OR(R[0]C[-23]=R[0]C[-18];R[0]C[-23]=R[0]C[-14])); "LIKA"; "OLIKA")'}
-  ];
-/***Medlemslistor - Slut***/
-
-
-/**
  * Kontrollerar om inställningarna i Konfiguration.gs verkar korrekta
  * 
  * @param {Object} INPUT_KONFIG_OBJECT - Objekt med kårens konfiguration
@@ -167,6 +144,56 @@ function getGmailAdressWithoutDots_(email) {
   
   email = email.replace(regexGmailDots, "");
   return email;
+}
+
+
+/**
+ * Returnerar en lista över alla Googlekonton för underorganisationen som synkroniserar med Scoutnet
+ *
+ * @returns {Object[]} - Lista med objekt av Googlekonton i denna underorganisation
+ */
+function getGoogleAccounts_() {
+
+  let listOfUsers = [];
+
+  for (let n = 0; n < 6; n++) {
+    if (0 !== n) {
+      console.warn("Funktionen getGoogleAcounts körs " + n);
+    }
+    try {
+      let pageToken, page;
+      do {
+        page = AdminDirectory.Users.list({
+          domain: KONFIG.DOMAIN,
+          query: "orgUnitPath='" + KONFIG.DEFAULT_ORG_UNIT_PATH + "'",
+          orderBy: 'givenName',
+          maxResults: 150,
+          pageToken: pageToken
+        });
+        const users = page.users;
+        if (users) {
+          for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+            listOfUsers.push(user);
+            //console.log('%s (%s)', user.name.fullName, user.primaryEmail);
+          }
+        } else {
+          console.warn('Ingen användare hittades i denna underoganisation.');
+          return [];
+        }
+        pageToken = page.nextPageToken;
+      } while (pageToken);
+
+      return listOfUsers;
+    
+    } catch(e) {
+      console.error("Problem med att anropa GoogleTjänst Users.list i funktionen getGoogleAccounts");
+      if (n === 5) {
+        throw e;
+      } 
+      Utilities.sleep((Math.pow(2,n)*1000) + (Math.round(Math.random() * 1000)));
+    }
+  }  
 }
 
 

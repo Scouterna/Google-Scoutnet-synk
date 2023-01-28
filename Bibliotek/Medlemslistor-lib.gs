@@ -64,6 +64,7 @@ function synkroniseraMedlemslistor(INPUT_KONFIG_OBJECT, start, slut, shouldUpdat
   const allActiveMembers = fetchScoutnetMembers_(true, false);
   const allWaitingMembers = fetchScoutnetMembers_(true, true);
   const allMembers = [...allActiveMembers, ...allWaitingMembers];
+  addExtraMemberAttributes_(allMembers);
   console.info("Antal medlemmar i kåren samt väntelistan " + allMembers.length);
 
   const sheet = sheetDataMedlemslistor["sheet"];
@@ -239,6 +240,206 @@ function skapaRubrikerMedlemslistor(INPUT_KONFIG_OBJECT) {
 
 
 /**
+ * Ställer in egna attribut och de funktioner som körs för att räkna ut
+ * värdet på attributet för respektive person.
+ * Funktionerna använder R1C1 notation för att skriva formeln i google kalkylark
+ * och hänvisar då relativt aktuell kolumn till en rad R eller kolumn C från denna
+ * R[0]C[-37] betyder därmed att man hänvisar till samma rad (0 rader förändring) och
+ * till värdet i cellen 37 kolumner till vänster.
+ * 
+ * Vilken plats som varje eget attribut får är att först sätts alla standardattribut
+ * ut och sedan nedanstående i ordning. Enklast är att testa för att se till att det
+ * blir korrekt.
+ * Observera att dessa påverkar alla medlemslistor som används, så var försiktig om du
+ * tar bort någon funktion nedan då den kanske används i någon annan lista.
+ */
+MEDLEMSLISTA_EGNA_ATTRIBUT_FUNKTIONER = [
+  ];
+
+
+/**
+ * Lägger till extra medlemsattribut till kårens medlemmar
+ * 
+ * @param {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren & väntelistan
+ */
+function addExtraMemberAttributes_(allMembers) {
+
+  const date = new Date();
+  const todayDate = date.toLocaleString('sv-SE', { timeZone: "Europe/Paris"});
+
+  let useraccounts = getGoogleAccounts_();
+
+  for (let i = 0; i < allMembers.length; i++) {
+    const member = allMembers[i];
+    
+    addExtraMemberAttributeAge_(member, todayDate);
+    addExtraMemberAttributeDaysUntilBirthday_(member, todayDate);
+    addExtraMemberAttributeNumberOfDaysAsMember_(member, todayDate);
+    addExtraMemberAttributeEmailSameAsParents_(member)
+    addExtraMemberAttributeUserAccount_(useraccounts, member, todayDate);
+  }
+}
+
+
+/**
+ * Lägger till extra medlemsattribut gällande ålder på medlem
+ * 
+ * @param {Object} member - Medlemsobjekt för en medlem
+ * @param {string} todayDate - Dagens datum
+ */
+function addExtraMemberAttributeAge_(member, todayDate)  {
+  member.alder = dateDiff_(member.date_of_birth, todayDate, "Y");
+}
+
+
+/**
+ * Lägger till extra medlemsattribut gällande antal dagar till nästa födelsedag
+ * 
+ * @param {Object} member - Medlemsobjekt för en medlem
+ * @param {string} todayDate - Dagens datum
+ */
+function addExtraMemberAttributeDaysUntilBirthday_(member, todayDate)  {
+
+  const birthYear = member.date_of_birth.substr(0, 4);
+  const birthMonth = member.date_of_birth.substr(5, 2) - 1;
+  const birthDay = member.date_of_birth.substr(8, 2);
+
+  const nextBirthYear = Number(birthYear) + Number(member.alder) + 1;
+
+  const nextBirthDate = new Date(nextBirthYear, birthMonth, birthDay);
+  const nextBirthDay = nextBirthDate.toLocaleString('sv-SE', { timeZone: "Europe/Paris"});
+
+  member.dagar_till_fodelsedag = dateDiff_(todayDate, nextBirthDay, "D");
+}
+
+
+/**
+ * Lägger till extra medlemsattribut gällande antal dagar som medlem i kåren
+ * 
+ * @param {Object} member - Medlemsobjekt för en medlem
+ * @param {string} todayDate - Dagens datum
+ */
+function addExtraMemberAttributeNumberOfDaysAsMember_(member, todayDate) {
+  member.dagar_som_medlem = dateDiff_(member.confirmed_at, todayDate, "D");
+}
+
+
+/**
+ * Lägger till extra medlemsattribut gällande om primär e-postadress
+ * är samma som antingen anhörig 1 e-post eller anhörig 2 e-post
+ * 
+ * @param {Object} member - Medlemsobjekt för en medlem
+ */
+function addExtraMemberAttributeEmailSameAsParents_(member) {
+  
+  if (member.email) {
+    if (member.email === member.contact_email_mum)  {
+      member.primar_samma_anhorig_epost = "LIKA";
+      return;
+    }
+    else if (member.email === member.contact_email_dad) {
+      member.primar_samma_anhorig_epost = "LIKA";
+      return;
+    }
+  }
+  member.primar_samma_anhorig_epost = "OLIKA";
+}
+
+
+/**
+ * Lägger till extra medlemsattribut hämtat från personens kårkonto om det finns
+ * 
+ * @param {Object[]} useraccounts - Lista med objekt av Googlekonton
+ * @param {Object} member - Medlemsobjekt för en medlem
+ * @param {string} todayDate - Dagens datum
+ */
+function addExtraMemberAttributeUserAccount_(useraccounts, member, todayDate) {
+
+  const googleUserAccount = useraccounts.find(u => u.externalIds !== undefined && u.externalIds.some(extid => extid.type === "organization" && extid.value === member.member_no)); // leta upp befintligt Googlekonto som representerar rätt objekt
+  
+  if (googleUserAccount)  {
+    member.kar_konto = googleUserAccount.primaryEmail;
+    member.kar_konto_dagar_sedan_skapat = dateDiff_(googleUserAccount.creationTime, todayDate, "D");
+
+    if (googleUserAccount.suspended) {
+      member.kar_konto_status = "Nej";
+    }
+    else {
+      member.kar_konto_status = "Ja";
+    }
+
+    if (googleUserAccount.lastLoginTime.startsWith("1970-01-01")) {
+      member.kar_konto_har_loggat_in = "Nej";
+    }
+    else {
+      member.kar_konto_har_loggat_in = "Ja";
+      member.kar_konto_dagar_sedan_loggat_in = dateDiff_(googleUserAccount.lastLoginTime, todayDate, "D");
+    }    
+
+    if (googleUserAccount.primaryEmail === member.email) {
+      member.kar_konto_samma_primar = "Ja";
+    }
+    else {
+      member.kar_konto_samma_primar = "Nej";
+    }
+  }
+}
+
+
+/**
+ * Ger antalet dagar eller år mellan två datum
+ * 
+ * @param {string}-{string}-{string} dateInputOne - Ett första datum ÅÅÅÅ-MM-DD
+ * @param {string}-{string}-{string} dateInputTwo - Ett första datum ÅÅÅÅ-MM-DD
+ * @param {string} format - Format Y=År eller D=Dagar
+ * 
+ * @return {number} - Antalet dagar eller år mellan två datum
+ */
+function dateDiff_(dateInputOne, dateInputTwo, format) {
+
+  if (dateInputOne.length < 10) {
+    return "";
+  }
+
+  const dateOneYear = dateInputOne.substr(0, 4);
+  const dateOneMonth = dateInputOne.substr(5, 2) - 1;
+  const dateOneDay = dateInputOne.substr(8, 2);
+  const dateOne = new Date(dateOneYear, dateOneMonth, dateOneDay);
+
+  const dateTwoYear = dateInputTwo.substr(0, 4);
+  const dateTwoMonth = dateInputTwo.substr(5, 2) - 1;
+  const dateTwoDay = dateInputTwo.substr(8, 2);
+
+  if ("D" === format) {
+    const dateTwo = new Date(dateTwoYear, dateTwoMonth, dateTwoDay);
+
+    const diffTime = dateTwo.getTime() - dateOne.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+    return diffDays;
+  }
+
+  if ("Y" === format) {
+    
+    let diffYear = dateTwoYear - dateOneYear;
+    
+    if (dateOneMonth > dateTwoMonth) {
+      return diffYear-1;
+      
+    }
+    if (dateOneMonth == dateTwoMonth) {
+      if (dateOneDay > dateTwoDay) {
+        return diffYear-1;
+      }
+      if (dateOneDay == dateTwoDay) {
+        return diffYear;
+      }
+    }
+    return diffYear;
+  }  
+}
+
+
+/**
  * Ger ett kalkylark för en medlemslista givet URL
  * 
  * @param {Object} selection - Området på kalkylarket för alla listor som används just nu
@@ -247,7 +448,7 @@ function skapaRubrikerMedlemslistor(INPUT_KONFIG_OBJECT) {
  * @param {Object[]} rowSpreadsheet - Ett googleobjekt av typen Spreadsheet där listan finns
  * @param {string} spreadsheetUrl - URL för ett kalkylark för en medlemslista
  * 
- * @param {Object | boolean} - Ett Google-kalkylark eller falskt
+ * @returns {Object | boolean} - Ett Google-kalkylark eller falskt
  */
 function openSpreadsheetUrlForMemberlist_(selection, rad_nummer, grd, spreadsheetUrl) {
 
@@ -313,7 +514,7 @@ function skickaMedlemslista_(selection, rad_nummer, radInfo, grd, rowSpreadsheet
   let documentToMerge;
   if (email_document_merge) { //Kolla om fältet för koppla dokument är angivet
     
-    documentToMerge = getDocumentToMerge(email_document_merge);
+    documentToMerge = getDocumentToMerge_(email_document_merge);
     
     if (documentToMerge) { //Lyckades hitta dokument att koppla
       setBackgroundColour_(cell, "white", false);
@@ -543,7 +744,7 @@ function checkIfNoReplyOption_(textInput, attribut, dataArray, cell) {
  *
  * @returns {Object[]} - En lista av objekt av typen File
  */
-function getDocumentToMerge(ids) {
+function getDocumentToMerge_(ids) {
   
   const idList = ids.split(",");
   const docs = [];
@@ -1039,6 +1240,9 @@ function setCustomColumns_(sheet, startCol, numRow) {
 
   const cf = MEDLEMSLISTA_EGNA_ATTRIBUT_FUNKTIONER;
   const num_cf = cf.length;
+  if (0 === num_cf) {
+    return;
+  }
 
   /***********Rubriker**********/
   const row = [];
@@ -1110,7 +1314,17 @@ function getMedlemslistorRubrikData_() {
     {"apiName": "current_term", "svName": "Aktuell termin"},
     {"apiName": "current_term_due_date", "svName": "Aktuell termin förfallodatum"},
     {"apiName": "avatar_updated", "svName": "Profilbild uppdaterad"},
-    {"apiName": "avatar_url", "svName": "Profilbild url"}
+    {"apiName": "avatar_url", "svName": "Profilbild url"},
+    {"apiName": "kar_konto", "svName": "Kårkonto"},
+    {"apiName": "kar_konto_status", "svName": "Kårkonto aktivt"},
+    {"apiName": "kar_konto_dagar_sedan_skapat", "svName": "Kårkonto dagar sedan skapat"},
+    {"apiName": "kar_konto_har_loggat_in", "svName": "Kårkonto har loggat in"},
+    {"apiName": "kar_konto_dagar_sedan_loggat_in", "svName": "Kårkonto dagar sedan inloggad"},
+    {"apiName": "kar_konto_samma_primar", "svName": "Kårkonto samma som primär e-post"},
+    {"apiName": "alder", "svName": "Ålder"},
+    {"apiName": "dagar_till_fodelsedag", "svName": "Dagar till nästa födelsedag"},
+    {"apiName": "dagar_som_medlem", "svName": "Antal dagar som medlem i kåren"},
+    {"apiName": "primar_samma_anhorig_epost", "svName": "Primär e-post som anhörigs e-post"}
   ];
 
   return mlrd;
