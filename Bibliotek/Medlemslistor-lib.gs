@@ -240,6 +240,28 @@ function skapaRubrikerMedlemslistor(INPUT_KONFIG_OBJECT) {
 
 
 /**
+ * Ställer in egna attribut och de funktioner som körs för att räkna ut
+ * värdet på attributet för respektive person.
+ * Funktionerna använder R1C1 notation för att skriva formeln i google kalkylark
+ * och hänvisar då relativt aktuell kolumn till en rad R eller kolumn C från denna
+ * R[0]C[-37] betyder därmed att man hänvisar till samma rad (0 rader förändring) och
+ * till värdet i cellen 37 kolumner till vänster.
+ * 
+ * Vilken plats som varje eget attribut får är att först sätts alla standardattribut
+ * ut och sedan nedanstående i ordning. Enklast är att testa för att se till att det
+ * blir korrekt.
+ * Observera att dessa påverkar alla medlemslistor som används, så var försiktig om du
+ * tar bort någon funktion nedan då den kanske används i någon annan lista.
+ */
+MEDLEMSLISTA_EGNA_ATTRIBUT_FUNKTIONER = [
+    {'namn': 'Ålder', 'formel': '=DATEDIF(R[0]C[-43]; TODAY(); "Y")'},
+    {'namn': 'Dagar till nästa födelsedag', 'formel': '=DATE(YEAR(R[0]C[-44])+DATEDIF(R[0]C[-44];TODAY();"Y")+1;MONTH(R[0]C[-44]);DAY(R[0]C[-44]))-TODAY()'},
+    {'namn': 'Antal dagar som medlem i kåren', 'formel': '=DATEDIF(R[0]C[-42];TODAY(); "D")'},
+    {'namn': 'Primär e-post som anhörigs e-post', 'formel': '=IF(AND(ISTEXT(R[0]C[-29]);OR(R[0]C[-29]=R[0]C[-24];R[0]C[-29]=R[0]C[-20])); "LIKA"; "OLIKA")'}
+  ];
+  
+
+/**
  * Lägger till extra medlemsattribut till kårens medlemmar
  * 
  * @param {Object[]} allMembers - Lista med medlemsobjekt för alla medlemmar i kåren & väntelistan
