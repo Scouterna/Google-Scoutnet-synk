@@ -16,7 +16,7 @@ function addMenuForSpreadsheet() {
     .addSubMenu(ui.createMenu('Användare')
       .addItem('Synkronisera användare', 'synkroniseraAnvandare'))
     .addSubMenu(ui.createMenu('Grupper')
-      .addItem('Synkronisera alla grupper', 'synkroniseraGrupper')
+      .addItem('Synkronisera alla grupper', 'synkroniseraGrupper_')
       .addItem('Synkronisera GrupperVissaRader1', 'synkroniseraGrupperVissaRader1')
       .addItem('Synkronisera GrupperVissaRader2', 'synkroniseraGrupperVissaRader2')
       .addItem('Synkronisera GrupperVissaRader3', 'synkroniseraGrupperVissaRader3')
