@@ -331,7 +331,7 @@ function fetchScoutnetMembersMultipleMailinglists_(scoutnet_list_id, cell_scoutn
  
   if (manuellEpostadress.length !== 0) {
     members.push.apply(members, manuellEpostadress);
-    console.log("Identifierade mannuellt tillagd e-post i stället för lista från Scoutnet");
+    console.log("Identifierade manuellt tillagd e-post i stället för lista från Scoutnet");
     console.log("Om detta är fel, kontrollera så att det inte finns något @ på fel ställe");
   }  
   return members;
@@ -428,7 +428,13 @@ function fetchScoutnetMembersOneMailinglist_(scoutnet_list_id, cell_scoutnet_lis
     let json;
     let data;
 
-    if (forceUpdate || !(kaka = cache.get(scoutnet_list_id))) {
+    const cacheKey = "" + KONFIG.SCOUTNET_GROUP_ID + KONFIG.API_KEY_MAILINGLISTS;
+    //console.warn(cacheKey);
+    const cacheKeyDigest = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, cacheKey).toString();
+    //console.warn(cacheKeyDigest);
+    const cacheName = cacheKeyDigest + scoutnet_list_id;
+
+    if (forceUpdate || !(kaka = cache.get(cacheName))) {
 
       const email_fields = '&contact_fields=email_mum,email_dad,alt_email,mobile_phone';
       const url = 'https://' + KONFIG.SCOUTNET_URL + '/api/' + KONFIG.ORGANISATION_TYPE + '/customlists?list_id=' + scoutnet_list_id + email_fields;
@@ -440,7 +446,7 @@ function fetchScoutnetMembersOneMailinglist_(scoutnet_list_id, cell_scoutnet_lis
       //100KB ~ 102400 tecken från variabeln json
       //En medlem ~ 310 tecken. 100000/310 ~ max 320 medlemmar
       if (json.length < 100000) {
-        cache.put(scoutnet_list_id, json, cacheExpirationInSeconds);
+        cache.put(cacheName, json, cacheExpirationInSeconds);
         //console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
       }
       else {
@@ -449,6 +455,7 @@ function fetchScoutnetMembersOneMailinglist_(scoutnet_list_id, cell_scoutnet_lis
     }
     else {
       console.log("Kakan för e-postlistan " + scoutnet_list_id + " fanns redan");
+      console.log("Kakan heter " + cacheName);
       json = kaka;
     }
     
@@ -690,9 +697,14 @@ function fetchScoutnetMembers_(forceUpdate, fetchWaitingMembers) {
     extraUrlParam = "?waiting=1";
   }
 
-  const nameOfCache = "fetchScoutnetMembers-fetchWaitingMembers-" + fetchWaitingMembers;
+  const cacheKey = "" + KONFIG.SCOUTNET_GROUP_ID + KONFIG.API_KEY_LIST_ALL;
+  //console.warn(cacheKey);
+  const cacheKeyDigest = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, cacheKey).toString();
+  //console.warn(cacheKeyDigest);
+  const cacheName = "fetchWaitingMembers " + fetchWaitingMembers + " " + cacheKeyDigest;
+
   //kaka sätts här för att spara ca 70ms då anropet inte behövs vid forceUpdate
-  if (forceUpdate || !(kaka = cache.get(nameOfCache))) {
+  if (forceUpdate || !(kaka = cache.get(cacheName))) {
 
     const url = 'https://' + KONFIG.SCOUTNET_URL + '/api/' + KONFIG.ORGANISATION_TYPE + '/memberlist' + extraUrlParam;
     json = urlFetch_(url, KONFIG.API_KEY_LIST_ALL);
@@ -703,7 +715,7 @@ function fetchScoutnetMembers_(forceUpdate, fetchWaitingMembers) {
     //100KB ~ 102400 tecken från variabeln json
     //Motsvarar ca 78 medlemmar
     if (json.length < 100000) {
-      cache.put(nameOfCache, json, cacheExpirationInSeconds);
+      cache.put(cacheName, json, cacheExpirationInSeconds);
       //console.log("Skapa kaka med livslängd " + cacheExpirationInSeconds + " sekunder");
     }
     else {
@@ -712,6 +724,7 @@ function fetchScoutnetMembers_(forceUpdate, fetchWaitingMembers) {
   }
   else {
     console.log("Kakan för att hämta alla medlemmar fanns redan fetchWaitingMembers-" + fetchWaitingMembers);
+    console.log("Kakan heter " + cacheName);
     json = kaka;
   }
   
