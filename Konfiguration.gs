@@ -1,7 +1,7 @@
 /**
  * @author Emil Öhman <emil.ohman@scouterna.se>
  * @website https://github.com/Scouterna
- * @version 2023-01-27
+ * @version 2025-03-26
  */
 
 
