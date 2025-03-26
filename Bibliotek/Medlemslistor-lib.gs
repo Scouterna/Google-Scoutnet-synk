@@ -275,7 +275,9 @@ function addExtraMemberAttributes_(allMembers) {
     addExtraMemberAttributeAge_(member, todayDate);
     addExtraMemberAttributeDaysUntilBirthday_(member, todayDate);
     addExtraMemberAttributeNumberOfDaysAsMember_(member, todayDate);
-    addExtraMemberAttributeEmailSameAsParents_(member)
+    addExtraMemberAttributeEmailSameAsParents_(member);
+    addExtraMemberAttributeParentsFirstName_(member);
+    addExtraMemberAttributeParentsFirstNameIfEmail_(member);
     addExtraMemberAttributeUserAccount_(useraccounts, member, todayDate);
   }
 }
@@ -343,6 +345,43 @@ function addExtraMemberAttributeEmailSameAsParents_(member) {
     }
   }
   member.primar_samma_anhorig_epost = "OLIKA";
+}
+
+
+/**
+ * Lägger till extra medlemsattribut med anhörigas förnamn
+ * 
+ * @param {Object} member - Medlemsobjekt för en medlem
+ */
+function addExtraMemberAttributeParentsFirstName_(member) {
+  
+  const mothers_first_name = member.contact_mothers_name ? member.contact_mothers_name.split(" ")[0] : "";
+  const fathers_first_name = member.contact_fathers_name ? member.contact_fathers_name.split(" ")[0] : "";
+  const parents_first_name = [mothers_first_name, fathers_first_name].filter(Boolean);
+  
+  member.anhoriga_fornamn = parents_first_name.length ? parents_first_name.join(" och ") : "";
+}
+
+
+/**
+ * Lägger till extra medlemsattribut med anhörigas förnamn om e-postadress är angiven
+ * 
+ * @param {Object} member - Medlemsobjekt för en medlem
+ */
+function addExtraMemberAttributeParentsFirstNameIfEmail_(member) {
+  
+  let mothers_first_name = "";
+  let fathers_first_name = "";
+
+  if (member.contact_mothers_name && member.contact_email_mum)  {
+    mothers_first_name = member.contact_mothers_name.split(" ")[0];
+  }
+  if (member.contact_fathers_name && member.contact_email_dad)  {
+    fathers_first_name = member.contact_fathers_name.split(" ")[0];
+  }
+  const parents_first_name = [mothers_first_name, fathers_first_name].filter(Boolean);
+  
+  member.anhoriga_fornamn_om_epost = parents_first_name.length ? parents_first_name.join(" och ") : "";
 }
 
 
@@ -568,7 +607,12 @@ function sendEmailMemberlists_(selection, rad_nummer, radInfo, grd, draft, sheet
     console.log("Rad %d i kalkylarket för denna medlemslista", rowNumber);
 
     /***Villkor***/
+    console.warn(email_condition);
+    console.warn(attribut);
+    console.warn(data[i]);
+    
     const actual_email_condition = replaceTemplate_(email_condition, attribut, data[i]);
+    console.warn("actual_email_condition" + actual_email_condition);
     if (actual_email_condition) {
       if (!eval(actual_email_condition)) {
         console.log("Uppfyller INTE villkoren " + data[i][attribut.Förnamn] + " " + data[i][attribut.Efternamn]);
@@ -1324,7 +1368,9 @@ function getMedlemslistorRubrikData_() {
     {"apiName": "alder", "svName": "Ålder"},
     {"apiName": "dagar_till_fodelsedag", "svName": "Dagar till nästa födelsedag"},
     {"apiName": "dagar_som_medlem", "svName": "Antal dagar som medlem i kåren"},
-    {"apiName": "primar_samma_anhorig_epost", "svName": "Primär e-post som anhörigs e-post"}
+    {"apiName": "primar_samma_anhorig_epost", "svName": "Primär e-post som anhörigs e-post"},
+    {"apiName": "anhoriga_fornamn", "svName": "Anhöriga förnamn"},
+    {"apiName": "anhoriga_fornamn_om_epost", "svName": "Anhöriga förnamn om e-post"}
   ];
 
   return mlrd;

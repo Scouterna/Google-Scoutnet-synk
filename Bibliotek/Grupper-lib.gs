@@ -20,6 +20,8 @@ function synkroniseraGrupper(INPUT_KONFIG_OBJECT, args) {
   console.time("Grupper");
 
   KONFIG = INPUT_KONFIG_OBJECT;
+  fixExcludeEmailsIfGmail_();
+
   const sheetDataGrupper = getDataFromActiveSheet_("Grupper");
   const sheet = sheetDataGrupper["sheet"];
   const selection = sheetDataGrupper["selection"];
@@ -1319,7 +1321,31 @@ function getMemberlistsMemberEmail_(members, synk_option) {
   members_email = removeDublicates_(members_email);
   //Ifall samma e-postadress är hos flera medlemmar eller upprepas i olika kontaktfält.
   //Sparar in på dataförfrågningar till Google något
+
+  members_email = exludeEmails_(members_email);
   return members_email;
+}
+
+
+/**
+ * Ta bort e-postadresser som ska exkluderas enligt konfiguration
+ * 
+ * @param {string[] | number[] | Object[]} - lista
+ * 
+ * @returns {string[] | number[] | Object[]} - lista
+ */
+function exludeEmails_(members_email) {
+  const listWithoutEmailsToExclude = []
+  
+  for (let i = 0; i < members_email.length; i++) {
+    if (!KONFIG.EXCLUDE_EMAILS.includes(members_email[i])){
+      listWithoutEmailsToExclude.push(members_email[i])
+    }
+    else {
+      console.log("Hittade e-post som ska exkluderas " + members_email[i]);
+    }
+  }
+  return listWithoutEmailsToExclude;
 }
 
 
@@ -1485,6 +1511,22 @@ function getEmailadressesToSendSpamNotification_(group_moderate_content_email, c
   console.log("E-postadresser för skräppostmoderatorer att använda för denna grupp");
   console.log(emailAdresses);
   return emailAdresses;
+}
+
+
+/**
+ * Göra alla gmailadresser jämförbara för e-postadressen som ska exkluderas
+ */
+function fixExcludeEmailsIfGmail_()  {
+  if (typeof KONFIG.EXCLUDE_EMAILS !== 'undefined' && KONFIG.EXCLUDE_EMAILS)  {
+
+    for (let i = 0; i < KONFIG.EXCLUDE_EMAILS.length; i++) {
+      KONFIG.EXCLUDE_EMAILS[i] = getGmailAdressWithoutDots_(KONFIG.EXCLUDE_EMAILS[i]);
+    }
+  }
+  else  {
+    KONFIG.EXCLUDE_EMAILS = [];
+  }
 }
 
 

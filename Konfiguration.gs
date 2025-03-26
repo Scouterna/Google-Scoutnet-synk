@@ -33,6 +33,9 @@ KONFIG_OBJECT.API_KEY_MAILINGLISTS = "11122233356454d0dce624"; //Kan hittas i Sc
 //T.ex "webmaster@minscoutkår.se, 1234"
 KONFIG_OBJECT.MODERATE_CONTENT_EMAIL = "";
 
+//Lista med e-postadresser som ska exkluderas från kårens grupper/e-postlistor om de finns
+KONFIG_OBJECT.EXCLUDE_EMAILS = ["test.testsson@scouterna.se"];
+
 //Inställning om viss kontaktinformation ska synkroniseras till användares Google Workspace-konto
 KONFIG_OBJECT.SYNC_USER_CONTACT_INFO = true;
 
